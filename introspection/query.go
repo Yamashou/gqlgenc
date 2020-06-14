@@ -1,5 +1,4 @@
-package interseption
-
+package introspection
 
 const Introspection = `query IntrospectionQuery {
       __schema {

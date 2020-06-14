@@ -1,4 +1,4 @@
-package interseption
+package introspection
 
 import (
 	"fmt"
