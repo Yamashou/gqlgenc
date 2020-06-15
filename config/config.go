@@ -113,9 +113,7 @@ func LoadRemoteSchema(ctx context.Context, gqlclient *client.Client) (*ast.Schem
 		return nil, xerrors.Errorf("introspection query failed: %w", err)
 	}
 
-	doc := introspection.ParseIntrospectionQuery(res)
-
-	schema, err := validator.ValidateSchemaDocument(doc)
+	schema, err := validator.ValidateSchemaDocument(introspection.ParseIntrospectionQuery(res))
 	if err != nil {
 		return nil, xerrors.Errorf("validation error: %w", err)
 	}
