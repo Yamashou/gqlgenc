@@ -67,7 +67,7 @@ func LoadConfig(filename string) (*Config, error) {
 	if err := yaml.UnmarshalStrict(b, &cfg); err != nil {
 		return nil, errors.Wrap(err, "unable to parse config")
 	}
-	config.DefaultConfig()
+
 	cfg.GQLConfig = &config.Config{
 		Model:  cfg.Model,
 		Models: cfg.Models,
