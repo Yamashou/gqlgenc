@@ -23,6 +23,8 @@ go get -u github.com/Yamashou/gqlgenc
 
 ## How to use
 
+### Client Codes Only
+
 gqlgenc base is gqlgen with [plugins](https://gqlgen.com/reference/plugins/). So the setting is yaml in each format.
 gqlgenc can be configured using a .gqlgenc.yml file, 
 
@@ -47,16 +49,65 @@ query:
   - "./query/*.graphql" # Where are all the query files located? 
 ```
 
+Execute the following command on same directory for .gqlgenc.yaml
 
 ```shell script
 gqlgenc
 ```
 
+### With gqlgen
 
+If you want to create a server and client for Go, This way.
+You create your own entrypoint for gqlgen.
+This use case is very useful for testing your server.
+
+
+```go
+package main
+
+
+import (
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+	"time"
+
+    "github.com/Yamashou/gqlgenc/clientgen"
+
+	"github.com/99designs/gqlgen/api"
+	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/plugin/stubgen"
+)
+
+func main() {
+	cfg, err := config.LoadConfigFromDefaultLocations()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "failed to load config", err.Error())
+		os.Exit(2)
+	}
+    queries := []string{"client.query", "fragemt.query"}
+    clientPackage := config.PackageConfig{
+    	Filename: "./client.go",
+        Package: "gen",
+    }
+
+    clientPlugin := clientgen.New(queries, clientPackage)
+	err = api.Generate(cfg,
+		api.AddPlugin(clientPlugin), 
+	)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(3)
+	}
+}
+```
 
 #### documents
 
 - [How to configure gqlgen using gqlgen.yml](https://gqlgen.com/config/)
+- [How to write plugins for gqlgen](https://gqlgen.com/reference/plugins/)
 
 
 
