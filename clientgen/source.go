@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"go/types"
 
+	"github.com/99designs/gqlgen/codegen/templates"
+
 	"github.com/vektah/gqlparser/v2/formatter"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -37,6 +39,14 @@ func (s *Source) fragments() []*Fragment {
 		}
 
 		fragments = append(fragments, fragment)
+	}
+
+	for _, fragment := range fragments {
+		name := fragment.Name
+		s.sourceGenerator.cfg.Models.Add(
+			name,
+			fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(name)),
+		)
 	}
 
 	return fragments
@@ -117,6 +127,14 @@ func (s *Source) operationResponses() []*OperationResponse {
 			Name: getResponseStructName(operation),
 			Type: responseFields.StructType(),
 		})
+	}
+
+	for _, operationResponse := range operationResponse {
+		name := operationResponse.Name
+		s.sourceGenerator.cfg.Models.Add(
+			name,
+			fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(name)),
+		)
 	}
 
 	return operationResponse

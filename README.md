@@ -67,18 +67,13 @@ package main
 
 
 import (
-	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
-	"time"
 
     "github.com/Yamashou/gqlgenc/clientgen"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin/stubgen"
 )
 
 func main() {
@@ -104,7 +99,7 @@ func main() {
 }
 ```
 
-#### documents
+## Documents
 
 - [How to configure gqlgen using gqlgen.yml](https://gqlgen.com/config/)
 - [How to write plugins for gqlgen](https://gqlgen.com/reference/plugins/)

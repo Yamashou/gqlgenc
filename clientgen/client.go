@@ -47,7 +47,6 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	source := NewSource(queryDocument, sourceGenerator)
 	fragments := source.fragments()
 	operationResponses := source.operationResponses()
-	ModelRecord(cfg, fragments, operationResponses, p.Client)
 	if err := RenderTemplate(cfg, fragments, source.operations(queryDocuments), operationResponses, p.Client); err != nil {
 		return xerrors.Errorf(": %w", err)
 	}

@@ -172,19 +172,6 @@ func parseScalarTypeExtension(typeVale *FullType) *ast.Definition {
 	}
 }
 
-type TypeKind string
-
-const (
-	TypeKindScalar      TypeKind = "SCALAR"
-	TypeKindObject      TypeKind = "OBJECT"
-	TypeKindInterface   TypeKind = "INTERFACE"
-	TypeKindUnion       TypeKind = "UNION"
-	TypeKindEnum        TypeKind = "ENUM"
-	TypeKindInputObject TypeKind = "INPUT_OBJECT"
-	TypeKindList        TypeKind = "LIST"
-	TypeKindNonNull     TypeKind = "NON_NULL"
-)
-
 func ParseTypeSystemDefinition(typeVale *FullType) *ast.Definition {
 	switch typeVale.Kind {
 	case TypeKindScalar:
