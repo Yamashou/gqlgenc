@@ -149,7 +149,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 		}
 	}
 
-	// ここに来たらバグ
 	panic("unexpected selection type")
 }
 

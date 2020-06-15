@@ -2,7 +2,6 @@ package config
 
 import (
 	"context"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -26,6 +25,7 @@ type Config struct {
 	Endpoint EndPointConfig       `yaml:"endpoint"`
 	Query    []string             `yaml:"query"`
 
+	// gqlgen config struct
 	GQLConfig *config.Config `yaml:"-"`
 }
 
@@ -111,24 +111,12 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 func LoadRemoteSchema(ctx context.Context, gqlclient *client.Client) (*ast.Schema, error) {
 	var res introspection.IntrospectionQuery
 	if err := gqlclient.Post(ctx, introspection.Introspection, &res, nil); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
-	var doc ast.SchemaDocument
-	typeMap := make(map[string]*introspection.FullType)
-	for _, typ := range res.Schema.Types {
-		typeMap[*typ.Name] = typ
-	}
-	for _, typeVale := range typeMap {
-		doc.Definitions = append(doc.Definitions, introspection.ParseTypeSystemDefinition(typeVale))
-	}
+	doc := introspection.ParseIntrospectionQuery(res)
 
-	for _, directiveValue := range res.Schema.Directives {
-		doc.Directives = append(doc.Directives, introspection.ParseDirectiveDefinition(directiveValue))
-	}
-
-	schema, err := validator.ValidateSchemaDocument(&doc)
+	schema, err := validator.ValidateSchemaDocument(doc)
 	if err != nil {
 		return nil, err
 	}

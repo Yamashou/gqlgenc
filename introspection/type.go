@@ -13,6 +13,17 @@ const (
 	TypeKindNonNull     TypeKind = "NON_NULL"
 )
 
+type FullTypes []*FullType
+
+func (fs FullTypes) NameMap() map[string]*FullType {
+	typeMap := make(map[string]*FullType)
+	for _, typ := range fs {
+		typeMap[*typ.Name] = typ
+	}
+
+	return typeMap
+}
+
 type FullType struct {
 	Kind        TypeKind
 	Name        *string
@@ -56,7 +67,7 @@ type IntrospectionQuery struct {
 		QueryType        struct{ Name *string }
 		MutationType     *struct{ Name *string }
 		SubscriptionType *struct{ Name *string }
-		Types            []*FullType
+		Types            FullTypes
 		Directives       []*DirectiveType
 	} `graphql:"__schema"`
 }

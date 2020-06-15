@@ -3,11 +3,12 @@ package generator
 import (
 	"context"
 
+	"golang.org/x/xerrors"
+
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/modelgen"
 	"github.com/Yamashou/gqlgenc/config"
-	"github.com/pkg/errors"
 )
 
 func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) error {
@@ -20,18 +21,19 @@ func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) err
 	}
 
 	if err := cfg.LoadSchema(ctx); err != nil {
-		return errors.Wrap(err, "failed to load schema")
+		return xerrors.Errorf("failed to load schema: %w", err)
 	}
 
 	if err := cfg.GQLConfig.Init(); err != nil {
-		return errors.Wrap(err, "generating core failed")
+		return xerrors.Errorf("generating core failed: %w", err)
 	}
 
 	for _, p := range plugins {
 		if mut, ok := p.(plugin.ConfigMutator); ok {
 			err := mut.MutateConfig(cfg.GQLConfig)
 			if err != nil {
-				return errors.Wrap(err, p.Name())
+				// return errors.Wrap(err, p.Name())
+				return xerrors.Errorf("%s failed: %w", p.Name(), err)
 			}
 		}
 	}

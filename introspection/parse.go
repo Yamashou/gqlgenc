@@ -6,7 +6,22 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-func ParseDirectiveDefinition(directiveValue *DirectiveType) *ast.DirectiveDefinition {
+func ParseIntrospectionQuery(query IntrospectionQuery) *ast.SchemaDocument {
+	var doc ast.SchemaDocument
+	typeMap := query.Schema.Types.NameMap()
+
+	for _, typeVale := range typeMap {
+		doc.Definitions = append(doc.Definitions, parseTypeSystemDefinition(typeVale))
+	}
+
+	for _, directiveValue := range query.Schema.Directives {
+		doc.Directives = append(doc.Directives, parseDirectiveDefinition(directiveValue))
+	}
+
+	return &doc
+}
+
+func parseDirectiveDefinition(directiveValue *DirectiveType) *ast.DirectiveDefinition {
 	args := make(ast.ArgumentDefinitionList, 0, len(directiveValue.Args))
 	for _, arg := range directiveValue.Args {
 		argumentDefinition := buildInputValue(arg)
@@ -172,7 +187,7 @@ func parseScalarTypeExtension(typeVale *FullType) *ast.Definition {
 	}
 }
 
-func ParseTypeSystemDefinition(typeVale *FullType) *ast.Definition {
+func parseTypeSystemDefinition(typeVale *FullType) *ast.Definition {
 	switch typeVale.Kind {
 	case TypeKindScalar:
 		return parseScalarTypeExtension(typeVale)

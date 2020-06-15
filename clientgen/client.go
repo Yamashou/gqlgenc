@@ -27,7 +27,7 @@ func (p *Plugin) Name() string {
 func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	querySources, err := LoadQuerySources(p.queryFilePaths)
 	if err != nil {
-		return xerrors.Errorf(": %w", err)
+		return xerrors.Errorf("load query sources failed: %w", err)
 	}
 
 	// 1. 全体のqueryDocumentを1度にparse
@@ -39,7 +39,7 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	// 2. OperationごとのqueryDocumentを作成
 	queryDocuments, err := QueryDocumentsByOperations(cfg.Schema, queryDocument.Operations)
 	if err != nil {
-		return xerrors.Errorf(": %w", err)
+		return xerrors.Errorf("parse query document failed: %w", err)
 	}
 
 	// 3. テンプレートと情報ソースを元にコード生成
@@ -48,7 +48,7 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	fragments := source.fragments()
 	operationResponses := source.operationResponses()
 	if err := RenderTemplate(cfg, fragments, source.operations(queryDocuments), operationResponses, p.Client); err != nil {
-		return xerrors.Errorf(": %w", err)
+		return xerrors.Errorf("template failed: %w", err)
 	}
 
 	return nil

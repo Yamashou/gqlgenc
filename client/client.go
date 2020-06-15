@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/Yamashou/gqlgenc/graphqljson"
@@ -43,12 +42,12 @@ func (c *Client) newRequest(ctx context.Context, query string, vars map[string]i
 
 	requestBody, err := json.Marshal(r)
 	if err != nil {
-		return nil, fmt.Errorf("encode: %s", err.Error())
+		return nil, xerrors.Errorf("encode: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, bytes.NewBuffer(requestBody))
 	if err != nil {
-		return nil, xerrors.Errorf(": %w", err)
+		return nil, xerrors.Errorf("create request struct failed: %w", err)
 	}
 
 	for _, httpRequestOption := range c.HTTPRequestOptions {
@@ -66,18 +65,18 @@ func (c *Client) newRequest(ctx context.Context, query string, vars map[string]i
 func (c *Client) Post(ctx context.Context, query string, respData interface{}, vars map[string]interface{}, httpRequestOptions ...HTTPRequestOption) error {
 	req, err := c.newRequest(ctx, query, vars, httpRequestOptions)
 	if err != nil {
-		return xerrors.Errorf(": %w", err)
+		return xerrors.Errorf("don't create request: %w", err)
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		return xerrors.Errorf(": %w", err)
+		return xerrors.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if err := graphqljson.Unmarshal(resp.Body, respData); err != nil {
-		return xerrors.Errorf(": %w", err)
+		return xerrors.Errorf("response mapping failed: %w", err)
 	}
 
 	if resp.StatusCode < 200 || 299 < resp.StatusCode {
