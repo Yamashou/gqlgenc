@@ -44,7 +44,7 @@ models:
 endpoint:
   url: https://api.annict.com/graphql # Where do you want to send your request?
   headers:　# If you need header for getting introspection query, set it 
-    Authorization: "Bearer xxxxxxxxxxxxx"
+    Authorization: "Bearer ${ANNICT_KEY}" # support environment variables
 query:
   - "./query/*.graphql" # Where are all the query files located? 
 ```
