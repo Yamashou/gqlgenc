@@ -57,7 +57,7 @@ gqlgenc
 
 ### With gqlgen
 
-If you want to create a server and client for Go, This way.
+Do this when creating a server and client for Go.
 You create your own entrypoint for gqlgen.
 This use case is very useful for testing your server.
 
