@@ -1,0 +1,19 @@
+fragment ViewerFragment on User {
+    avatarUrl
+    recordsCount
+    wannaWatchCount
+    watchingCount
+    watchedCount
+}
+
+fragment WorkFragment on Work {
+    title
+    annictId
+    seasonYear
+    seasonName
+    episodesCount
+    id
+    officialSiteUrl
+    wikipediaUrl
+    viewerStatusState
+}

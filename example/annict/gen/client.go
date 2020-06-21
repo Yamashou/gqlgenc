@@ -12,12 +12,24 @@ type Client struct {
 	Client *client.Client
 }
 
-type Viewer struct {
+type ViewerFragment struct {
 	AvatarURL       *string
 	RecordsCount    int64
 	WannaWatchCount int64
 	WatchingCount   int64
 	WatchedCount    int64
+}
+
+type WorkFragment struct {
+	Title             string
+	AnnictID          int64
+	SeasonYear        *int64
+	SeasonName        *SeasonName
+	EpisodesCount     int64
+	ID                string
+	OfficialSiteURL   *string
+	WikipediaURL      *string
+	ViewerStatusState *StatusState
 }
 
 type CreateRecordMutationPayload struct {
@@ -33,23 +45,13 @@ type UpdateWorkStatusPayload struct {
 }
 
 type (
-	GetProfile struct{ Viewer *Viewer }
+	GetProfile struct{ Viewer *ViewerFragment }
 	ListWorks  struct {
 		Viewer *struct {
 			Works *struct {
 				Edges []*struct {
 					Cursor string
-					Node   *struct {
-						Title             string
-						AnnictID          int64
-						SeasonYear        *int64
-						SeasonName        *SeasonName
-						EpisodesCount     int64
-						ID                string
-						OfficialSiteURL   *string
-						WikipediaURL      *string
-						ViewerStatusState *StatusState
-					}
+					Node   *WorkFragment
 				}
 			}
 		}
@@ -61,10 +63,7 @@ type ListRecords struct {
 		Records *struct {
 			Edges []*struct {
 				Node *struct {
-					Work struct {
-						Title         string
-						EpisodesCount int64
-					}
+					Work      WorkFragment
 					Episode   struct{ SortNumber int64 }
 					CreatedAt string
 				}
@@ -172,10 +171,10 @@ func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, httpReques
 
 const GetProfileQuery = `query GetProfile {
 	viewer {
-		... Viewer
+		... ViewerFragment
 	}
 }
-fragment Viewer on User {
+fragment ViewerFragment on User {
 	avatarUrl
 	recordsCount
 	wannaWatchCount
@@ -201,19 +200,22 @@ const ListWorksQuery = `query ListWorks ($state: StatusState, $after: String, $n
 			edges {
 				cursor
 				node {
-					title
-					annictId
-					seasonYear
-					seasonName
-					episodesCount
-					id
-					officialSiteUrl
-					wikipediaUrl
-					viewerStatusState
+					... WorkFragment
 				}
 			}
 		}
 	}
+}
+fragment WorkFragment on Work {
+	title
+	annictId
+	seasonYear
+	seasonName
+	episodesCount
+	id
+	officialSiteUrl
+	wikipediaUrl
+	viewerStatusState
 }
 `
 
@@ -232,14 +234,13 @@ func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *strin
 	return &res, nil
 }
 
-const ListRecordsQuery = `query listRecords {
+const ListRecordsQuery = `query ListRecords {
 	viewer {
 		records {
 			edges {
 				node {
 					work {
-						title
-						episodesCount
+						... WorkFragment
 					}
 					episode {
 						sortNumber
@@ -249,6 +250,17 @@ const ListRecordsQuery = `query listRecords {
 			}
 		}
 	}
+}
+fragment WorkFragment on Work {
+	title
+	annictId
+	seasonYear
+	seasonName
+	episodesCount
+	id
+	officialSiteUrl
+	wikipediaUrl
+	viewerStatusState
 }
 `
 
