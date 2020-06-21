@@ -1,10 +1,14 @@
+fragment Viewer on User {
+    avatarUrl
+    recordsCount
+    wannaWatchCount
+    watchingCount
+    watchedCount
+}
+
 query GetProfile {
     viewer {
-        avatarUrl
-        recordsCount
-        wannaWatchCount
-        watchingCount
-        watchedCount
+        ...Viewer
     }
 }
 

@@ -124,7 +124,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet)
 		typ := types.NewNamed(
-			types.NewTypeName(0, types.NewPackage(r.client.Filename, r.client.Package), templates.ToGo(selection.Name), nil),
+			types.NewTypeName(0, r.client.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
 			nil,
 		)

@@ -12,6 +12,14 @@ type Client struct {
 	Client *client.Client
 }
 
+type Viewer struct {
+	AvatarURL       *string
+	RecordsCount    int64
+	WannaWatchCount int64
+	WatchingCount   int64
+	WatchedCount    int64
+}
+
 type CreateRecordMutationPayload struct {
 	CreateRecord *struct{ ClientMutationID *string }
 }
@@ -24,36 +32,29 @@ type UpdateWorkStatusPayload struct {
 	UpdateStatus *struct{ ClientMutationID *string }
 }
 
-type GetProfile struct {
-	Viewer *struct {
-		AvatarURL       *string
-		RecordsCount    int64
-		WannaWatchCount int64
-		WatchingCount   int64
-		WatchedCount    int64
-	}
-}
-
-type ListWorks struct {
-	Viewer *struct {
-		Works *struct {
-			Edges []*struct {
-				Cursor string
-				Node   *struct {
-					Title             string
-					AnnictID          int64
-					SeasonYear        *int64
-					SeasonName        *SeasonName
-					EpisodesCount     int64
-					ID                string
-					OfficialSiteURL   *string
-					WikipediaURL      *string
-					ViewerStatusState *StatusState
+type (
+	GetProfile struct{ Viewer *Viewer }
+	ListWorks  struct {
+		Viewer *struct {
+			Works *struct {
+				Edges []*struct {
+					Cursor string
+					Node   *struct {
+						Title             string
+						AnnictID          int64
+						SeasonYear        *int64
+						SeasonName        *SeasonName
+						EpisodesCount     int64
+						ID                string
+						OfficialSiteURL   *string
+						WikipediaURL      *string
+						ViewerStatusState *StatusState
+					}
 				}
 			}
 		}
 	}
-}
+)
 
 type ListRecords struct {
 	Viewer *struct {
@@ -171,12 +172,15 @@ func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, httpReques
 
 const GetProfileQuery = `query GetProfile {
 	viewer {
-		avatarUrl
-		recordsCount
-		wannaWatchCount
-		watchingCount
-		watchedCount
+		... Viewer
 	}
+}
+fragment Viewer on User {
+	avatarUrl
+	recordsCount
+	wannaWatchCount
+	watchingCount
+	watchedCount
 }
 `
 
