@@ -104,7 +104,7 @@ func main() {
 - [How to write plugins for gqlgen](https://gqlgen.com/reference/plugins/)
 
 
-## Comment
+## Comments
 
 ### Japanese Comments
 These codes have Japanese comments. Replace with English.
@@ -113,3 +113,6 @@ These codes have Japanese comments. Replace with English.
 
 This client does not support subscription. If you need a subscription, please create an issue or pull request. 
 
+### Pre-conditions
+
+[clientgen](https://github.com/Yamashou/gqlgenc/tree/master/clientgen) is created based on [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen). So if you don't have a modelgen, it may be a mysterious move.
