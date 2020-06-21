@@ -107,7 +107,7 @@ func main() {
 ## Comment
 
 ### Japanese Comments
-There are Japanese comments in these codes. I will replace it with English.
+These codes have Japanese comments. Replace with English.
  
 ### Subscription
 
