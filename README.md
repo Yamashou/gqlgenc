@@ -104,4 +104,12 @@ func main() {
 - [How to write plugins for gqlgen](https://gqlgen.com/reference/plugins/)
 
 
+## Comment
+
+### Japanese Comments
+There are japanese comments in these codes. I will replace it with English.
+ 
+### Subscription
+
+This client does not support subscription. If you need a subscription, please create an issue or pull request. 
 

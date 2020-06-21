@@ -78,7 +78,7 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 
 	if err := cfg.Client.Check(); err != nil {
-		return nil, xerrors.Errorf("config.exec: %w")
+		return nil, xerrors.Errorf("config.exec: %w", err)
 	}
 
 	return &cfg, nil
