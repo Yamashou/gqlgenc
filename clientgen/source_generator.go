@@ -155,7 +155,7 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &Argument{
 			Variable: v.Variable,
-			Type:     r.Type(v.Type.Name()),
+			Type:     r.binder.CopyModifiersFromAst(v.Type, r.Type(v.Type.Name())),
 		})
 	}
 

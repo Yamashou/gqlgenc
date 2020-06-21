@@ -213,7 +213,7 @@ const ListWorksQuery = `query ListWorks ($state: StatusState, $after: String, $n
 }
 `
 
-func (c *Client) ListWorks(ctx context.Context, state StatusState, after string, n int64, httpRequestOptions ...client.HTTPRequestOption) (*ListWorks, error) {
+func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *string, n int64, httpRequestOptions ...client.HTTPRequestOption) (*ListWorks, error) {
 	vars := map[string]interface{}{
 		"state": state,
 		"after": after,
@@ -314,7 +314,7 @@ const GetWorkQuery = `query GetWork ($ids: [Int!]) {
 }
 `
 
-func (c *Client) GetWork(ctx context.Context, ids int64, httpRequestOptions ...client.HTTPRequestOption) (*GetWork, error) {
+func (c *Client) GetWork(ctx context.Context, ids []int64, httpRequestOptions ...client.HTTPRequestOption) (*GetWork, error) {
 	vars := map[string]interface{}{
 		"ids": ids,
 	}
