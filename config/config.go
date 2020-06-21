@@ -65,7 +65,9 @@ func LoadConfig(filename string) (*Config, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("unable to read config: %w", err)
 	}
-	if err := yaml.UnmarshalStrict(b, &cfg); err != nil {
+
+	confContent := []byte(os.ExpandEnv(string(b)))
+	if err := yaml.UnmarshalStrict(confContent, &cfg); err != nil {
 		return nil, xerrors.Errorf("unable to parse config: %w", err)
 	}
 
