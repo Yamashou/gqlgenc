@@ -6,7 +6,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-func ParseIntrospectionQuery(query IntrospectionQuery) *ast.SchemaDocument {
+func ParseIntrospectionQuery(query Query) *ast.SchemaDocument {
 	var doc ast.SchemaDocument
 	typeMap := query.Schema.Types.NameMap()
 

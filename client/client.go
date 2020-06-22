@@ -6,8 +6,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/Yamashou/gqlgenc/graphqljson"
 	"golang.org/x/xerrors"
+
+	"github.com/Yamashou/gqlgenc/graphqljson"
 )
 
 type HTTPRequestOption func(req *http.Request)

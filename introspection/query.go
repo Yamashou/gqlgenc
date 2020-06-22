@@ -1,6 +1,6 @@
 package introspection
 
-const Introspection = `query IntrospectionQuery {
+const Introspection = `query Query {
       __schema {
         queryType { name }
         mutationType { name }

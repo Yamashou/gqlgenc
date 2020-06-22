@@ -11,9 +11,10 @@ import (
 
 	"github.com/vektah/gqlparser/v2/validator"
 
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/Yamashou/gqlgenc/client"
 	"github.com/Yamashou/gqlgenc/introspection"
-	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"gopkg.in/yaml.v2"
@@ -110,7 +111,7 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 }
 
 func LoadRemoteSchema(ctx context.Context, gqlclient *client.Client) (*ast.Schema, error) {
-	var res introspection.IntrospectionQuery
+	var res introspection.Query
 	if err := gqlclient.Post(ctx, introspection.Introspection, &res, nil); err != nil {
 		return nil, xerrors.Errorf("introspection query failed: %w", err)
 	}

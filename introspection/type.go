@@ -62,7 +62,7 @@ type TypeRef struct {
 	OfType *TypeRef
 }
 
-type IntrospectionQuery struct {
+type Query struct {
 	Schema struct {
 		QueryType        struct{ Name *string }
 		MutationType     *struct{ Name *string }
