@@ -63,14 +63,28 @@ query ListNextEpisodes {
 
 query GetWork($ids: [Int!]) {
     searchWorks(annictIds: $ids) {
-        edges {
-            node {
-                id
-                title
-                episodes(first: 1, orderBy: {direction: ASC, field: SORT_NUMBER}) {
-                    nodes {
-                        id
-                    }
+        nodes {
+            id
+            title
+            episodes(orderBy: {direction: ASC, field: SORT_NUMBER}) {
+                nodes {
+                    id
+                    annictId
+                    title
+                    sortNumber
+                }
+            }
+        }
+    }
+}
+
+query SearchWorks($seasons: [String!]) {
+    searchWorks(seasons: $seasons, first: 1, orderBy: { field: WATCHERS_COUNT, direction: DESC }) {
+        nodes {
+            ...WorkFragment
+            ... on Work{
+                image {
+                    recommendedImageUrl
                 }
             }
         }

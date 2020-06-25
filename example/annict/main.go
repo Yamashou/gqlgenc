@@ -25,8 +25,29 @@ func main() {
 		log.Error(err)
 		os.Exit(1)
 	}
-
 	fmt.Println(*res.Viewer.AvatarURL)
+
+	list, err := annictClient.SearchWorks(ctx, []string{"2017-spring"})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	for _, node := range list.SearchWorks.Nodes {
+		fmt.Println(node.ID, node.AnnictID, node.Title, *node.Work.Image.RecommendedImageURL)
+	}
+
+	getWork, err := annictClient.GetWork(ctx, []int64{list.SearchWorks.Nodes[0].AnnictID})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	for _, node := range getWork.SearchWorks.Nodes {
+		for _, e := range node.Episodes.Nodes {
+			fmt.Println(e.ID, e.AnnictID, *e.Title, e.AnnictID, e.SortNumber)
+		}
+	}
 }
 
 func NewAnnictClient(c *client.Client) *gen.Client {

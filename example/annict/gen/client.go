@@ -98,12 +98,36 @@ type ListNextEpisodes struct {
 
 type GetWork struct {
 	SearchWorks *struct {
-		Edges []*struct {
-			Node *struct {
-				ID       string
-				Title    string
-				Episodes *struct{ Nodes []*struct{ ID string } }
+		Nodes []*struct {
+			ID       string
+			Title    string
+			Episodes *struct {
+				Nodes []*struct {
+					ID         string
+					AnnictID   int64
+					Title      *string
+					SortNumber int64
+				}
 			}
+		}
+	}
+}
+
+type SearchWorks struct {
+	SearchWorks *struct {
+		Nodes []*struct {
+			Title             string
+			AnnictID          int64
+			SeasonYear        *int64
+			SeasonName        *SeasonName
+			EpisodesCount     int64
+			ID                string
+			OfficialSiteURL   *string
+			WikipediaURL      *string
+			ViewerStatusState *StatusState
+			Work              struct {
+				Image *struct{ RecommendedImageURL *string }
+			} "graphql:\"... on Work\""
 		}
 	}
 }
@@ -315,14 +339,15 @@ func (c *Client) ListNextEpisodes(ctx context.Context, httpRequestOptions ...cli
 
 const GetWorkQuery = `query GetWork ($ids: [Int!]) {
 	searchWorks(annictIds: $ids) {
-		edges {
-			node {
-				id
-				title
-				episodes(first: 1, orderBy: {direction:ASC,field:SORT_NUMBER}) {
-					nodes {
-						id
-					}
+		nodes {
+			id
+			title
+			episodes(orderBy: {direction:ASC,field:SORT_NUMBER}) {
+				nodes {
+					id
+					annictId
+					title
+					sortNumber
 				}
 			}
 		}
@@ -337,6 +362,44 @@ func (c *Client) GetWork(ctx context.Context, ids []int64, httpRequestOptions ..
 
 	var res GetWork
 	if err := c.Client.Post(ctx, GetWorkQuery, &res, vars, httpRequestOptions...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const SearchWorksQuery = `query SearchWorks ($seasons: [String!]) {
+	searchWorks(seasons: $seasons, first: 1, orderBy: {field:WATCHERS_COUNT,direction:DESC}) {
+		nodes {
+			... WorkFragment
+			... on Work {
+				image {
+					recommendedImageUrl
+				}
+			}
+		}
+	}
+}
+fragment WorkFragment on Work {
+	title
+	annictId
+	seasonYear
+	seasonName
+	episodesCount
+	id
+	officialSiteUrl
+	wikipediaUrl
+	viewerStatusState
+}
+`
+
+func (c *Client) SearchWorks(ctx context.Context, seasons []string, httpRequestOptions ...client.HTTPRequestOption) (*SearchWorks, error) {
+	vars := map[string]interface{}{
+		"seasons": seasons,
+	}
+
+	var res SearchWorks
+	if err := c.Client.Post(ctx, SearchWorksQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 

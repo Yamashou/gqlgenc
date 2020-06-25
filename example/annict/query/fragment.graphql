@@ -17,3 +17,4 @@ fragment WorkFragment on Work {
     wikipediaUrl
     viewerStatusState
 }
+
