@@ -32,7 +32,7 @@ const {{ $model.Name|go }}Query = `{{ $model.Operation }}`
 func (c *Client) {{ $model.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, httpRequestOptions ...client.HTTPRequestOption) (*{{ $model.ResponseStructName | go }}, error) {
 	vars := map[string]interface{}{
 	{{- range $args := .VariableDefinitions}}
-		"{{ $args.Variable | goPrivate }}": {{ $args.Variable | goPrivate }},
+		"{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
 	{{- end }}
 	}
 

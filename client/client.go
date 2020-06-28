@@ -68,7 +68,8 @@ func (c *Client) Post(ctx context.Context, query string, respData interface{}, v
 	if err != nil {
 		return xerrors.Errorf("don't create request: %w", err)
 	}
-	req.Header.Add("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Accept", "application/json; charset=utf-8")
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
@@ -77,7 +78,7 @@ func (c *Client) Post(ctx context.Context, query string, respData interface{}, v
 	defer resp.Body.Close()
 
 	if err := graphqljson.Unmarshal(resp.Body, respData); err != nil {
-		return xerrors.Errorf("response mapping failed: %w", err)
+		return err
 	}
 
 	if resp.StatusCode < 200 || 299 < resp.StatusCode {

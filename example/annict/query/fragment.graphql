@@ -7,14 +7,22 @@ fragment ViewerFragment on User {
 }
 
 fragment WorkFragment on Work {
+    id
     title
     annictId
     seasonYear
     seasonName
     episodesCount
-    id
     officialSiteUrl
     wikipediaUrl
     viewerStatusState
+    episodes(orderBy: {direction: ASC, field: SORT_NUMBER}) {
+        nodes {
+            id
+            annictId
+            title
+            sortNumber
+        }
+    }
 }
 

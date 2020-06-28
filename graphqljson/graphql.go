@@ -51,7 +51,7 @@ func (r RawJSONError) Error() string {
 // Response is a GraphQL layer response from a handler.
 type Response struct {
 	Data       json.RawMessage
-	Errors     json.RawMessage
+	Errors     Errors
 	Extensions map[string]interface{}
 }
 
@@ -67,8 +67,12 @@ func Unmarshal(r io.Reader, data interface{}) error {
 		return xerrors.Errorf("%s", buf.String())
 	}
 
+	if len(resp.Errors) > 0 {
+		return xerrors.Errorf("response error: %w", resp.Errors)
+	}
+
 	if err := UnmarshalData(resp.Data, data); err != nil {
-		return xerrors.Errorf(": %w", err)
+		return xerrors.Errorf("response mapping failed: %w", err)
 	}
 
 	if resp.Errors != nil {
@@ -386,4 +390,21 @@ func unmarshalValue(value json.Token, v reflect.Value) error {
 		return xerrors.Errorf(": %w", err)
 	}
 	return json.Unmarshal(b, v.Addr().Interface())
+}
+
+// Errors represents the "Errors" array in a response from a GraphQL server.
+// If returned via error interface, the slice is expected to contain at least 1 element.
+//
+// Specification: https://facebook.github.io/graphql/#sec-Errors.
+type Errors []struct {
+	Message   string
+	Locations []struct {
+		Line   int
+		Column int
+	}
+}
+
+// Error implements error interface.
+func (e Errors) Error() string {
+	return e[0].Message
 }

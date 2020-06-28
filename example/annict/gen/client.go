@@ -21,15 +21,23 @@ type ViewerFragment struct {
 }
 
 type WorkFragment struct {
+	ID                string
 	Title             string
 	AnnictID          int64
 	SeasonYear        *int64
 	SeasonName        *SeasonName
 	EpisodesCount     int64
-	ID                string
 	OfficialSiteURL   *string
 	WikipediaURL      *string
 	ViewerStatusState *StatusState
+	Episodes          *struct {
+		Nodes []*struct {
+			ID         string
+			AnnictID   int64
+			Title      *string
+			SortNumber int64
+		}
+	}
 }
 
 type CreateRecordMutationPayload struct {
@@ -97,11 +105,22 @@ type ListNextEpisodes struct {
 }
 
 type GetWork struct {
+	SearchWorks *struct{ Nodes []*WorkFragment }
+}
+
+type SearchWorks struct {
 	SearchWorks *struct {
 		Nodes []*struct {
-			ID       string
-			Title    string
-			Episodes *struct {
+			ID                string
+			Title             string
+			AnnictID          int64
+			SeasonYear        *int64
+			SeasonName        *SeasonName
+			EpisodesCount     int64
+			OfficialSiteURL   *string
+			WikipediaURL      *string
+			ViewerStatusState *StatusState
+			Episodes          *struct {
 				Nodes []*struct {
 					ID         string
 					AnnictID   int64
@@ -109,23 +128,7 @@ type GetWork struct {
 					SortNumber int64
 				}
 			}
-		}
-	}
-}
-
-type SearchWorks struct {
-	SearchWorks *struct {
-		Nodes []*struct {
-			Title             string
-			AnnictID          int64
-			SeasonYear        *int64
-			SeasonName        *SeasonName
-			EpisodesCount     int64
-			ID                string
-			OfficialSiteURL   *string
-			WikipediaURL      *string
-			ViewerStatusState *StatusState
-			Work              struct {
+			Work struct {
 				Image *struct{ RecommendedImageURL *string }
 			} "graphql:\"... on Work\""
 		}
@@ -141,7 +144,7 @@ const CreateRecordMutationQuery = `mutation CreateRecordMutation ($episodeId: ID
 
 func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, httpRequestOptions ...client.HTTPRequestOption) (*CreateRecordMutationPayload, error) {
 	vars := map[string]interface{}{
-		"episodeID": episodeID,
+		"episodeId": episodeID,
 	}
 
 	var res CreateRecordMutationPayload
@@ -162,7 +165,7 @@ const UpdateStatusMutationQuery = `mutation UpdateStatusMutation ($state: Status
 func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, workID string, httpRequestOptions ...client.HTTPRequestOption) (*UpdateStatusMutationPayload, error) {
 	vars := map[string]interface{}{
 		"state":  state,
-		"workID": workID,
+		"workId": workID,
 	}
 
 	var res UpdateStatusMutationPayload
@@ -182,7 +185,7 @@ const UpdateWorkStatusQuery = `mutation UpdateWorkStatus ($workId: ID!) {
 
 func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, httpRequestOptions ...client.HTTPRequestOption) (*UpdateWorkStatusPayload, error) {
 	vars := map[string]interface{}{
-		"workID": workID,
+		"workId": workID,
 	}
 
 	var res UpdateWorkStatusPayload
@@ -231,15 +234,23 @@ const ListWorksQuery = `query ListWorks ($state: StatusState, $after: String, $n
 	}
 }
 fragment WorkFragment on Work {
+	id
 	title
 	annictId
 	seasonYear
 	seasonName
 	episodesCount
-	id
 	officialSiteUrl
 	wikipediaUrl
 	viewerStatusState
+	episodes(orderBy: {direction:ASC,field:SORT_NUMBER}) {
+		nodes {
+			id
+			annictId
+			title
+			sortNumber
+		}
+	}
 }
 `
 
@@ -276,15 +287,23 @@ const ListRecordsQuery = `query ListRecords {
 	}
 }
 fragment WorkFragment on Work {
+	id
 	title
 	annictId
 	seasonYear
 	seasonName
 	episodesCount
-	id
 	officialSiteUrl
 	wikipediaUrl
 	viewerStatusState
+	episodes(orderBy: {direction:ASC,field:SORT_NUMBER}) {
+		nodes {
+			id
+			annictId
+			title
+			sortNumber
+		}
+	}
 }
 `
 
@@ -340,16 +359,26 @@ func (c *Client) ListNextEpisodes(ctx context.Context, httpRequestOptions ...cli
 const GetWorkQuery = `query GetWork ($ids: [Int!]) {
 	searchWorks(annictIds: $ids) {
 		nodes {
+			... WorkFragment
+		}
+	}
+}
+fragment WorkFragment on Work {
+	id
+	title
+	annictId
+	seasonYear
+	seasonName
+	episodesCount
+	officialSiteUrl
+	wikipediaUrl
+	viewerStatusState
+	episodes(orderBy: {direction:ASC,field:SORT_NUMBER}) {
+		nodes {
 			id
+			annictId
 			title
-			episodes(orderBy: {direction:ASC,field:SORT_NUMBER}) {
-				nodes {
-					id
-					annictId
-					title
-					sortNumber
-				}
-			}
+			sortNumber
 		}
 	}
 }
@@ -381,15 +410,23 @@ const SearchWorksQuery = `query SearchWorks ($seasons: [String!]) {
 	}
 }
 fragment WorkFragment on Work {
+	id
 	title
 	annictId
 	seasonYear
 	seasonName
 	episodesCount
-	id
 	officialSiteUrl
 	wikipediaUrl
 	viewerStatusState
+	episodes(orderBy: {direction:ASC,field:SORT_NUMBER}) {
+		nodes {
+			id
+			annictId
+			title
+			sortNumber
+		}
+	}
 }
 `
 

@@ -20,12 +20,13 @@ func main() {
 
 	annictClient := NewAnnictClient(client.NewClient(http.DefaultClient, "https://api.annict.com/graphql", authHeader))
 	ctx := context.Background()
-	res, err := annictClient.GetProfile(ctx)
+
+	getProfile, err := annictClient.GetProfile(ctx)
 	if err != nil {
 		log.Error(err)
 		os.Exit(1)
 	}
-	fmt.Println(*res.Viewer.AvatarURL)
+	fmt.Println(*getProfile.Viewer.AvatarURL, getProfile.Viewer.RecordsCount, getProfile.Viewer.WatchedCount)
 
 	list, err := annictClient.SearchWorks(ctx, []string{"2017-spring"})
 	if err != nil {
@@ -43,11 +44,26 @@ func main() {
 		os.Exit(1)
 	}
 
-	for _, node := range getWork.SearchWorks.Nodes {
-		for _, e := range node.Episodes.Nodes {
-			fmt.Println(e.ID, e.AnnictID, *e.Title, e.AnnictID, e.SortNumber)
-		}
+	work := getWork.SearchWorks.Nodes[0]
+	_, err = annictClient.UpdateWorkStatus(ctx, work.ID)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
 	}
+
+	_, err = annictClient.CreateRecordMutation(ctx, work.Episodes.Nodes[0].ID)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
+	}
+
+	getProfile2, err := annictClient.GetProfile(ctx)
+	if err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+
+	fmt.Println(getProfile2.Viewer.RecordsCount, getProfile2.Viewer.WatchedCount)
 }
 
 func NewAnnictClient(c *client.Client) *gen.Client {
