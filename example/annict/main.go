@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/opentracing/opentracing-go/log"
-
 	"github.com/Yamashou/gqlgenc/client"
 	"github.com/Yamashou/gqlgenc/example/annict/gen"
 )
@@ -23,7 +21,7 @@ func main() {
 
 	getProfile, err := annictClient.GetProfile(ctx)
 	if err != nil {
-		log.Error(err)
+		fmt.Fprintf(os.Stderr, "error: %s", err.Error())
 		os.Exit(1)
 	}
 	fmt.Println(*getProfile.Viewer.AvatarURL, getProfile.Viewer.RecordsCount, getProfile.Viewer.WatchedCount)
@@ -40,26 +38,26 @@ func main() {
 
 	getWork, err := annictClient.GetWork(ctx, []int64{list.SearchWorks.Nodes[0].AnnictID})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "error: %s", err.Error())
 		os.Exit(1)
 	}
 
 	work := getWork.SearchWorks.Nodes[0]
 	_, err = annictClient.UpdateWorkStatus(ctx, work.ID)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "error: %s", err.Error())
 		os.Exit(1)
 	}
 
 	_, err = annictClient.CreateRecordMutation(ctx, work.Episodes.Nodes[0].ID)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "error: %s", err.Error())
 		os.Exit(1)
 	}
 
 	getProfile2, err := annictClient.GetProfile(ctx)
 	if err != nil {
-		log.Error(err)
+		fmt.Fprintf(os.Stderr, "error: %s", err.Error())
 		os.Exit(1)
 	}
 
