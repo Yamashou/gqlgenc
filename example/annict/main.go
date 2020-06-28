@@ -28,7 +28,7 @@ func main() {
 
 	list, err := annictClient.SearchWorks(ctx, []string{"2017-spring"})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "error: %s", err.Error())
 		os.Exit(1)
 	}
 
