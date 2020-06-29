@@ -22,7 +22,7 @@ func main() {
 	githubClient := &gen.Client{
 		Client: client.NewClient(http.DefaultClient, "https://api.github.com/graphql", authHeader),
 	}
-	getUser, err := githubClient.GetUser(ctx)
+	getUser, err := githubClient.GetUser(ctx, 10, 10)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, err.Error())
 		os.Exit(1)

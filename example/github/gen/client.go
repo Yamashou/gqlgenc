@@ -11,6 +11,10 @@ import (
 type Client struct {
 	Client *client.Client
 }
+type LanguageFragment struct {
+	ID   string
+	Name string
+}
 type GetUser struct {
 	Viewer struct {
 		ID           string
@@ -19,39 +23,40 @@ type GetUser struct {
 			Nodes []*struct {
 				ID        string
 				Name      string
-				Languages *struct {
-					Nodes []*struct {
-						ID   string
-						Name string
-					}
-				}
+				Languages *struct{ Nodes []*LanguageFragment }
 			}
 		}
 	}
 }
 
-const GetUserQuery = `query GetUser {
+const GetUserQuery = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {
 	viewer {
 		id
 		name
-		repositories(first: 3, orderBy: {field:CREATED_AT,direction:DESC}) {
+		repositories(first: $repositoryFirst, orderBy: {field:CREATED_AT,direction:DESC}) {
 			nodes {
 				id
 				name
-				languages(first: 10) {
+				languages(first: $languageFirst) {
 					nodes {
-						id
-						name
+						... LanguageFragment
 					}
 				}
 			}
 		}
 	}
 }
+fragment LanguageFragment on Language {
+	id
+	name
+}
 `
 
-func (c *Client) GetUser(ctx context.Context, httpRequestOptions ...client.HTTPRequestOption) (*GetUser, error) {
-	vars := map[string]interface{}{}
+func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, httpRequestOptions ...client.HTTPRequestOption) (*GetUser, error) {
+	vars := map[string]interface{}{
+		"repositoryFirst": repositoryFirst,
+		"languageFirst":   languageFirst,
+	}
 
 	var res GetUser
 	if err := c.Client.Post(ctx, GetUserQuery, &res, vars, httpRequestOptions...); err != nil {

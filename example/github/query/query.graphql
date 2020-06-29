@@ -1,15 +1,20 @@
-query GetUser {
+fragment LanguageFragment on Language {
+    id
+    name
+}
+
+
+query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
     viewer {
         id
         name
-        repositories(first: 3, orderBy: {field: CREATED_AT, direction: DESC}) {
+        repositories(first: $repositoryFirst, orderBy: {field: CREATED_AT, direction: DESC}) {
             nodes {
                 id
                 name
-                languages(first: 10) {
+                languages(first: $languageFirst) {
                     nodes {
-                        id
-                        name
+                        ...LanguageFragment
                     }
                 }
             }
