@@ -1,0 +1,18 @@
+query GetUser {
+    viewer {
+        id
+        name
+        repositories(first: 3, orderBy: {field: CREATED_AT, direction: DESC}) {
+            nodes {
+                id
+                name
+                languages(first: 10) {
+                    nodes {
+                        id
+                        name
+                    }
+                }
+            }
+        }
+    }
+}
