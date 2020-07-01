@@ -24,7 +24,7 @@ func main() {
 	}
 	getUser, err := githubClient.GetUser(ctx, 10, 10)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "error: %s", err.Error())
 		os.Exit(1)
 	}
 
