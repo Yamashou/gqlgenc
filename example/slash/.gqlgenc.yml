@@ -8,6 +8,6 @@ models:
 endpoint:
   url: ${SLASH_ENDPOINT}
   headers:
-    Authorization: "Bearer ${SLASH_TOKEN}" # public access token
+    Authorization: "Bearer ${SLASH_TOKEN}"
 query:
   - "./query/*.graphql"
