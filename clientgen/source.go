@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"go/types"
 
+	"golang.org/x/xerrors"
+
 	"github.com/99designs/gqlgen/codegen/templates"
 
 	"github.com/vektah/gqlparser/v2/formatter"
@@ -29,10 +31,14 @@ type Fragment struct {
 	Type types.Type
 }
 
-func (s *Source) fragments() []*Fragment {
+func (s *Source) fragments() ([]*Fragment, error) {
 	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
 	for _, fragment := range s.queryDocument.Fragments {
 		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet)
+		if s.sourceGenerator.cfg.Models.Exists(fragment.Name) {
+			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", fragment.Name))
+		}
+
 		fragment := &Fragment{
 			Name: fragment.Name,
 			Type: responseFields.StructType(),
@@ -49,7 +55,7 @@ func (s *Source) fragments() []*Fragment {
 		)
 	}
 
-	return fragments
+	return fragments, nil
 }
 
 type Operation struct {
@@ -119,12 +125,16 @@ type OperationResponse struct {
 	Type types.Type
 }
 
-func (s *Source) operationResponses() []*OperationResponse {
+func (s *Source) operationResponses() ([]*OperationResponse, error) {
 	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
 	for _, operation := range s.queryDocument.Operations {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet)
+		name := getResponseStructName(operation)
+		if s.sourceGenerator.cfg.Models.Exists(name) {
+			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", name))
+		}
 		operationResponse = append(operationResponse, &OperationResponse{
-			Name: getResponseStructName(operation),
+			Name: name,
 			Type: responseFields.StructType(),
 		})
 	}
@@ -137,7 +147,7 @@ func (s *Source) operationResponses() []*OperationResponse {
 		)
 	}
 
-	return operationResponse
+	return operationResponse, nil
 }
 
 func getResponseStructName(operation *ast.OperationDefinition) string {

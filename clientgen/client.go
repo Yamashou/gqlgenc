@@ -45,8 +45,16 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	// 3. テンプレートと情報ソースを元にコード生成
 	sourceGenerator := NewSourceGenerator(cfg, p.Client)
 	source := NewSource(queryDocument, sourceGenerator)
-	fragments := source.fragments()
-	operationResponses := source.operationResponses()
+	fragments, err := source.fragments()
+	if err != nil {
+		return xerrors.Errorf("generating fragment failed: %w", err)
+	}
+
+	operationResponses, err := source.operationResponses()
+	if err != nil {
+		return xerrors.Errorf("generating operation response failed: %w", err)
+	}
+
 	if err := RenderTemplate(cfg, fragments, source.operations(queryDocuments), operationResponses, p.Client); err != nil {
 		return xerrors.Errorf("template failed: %w", err)
 	}
