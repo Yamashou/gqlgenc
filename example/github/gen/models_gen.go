@@ -760,13 +760,8 @@ type Blob struct {
 	// The HTTP URL for this Git object
 	CommitURL string `json:"commitUrl"`
 	ID        string `json:"id"`
-	// Indicates whether the Blob is binary or text
-	//
-	// **Upcoming Change on 2019-07-01 UTC**
-	// **Description:** Type for `isBinary` will change from `Boolean!` to `Boolean`.
-	// **Reason:** The `isBinary` field may return `null` when it cannot determine if a Blob is binary.
-	//
-	IsBinary bool `json:"isBinary"`
+	// Indicates whether the Blob is binary or text. Returns null if unable to determine the encoding.
+	IsBinary *bool `json:"isBinary"`
 	// Indicates whether the contents is truncated
 	IsTruncated bool `json:"isTruncated"`
 	// The Git object ID

@@ -10,6 +10,8 @@ func ParseIntrospectionQuery(query Query) *ast.SchemaDocument {
 	var doc ast.SchemaDocument
 	typeMap := query.Schema.Types.NameMap()
 
+	doc.Schema = append(doc.Schema, parseSchemaDefinition(query, typeMap))
+
 	for _, typeVale := range typeMap {
 		doc.Definitions = append(doc.Definitions, parseTypeSystemDefinition(typeVale))
 	}
@@ -19,6 +21,31 @@ func ParseIntrospectionQuery(query Query) *ast.SchemaDocument {
 	}
 
 	return &doc
+}
+
+func parseSchemaDefinition(query Query, typeMap map[string]*FullType) *ast.SchemaDefinition {
+	def := ast.SchemaDefinition{}
+
+	def.OperationTypes = append(def.OperationTypes,
+		parseOperationTypeDefinitionForQuery(typeMap[*query.Schema.QueryType.Name]),
+		parseOperationTypeDefinitionForMutation(typeMap[*query.Schema.MutationType.Name]),
+	)
+
+	return &def
+}
+
+func parseOperationTypeDefinitionForQuery(fullType *FullType) *ast.OperationTypeDefinition {
+	var op ast.OperationTypeDefinition
+	op.Operation = ast.Query
+	op.Type = *fullType.Name
+	return &op
+}
+
+func parseOperationTypeDefinitionForMutation(fullType *FullType) *ast.OperationTypeDefinition {
+	var op ast.OperationTypeDefinition
+	op.Operation = ast.Mutation
+	op.Type = *fullType.Name
+	return &op
 }
 
 func parseDirectiveDefinition(directiveValue *DirectiveType) *ast.DirectiveDefinition {
