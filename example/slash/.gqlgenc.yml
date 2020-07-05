@@ -1,0 +1,13 @@
+model:
+  filename: ./gen/models_gen.go
+client:
+  filename: ./gen/client.go
+models:
+  Date:
+    model: github.com/99designs/gqlgen/graphql.Time
+endpoint:
+  url: ${SLASH_ENDPOINT}
+  headers:
+    Authorization: "Bearer ${SLASH_TOKEN}" # public access token
+query:
+  - "./query/*.graphql"

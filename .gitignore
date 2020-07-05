@@ -1,6 +1,6 @@
 /.gqlgenc.yml
 /models_gen.go
-/.graphqlconfig
+/**/.graphqlconfig
 /schema.graphql
 /client.go
 /query/

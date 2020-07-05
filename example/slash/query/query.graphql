@@ -1,0 +1,51 @@
+fragment UserFragment on User {
+    name
+    username
+}
+
+query GetUsers {
+    queryUser {
+        ...UserFragment
+        tasks {
+            title
+            completed
+        }
+    }
+}
+
+mutation AddTasks ($input: [AddTaskInput!]!) {
+    addTask(input: $input) {
+        numUids
+        task {
+            id
+            title
+            user {
+                ...UserFragment
+            }
+        }
+    }
+}
+
+
+mutation AddUsersMutation ($input: [AddUserInput!]!) {
+    addUser(input: $input) {
+        numUids
+        user {
+            ...UserFragment
+        }
+    }
+}
+
+mutation DeleteUserMutation ($username: String!) {
+    deleteUser(filter: {username: {eq: $username}}) {
+        numUids
+        msg
+    }
+}
+
+mutation DeleteTaskMutation ($id: ID!) {
+    deleteTask(filter: {id: [$id]}) {
+        numUids
+        msg
+    }
+}
