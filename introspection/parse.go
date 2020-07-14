@@ -169,9 +169,9 @@ func parseInputObjectTypeDefinition(typeVale *FullType) *ast.Definition {
 }
 
 func parseUnionTypeDefinition(typeVale *FullType) *ast.Definition {
-	unions := make([]string, 0, len(typeVale.EnumValues))
-	for _, unionValue := range typeVale.EnumValues {
-		unions = append(unions, unionValue.Name)
+	unions := make([]string, 0, len(typeVale.PossibleTypes))
+	for _, unionValue := range typeVale.PossibleTypes {
+		unions = append(unions, *unionValue.Name)
 	}
 
 	return &ast.Definition{
