@@ -4,6 +4,7 @@ package gen
 
 import (
 	"context"
+	"time"
 
 	"github.com/Yamashou/gqlgenc/client"
 )
@@ -59,7 +60,17 @@ type (
 			Works *struct {
 				Edges []*struct {
 					Cursor string
-					Node   *WorkFragment
+					Node   *struct {
+						Title             string
+						AnnictID          int64
+						SeasonYear        *int64
+						SeasonName        *SeasonName
+						EpisodesCount     int64
+						ID                string
+						OfficialSiteURL   *string
+						WikipediaURL      *string
+						ViewerStatusState *StatusState
+					}
 				}
 			}
 		}
@@ -73,7 +84,7 @@ type ListRecords struct {
 				Node *struct {
 					Work      WorkFragment
 					Episode   struct{ SortNumber int64 }
-					CreatedAt string
+					CreatedAt time.Time
 				}
 			}
 		}
@@ -227,28 +238,17 @@ const ListWorksQuery = `query ListWorks ($state: StatusState, $after: String, $n
 			edges {
 				cursor
 				node {
-					... WorkFragment
+					title
+					annictId
+					seasonYear
+					seasonName
+					episodesCount
+					id
+					officialSiteUrl
+					wikipediaUrl
+					viewerStatusState
 				}
 			}
-		}
-	}
-}
-fragment WorkFragment on Work {
-	id
-	title
-	annictId
-	seasonYear
-	seasonName
-	episodesCount
-	officialSiteUrl
-	wikipediaUrl
-	viewerStatusState
-	episodes(orderBy: {direction:ASC,field:SORT_NUMBER}) {
-		nodes {
-			id
-			annictId
-			title
-			sortNumber
 		}
 	}
 }

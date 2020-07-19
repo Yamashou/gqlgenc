@@ -62,6 +62,13 @@ func main() {
 	}
 
 	fmt.Println(getProfile2.Viewer.RecordsCount, getProfile2.Viewer.WatchedCount)
+
+	res, err := annictClient.ListWorks(ctx, nil, nil, 5)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %s", err.Error())
+		os.Exit(1)
+	}
+	fmt.Println(res.Viewer.Works.Edges[0].Node.Title, res.Viewer.Works.Edges[0].Cursor, len(res.Viewer.Works.Edges))
 }
 
 func NewAnnictClient(c *client.Client) *gen.Client {

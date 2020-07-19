@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"time"
 )
 
 type ActivityItem interface {
@@ -301,7 +302,7 @@ type EpisodeOrder struct {
 
 type MultipleRecord struct {
 	AnnictID  int64             `json:"annictId"`
-	CreatedAt string            `json:"createdAt"`
+	CreatedAt time.Time         `json:"createdAt"`
 	ID        string            `json:"id"`
 	Records   *RecordConnection `json:"records"`
 	User      *User             `json:"user"`
@@ -427,7 +428,7 @@ type Program struct {
 	ID          string       `json:"id"`
 	Rebroadcast bool         `json:"rebroadcast"`
 	ScPid       *int64       `json:"scPid"`
-	StartedAt   string       `json:"startedAt"`
+	StartedAt   time.Time    `json:"startedAt"`
 	State       ProgramState `json:"state"`
 	Work        *Work        `json:"work"`
 }
@@ -461,7 +462,7 @@ type Record struct {
 	AnnictID           int64        `json:"annictId"`
 	Comment            *string      `json:"comment"`
 	CommentsCount      int64        `json:"commentsCount"`
-	CreatedAt          string       `json:"createdAt"`
+	CreatedAt          time.Time    `json:"createdAt"`
 	Episode            *Episode     `json:"episode"`
 	FacebookClickCount int64        `json:"facebookClickCount"`
 	ID                 string       `json:"id"`
@@ -470,7 +471,7 @@ type Record struct {
 	Rating             *float64     `json:"rating"`
 	RatingState        *RatingState `json:"ratingState"`
 	TwitterClickCount  int64        `json:"twitterClickCount"`
-	UpdatedAt          string       `json:"updatedAt"`
+	UpdatedAt          time.Time    `json:"updatedAt"`
 	User               *User        `json:"user"`
 	Work               *Work        `json:"work"`
 }
@@ -503,18 +504,18 @@ type RecordOrder struct {
 type Review struct {
 	AnnictID             int64        `json:"annictId"`
 	Body                 string       `json:"body"`
-	CreatedAt            string       `json:"createdAt"`
+	CreatedAt            time.Time    `json:"createdAt"`
 	ID                   string       `json:"id"`
 	ImpressionsCount     int64        `json:"impressionsCount"`
 	LikesCount           int64        `json:"likesCount"`
-	ModifiedAt           *string      `json:"modifiedAt"`
+	ModifiedAt           *time.Time   `json:"modifiedAt"`
 	RatingAnimationState *RatingState `json:"ratingAnimationState"`
 	RatingCharacterState *RatingState `json:"ratingCharacterState"`
 	RatingMusicState     *RatingState `json:"ratingMusicState"`
 	RatingOverallState   *RatingState `json:"ratingOverallState"`
 	RatingStoryState     *RatingState `json:"ratingStoryState"`
 	Title                *string      `json:"title"`
-	UpdatedAt            string       `json:"updatedAt"`
+	UpdatedAt            time.Time    `json:"updatedAt"`
 	User                 *User        `json:"user"`
 	Work                 *Work        `json:"work"`
 }
@@ -637,7 +638,7 @@ type StaffOrder struct {
 
 type Status struct {
 	AnnictID   int64       `json:"annictId"`
-	CreatedAt  string      `json:"createdAt"`
+	CreatedAt  time.Time   `json:"createdAt"`
 	ID         string      `json:"id"`
 	LikesCount int64       `json:"likesCount"`
 	State      StatusState `json:"state"`
@@ -708,7 +709,7 @@ type User struct {
 	AnnictID            int64               `json:"annictId"`
 	AvatarURL           *string             `json:"avatarUrl"`
 	BackgroundImageURL  *string             `json:"backgroundImageUrl"`
-	CreatedAt           string              `json:"createdAt"`
+	CreatedAt           time.Time           `json:"createdAt"`
 	Description         string              `json:"description"`
 	Email               *string             `json:"email"`
 	Followers           *UserConnection     `json:"followers"`
