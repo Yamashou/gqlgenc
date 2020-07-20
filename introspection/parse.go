@@ -228,6 +228,8 @@ func parseTypeSystemDefinition(typeVale *FullType) *ast.Definition {
 		return parseObjectTypeDefinition(typeVale)
 	case TypeKindInputObject:
 		return parseInputObjectTypeDefinition(typeVale)
+	case TypeKindList, TypeKindNonNull:
+		panic(fmt.Sprintf("not match Kind: %s", typeVale.Kind))
 	}
 
 	panic(fmt.Sprintf("not match Kind: %s", typeVale.Kind))
