@@ -108,9 +108,9 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 		// GraphQLの定義がオプショナルのはtypのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
-		var tags []string
-		if strings.HasPrefix(selection.Name, "__") {
-			tags = append(tags, fmt.Sprintf(`graphql:"%s"`, selection.Name))
+		tags := []string{
+			fmt.Sprintf(`json:"%s"`, selection.Alias),
+			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
 		}
 
 		return &ResponseField{

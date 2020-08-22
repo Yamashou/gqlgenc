@@ -14,81 +14,80 @@ type Client struct {
 }
 
 type ViewerFragment struct {
-	AvatarURL       *string
-	RecordsCount    int64
-	WannaWatchCount int64
-	WatchingCount   int64
-	WatchedCount    int64
+	AvatarURL       *string "json:\"avatar_url\" graphql:\"avatar_url\""
+	RecordsCount    int64   "json:\"recordsCount\" graphql:\"recordsCount\""
+	WannaWatchCount int64   "json:\"wannaWatchCount\" graphql:\"wannaWatchCount\""
+	WatchingCount   int64   "json:\"watchingCount\" graphql:\"watchingCount\""
+	WatchedCount    int64   "json:\"watchedCount\" graphql:\"watchedCount\""
 }
 
 type WorkFragment struct {
-	ID                string
-	Title             string
-	AnnictID          int64
-	SeasonYear        *int64
-	SeasonName        *SeasonName
-	EpisodesCount     int64
-	OfficialSiteURL   *string
-	WikipediaURL      *string
-	ViewerStatusState *StatusState
+	ID                string       "json:\"id\" graphql:\"id\""
+	Title             string       "json:\"title\" graphql:\"title\""
+	AnnictID          int64        "json:\"annict_id\" graphql:\"annict_id\""
+	SeasonYear        *int64       "json:\"seasonYear\" graphql:\"seasonYear\""
+	SeasonName        *SeasonName  "json:\"seasonName\" graphql:\"seasonName\""
+	EpisodesCount     int64        "json:\"episodesCount\" graphql:\"episodesCount\""
+	OfficialSiteURL   *string      "json:\"officialSiteUrl\" graphql:\"officialSiteUrl\""
+	WikipediaURL      *string      "json:\"wikipediaUrl\" graphql:\"wikipediaUrl\""
+	ViewerStatusState *StatusState "json:\"viewerStatusState\" graphql:\"viewerStatusState\""
 	Episodes          *struct {
 		Nodes []*struct {
-			ID         string
-			AnnictID   int64
-			Title      *string
-			SortNumber int64
-		}
-	}
+			ID         string  "json:\"id\" graphql:\"id\""
+			AnnictID   int64   "json:\"annictId\" graphql:\"annictId\""
+			Title      *string "json:\"title\" graphql:\"title\""
+			SortNumber int64   "json:\"sortNumber\" graphql:\"sortNumber\""
+		} "json:\"nodes\" graphql:\"nodes\""
+	} "json:\"episodes\" graphql:\"episodes\""
 }
 
 type CreateRecordMutationPayload struct {
-	CreateRecord *struct{ ClientMutationID *string }
+	CreateRecord *struct {
+		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
+	} "json:\"createRecord\" graphql:\"createRecord\""
 }
 
 type UpdateStatusMutationPayload struct {
-	UpdateStatus *struct{ ClientMutationID *string }
+	UpdateStatus *struct {
+		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
+	} "json:\"updateStatus\" graphql:\"updateStatus\""
 }
 
 type UpdateWorkStatusPayload struct {
-	UpdateStatus *struct{ ClientMutationID *string }
+	UpdateStatus *struct {
+		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
+	} "json:\"updateStatus\" graphql:\"updateStatus\""
 }
 
-type (
-	GetProfile struct{ Viewer *ViewerFragment }
-	ListWorks  struct {
-		Viewer *struct {
-			Works *struct {
-				Edges []*struct {
-					Cursor string
-					Node   *struct {
-						Title             string
-						AnnictID          int64
-						SeasonYear        *int64
-						SeasonName        *SeasonName
-						EpisodesCount     int64
-						ID                string
-						OfficialSiteURL   *string
-						WikipediaURL      *string
-						ViewerStatusState *StatusState
-					}
-				}
-			}
-		}
-	}
-)
+type GetProfile struct {
+	Viewer *ViewerFragment "json:\"viewer\" graphql:\"viewer\""
+}
+
+type ListWorks struct {
+	Viewer *struct {
+		Works *struct {
+			Edges []*struct {
+				Cursor string        "json:\"cursor\" graphql:\"cursor\""
+				Node   *WorkFragment "json:\"node\" graphql:\"node\""
+			} "json:\"edges\" graphql:\"edges\""
+		} "json:\"works\" graphql:\"works\""
+	} "json:\"viewer\" graphql:\"viewer\""
+}
 
 type ListRecords struct {
 	Viewer *struct {
 		Records *struct {
 			Edges []*struct {
 				Node *struct {
-					Work      WorkFragment
-					Episode   struct{ SortNumber int64 }
-					CreatedAt time.Time
-				}
-			}
-		}
-	}
+					Work    WorkFragment "json:\"work\" graphql:\"work\""
+					Episode struct {
+						SortNumber int64 "json:\"sortNumber\" graphql:\"sortNumber\""
+					} "json:\"episode\" graphql:\"episode\""
+					CreatedAt time.Time "json:\"createdAt\" graphql:\"createdAt\""
+				} "json:\"node\" graphql:\"node\""
+			} "json:\"edges\" graphql:\"edges\""
+		} "json:\"records\" graphql:\"records\""
+	} "json:\"viewer\" graphql:\"viewer\""
 }
 
 type ListNextEpisodes struct {
@@ -98,52 +97,58 @@ type ListNextEpisodes struct {
 				Node *struct {
 					Episode struct {
 						NextEpisode *struct {
-							ID          string
-							Number      *int64
-							NumberText  *string
-							Title       *string
-							NextEpisode *struct{ ID string }
-						}
+							ID          string  "json:\"id\" graphql:\"id\""
+							Number      *int64  "json:\"number\" graphql:\"number\""
+							NumberText  *string "json:\"numberText\" graphql:\"numberText\""
+							Title       *string "json:\"title\" graphql:\"title\""
+							NextEpisode *struct {
+								ID string "json:\"id\" graphql:\"id\""
+							} "json:\"nextEpisode\" graphql:\"nextEpisode\""
+						} "json:\"nextEpisode\" graphql:\"nextEpisode\""
 						Work struct {
-							ID    string
-							Title string
-						}
-					}
-				}
-			}
-		}
-	}
+							ID    string "json:\"id\" graphql:\"id\""
+							Title string "json:\"title\" graphql:\"title\""
+						} "json:\"work\" graphql:\"work\""
+					} "json:\"episode\" graphql:\"episode\""
+				} "json:\"node\" graphql:\"node\""
+			} "json:\"edges\" graphql:\"edges\""
+		} "json:\"records\" graphql:\"records\""
+	} "json:\"viewer\" graphql:\"viewer\""
 }
 
 type GetWork struct {
-	SearchWorks *struct{ Nodes []*WorkFragment }
+	SearchWorks *struct {
+		Nodes []*WorkFragment "json:\"nodes\" graphql:\"nodes\""
+	} "json:\"searchWorks\" graphql:\"searchWorks\""
 }
 
 type SearchWorks struct {
 	SearchWorks *struct {
 		Nodes []*struct {
-			ID                string
-			Title             string
-			AnnictID          int64
-			SeasonYear        *int64
-			SeasonName        *SeasonName
-			EpisodesCount     int64
-			OfficialSiteURL   *string
-			WikipediaURL      *string
-			ViewerStatusState *StatusState
+			ID                string       "json:\"id\" graphql:\"id\""
+			Title             string       "json:\"title\" graphql:\"title\""
+			AnnictID          int64        "json:\"annict_id\" graphql:\"annict_id\""
+			SeasonYear        *int64       "json:\"seasonYear\" graphql:\"seasonYear\""
+			SeasonName        *SeasonName  "json:\"seasonName\" graphql:\"seasonName\""
+			EpisodesCount     int64        "json:\"episodesCount\" graphql:\"episodesCount\""
+			OfficialSiteURL   *string      "json:\"officialSiteUrl\" graphql:\"officialSiteUrl\""
+			WikipediaURL      *string      "json:\"wikipediaUrl\" graphql:\"wikipediaUrl\""
+			ViewerStatusState *StatusState "json:\"viewerStatusState\" graphql:\"viewerStatusState\""
 			Episodes          *struct {
 				Nodes []*struct {
-					ID         string
-					AnnictID   int64
-					Title      *string
-					SortNumber int64
-				}
-			}
+					ID         string  "json:\"id\" graphql:\"id\""
+					AnnictID   int64   "json:\"annictId\" graphql:\"annictId\""
+					Title      *string "json:\"title\" graphql:\"title\""
+					SortNumber int64   "json:\"sortNumber\" graphql:\"sortNumber\""
+				} "json:\"nodes\" graphql:\"nodes\""
+			} "json:\"episodes\" graphql:\"episodes\""
 			Work struct {
-				Image *struct{ RecommendedImageURL *string }
+				Image *struct {
+					RecommendedImageURL *string "json:\"recommendedImageUrl\" graphql:\"recommendedImageUrl\""
+				} "json:\"image\" graphql:\"image\""
 			} "graphql:\"... on Work\""
-		}
-	}
+		} "json:\"nodes\" graphql:\"nodes\""
+	} "json:\"searchWorks\" graphql:\"searchWorks\""
 }
 
 const CreateRecordMutationQuery = `mutation CreateRecordMutation ($episodeId: ID!) {
@@ -213,7 +218,7 @@ const GetProfileQuery = `query GetProfile {
 	}
 }
 fragment ViewerFragment on User {
-	avatarUrl
+	avatar_url: avatarUrl
 	recordsCount
 	wannaWatchCount
 	watchingCount
@@ -238,17 +243,28 @@ const ListWorksQuery = `query ListWorks ($state: StatusState, $after: String, $n
 			edges {
 				cursor
 				node {
-					title
-					annictId
-					seasonYear
-					seasonName
-					episodesCount
-					id
-					officialSiteUrl
-					wikipediaUrl
-					viewerStatusState
+					... WorkFragment
 				}
 			}
+		}
+	}
+}
+fragment WorkFragment on Work {
+	id
+	title
+	annict_id: annictId
+	seasonYear
+	seasonName
+	episodesCount
+	officialSiteUrl
+	wikipediaUrl
+	viewerStatusState
+	episodes(orderBy: {direction:ASC,field:SORT_NUMBER}) {
+		nodes {
+			id
+			annictId
+			title
+			sortNumber
 		}
 	}
 }
@@ -289,7 +305,7 @@ const ListRecordsQuery = `query ListRecords {
 fragment WorkFragment on Work {
 	id
 	title
-	annictId
+	annict_id: annictId
 	seasonYear
 	seasonName
 	episodesCount
@@ -366,7 +382,7 @@ const GetWorkQuery = `query GetWork ($ids: [Int!]) {
 fragment WorkFragment on Work {
 	id
 	title
-	annictId
+	annict_id: annictId
 	seasonYear
 	seasonName
 	episodesCount
@@ -412,7 +428,7 @@ const SearchWorksQuery = `query SearchWorks ($seasons: [String!]) {
 fragment WorkFragment on Work {
 	id
 	title
-	annictId
+	annict_id: annictId
 	seasonYear
 	seasonName
 	episodesCount

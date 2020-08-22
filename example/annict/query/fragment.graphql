@@ -1,5 +1,5 @@
 fragment ViewerFragment on User {
-    avatarUrl
+    avatar_url:avatarUrl
     recordsCount
     wannaWatchCount
     watchingCount
@@ -9,7 +9,7 @@ fragment ViewerFragment on User {
 fragment WorkFragment on Work {
     id
     title
-    annictId
+    annict_id:annictId
     seasonYear
     seasonName
     episodesCount
