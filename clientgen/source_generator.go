@@ -97,15 +97,19 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 			baseType = r.Type(selection.Definition.Type.Name())
 		case fieldsResponseFields.IsFragment():
 			// 子フィールドがFragmentの場合はこのFragmentがフィールドの型になる
+			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
 			baseType = fieldsResponseFields.StructType()
 		default:
 			// ここにきたらバグ
+			// here is bug
 			panic("not match type")
 		}
 
-		// GraphQLの定義がオプショナルのはtypのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
+		// GraphQLの定義がオプショナルのはtypeのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
+		// return pointer type then optional type of definition in GraphQL.
+		// return slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
 		tags := []string{

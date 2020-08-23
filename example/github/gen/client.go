@@ -12,21 +12,23 @@ type Client struct {
 	Client *client.Client
 }
 type LanguageFragment struct {
-	ID   string
-	Name string
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
 }
 type GetUser struct {
 	Viewer struct {
-		ID           string
-		Name         *string
+		ID           string  "json:\"id\" graphql:\"id\""
+		Name         *string "json:\"name\" graphql:\"name\""
 		Repositories struct {
 			Nodes []*struct {
-				ID        string
-				Name      string
-				Languages *struct{ Nodes []*LanguageFragment }
-			}
-		}
-	}
+				ID        string "json:\"id\" graphql:\"id\""
+				Name      string "json:\"name\" graphql:\"name\""
+				Languages *struct {
+					Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
+				} "json:\"languages\" graphql:\"languages\""
+			} "json:\"nodes\" graphql:\"nodes\""
+		} "json:\"repositories\" graphql:\"repositories\""
+	} "json:\"viewer\" graphql:\"viewer\""
 }
 
 const GetUserQuery = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {

@@ -12,46 +12,46 @@ type Client struct {
 	Client *client.Client
 }
 type UserFragment struct {
-	Name     *string
-	Username string
+	Name     *string "json:\"name\" graphql:\"name\""
+	Username string  "json:\"username\" graphql:\"username\""
 }
 type GetUsers struct {
 	QueryUser []*struct {
-		Name     *string
-		Username string
+		Name     *string "json:\"name\" graphql:\"name\""
+		Username string  "json:\"username\" graphql:\"username\""
 		Tasks    []*struct {
-			Title     string
-			Completed bool
-		}
-	}
+			Title     string "json:\"title\" graphql:\"title\""
+			Completed bool   "json:\"completed\" graphql:\"completed\""
+		} "json:\"tasks\" graphql:\"tasks\""
+	} "json:\"queryUser\" graphql:\"queryUser\""
 }
 type AddTasksPayload struct {
 	AddTask *struct {
-		NumUids *int
+		NumUids *int "json:\"numUids\" graphql:\"numUids\""
 		Task    []*struct {
-			ID    string
-			Title string
-			User  UserFragment
-		}
-	}
+			ID    string       "json:\"id\" graphql:\"id\""
+			Title string       "json:\"title\" graphql:\"title\""
+			User  UserFragment "json:\"user\" graphql:\"user\""
+		} "json:\"task\" graphql:\"task\""
+	} "json:\"addTask\" graphql:\"addTask\""
 }
 type AddUsersMutationPayload struct {
 	AddUser *struct {
-		NumUids *int
-		User    []*UserFragment
-	}
+		NumUids *int            "json:\"numUids\" graphql:\"numUids\""
+		User    []*UserFragment "json:\"user\" graphql:\"user\""
+	} "json:\"addUser\" graphql:\"addUser\""
 }
 type DeleteUserMutationPayload struct {
 	DeleteUser *struct {
-		NumUids *int
-		Msg     *string
-	}
+		NumUids *int    "json:\"numUids\" graphql:\"numUids\""
+		Msg     *string "json:\"msg\" graphql:\"msg\""
+	} "json:\"deleteUser\" graphql:\"deleteUser\""
 }
 type DeleteTaskMutationPayload struct {
 	DeleteTask *struct {
-		NumUids *int
-		Msg     *string
-	}
+		NumUids *int    "json:\"numUids\" graphql:\"numUids\""
+		Msg     *string "json:\"msg\" graphql:\"msg\""
+	} "json:\"deleteTask\" graphql:\"deleteTask\""
 }
 
 const GetUsersQuery = `query GetUsers {

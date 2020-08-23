@@ -38,14 +38,15 @@ type AuthRule struct {
 }
 
 type CustomHTTP struct {
-	URL               string     `json:"url"`
-	Method            HTTPMethod `json:"method"`
-	Body              *string    `json:"body"`
-	Graphql           *string    `json:"graphql"`
-	Mode              *Mode      `json:"mode"`
-	ForwardHeaders    []string   `json:"forwardHeaders"`
-	SecretHeaders     []string   `json:"secretHeaders"`
-	SkipIntrospection *bool      `json:"skipIntrospection"`
+	URL                  string     `json:"url"`
+	Method               HTTPMethod `json:"method"`
+	Body                 *string    `json:"body"`
+	Graphql              *string    `json:"graphql"`
+	Mode                 *Mode      `json:"mode"`
+	ForwardHeaders       []string   `json:"forwardHeaders"`
+	SecretHeaders        []string   `json:"secretHeaders"`
+	IntrospectionHeaders []string   `json:"introspectionHeaders"`
+	SkipIntrospection    *bool      `json:"skipIntrospection"`
 }
 
 type DateTimeFilter struct {
@@ -57,11 +58,13 @@ type DateTimeFilter struct {
 }
 
 type DeleteTaskPayload struct {
+	Task    []*Task `json:"task"`
 	Msg     *string `json:"msg"`
 	NumUids *int    `json:"numUids"`
 }
 
 type DeleteUserPayload struct {
+	User    []*User `json:"user"`
 	Msg     *string `json:"msg"`
 	NumUids *int    `json:"numUids"`
 }
