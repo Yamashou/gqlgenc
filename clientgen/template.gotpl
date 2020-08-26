@@ -18,6 +18,10 @@ type Client struct {
 	Client *client.Client
 }
 
+type {{ .Query.Name | go }} {{ .Query.Type | ref }}
+
+type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
+
 {{- range $name, $element := .Fragment }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
 {{- end }}

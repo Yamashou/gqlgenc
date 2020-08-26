@@ -5,6 +5,8 @@ import (
 	"go/types"
 	"strings"
 
+	"golang.org/x/xerrors"
+
 	"github.com/99designs/gqlgen/codegen/templates"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -86,6 +88,31 @@ func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet) Respo
 	return responseFields
 }
 
+func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definition) (ResponseFieldList, error) {
+	fields := make(ResponseFieldList, 0, len(definition.Fields))
+	for _, field := range definition.Fields {
+		if field.Type.Name() == "__Schema" || field.Type.Name() == "__Type" {
+			continue
+		}
+		typ, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
+		if err != nil {
+			return nil, xerrors.Errorf("not found type: %w", err)
+		}
+		tags := []string{
+			fmt.Sprintf(`json:"%s"`, field.Name),
+			fmt.Sprintf(`graphql:"%s"`, field.Name),
+		}
+
+		fields = append(fields, &ResponseField{
+			Name: field.Name,
+			Type: typ,
+			Tags: tags,
+		})
+	}
+
+	return fields, nil
+}
+
 func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseField {
 	switch selection := selection.(type) {
 	case *ast.Field:
@@ -108,8 +135,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 		}
 
 		// GraphQLの定義がオプショナルのはtypeのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
-		// return pointer type then optional type of definition in GraphQL.
-		// return slice pointer then slice type of definition in GraphQL.
+		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
 		tags := []string{
