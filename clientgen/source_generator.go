@@ -105,7 +105,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 
 		fields = append(fields, &ResponseField{
 			Name: field.Name,
-			Type: typ,
+			Type: r.binder.CopyModifiersFromAst(field.Type, typ),
 			Tags: tags,
 		})
 	}
