@@ -18,6 +18,10 @@ type Client struct {
 	Client *client.Client
 }
 
+func NewClient(cli *client.Client) *Client {
+	return &Client{Client: cli}
+}
+
 type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 
 type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
