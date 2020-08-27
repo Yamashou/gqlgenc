@@ -5,12 +5,10 @@ import (
 	"go/types"
 	"strings"
 
-	"golang.org/x/xerrors"
-
-	"github.com/99designs/gqlgen/codegen/templates"
-
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/v2/ast"
+	"golang.org/x/xerrors"
 )
 
 type Argument struct {
@@ -158,6 +156,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 			fieldsResponseFields.StructType(),
 			nil,
 		)
+
 		return &ResponseField{
 			Name:             selection.Name,
 			Type:             typ,
@@ -168,6 +167,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
+
 		return &ResponseField{
 			Name:             selection.TypeCondition,
 			Type:             fieldsResponseFields.StructType(),

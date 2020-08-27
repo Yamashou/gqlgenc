@@ -5,13 +5,10 @@ import (
 	"fmt"
 	"go/types"
 
-	"golang.org/x/xerrors"
-
 	"github.com/99designs/gqlgen/codegen/templates"
-
-	"github.com/vektah/gqlparser/v2/formatter"
-
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/formatter"
+	"golang.org/x/xerrors"
 )
 
 type Source struct {
@@ -119,6 +116,7 @@ func queryString(queryDocument *ast.QueryDocument) string {
 	var buf bytes.Buffer
 	astFormatter := formatter.NewFormatter(&buf)
 	astFormatter.FormatQueryDocument(queryDocument)
+
 	return buf.String()
 }
 
@@ -190,5 +188,6 @@ func getResponseStructName(operation *ast.OperationDefinition) string {
 	if operation.Operation == ast.Mutation {
 		return fmt.Sprintf("%sPayload", operation.Name)
 	}
+
 	return operation.Name
 }
