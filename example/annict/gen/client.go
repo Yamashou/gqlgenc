@@ -4,6 +4,7 @@ package gen
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/Yamashou/gqlgenc/client"
@@ -11,6 +12,32 @@ import (
 
 type Client struct {
 	Client *client.Client
+}
+
+func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
+	return &Client{Client: client.NewClient(cli, baseURL, options...)}
+}
+
+type Query struct {
+	Node                Node                    "json:\"node\" graphql:\"node\""
+	Nodes               []Node                  "json:\"nodes\" graphql:\"nodes\""
+	SearchCharacters    *CharacterConnection    "json:\"searchCharacters\" graphql:\"searchCharacters\""
+	SearchEpisodes      *EpisodeConnection      "json:\"searchEpisodes\" graphql:\"searchEpisodes\""
+	SearchOrganizations *OrganizationConnection "json:\"searchOrganizations\" graphql:\"searchOrganizations\""
+	SearchPeople        *PersonConnection       "json:\"searchPeople\" graphql:\"searchPeople\""
+	SearchWorks         *WorkConnection         "json:\"searchWorks\" graphql:\"searchWorks\""
+	User                *User                   "json:\"user\" graphql:\"user\""
+	Viewer              *User                   "json:\"viewer\" graphql:\"viewer\""
+}
+
+type Mutation struct {
+	CreateRecord *CreateRecordPayload "json:\"createRecord\" graphql:\"createRecord\""
+	CreateReview *CreateReviewPayload "json:\"createReview\" graphql:\"createReview\""
+	DeleteRecord *DeleteRecordPayload "json:\"deleteRecord\" graphql:\"deleteRecord\""
+	DeleteReview *DeleteReviewPayload "json:\"deleteReview\" graphql:\"deleteReview\""
+	UpdateRecord *UpdateRecordPayload "json:\"updateRecord\" graphql:\"updateRecord\""
+	UpdateReview *UpdateReviewPayload "json:\"updateReview\" graphql:\"updateReview\""
+	UpdateStatus *UpdateStatusPayload "json:\"updateStatus\" graphql:\"updateStatus\""
 }
 
 type ViewerFragment struct {
