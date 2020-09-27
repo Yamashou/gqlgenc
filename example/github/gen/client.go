@@ -34,6 +34,7 @@ type Query struct {
 	Nodes                                    []Node                             "json:\"nodes\" graphql:\"nodes\""
 	Organization                             *Organization                      "json:\"organization\" graphql:\"organization\""
 	RateLimit                                *RateLimit                         "json:\"rateLimit\" graphql:\"rateLimit\""
+	Relay                                    *Query                             "json:\"relay\" graphql:\"relay\""
 	Repository                               *Repository                        "json:\"repository\" graphql:\"repository\""
 	RepositoryOwner                          RepositoryOwner                    "json:\"repositoryOwner\" graphql:\"repositoryOwner\""
 	Resource                                 UniformResourceLocatable           "json:\"resource\" graphql:\"resource\""
@@ -169,10 +170,12 @@ type Mutation struct {
 	UpdateTeamDiscussionComment                                 *UpdateTeamDiscussionCommentPayload                                 "json:\"updateTeamDiscussionComment\" graphql:\"updateTeamDiscussionComment\""
 	UpdateTopics                                                *UpdateTopicsPayload                                                "json:\"updateTopics\" graphql:\"updateTopics\""
 }
+
 type LanguageFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
 type GetUser struct {
 	Viewer struct {
 		ID           string  "json:\"id\" graphql:\"id\""
