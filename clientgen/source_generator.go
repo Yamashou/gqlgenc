@@ -92,6 +92,10 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 		if field.Type.Name() == "__Schema" || field.Type.Name() == "__Type" {
 			continue
 		}
+		if len(r.cfg.Models[field.Type.Name()].Model) == 0 {
+			continue
+		}
+
 		typ, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
 		if err != nil {
 			return nil, xerrors.Errorf("not found type: %w", err)
