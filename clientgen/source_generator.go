@@ -89,10 +89,7 @@ func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet) Respo
 func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definition) (ResponseFieldList, error) {
 	fields := make(ResponseFieldList, 0, len(definition.Fields))
 	for _, field := range definition.Fields {
-		if field.Type.Name() == "__Schema" || field.Type.Name() == "__Type" {
-			continue
-		}
-		if len(r.cfg.Models[field.Type.Name()].Model) == 0 {
+		if field.Type.Name() == "__Schema" || field.Type.Name() == "__Type" || field.Type.Name() == "Query" || field.Type.Name() == "Mutation" {
 			continue
 		}
 
