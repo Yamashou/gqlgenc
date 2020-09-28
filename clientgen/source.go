@@ -161,6 +161,11 @@ func (s *Source) Query() (*Query, error) {
 		return nil, xerrors.Errorf("generate failed for query struct type : %w", err)
 	}
 
+	s.sourceGenerator.cfg.Models.Add(
+		s.schema.Query.Name,
+		fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(s.schema.Query.Name)),
+	)
+
 	return &Query{
 		Name: s.schema.Query.Name,
 		Type: fields.StructType(),
@@ -177,6 +182,11 @@ func (s *Source) Mutation() (*Mutation, error) {
 	if err != nil {
 		return nil, xerrors.Errorf("generate failed for mutation struct type : %w", err)
 	}
+
+	s.sourceGenerator.cfg.Models.Add(
+		s.schema.Mutation.Name,
+		fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(s.schema.Mutation.Name)),
+	)
 
 	return &Mutation{
 		Name: s.schema.Mutation.Name,

@@ -95,7 +95,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 
 		var typ types.Type
 		if field.Type.Name() == "Query" || field.Type.Name() == "Mutation" {
-			baseType, err := r.binder.FindType(r.client.Pkg().Path(), "Query")
+			baseType, err := r.binder.FindType(r.client.Pkg().Path(), field.Type.Name())
 			if err != nil {
 				return nil, xerrors.Errorf("not found type: %w", err)
 			}
