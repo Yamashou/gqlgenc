@@ -69,9 +69,14 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, xerrors.Errorf("unable to parse config: %w", err)
 	}
 
+	models := make(config.TypeMap)
+	if cfg.Models != nil {
+		models = cfg.Models
+	}
+
 	cfg.GQLConfig = &config.Config{
 		Model:  cfg.Model,
-		Models: cfg.Models,
+		Models: models,
 		// TODO: gqlgen must be set exec but client not used
 		Exec:       config.PackageConfig{Filename: "generated.go"},
 		Directives: map[string]config.DirectiveConfig{},
