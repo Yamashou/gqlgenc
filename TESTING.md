@@ -2,18 +2,18 @@
 
 To run tests simply run
 
-```sh
+```shell script
 go test ./... -coverprofile=coverage.out
 ```
 
 To deep dive into test coverage, run the following command to see the result in your terminal
 
-```sh
+```shell script
 go tool cover -func=coverage.out
 ```
 
 or the following to see the result in your browser
 
-```sh
+```shell script
 go tool cover -html=coverage.out
 ```
