@@ -1,0 +1,6 @@
+model:
+  filename: ./gen/models_gen.go
+client:
+  filename: ./gen/client.go
+query:
+  - "./queries/*.graphql"

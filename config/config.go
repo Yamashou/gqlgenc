@@ -98,9 +98,9 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, xerrors.Errorf("unable to parse config: %w", err)
 	}
 	if cfg.SchemaFilename != nil && cfg.Endpoint != nil {
-		return nil, xerrors.Errorf("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+		return nil, errors.New("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	} else if cfg.SchemaFilename == nil && cfg.Endpoint == nil {
-		return nil, xerrors.Errorf("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+		return nil, errors.New("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
 	preGlobbing := cfg.SchemaFilename
@@ -139,10 +139,9 @@ func LoadConfig(filename string) (*Config, error) {
 		}
 
 		for _, m := range matches {
-			if cfg.SchemaFilename.Has(m) {
-				continue
+			if !cfg.SchemaFilename.Has(m) {
+				cfg.SchemaFilename = append(cfg.SchemaFilename, m)
 			}
-			cfg.SchemaFilename = append(cfg.SchemaFilename, m)
 		}
 	}
 
