@@ -10,23 +10,29 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/Yamashou/gqlgenc/client"
 	"github.com/Yamashou/gqlgenc/introspection"
+	"github.com/pkg/errors"
+	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/validator"
 	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
+// Config extends the gqlgen basic config
+// and represents the config file
 type Config struct {
-	Model    config.PackageConfig `yaml:"model,omitempty"`
-	Client   config.PackageConfig `yaml:"client,omitempty"`
-	Models   config.TypeMap       `yaml:"models,omitempty"`
-	Endpoint EndPointConfig       `yaml:"endpoint"`
-	Query    []string             `yaml:"query"`
+	SchemaFilename []string             `yaml:"schema,omitempty"`
+	Model          config.PackageConfig `yaml:"model,omitempty"`
+	Client         config.PackageConfig `yaml:"client,omitempty"`
+	Models         config.TypeMap       `yaml:"models,omitempty"`
+	Endpoint       *EndPointConfig      `yaml:"endpoint,omitempty"`
+	Query          []string             `yaml:"query"`
 
 	// gqlgen config struct
 	GQLConfig *config.Config `yaml:"-"`
 }
 
+// EndPointConfig are the allowed options for the 'endpoint' config
 type EndPointConfig struct {
 	URL     string            `yaml:"url"`
 	Headers map[string]string `yaml:"headers,omitempty"`
@@ -53,6 +59,7 @@ func findCfgInDir(dir, fileName string) string {
 	return path
 }
 
+// LoadConfig loads and parses the config gqlgenc config
 func LoadConfig(filename string) (*Config, error) {
 	var cfg Config
 	file, err := findCfg(filename)
@@ -68,10 +75,29 @@ func LoadConfig(filename string) (*Config, error) {
 	if err := yaml.UnmarshalStrict(confContent, &cfg); err != nil {
 		return nil, xerrors.Errorf("unable to parse config: %w", err)
 	}
+	if cfg.SchemaFilename != nil && cfg.Endpoint != nil {
+		return nil, xerrors.Errorf("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+	} else if cfg.SchemaFilename == nil && cfg.Endpoint == nil {
+		return nil, xerrors.Errorf("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+	}
 
 	models := make(config.TypeMap)
 	if cfg.Models != nil {
 		models = cfg.Models
+	}
+
+	sources := []*ast.Source{}
+
+	for _, filename := range cfg.SchemaFilename {
+		filename = filepath.ToSlash(filename)
+		var err error
+		var schemaRaw []byte
+		schemaRaw, err = ioutil.ReadFile(filename)
+		if err != nil {
+			return nil, errors.Wrap(err, "unable to open schema")
+		}
+
+		sources = append(sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
 
 	cfg.GQLConfig = &config.Config{
@@ -80,6 +106,7 @@ func LoadConfig(filename string) (*Config, error) {
 		// TODO: gqlgen must be set exec but client not used
 		Exec:       config.PackageConfig{Filename: "generated.go"},
 		Directives: map[string]config.DirectiveConfig{},
+		Sources:    sources,
 	}
 
 	if err := cfg.Client.Check(); err != nil {
@@ -89,17 +116,24 @@ func LoadConfig(filename string) (*Config, error) {
 	return &cfg, nil
 }
 
+// LoadSchema load and parses the schema from a local file or a remote server
 func (c *Config) LoadSchema(ctx context.Context) error {
-	addHeader := func(req *http.Request) {
-		for key, value := range c.Endpoint.Headers {
-			req.Header.Set(key, value)
+	var schema *ast.Schema
+
+	if c.SchemaFilename != nil {
+		s, err := c.loadLocalSchema(ctx)
+		if err != nil {
+			return xerrors.Errorf("load local schema failed: %w", err)
 		}
+		schema = s
+	} else {
+		s, err := c.loadRemoteSchema(ctx)
+		if err != nil {
+			return xerrors.Errorf("load remote schema failed: %w", err)
+		}
+		schema = s
 	}
-	gqlclient := client.NewClient(http.DefaultClient, c.Endpoint.URL, addHeader)
-	schema, err := LoadRemoteSchema(ctx, gqlclient)
-	if err != nil {
-		return xerrors.Errorf("load remote schema failed: %w", err)
-	}
+
 	if schema.Query == nil {
 		schema.Query = &ast.Definition{
 			Kind: ast.Object,
@@ -113,7 +147,14 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 	return nil
 }
 
-func LoadRemoteSchema(ctx context.Context, gqlclient *client.Client) (*ast.Schema, error) {
+func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
+	addHeader := func(req *http.Request) {
+		for key, value := range c.Endpoint.Headers {
+			req.Header.Set(key, value)
+		}
+	}
+	gqlclient := client.NewClient(http.DefaultClient, c.Endpoint.URL, addHeader)
+
 	var res introspection.Query
 	if err := gqlclient.Post(ctx, introspection.Introspection, &res, nil); err != nil {
 		return nil, xerrors.Errorf("introspection query failed: %w", err)
@@ -124,5 +165,13 @@ func LoadRemoteSchema(ctx context.Context, gqlclient *client.Client) (*ast.Schem
 		return nil, xerrors.Errorf("validation error: %w", err)
 	}
 
+	return schema, nil
+}
+
+func (c *Config) loadLocalSchema(ctx context.Context) (*ast.Schema, error) {
+	schema, err := gqlparser.LoadSchema(c.GQLConfig.Sources...)
+	if err != nil {
+		return nil, err
+	}
 	return schema, nil
 }
