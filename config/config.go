@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/Yamashou/gqlgenc/client"
@@ -21,7 +23,7 @@ import (
 // Config extends the gqlgen basic config
 // and represents the config file
 type Config struct {
-	SchemaFilename []string             `yaml:"schema,omitempty"`
+	SchemaFilename StringList           `yaml:"schema,omitempty"`
 	Model          config.PackageConfig `yaml:"model,omitempty"`
 	Client         config.PackageConfig `yaml:"client,omitempty"`
 	Models         config.TypeMap       `yaml:"models,omitempty"`
@@ -30,6 +32,19 @@ type Config struct {
 
 	// gqlgen config struct
 	GQLConfig *config.Config `yaml:"-"`
+}
+
+// StringList is a simple array of strings
+type StringList []string
+
+// Has checks if the strings array has a give value
+func (a StringList) Has(file string) bool {
+	for _, existing := range a {
+		if existing == file {
+			return true
+		}
+	}
+	return false
 }
 
 // EndPointConfig are the allowed options for the 'endpoint' config
@@ -59,6 +74,13 @@ func findCfgInDir(dir, fileName string) string {
 	return path
 }
 
+var path2regex = strings.NewReplacer(
+	`.`, `\.`,
+	`*`, `.+`,
+	`\`, `[\\/]`,
+	`/`, `[\\/]`,
+)
+
 // LoadConfig loads and parses the config gqlgenc config
 func LoadConfig(filename string) (*Config, error) {
 	var cfg Config
@@ -79,6 +101,49 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, xerrors.Errorf("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	} else if cfg.SchemaFilename == nil && cfg.Endpoint == nil {
 		return nil, xerrors.Errorf("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+	}
+
+	preGlobbing := cfg.SchemaFilename
+	cfg.SchemaFilename = []string{}
+	// https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/codegen/config/config.go#L120
+	for _, f := range preGlobbing {
+		var matches []string
+
+		// for ** we want to override default globbing patterns and walk all
+		// subdirectories to match schema files.
+		if strings.Contains(f, "**") {
+			pathParts := strings.SplitN(f, "**", 2)
+			rest := strings.TrimPrefix(strings.TrimPrefix(pathParts[1], `\`), `/`)
+			// turn the rest of the glob into a regex, anchored only at the end because ** allows
+			// for any number of dirs in between and walk will let us match against the full path name
+			globRe := regexp.MustCompile(path2regex.Replace(rest) + `$`)
+
+			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
+				if err != nil {
+					return err
+				}
+
+				if globRe.MatchString(strings.TrimPrefix(path, pathParts[0])) {
+					matches = append(matches, path)
+				}
+
+				return nil
+			}); err != nil {
+				return nil, errors.Wrapf(err, "failed to walk schema at root %s", pathParts[0])
+			}
+		} else {
+			matches, err = filepath.Glob(f)
+			if err != nil {
+				return nil, errors.Wrapf(err, "failed to glob schema filename %s", f)
+			}
+		}
+
+		for _, m := range matches {
+			if cfg.SchemaFilename.Has(m) {
+				continue
+			}
+			cfg.SchemaFilename = append(cfg.SchemaFilename, m)
+		}
 	}
 
 	models := make(config.TypeMap)
