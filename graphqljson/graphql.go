@@ -38,13 +38,6 @@ import (
 
 // Reference: https://blog.gopheracademy.com/advent-2017/custom-json-unmarshaler-for-graphql-client/
 
-// Response is a GraphQL layer response from a handler.
-type Response struct {
-	Data       json.RawMessage
-	Errors     Errors
-	Extensions map[string]interface{}
-}
-
 // UnmarshalData parses the JSON-encoded GraphQL response data and stores
 // the result in the GraphQL query data structure pointed to by v.
 //
@@ -70,9 +63,9 @@ func UnmarshalData(data json.RawMessage, v interface{}) error {
 	return xerrors.Errorf("invalid token '%v' after top-level value", tok)
 }
 
-// decoder is a JSON decoder that performs custom unmarshaling behavior
+// Decoder is a JSON Decoder that performs custom unmarshaling behavior
 // for GraphQL query data structures. It's implemented on top of a JSON tokenizer.
-type decoder struct {
+type Decoder struct {
 	jsonDecoder *json.Decoder
 
 	// Stack of what part of input JSON we're in the middle of - objects, arrays.
@@ -87,17 +80,17 @@ type decoder struct {
 	vs [][]reflect.Value
 }
 
-func newDecoder(r io.Reader) *decoder {
+func newDecoder(r io.Reader) *Decoder {
 	jsonDecoder := json.NewDecoder(r)
 	jsonDecoder.UseNumber()
 
-	return &decoder{
+	return &Decoder{
 		jsonDecoder: jsonDecoder,
 	}
 }
 
 // Decode decodes a single JSON value from d.tokenizer into v.
-func (d *decoder) Decode(v interface{}) error {
+func (d *Decoder) Decode(v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
 		return xerrors.Errorf("cannot decode into non-pointer %T", v)
@@ -112,7 +105,7 @@ func (d *decoder) Decode(v interface{}) error {
 }
 
 // decode decodes a single JSON value from d.tokenizer into d.vs.
-func (d *decoder) decode() error {
+func (d *Decoder) decode() error {
 	// The loop invariant is that the top of each d.vs stack
 	// is where we try to unmarshal the next JSON value we see.
 	for len(d.vs) > 0 {
@@ -268,18 +261,18 @@ func (d *decoder) decode() error {
 }
 
 // pushState pushes a new parse state s onto the stack.
-func (d *decoder) pushState(s json.Delim) {
+func (d *Decoder) pushState(s json.Delim) {
 	d.parseState = append(d.parseState, s)
 }
 
 // popState pops a parse state (already obtained) off the stack.
 // The stack must be non-empty.
-func (d *decoder) popState() {
+func (d *Decoder) popState() {
 	d.parseState = d.parseState[:len(d.parseState)-1]
 }
 
 // state reports the parse state on top of stack, or 0 if empty.
-func (d *decoder) state() json.Delim {
+func (d *Decoder) state() json.Delim {
 	if len(d.parseState) == 0 {
 		return 0
 	}
@@ -288,7 +281,7 @@ func (d *decoder) state() json.Delim {
 }
 
 // popAllVs pops from all d.vs stacks, keeping only non-empty ones.
-func (d *decoder) popAllVs() {
+func (d *Decoder) popAllVs() {
 	var nonEmpty [][]reflect.Value
 	for i := range d.vs {
 		d.vs[i] = d.vs[i][:len(d.vs[i])-1]
@@ -359,21 +352,4 @@ func unmarshalValue(value json.Token, v reflect.Value) error {
 	}
 
 	return json.Unmarshal(b, v.Addr().Interface())
-}
-
-// Errors represents the "Errors" array in a response from a GraphQL server.
-// If returned via error interface, the slice is expected to contain at least 1 element.
-//
-// Specification: https://facebook.github.io/graphql/#sec-Errors.
-type Errors []struct {
-	Message   string
-	Locations []struct {
-		Line   int
-		Column int
-	}
-}
-
-// Error implements error interface.
-func (e Errors) Error() string {
-	return e[0].Message
 }
