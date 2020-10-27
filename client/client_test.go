@@ -26,10 +26,9 @@ type fakeRes struct {
 }
 
 func TestUnmarshal(t *testing.T) {
-
 	t.Run("single error", func(t *testing.T) {
 		var path ast.Path
-		json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
+		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
 		r := &fakeRes{}
 		err := unmarshal([]byte(qqlSingleErr), r)
 		expectedErr := &GqlErrorList{
@@ -52,11 +51,11 @@ func TestUnmarshal(t *testing.T) {
 
 	t.Run("multiple errors", func(t *testing.T) {
 		var path1 ast.Path
-		json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path1)
+		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path1)
 		var path2 ast.Path
-		json.Unmarshal([]byte(`["query GetUser"]`), &path2)
+		_ = json.Unmarshal([]byte(`["query GetUser"]`), &path2)
 		var path3 ast.Path
-		json.Unmarshal([]byte(`["fragment LanguageFragment"]`), &path3)
+		_ = json.Unmarshal([]byte(`["fragment LanguageFragment"]`), &path3)
 		r := &fakeRes{}
 		err := unmarshal([]byte(gqlMultipleErr), r)
 		expectedErr := &GqlErrorList{
@@ -105,7 +104,7 @@ func TestUnmarshal(t *testing.T) {
 
 	t.Run("data and error", func(t *testing.T) {
 		var path ast.Path
-		json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
+		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
 		r := &fakeRes{}
 		err := unmarshal([]byte(gqlDataAndErr), r)
 		expectedErr := &GqlErrorList{

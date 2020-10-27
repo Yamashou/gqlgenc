@@ -135,13 +135,11 @@ func parseResponse(body []byte, httpCode int, result interface{}) error {
 			Code:    httpCode,
 			Message: fmt.Sprintf("Response body %s", string(body)),
 		}
-	} else {
-		if err := unmarshal(body, &result); err != nil {
-			if gqlErr, ok := err.(*GqlErrorList); ok {
-				errResponse.GqlErrors = &gqlErr.Errors
-			} else {
-				return err
-			}
+	} else if err := unmarshal(body, &result); err != nil {
+		if gqlErr, ok := err.(*GqlErrorList); ok {
+			errResponse.GqlErrors = &gqlErr.Errors
+		} else {
+			return err
 		}
 	}
 
