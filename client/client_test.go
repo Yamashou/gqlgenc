@@ -145,7 +145,7 @@ func TestUnmarshal(t *testing.T) {
 	t.Run("bad data format", func(t *testing.T) {
 		r := &fakeRes{}
 		err := unmarshal([]byte(withBadDataFormat), r)
-		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: json: cannot unmarshal string into Go value of type client.fakeRes")
+		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : json: cannot unmarshal string into Go value of type client.fakeRes")
 	})
 
 	t.Run("bad data format", func(t *testing.T) {

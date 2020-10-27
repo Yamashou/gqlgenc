@@ -136,7 +136,7 @@ func parseResponse(body []byte, httpCode int, result interface{}) error {
 			Code:    httpCode,
 			Message: fmt.Sprintf("Response body %s", string(body)),
 		}
-	} else if err := unmarshal(body, &result); err != nil {
+	} else if err := unmarshal(body, result); err != nil {
 		if gqlErr, ok := err.(*GqlErrorList); ok {
 			errResponse.GqlErrors = &gqlErr.Errors
 		} else {
@@ -159,7 +159,7 @@ type response struct {
 
 func unmarshal(data []byte, res interface{}) error {
 	resp := response{}
-	if err := graphqljson.UnmarshalData(data, &resp); err != nil {
+	if err := json.Unmarshal(data, &resp); err != nil {
 		return xerrors.Errorf("failed to decode data %s: %w", string(data), err)
 	}
 
@@ -172,7 +172,7 @@ func unmarshal(data []byte, res interface{}) error {
 		return errors
 	}
 
-	if err := json.Unmarshal(resp.Data, &res); err != nil {
+	if err := graphqljson.UnmarshalData(resp.Data, res); err != nil {
 		return xerrors.Errorf("failed to decode data into response %s: %w", string(data), err)
 	}
 
