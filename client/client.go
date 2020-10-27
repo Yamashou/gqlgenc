@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"github.com/Yamashou/gqlgenc/graphqljson"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"golang.org/x/xerrors"
 )
@@ -150,15 +151,9 @@ func parseResponse(body []byte, httpCode int, result interface{}) error {
 	return nil
 }
 
-// response is a GraphQL layer response from a handler.
-type response struct {
-	Data   json.RawMessage `json:"data"`
-	Errors json.RawMessage `json:"errors"`
-}
-
 func unmarshal(data []byte, res interface{}) error {
-	resp := response{}
-	if err := json.Unmarshal(data, &resp); err != nil {
+	resp := graphqljson.Response{}
+	if err := graphqljson.UnmarshalData(data, &resp); err != nil {
 		return xerrors.Errorf("failed to decode data %s: %w", string(data), err)
 	}
 

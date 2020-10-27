@@ -22,14 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Package jsonutil provides a function for decoding JSON
+// Package graphqljson provides a function for decoding JSON
 // into a GraphQL query data structure.
 package graphqljson
 
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"reflect"
 	"strings"
@@ -39,15 +38,6 @@ import (
 
 // Reference: https://blog.gopheracademy.com/advent-2017/custom-json-unmarshaler-for-graphql-client/
 
-// RawJSONError is a json formatted error from a GraphQL server.
-type RawJSONError struct {
-	Response
-}
-
-func (r RawJSONError) Error() string {
-	return fmt.Sprintf("data: %s, error: %s, extensions: %v", r.Data, r.Errors, r.Extensions)
-}
-
 // Response is a GraphQL layer response from a handler.
 type Response struct {
 	Data       json.RawMessage
@@ -55,40 +45,13 @@ type Response struct {
 	Extensions map[string]interface{}
 }
 
-func Unmarshal(r io.Reader, data interface{}) error {
-	resp := Response{}
-	decoder := json.NewDecoder(r)
-	if err := decoder.Decode(&resp); err != nil {
-		var buf bytes.Buffer
-		if _, e := io.Copy(&buf, decoder.Buffered()); e != nil {
-			return xerrors.Errorf(": %w", err)
-		}
-
-		return xerrors.Errorf("%s", buf.String())
-	}
-
-	if len(resp.Errors) > 0 {
-		return xerrors.Errorf("response error: %w", resp.Errors)
-	}
-
-	if err := UnmarshalData(resp.Data, data); err != nil {
-		return xerrors.Errorf("response mapping failed: %w", err)
-	}
-
-	if resp.Errors != nil {
-		return RawJSONError{resp}
-	}
-
-	return nil
-}
-
-// UnmarshalGraphQL parses the JSON-encoded GraphQL response data and stores
+// UnmarshalData parses the JSON-encoded GraphQL response data and stores
 // the result in the GraphQL query data structure pointed to by v.
 //
 // The implementation is created on top of the JSON tokenizer available
 // in "encoding/json".Decoder.
 func UnmarshalData(data json.RawMessage, v interface{}) error {
-	d := NewDecoder(bytes.NewBuffer(data))
+	d := newDecoder(bytes.NewBuffer(data))
 	if err := d.Decode(v); err != nil {
 		return xerrors.Errorf(": %w", err)
 	}
@@ -109,7 +72,7 @@ func UnmarshalData(data json.RawMessage, v interface{}) error {
 
 // decoder is a JSON decoder that performs custom unmarshaling behavior
 // for GraphQL query data structures. It's implemented on top of a JSON tokenizer.
-type Decoder struct {
+type decoder struct {
 	jsonDecoder *json.Decoder
 
 	// Stack of what part of input JSON we're in the middle of - objects, arrays.
@@ -124,17 +87,17 @@ type Decoder struct {
 	vs [][]reflect.Value
 }
 
-func NewDecoder(r io.Reader) *Decoder {
+func newDecoder(r io.Reader) *decoder {
 	jsonDecoder := json.NewDecoder(r)
 	jsonDecoder.UseNumber()
 
-	return &Decoder{
+	return &decoder{
 		jsonDecoder: jsonDecoder,
 	}
 }
 
 // Decode decodes a single JSON value from d.tokenizer into v.
-func (d *Decoder) Decode(v interface{}) error {
+func (d *decoder) Decode(v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
 		return xerrors.Errorf("cannot decode into non-pointer %T", v)
@@ -149,7 +112,7 @@ func (d *Decoder) Decode(v interface{}) error {
 }
 
 // decode decodes a single JSON value from d.tokenizer into d.vs.
-func (d *Decoder) decode() error {
+func (d *decoder) decode() error {
 	// The loop invariant is that the top of each d.vs stack
 	// is where we try to unmarshal the next JSON value we see.
 	for len(d.vs) > 0 {
@@ -305,18 +268,18 @@ func (d *Decoder) decode() error {
 }
 
 // pushState pushes a new parse state s onto the stack.
-func (d *Decoder) pushState(s json.Delim) {
+func (d *decoder) pushState(s json.Delim) {
 	d.parseState = append(d.parseState, s)
 }
 
 // popState pops a parse state (already obtained) off the stack.
 // The stack must be non-empty.
-func (d *Decoder) popState() {
+func (d *decoder) popState() {
 	d.parseState = d.parseState[:len(d.parseState)-1]
 }
 
 // state reports the parse state on top of stack, or 0 if empty.
-func (d *Decoder) state() json.Delim {
+func (d *decoder) state() json.Delim {
 	if len(d.parseState) == 0 {
 		return 0
 	}
@@ -325,7 +288,7 @@ func (d *Decoder) state() json.Delim {
 }
 
 // popAllVs pops from all d.vs stacks, keeping only non-empty ones.
-func (d *Decoder) popAllVs() {
+func (d *decoder) popAllVs() {
 	var nonEmpty [][]reflect.Value
 	for i := range d.vs {
 		d.vs[i] = d.vs[i][:len(d.vs[i])-1]
