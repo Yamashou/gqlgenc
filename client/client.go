@@ -131,15 +131,19 @@ func (c *Client) Post(ctx context.Context, query string, respData interface{}, v
 
 func parseResponse(body []byte, httpCode int, result interface{}) error {
 	errResponse := &ErrorResponse{}
-	if httpCode < 200 || 299 < httpCode {
+	isKOCode := httpCode < 200 || 299 < httpCode
+	if isKOCode {
 		errResponse.NetworkError = &HTTPError{
 			Code:    httpCode,
 			Message: fmt.Sprintf("Response body %s", string(body)),
 		}
-	} else if err := unmarshal(body, result); err != nil {
+	}
+
+	// some servers return a graphql error with a non OK http code, try anyway to parse the body
+	if err := unmarshal(body, result); err != nil {
 		if gqlErr, ok := err.(*GqlErrorList); ok {
 			errResponse.GqlErrors = &gqlErr.Errors
-		} else {
+		} else if !isKOCode { // if is KO code there is already the http error, this error should not be returned
 			return err
 		}
 	}

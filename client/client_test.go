@@ -177,9 +177,23 @@ func TestParseResponse(t *testing.T) {
 		require.IsType(t, expectedType, err)
 	})
 
-	t.Run("network error", func(t *testing.T) {
+	t.Run("network error with valid gql error response", func(t *testing.T) {
 		r := &fakeRes{}
 		err := parseResponse([]byte(qqlSingleErr), 400, r)
+
+		expectedType := &ErrorResponse{}
+		require.IsType(t, expectedType, err)
+
+		netExpectedType := &HTTPError{}
+		require.IsType(t, netExpectedType, err.(*ErrorResponse).NetworkError)
+
+		gqlExpectedType := &gqlerror.List{}
+		require.IsType(t, gqlExpectedType, err.(*ErrorResponse).GqlErrors)
+	})
+
+	t.Run("network error with not valid gql error response", func(t *testing.T) {
+		r := &fakeRes{}
+		err := parseResponse([]byte(invalidJSON), 500, r)
 
 		expectedType := &ErrorResponse{}
 		require.IsType(t, expectedType, err)
