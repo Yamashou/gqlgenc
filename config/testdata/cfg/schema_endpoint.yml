@@ -1,0 +1,10 @@
+model:
+  filename: ./gen/models_gen.go
+client:
+  filename: ./gen/client.go
+schema:
+  - testdata/cfg/glob/**/*.graphql
+endpoint:
+  url: http://localhost:4000/graphql
+query:
+  - "./queries/*.graphql"
