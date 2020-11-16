@@ -44,6 +44,7 @@ func (a StringList) Has(file string) bool {
 			return true
 		}
 	}
+
 	return false
 }
 
@@ -140,7 +141,7 @@ func LoadConfig(filename string) (*Config, error) {
 			}
 		}
 
-		 files := StringList{}
+		files := StringList{}
 		for _, m := range matches {
 			if !files.Has(m) {
 				files = append(files, m)
@@ -244,5 +245,6 @@ func (c *Config) loadLocalSchema() (*ast.Schema, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return schema, nil
 }
