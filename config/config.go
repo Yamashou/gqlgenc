@@ -97,14 +97,16 @@ func LoadConfig(filename string) (*Config, error) {
 	if err := yaml.UnmarshalStrict(confContent, &cfg); err != nil {
 		return nil, xerrors.Errorf("unable to parse config: %w", err)
 	}
-	if cfg.SchemaFilename != nil && cfg.Endpoint != nil {
+
+	if len(cfg.SchemaFilename) > 0 && cfg.Endpoint != nil {
 		return nil, errors.New("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
-	} else if cfg.SchemaFilename == nil && cfg.Endpoint == nil {
+	}
+
+	if len(cfg.SchemaFilename) == 0 && cfg.Endpoint == nil {
 		return nil, errors.New("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
 	preGlobbing := cfg.SchemaFilename
-	cfg.SchemaFilename = []string{}
 	// https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/codegen/config/config.go#L120
 	for _, f := range preGlobbing {
 		var matches []string
@@ -138,11 +140,14 @@ func LoadConfig(filename string) (*Config, error) {
 			}
 		}
 
+		 files := StringList{}
 		for _, m := range matches {
-			if !cfg.SchemaFilename.Has(m) {
-				cfg.SchemaFilename = append(cfg.SchemaFilename, m)
+			if !files.Has(m) {
+				files = append(files, m)
 			}
 		}
+
+		cfg.SchemaFilename = files
 	}
 
 	models := make(config.TypeMap)
@@ -189,12 +194,14 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 		if err != nil {
 			return xerrors.Errorf("load local schema failed: %w", err)
 		}
+
 		schema = s
 	} else {
 		s, err := c.loadRemoteSchema(ctx)
 		if err != nil {
 			return xerrors.Errorf("load remote schema failed: %w", err)
 		}
+
 		schema = s
 	}
 
