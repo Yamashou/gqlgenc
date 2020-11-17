@@ -103,10 +103,8 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, errors.New("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
-	preGlobbing := cfg.SchemaFilename
-	cfg.SchemaFilename = []string{}
 	// https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/codegen/config/config.go#L120
-	for _, f := range preGlobbing {
+	for _, f := range cfg.SchemaFilename {
 		var matches []string
 
 		// for ** we want to override default globbing patterns and walk all
@@ -138,11 +136,14 @@ func LoadConfig(filename string) (*Config, error) {
 			}
 		}
 
+		files := StringList{}
 		for _, m := range matches {
-			if !cfg.SchemaFilename.Has(m) {
-				cfg.SchemaFilename = append(cfg.SchemaFilename, m)
+			if !files.Has(m) {
+				files = append(files, m)
 			}
 		}
+
+		cfg.SchemaFilename = files
 	}
 
 	models := make(config.TypeMap)
