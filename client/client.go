@@ -91,10 +91,7 @@ type ErrorResponse struct {
 
 // HasErrors returns true when at least one error is declared
 func (er *ErrorResponse) HasErrors() bool {
-	if er.NetworkError != nil || er.GqlErrors != nil {
-		return true
-	}
-	return false
+	return er.NetworkError != nil || er.GqlErrors != nil
 }
 
 func (er *ErrorResponse) Error() string {
@@ -102,6 +99,7 @@ func (er *ErrorResponse) Error() string {
 	if err != nil {
 		return err.Error()
 	}
+
 	return string(content)
 }
 
@@ -173,6 +171,7 @@ func unmarshal(data []byte, res interface{}) error {
 		if e := json.Unmarshal(data, errors); e != nil {
 			return xerrors.Errorf("faild to parse graphql errors. Response content %s - %w ", string(data), e)
 		}
+
 		return errors
 	}
 
