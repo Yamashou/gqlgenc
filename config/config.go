@@ -99,17 +99,16 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, xerrors.Errorf("unable to parse config: %w", err)
 	}
 
-	if len(cfg.SchemaFilename) > 0 && cfg.Endpoint != nil {
+	if cfg.SchemaFilename != nil && cfg.Endpoint != nil {
 		return nil, errors.New("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
-	if len(cfg.SchemaFilename) == 0 && cfg.Endpoint == nil {
+	if cfg.SchemaFilename == nil && cfg.Endpoint == nil {
 		return nil, errors.New("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
-	preGlobbing := cfg.SchemaFilename
 	// https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/codegen/config/config.go#L120
-	for _, f := range preGlobbing {
+	for _, f := range cfg.SchemaFilename {
 		var matches []string
 
 		// for ** we want to override default globbing patterns and walk all
