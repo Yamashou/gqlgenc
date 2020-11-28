@@ -123,6 +123,9 @@ type Mutation struct {
 	RerequestCheckSuite                                         *RerequestCheckSuitePayload                                         "json:\"rerequestCheckSuite\" graphql:\"rerequestCheckSuite\""
 	ResolveReviewThread                                         *ResolveReviewThreadPayload                                         "json:\"resolveReviewThread\" graphql:\"resolveReviewThread\""
 	SetEnterpriseIdentityProvider                               *SetEnterpriseIdentityProviderPayload                               "json:\"setEnterpriseIdentityProvider\" graphql:\"setEnterpriseIdentityProvider\""
+	SetOrganizationInteractionLimit                             *SetOrganizationInteractionLimitPayload                             "json:\"setOrganizationInteractionLimit\" graphql:\"setOrganizationInteractionLimit\""
+	SetRepositoryInteractionLimit                               *SetRepositoryInteractionLimitPayload                               "json:\"setRepositoryInteractionLimit\" graphql:\"setRepositoryInteractionLimit\""
+	SetUserInteractionLimit                                     *SetUserInteractionLimitPayload                                     "json:\"setUserInteractionLimit\" graphql:\"setUserInteractionLimit\""
 	SubmitPullRequestReview                                     *SubmitPullRequestReviewPayload                                     "json:\"submitPullRequestReview\" graphql:\"submitPullRequestReview\""
 	TransferIssue                                               *TransferIssuePayload                                               "json:\"transferIssue\" graphql:\"transferIssue\""
 	UnarchiveRepository                                         *UnarchiveRepositoryPayload                                         "json:\"unarchiveRepository\" graphql:\"unarchiveRepository\""
@@ -169,10 +172,12 @@ type Mutation struct {
 	UpdateTeamDiscussionComment                                 *UpdateTeamDiscussionCommentPayload                                 "json:\"updateTeamDiscussionComment\" graphql:\"updateTeamDiscussionComment\""
 	UpdateTopics                                                *UpdateTopicsPayload                                                "json:\"updateTopics\" graphql:\"updateTopics\""
 }
+
 type LanguageFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
 type GetUser struct {
 	Viewer struct {
 		ID           string  "json:\"id\" graphql:\"id\""
