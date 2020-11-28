@@ -3,9 +3,8 @@ package clientgen
 import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
-	"golang.org/x/xerrors"
-
 	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
+	"golang.org/x/xerrors"
 )
 
 var _ plugin.ConfigMutator = &Plugin{}
