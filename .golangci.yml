@@ -35,6 +35,8 @@ linters:
     - interfacer
     - gomnd
     - goerr113
+    - exhaustivestruct
+    - errorlint # TODO able this lint
   fast: false
 
 issues:

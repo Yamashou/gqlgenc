@@ -112,7 +112,6 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 
 			// for recursive struct field in go
 			typ = types.NewPointer(baseType)
-
 		} else {
 			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
 			if err != nil {
