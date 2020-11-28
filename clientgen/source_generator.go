@@ -95,17 +95,30 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 
 		var typ types.Type
 		if field.Type.Name() == "Query" || field.Type.Name() == "Mutation" {
+			var baseType types.Type
 			baseType, err := r.binder.FindType(r.client.Pkg().Path(), field.Type.Name())
 			if err != nil {
-				return nil, xerrors.Errorf("not found type: %w", err)
+				if !strings.Contains(err.Error(), "unable to find type") {
+					return nil, xerrors.Errorf("not found type: %w", err)
+				}
+
+				// create new type
+				baseType = types.NewPointer(types.NewNamed(
+					types.NewTypeName(0, r.client.Pkg(), templates.ToGo(field.Type.Name()), nil),
+					nil,
+					nil,
+				))
 			}
+
 			// for recursive struct field in go
 			typ = types.NewPointer(baseType)
+
 		} else {
 			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
 			if err != nil {
 				return nil, xerrors.Errorf("not found type: %w", err)
 			}
+
 			typ = r.binder.CopyModifiersFromAst(field.Type, baseType)
 		}
 
