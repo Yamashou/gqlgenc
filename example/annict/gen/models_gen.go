@@ -390,8 +390,8 @@ type Person struct {
 	WikipediaURLEn      string      `json:"wikipediaUrlEn"`
 }
 
-func (Person) IsStaffResourceItem() {}
 func (Person) IsNode()              {}
+func (Person) IsStaffResourceItem() {}
 
 // The connection type for Person.
 type PersonConnection struct {
@@ -479,8 +479,8 @@ type Record struct {
 	Work               *Work        `json:"work"`
 }
 
-func (Record) IsNode()         {}
 func (Record) IsActivityItem() {}
+func (Record) IsNode()         {}
 
 // The connection type for Record.
 type RecordConnection struct {

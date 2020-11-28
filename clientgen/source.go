@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"go/types"
 
+	"github.com/Yamashou/gqlgenc/config"
+
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
@@ -15,13 +17,15 @@ type Source struct {
 	schema          *ast.Schema
 	queryDocument   *ast.QueryDocument
 	sourceGenerator *SourceGenerator
+	generateConfig  *config.GenerateConfig
 }
 
-func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGenerator *SourceGenerator) *Source {
+func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGenerator *SourceGenerator, generateConfig *config.GenerateConfig) *Source {
 	return &Source{
 		schema:          schema,
 		queryDocument:   queryDocument,
 		sourceGenerator: sourceGenerator,
+		generateConfig:  generateConfig,
 	}
 }
 
@@ -65,10 +69,10 @@ type Operation struct {
 	VariableDefinitions ast.VariableDefinitionList
 }
 
-func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*Argument) *Operation {
+func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*Argument, generateConfig *config.GenerateConfig) *Operation {
 	return &Operation{
 		Name:                operation.Name,
-		ResponseStructName:  getResponseStructName(operation),
+		ResponseStructName:  getResponseStructName(operation, generateConfig),
 		Operation:           queryString(queryDocument),
 		Args:                args,
 		VariableDefinitions: operation.VariableDefinitions,
@@ -87,6 +91,7 @@ func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
 			operation,
 			queryDocument,
 			args,
+			s.generateConfig,
 		))
 	}
 
@@ -129,7 +134,7 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
 	for _, operation := range s.queryDocument.Operations {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet)
-		name := getResponseStructName(operation)
+		name := getResponseStructName(operation, s.generateConfig)
 		if s.sourceGenerator.cfg.Models.Exists(name) {
 			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", name))
 		}
@@ -194,10 +199,29 @@ func (s *Source) Mutation() (*Mutation, error) {
 	}, nil
 }
 
-func getResponseStructName(operation *ast.OperationDefinition) string {
-	if operation.Operation == ast.Mutation {
-		return fmt.Sprintf("%sPayload", operation.Name)
+func getResponseStructName(operation *ast.OperationDefinition, generateConfig *config.GenerateConfig) string {
+	name := operation.Name
+	if generateConfig != nil {
+		if generateConfig.Prefix != nil {
+			if operation.Operation == ast.Mutation {
+				name = fmt.Sprintf("%s%s", generateConfig.Prefix.Mutation, name)
+			}
+
+			if operation.Operation == ast.Query {
+				name = fmt.Sprintf("%s%s", generateConfig.Prefix.Query, name)
+			}
+		}
+
+		if generateConfig.Suffix != nil {
+			if operation.Operation == ast.Mutation {
+				name = fmt.Sprintf("%s%s", name, generateConfig.Suffix.Mutation)
+			}
+
+			if operation.Operation == ast.Query {
+				name = fmt.Sprintf("%s%s", name, generateConfig.Suffix.Query)
+			}
+		}
 	}
 
-	return operation.Name
+	return name
 }

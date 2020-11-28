@@ -4,6 +4,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"golang.org/x/xerrors"
+
+	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 )
 
 var _ plugin.ConfigMutator = &Plugin{}
@@ -11,12 +13,14 @@ var _ plugin.ConfigMutator = &Plugin{}
 type Plugin struct {
 	queryFilePaths []string
 	Client         config.PackageConfig
+	GenerateConfig *gqlgencConfig.GenerateConfig
 }
 
-func New(queryFilePaths []string, client config.PackageConfig) *Plugin {
+func New(queryFilePaths []string, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *Plugin {
 	return &Plugin{
 		queryFilePaths: queryFilePaths,
 		Client:         client,
+		GenerateConfig: generateConfig,
 	}
 }
 
@@ -47,7 +51,7 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	// 3. テンプレートと情報ソースを元にコード生成
 	// 3. Generate code from template and document source
 	sourceGenerator := NewSourceGenerator(cfg, p.Client)
-	source := NewSource(cfg.Schema, queryDocument, sourceGenerator)
+	source := NewSource(cfg.Schema, queryDocument, sourceGenerator, p.GenerateConfig)
 	query, err := source.Query()
 	if err != nil {
 		return xerrors.Errorf("generating query object: %w", err)
