@@ -68,19 +68,19 @@ type WorkFragment struct {
 	} "json:\"episodes\" graphql:\"episodes\""
 }
 
-type CreateRecordMutation struct {
+type HogeCreateRecordMutationPayload struct {
 	CreateRecord *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"createRecord\" graphql:\"createRecord\""
 }
 
-type UpdateStatusMutation struct {
+type HogeUpdateStatusMutationPayload struct {
 	UpdateStatus *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"updateStatus\" graphql:\"updateStatus\""
 }
 
-type UpdateWorkStatus struct {
+type HogeUpdateWorkStatusPayload struct {
 	UpdateStatus *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"updateStatus\" graphql:\"updateStatus\""
@@ -185,12 +185,12 @@ const CreateRecordMutationQuery = `mutation CreateRecordMutation ($episodeId: ID
 }
 `
 
-func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, httpRequestOptions ...client.HTTPRequestOption) (*CreateRecordMutation, error) {
+func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, httpRequestOptions ...client.HTTPRequestOption) (*HogeCreateRecordMutationPayload, error) {
 	vars := map[string]interface{}{
 		"episodeId": episodeID,
 	}
 
-	var res CreateRecordMutation
+	var res HogeCreateRecordMutationPayload
 	if err := c.Client.Post(ctx, CreateRecordMutationQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
@@ -205,13 +205,13 @@ const UpdateStatusMutationQuery = `mutation UpdateStatusMutation ($state: Status
 }
 `
 
-func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, workID string, httpRequestOptions ...client.HTTPRequestOption) (*UpdateStatusMutation, error) {
+func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, workID string, httpRequestOptions ...client.HTTPRequestOption) (*HogeUpdateStatusMutationPayload, error) {
 	vars := map[string]interface{}{
 		"state":  state,
 		"workId": workID,
 	}
 
-	var res UpdateStatusMutation
+	var res HogeUpdateStatusMutationPayload
 	if err := c.Client.Post(ctx, UpdateStatusMutationQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
@@ -226,12 +226,12 @@ const UpdateWorkStatusQuery = `mutation UpdateWorkStatus ($workId: ID!) {
 }
 `
 
-func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, httpRequestOptions ...client.HTTPRequestOption) (*UpdateWorkStatus, error) {
+func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, httpRequestOptions ...client.HTTPRequestOption) (*HogeUpdateWorkStatusPayload, error) {
 	vars := map[string]interface{}{
 		"workId": workID,
 	}
 
-	var res UpdateWorkStatus
+	var res HogeUpdateWorkStatusPayload
 	if err := c.Client.Post(ctx, UpdateWorkStatusQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
