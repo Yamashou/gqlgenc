@@ -28,7 +28,9 @@ type Config struct {
 	Client         config.PackageConfig `yaml:"client,omitempty"`
 	Models         config.TypeMap       `yaml:"models,omitempty"`
 	Endpoint       *EndPointConfig      `yaml:"endpoint,omitempty"`
-	Query          []string             `yaml:"query"`
+	Generate       *GenerateConfig      `yaml:"generate,omitempty"`
+
+	Query []string `yaml:"query"`
 
 	// gqlgen config struct
 	GQLConfig *config.Config `yaml:"-"`
@@ -246,4 +248,14 @@ func (c *Config) loadLocalSchema() (*ast.Schema, error) {
 	}
 
 	return schema, nil
+}
+
+type GenerateConfig struct {
+	Prefix *NamingConfig `yaml:"prefix,omitempty"`
+	Suffix *NamingConfig `yaml:"suffix,omitempty"`
+}
+
+type NamingConfig struct {
+	Query    string `yaml:"query,omitempty"`
+	Mutation string `yaml:"mutation,omitempty"`
 }

@@ -54,4 +54,13 @@ func TestLoadConfig(t *testing.T) {
 			require.EqualError(t, err, "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory")
 		}
 	})
+
+	t.Run("generate", func(t *testing.T) {
+		c, err := LoadConfig("testdata/cfg/generate.yml")
+		require.NoError(t, err)
+		require.Equal(t, c.Generate.Suffix.Mutation, "Bar")
+		require.Equal(t, c.Generate.Suffix.Query, "Foo")
+		require.Equal(t, c.Generate.Prefix.Mutation, "Hoge")
+		require.Equal(t, c.Generate.Prefix.Query, "Data")
+	})
 }
