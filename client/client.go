@@ -81,6 +81,10 @@ type HTTPError struct {
 	Message string `json:"message"`
 }
 
+func (e *HTTPError) Error() string {
+	return fmt.Sprintf("code: %d, message: %s", e.Code, e.Message)
+}
+
 // ErrorResponse represent an handled error
 type ErrorResponse struct {
 	// populated when http status code is not OK
@@ -95,6 +99,14 @@ func (er *ErrorResponse) HasErrors() bool {
 }
 
 func (er *ErrorResponse) Error() string {
+	if er.GqlErrors != nil {
+		return er.GqlErrors.Error()
+	}
+
+	if er.NetworkError != nil {
+		return er.NetworkError.Error()
+	}
+
 	content, err := json.Marshal(er)
 	if err != nil {
 		return err.Error()
