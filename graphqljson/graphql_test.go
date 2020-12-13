@@ -9,6 +9,7 @@ import (
 )
 
 func TestUnmarshalGraphQL(t *testing.T) {
+	t.Parallel()
 	/*
 		query {
 			me {
@@ -42,6 +43,7 @@ func TestUnmarshalGraphQL(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_graphqlTag(t *testing.T) {
+	t.Parallel()
 	type query struct {
 		Foo string `graphql:"baz"`
 	}
@@ -61,6 +63,7 @@ func TestUnmarshalGraphQL_graphqlTag(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_jsonTag(t *testing.T) {
+	t.Parallel()
 	type query struct {
 		Foo string `json:"baz"`
 	}
@@ -80,6 +83,7 @@ func TestUnmarshalGraphQL_jsonTag(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_array(t *testing.T) {
+	t.Parallel()
 	type query struct {
 		Foo []string
 		Bar []string
@@ -110,6 +114,7 @@ func TestUnmarshalGraphQL_array(t *testing.T) {
 // When unmarshaling into an array, its initial value should be overwritten
 // (rather than appended to).
 func TestUnmarshalGraphQL_arrayReset(t *testing.T) {
+	t.Parallel()
 	got := []string{"initial"}
 	err := graphqljson.UnmarshalData([]byte(`["bar", "baz"]`), &got)
 	if err != nil {
@@ -122,6 +127,7 @@ func TestUnmarshalGraphQL_arrayReset(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_objectArray(t *testing.T) {
+	t.Parallel()
 	type query struct {
 		Foo []struct {
 			Name string
@@ -149,6 +155,7 @@ func TestUnmarshalGraphQL_objectArray(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_pointer(t *testing.T) {
+	t.Parallel()
 	type query struct {
 		Foo *string
 		Bar *string
@@ -173,6 +180,7 @@ func TestUnmarshalGraphQL_pointer(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_objectPointerArray(t *testing.T) {
+	t.Parallel()
 	type query struct {
 		Foo []*struct {
 			Name string
@@ -202,6 +210,7 @@ func TestUnmarshalGraphQL_objectPointerArray(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_pointerWithInlineFragment(t *testing.T) {
+	t.Parallel()
 	type actor struct {
 		User struct {
 			DatabaseID uint64
@@ -242,6 +251,7 @@ func TestUnmarshalGraphQL_pointerWithInlineFragment(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_unexportedField(t *testing.T) {
+	t.Parallel()
 	type query struct {
 		foo string
 	}
@@ -257,6 +267,7 @@ func TestUnmarshalGraphQL_unexportedField(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_multipleValues(t *testing.T) {
+	t.Parallel()
 	type query struct {
 		Foo string
 	}
@@ -270,6 +281,7 @@ func TestUnmarshalGraphQL_multipleValues(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_union(t *testing.T) {
+	t.Parallel()
 	/*
 		{
 			__typename
@@ -332,6 +344,7 @@ func TestUnmarshalGraphQL_union(t *testing.T) {
 }
 
 func TestUnmarshalGraphQL_union2(t *testing.T) {
+	t.Parallel()
 	type SubscriptionItemFragment struct {
 		ID string
 	}
@@ -380,6 +393,7 @@ func TestUnmarshalGraphQL_union2(t *testing.T) {
 
 // Issue https://github.com/shurcooL/githubv4/issues/18.
 func TestUnmarshalGraphQL_arrayInsideInlineFragment(t *testing.T) {
+	t.Parallel()
 	/*
 		query {
 			search(type: ISSUE, first: 1, query: "type:pr repo:owner/name") {
