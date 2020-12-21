@@ -13,7 +13,7 @@ import (
 
 func main() {
 	ctx := context.Background()
-	cfg, err := config.LoadConfig(".gqlgenc.yml")
+	cfg, err := config.LoadConfigFromDefaultLocations()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%+v", err.Error())
 		os.Exit(2)

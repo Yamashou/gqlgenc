@@ -26,7 +26,9 @@ type fakeRes struct {
 }
 
 func TestUnmarshal(t *testing.T) {
+	t.Parallel()
 	t.Run("single error", func(t *testing.T) {
+		t.Parallel()
 		var path ast.Path
 		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
 		r := &fakeRes{}
@@ -50,6 +52,7 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("multiple errors", func(t *testing.T) {
+		t.Parallel()
 		var path1 ast.Path
 		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path1)
 		var path2 ast.Path
@@ -103,6 +106,7 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("data and error", func(t *testing.T) {
+		t.Parallel()
 		var path ast.Path
 		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
 		r := &fakeRes{}
@@ -126,12 +130,14 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("invalid json", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := unmarshal([]byte(invalidJSON), r)
 		require.EqualError(t, err, "failed to decode data invalid: invalid character 'i' looking for beginning of value")
 	})
 
 	t.Run("valid data", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := unmarshal([]byte(validData), r)
 		require.NoError(t, err)
@@ -143,12 +149,14 @@ func TestUnmarshal(t *testing.T) {
 	})
 
 	t.Run("bad data format", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := unmarshal([]byte(withBadDataFormat), r)
 		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : json: cannot unmarshal string into Go value of type client.fakeRes")
 	})
 
 	t.Run("bad data format", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := unmarshal([]byte(withBadErrorsFormat), r)
 		require.EqualError(t, err, "faild to parse graphql errors. Response content {\"errors\": \"bad\"} - json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List : json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List")
@@ -156,7 +164,9 @@ func TestUnmarshal(t *testing.T) {
 }
 
 func TestParseResponse(t *testing.T) {
+	t.Parallel()
 	t.Run("single error", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := parseResponse([]byte(qqlSingleErr), 200, r)
 
@@ -170,6 +180,7 @@ func TestParseResponse(t *testing.T) {
 	})
 
 	t.Run("bad error format", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := parseResponse([]byte(withBadErrorsFormat), 200, r)
 
@@ -178,6 +189,7 @@ func TestParseResponse(t *testing.T) {
 	})
 
 	t.Run("network error with valid gql error response", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := parseResponse([]byte(qqlSingleErr), 400, r)
 
@@ -192,6 +204,7 @@ func TestParseResponse(t *testing.T) {
 	})
 
 	t.Run("network error with not valid gql error response", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := parseResponse([]byte(invalidJSON), 500, r)
 
@@ -205,6 +218,7 @@ func TestParseResponse(t *testing.T) {
 	})
 
 	t.Run("no error", func(t *testing.T) {
+		t.Parallel()
 		r := &fakeRes{}
 		err := parseResponse([]byte(validData), 200, r)
 
