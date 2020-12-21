@@ -36,6 +36,8 @@ type Config struct {
 	GQLConfig *config.Config `yaml:"-"`
 }
 
+var cfgFilenames = []string{".gqlgenc.yml", "gqlgenc.yml", "gqlgenc.yaml"}
+
 // StringList is a simple array of strings
 type StringList []string
 
@@ -50,19 +52,42 @@ func (a StringList) Has(file string) bool {
 	return false
 }
 
+// LoadConfigFromDefaultLocations looks for a config file in the current directory, and all parent directories
+// walking up the tree. The closest config file will be returned.
+func LoadConfigFromDefaultLocations() (*Config, error) {
+	cfgFile, err := findCfg()
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.Chdir(filepath.Dir(cfgFile))
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to enter config dir")
+	}
+
+	return LoadConfig(cfgFile)
+}
+
 // EndPointConfig are the allowed options for the 'endpoint' config
 type EndPointConfig struct {
 	URL     string            `yaml:"url"`
 	Headers map[string]string `yaml:"headers,omitempty"`
 }
 
-func findCfg(fileName string) (string, error) {
+// findCfg searches for the config file in this directory and all parents up the tree
+// looking for the closest match
+func findCfg() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
-		return "", xerrors.Errorf("unable to get working dir to findCfg: %w", err)
+		return "", errors.Wrap(err, "unable to get working dir to findCfg")
 	}
 
-	cfg := findCfgInDir(dir, fileName)
+	cfg := findCfgInDir(dir)
+
+	for cfg == "" && dir != filepath.Dir(dir) {
+		dir = filepath.Dir(dir)
+		cfg = findCfgInDir(dir)
+	}
 
 	if cfg == "" {
 		return "", os.ErrNotExist
@@ -71,10 +96,15 @@ func findCfg(fileName string) (string, error) {
 	return cfg, nil
 }
 
-func findCfgInDir(dir, fileName string) string {
-	path := filepath.Join(dir, fileName)
+func findCfgInDir(dir string) string {
+	for _, cfgName := range cfgFilenames {
+		path := filepath.Join(dir, cfgName)
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
 
-	return path
+	return ""
 }
 
 var path2regex = strings.NewReplacer(
@@ -87,11 +117,7 @@ var path2regex = strings.NewReplacer(
 // LoadConfig loads and parses the config gqlgenc config
 func LoadConfig(filename string) (*Config, error) {
 	var cfg Config
-	file, err := findCfg(filename)
-	if err != nil {
-		return nil, xerrors.Errorf("unable to get file path: %w", err)
-	}
-	b, err := ioutil.ReadFile(file)
+	b, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, xerrors.Errorf("unable to read config: %w", err)
 	}
