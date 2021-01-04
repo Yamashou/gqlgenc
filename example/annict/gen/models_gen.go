@@ -328,8 +328,8 @@ type Organization struct {
 	WikipediaURLEn             string `json:"wikipediaUrlEn"`
 }
 
-func (Organization) IsNode()              {}
 func (Organization) IsStaffResourceItem() {}
+func (Organization) IsNode()              {}
 
 // The connection type for Organization.
 type OrganizationConnection struct {
@@ -390,8 +390,8 @@ type Person struct {
 	WikipediaURLEn      string      `json:"wikipediaUrlEn"`
 }
 
-func (Person) IsStaffResourceItem() {}
 func (Person) IsNode()              {}
+func (Person) IsStaffResourceItem() {}
 
 // The connection type for Person.
 type PersonConnection struct {
@@ -479,8 +479,8 @@ type Record struct {
 	Work               *Work        `json:"work"`
 }
 
-func (Record) IsActivityItem() {}
 func (Record) IsNode()         {}
+func (Record) IsActivityItem() {}
 
 // The connection type for Record.
 type RecordConnection struct {
@@ -524,8 +524,8 @@ type Review struct {
 	Work                 *Work        `json:"work"`
 }
 
-func (Review) IsActivityItem() {}
 func (Review) IsNode()         {}
+func (Review) IsActivityItem() {}
 
 // The connection type for Review.
 type ReviewConnection struct {

@@ -39,11 +39,11 @@ func NewClient(client *http.Client, baseURL string, options ...HTTPRequestOption
 	}
 }
 
-func (c *Client) newRequest(ctx context.Context, query string, vars map[string]interface{}, httpRequestOptions []HTTPRequestOption) (*http.Request, error) {
+func (c *Client) newRequest(ctx context.Context, operationName, query string, vars map[string]interface{}, httpRequestOptions []HTTPRequestOption) (*http.Request, error) {
 	r := &Request{
 		Query:         query,
 		Variables:     vars,
-		OperationName: "",
+		OperationName: operationName,
 	}
 
 	requestBody, err := json.Marshal(r)
@@ -105,8 +105,8 @@ func (er *ErrorResponse) Error() string {
 
 // Post sends a http POST request to the graphql endpoint with the given query then unpacks
 // the response into the given object.
-func (c *Client) Post(ctx context.Context, query string, respData interface{}, vars map[string]interface{}, httpRequestOptions ...HTTPRequestOption) error {
-	req, err := c.newRequest(ctx, query, vars, httpRequestOptions)
+func (c *Client) Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, httpRequestOptions ...HTTPRequestOption) error {
+	req, err := c.newRequest(ctx, operationName, query, vars, httpRequestOptions)
 	if err != nil {
 		return xerrors.Errorf("don't create request: %w", err)
 	}
