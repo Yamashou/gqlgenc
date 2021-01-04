@@ -39,7 +39,6 @@ type Mutation struct {
 	UpdateReview *UpdateReviewPayload "json:\"updateReview\" graphql:\"updateReview\""
 	UpdateStatus *UpdateStatusPayload "json:\"updateStatus\" graphql:\"updateStatus\""
 }
-
 type ViewerFragment struct {
 	AvatarURL       *string "json:\"avatar_url\" graphql:\"avatar_url\""
 	RecordsCount    int64   "json:\"recordsCount\" graphql:\"recordsCount\""
@@ -47,7 +46,6 @@ type ViewerFragment struct {
 	WatchingCount   int64   "json:\"watchingCount\" graphql:\"watchingCount\""
 	WatchedCount    int64   "json:\"watchedCount\" graphql:\"watchedCount\""
 }
-
 type WorkFragment struct {
 	ID                string       "json:\"id\" graphql:\"id\""
 	Title             string       "json:\"title\" graphql:\"title\""
@@ -67,29 +65,24 @@ type WorkFragment struct {
 		} "json:\"nodes\" graphql:\"nodes\""
 	} "json:\"episodes\" graphql:\"episodes\""
 }
-
 type HogeCreateRecordMutationPayload struct {
 	CreateRecord *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"createRecord\" graphql:\"createRecord\""
 }
-
 type HogeUpdateStatusMutationPayload struct {
 	UpdateStatus *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"updateStatus\" graphql:\"updateStatus\""
 }
-
 type HogeUpdateWorkStatusPayload struct {
 	UpdateStatus *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"updateStatus\" graphql:\"updateStatus\""
 }
-
 type GetProfile struct {
 	Viewer *ViewerFragment "json:\"viewer\" graphql:\"viewer\""
 }
-
 type ListWorks struct {
 	Viewer *struct {
 		Works *struct {
@@ -100,7 +93,6 @@ type ListWorks struct {
 		} "json:\"works\" graphql:\"works\""
 	} "json:\"viewer\" graphql:\"viewer\""
 }
-
 type ListRecords struct {
 	Viewer *struct {
 		Records *struct {
@@ -116,7 +108,6 @@ type ListRecords struct {
 		} "json:\"records\" graphql:\"records\""
 	} "json:\"viewer\" graphql:\"viewer\""
 }
-
 type ListNextEpisodes struct {
 	Viewer *struct {
 		Records *struct {
@@ -142,13 +133,11 @@ type ListNextEpisodes struct {
 		} "json:\"records\" graphql:\"records\""
 	} "json:\"viewer\" graphql:\"viewer\""
 }
-
 type GetWork struct {
 	SearchWorks *struct {
 		Nodes []*WorkFragment "json:\"nodes\" graphql:\"nodes\""
 	} "json:\"searchWorks\" graphql:\"searchWorks\""
 }
-
 type SearchWorks struct {
 	SearchWorks *struct {
 		Nodes []*struct {
@@ -191,7 +180,7 @@ func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, htt
 	}
 
 	var res HogeCreateRecordMutationPayload
-	if err := c.Client.Post(ctx, CreateRecordMutationQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "CreateRecordMutation", CreateRecordMutationQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 
@@ -212,7 +201,7 @@ func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, wo
 	}
 
 	var res HogeUpdateStatusMutationPayload
-	if err := c.Client.Post(ctx, UpdateStatusMutationQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "UpdateStatusMutation", UpdateStatusMutationQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 
@@ -232,7 +221,7 @@ func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, httpReques
 	}
 
 	var res HogeUpdateWorkStatusPayload
-	if err := c.Client.Post(ctx, UpdateWorkStatusQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "UpdateWorkStatus", UpdateWorkStatusQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 
@@ -257,7 +246,7 @@ func (c *Client) GetProfile(ctx context.Context, httpRequestOptions ...client.HT
 	vars := map[string]interface{}{}
 
 	var res GetProfile
-	if err := c.Client.Post(ctx, GetProfileQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "GetProfile", GetProfileQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 
@@ -305,7 +294,7 @@ func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *strin
 	}
 
 	var res ListWorks
-	if err := c.Client.Post(ctx, ListWorksQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "ListWorks", ListWorksQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 
@@ -354,7 +343,7 @@ func (c *Client) ListRecords(ctx context.Context, httpRequestOptions ...client.H
 	vars := map[string]interface{}{}
 
 	var res ListRecords
-	if err := c.Client.Post(ctx, ListRecordsQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "ListRecords", ListRecordsQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 
@@ -392,7 +381,7 @@ func (c *Client) ListNextEpisodes(ctx context.Context, httpRequestOptions ...cli
 	vars := map[string]interface{}{}
 
 	var res ListNextEpisodes
-	if err := c.Client.Post(ctx, ListNextEpisodesQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "ListNextEpisodes", ListNextEpisodesQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 
@@ -433,7 +422,7 @@ func (c *Client) GetWork(ctx context.Context, ids []int64, httpRequestOptions ..
 	}
 
 	var res GetWork
-	if err := c.Client.Post(ctx, GetWorkQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "GetWork", GetWorkQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 
@@ -479,7 +468,7 @@ func (c *Client) SearchWorks(ctx context.Context, seasons []string, httpRequestO
 	}
 
 	var res SearchWorks
-	if err := c.Client.Post(ctx, SearchWorksQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "SearchWorks", SearchWorksQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 

@@ -45,7 +45,7 @@ func (c *Client) {{ $model.Name|go }} (ctx context.Context{{- range $arg := .Arg
 	}
 
     var res {{ $model.ResponseStructName | go }}
-    if err := c.Client.Post(ctx, {{ $model.Name|go }}Query, &res, vars, httpRequestOptions...); err != nil {
+    if err := c.Client.Post(ctx, "{{ $model.Name|go }}", {{ $model.Name|go }}Query, &res, vars, httpRequestOptions...); err != nil {
         return nil, err
     }
 

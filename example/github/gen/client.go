@@ -172,12 +172,10 @@ type Mutation struct {
 	UpdateTeamDiscussionComment                                 *UpdateTeamDiscussionCommentPayload                                 "json:\"updateTeamDiscussionComment\" graphql:\"updateTeamDiscussionComment\""
 	UpdateTopics                                                *UpdateTopicsPayload                                                "json:\"updateTopics\" graphql:\"updateTopics\""
 }
-
 type LanguageFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
-
 type GetUser struct {
 	Viewer struct {
 		ID           string  "json:\"id\" graphql:\"id\""
@@ -224,7 +222,7 @@ func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst
 	}
 
 	var res GetUser
-	if err := c.Client.Post(ctx, GetUserQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "GetUser", GetUserQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 

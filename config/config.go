@@ -255,7 +255,7 @@ func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
 	gqlclient := client.NewClient(http.DefaultClient, c.Endpoint.URL, addHeader)
 
 	var res introspection.Query
-	if err := gqlclient.Post(ctx, introspection.Introspection, &res, nil); err != nil {
+	if err := gqlclient.Post(ctx, "Query", introspection.Introspection, &res, nil); err != nil {
 		return nil, xerrors.Errorf("introspection query failed: %w", err)
 	}
 
