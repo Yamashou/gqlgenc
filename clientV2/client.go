@@ -46,14 +46,35 @@ func NewRequestSet(ctx context.Context, baseURL, operationName, query string, va
 
 type Middleware func(next RequestInterceptorFunc) RequestInterceptorFunc
 
+type RequestInterceptor func(ctx context.Context, requestSet *RequestSet, res interface{}, next RequestInterceptorFunc) error
+
 type RequestInterceptorFunc func(ctx context.Context, requestSet *RequestSet, res interface{}) error
+
+func ChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
+	n := len(interceptors)
+
+	return func(ctx context.Context, requestSet *RequestSet, res interface{}, next RequestInterceptorFunc) error {
+		chainer := func(currentInter RequestInterceptor, currentFunc RequestInterceptorFunc) RequestInterceptorFunc {
+			return func(currentCtx context.Context, currentRequestSet *RequestSet, currentRes interface{}) error {
+				return currentInter(currentCtx, currentRequestSet, currentRes, currentFunc)
+			}
+		}
+
+		chainedHandler := next
+		for i := n - 1; i >= 0; i-- {
+			chainedHandler = chainer(interceptors[i], chainedHandler)
+		}
+
+		return chainedHandler(ctx, requestSet, res)
+	}
+}
 
 // Client is the http client wrapper
 type Client struct {
 	Client             *http.Client
 	BaseURL            string
-	HTTPRequestOptions []HTTPRequestOption
 	Middlewares        []Middleware
+	RequestInterceptor RequestInterceptor
 }
 
 // Request represents an outgoing GraphQL request
@@ -64,11 +85,22 @@ type Request struct {
 }
 
 // NewClient creates a new http client wrapper
-func NewClient(client *http.Client, baseURL string, options ...HTTPRequestOption) *Client {
+func NewClient(client *http.Client, baseURL string, middlewares ...Middleware) *Client {
 	return &Client{
-		Client:             client,
-		BaseURL:            baseURL,
-		HTTPRequestOptions: options,
+		Client:      client,
+		BaseURL:     baseURL,
+		Middlewares: middlewares,
+	}
+}
+
+// NewClient creates a new http client wrapper
+func NewClient2(client *http.Client, baseURL string, interceptors ...RequestInterceptor) *Client {
+	return &Client{
+		Client:  client,
+		BaseURL: baseURL,
+		RequestInterceptor: ChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *RequestSet, res interface{}, next RequestInterceptorFunc) error {
+			return next(ctx, requestSet, res)
+		}}, interceptors...)...),
 	}
 }
 
@@ -131,6 +163,20 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 	}
 
 	return r(ctx, requestSet, respData)
+}
+
+// the response into the given object.
+func (c *Client) Post2(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, interceptors ...RequestInterceptor) error {
+	requestSet, err := NewRequestSet(ctx, c.BaseURL, operationName, query, vars)
+	if err != nil {
+		return xerrors.Errorf(": %w", err)
+	}
+	requestSet.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
+	requestSet.HTTPRequest.Header.Set("Accept", "application/json; charset=utf-8")
+
+	r := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
+
+	return r(ctx, requestSet, respData, c.do)
 }
 
 func (c *Client) do(_ context.Context, requestSet *RequestSet, res interface{}) error {
