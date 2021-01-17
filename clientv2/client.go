@@ -1,4 +1,4 @@
-package clientV2
+package clientv2
 
 import (
 	"bytes"

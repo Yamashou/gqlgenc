@@ -1,4 +1,4 @@
-package clientgenV2
+package clientgenv2
 
 import (
 	"github.com/vektah/gqlparser/v2/ast"

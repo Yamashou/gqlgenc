@@ -1,4 +1,4 @@
-package clientgenV2
+package clientgenv2
 
 import (
 	"github.com/99designs/gqlgen/codegen/config"

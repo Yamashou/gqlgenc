@@ -12,14 +12,14 @@
 {{ reserveImport "golang.org/x/xerrors" }}
 
 {{ reserveImport "github.com/Yamashou/gqlgenc/graphqljson" }}
-{{ reserveImport "github.com/Yamashou/gqlgenc/clientV2" }}
+{{ reserveImport "github.com/Yamashou/gqlgenc/clientv2" }}
 
 type Client struct {
-Client *clientV2.Client
+Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, interceptors ...clientV2.RequestInterceptor) *Client {
-return &Client{Client: clientV2.NewClient(cli, baseURL, interceptors...)}
+func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
+return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
 }
 
 type {{ .Query.Name | go }} {{ .Query.Type | ref }}
@@ -37,7 +37,7 @@ type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
 {{- range $model := .Operation}}
 	const {{ $model.Name|go }}Query = `{{ $model.Operation }}`
 
-	func (c *Client) {{ $model.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, interceptors ...clientV2.RequestInterceptor) (*{{ $model.ResponseStructName | go }}, error) {
+	func (c *Client) {{ $model.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, interceptors ...clientv2.RequestInterceptor) (*{{ $model.ResponseStructName | go }}, error) {
 	vars := map[string]interface{}{
 	{{- range $args := .VariableDefinitions}}
 		"{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
