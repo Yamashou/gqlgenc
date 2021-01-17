@@ -13,50 +13,27 @@ import (
 	"golang.org/x/xerrors"
 )
 
-// HTTPRequestOption represents the options applicable to the http client
-type HTTPRequestOption func(req *http.Request)
-
-type RequestSet struct {
-	HTTPRequest        *http.Request
-	graphQLRequestBody *Request
+type GQLRequestInfo struct {
+	Request *Request
 }
 
-func NewRequestSet(ctx context.Context, baseURL, operationName, query string, vars map[string]interface{}) (*RequestSet, error) {
-	r := &Request{
-		Query:         query,
-		Variables:     vars,
-		OperationName: operationName,
+func NewGQLRequestInfo(r *Request) *GQLRequestInfo {
+	return &GQLRequestInfo{
+		Request: r,
 	}
-
-	requestBody, err := json.Marshal(r)
-	if err != nil {
-		return nil, xerrors.Errorf("encode: %w", err)
-	}
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, baseURL, bytes.NewBuffer(requestBody))
-	if err != nil {
-		return nil, xerrors.Errorf("create request struct failed: %w", err)
-	}
-
-	return &RequestSet{
-		HTTPRequest:        req,
-		graphQLRequestBody: r,
-	}, nil
 }
 
-type Middleware func(next RequestInterceptorFunc) RequestInterceptorFunc
+type RequestInterceptorFunc func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}) error
 
-type RequestInterceptor func(ctx context.Context, requestSet *RequestSet, res interface{}, next RequestInterceptorFunc) error
-
-type RequestInterceptorFunc func(ctx context.Context, requestSet *RequestSet, res interface{}) error
+type RequestInterceptor func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error
 
 func ChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
 	n := len(interceptors)
 
-	return func(ctx context.Context, requestSet *RequestSet, res interface{}, next RequestInterceptorFunc) error {
+	return func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
 		chainer := func(currentInter RequestInterceptor, currentFunc RequestInterceptorFunc) RequestInterceptorFunc {
-			return func(currentCtx context.Context, currentRequestSet *RequestSet, currentRes interface{}) error {
-				return currentInter(currentCtx, currentRequestSet, currentRes, currentFunc)
+			return func(currentCtx context.Context, currentReq *http.Request, currentGqlInfo *GQLRequestInfo, currentRes interface{}) error {
+				return currentInter(currentCtx, currentReq, currentGqlInfo, currentRes, currentFunc)
 			}
 		}
 
@@ -65,7 +42,7 @@ func ChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
 			chainedHandler = chainer(interceptors[i], chainedHandler)
 		}
 
-		return chainedHandler(ctx, requestSet, res)
+		return chainedHandler(ctx, req, gqlInfo, res)
 	}
 }
 
@@ -73,7 +50,6 @@ func ChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
 type Client struct {
 	Client             *http.Client
 	BaseURL            string
-	Middlewares        []Middleware
 	RequestInterceptor RequestInterceptor
 }
 
@@ -85,27 +61,14 @@ type Request struct {
 }
 
 // NewClient creates a new http client wrapper
-func NewClient(client *http.Client, baseURL string, middlewares ...Middleware) *Client {
-	return &Client{
-		Client:      client,
-		BaseURL:     baseURL,
-		Middlewares: middlewares,
-	}
-}
-
-// NewClient creates a new http client wrapper
-func NewClient2(client *http.Client, baseURL string, interceptors ...RequestInterceptor) *Client {
+func NewClient(client *http.Client, baseURL string, interceptors ...RequestInterceptor) *Client {
 	return &Client{
 		Client:  client,
 		BaseURL: baseURL,
-		RequestInterceptor: ChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *RequestSet, res interface{}, next RequestInterceptorFunc) error {
-			return next(ctx, requestSet, res)
+		RequestInterceptor: ChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
+			return next(ctx, requestSet, gqlInfo, res)
 		}}, interceptors...)...),
 	}
-}
-
-func (c *Client) Intercept(interceptor Middleware) {
-	c.Middlewares = append(c.Middlewares, interceptor)
 }
 
 // GqlErrorList is the struct of a standard graphql error response
@@ -145,42 +108,34 @@ func (er *ErrorResponse) Error() string {
 	return string(content)
 }
 
-// Post sends a http POST request to the graphql endpoint with the given query then unpacks
 // the response into the given object.
-func (c *Client) Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, middlewares ...Middleware) error {
-	requestSet, err := NewRequestSet(ctx, c.BaseURL, operationName, query, vars)
+func (c *Client) Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, interceptors ...RequestInterceptor) error {
+	r := &Request{
+		Query:         query,
+		Variables:     vars,
+		OperationName: operationName,
+	}
+	gqlInfo := NewGQLRequestInfo(r)
+
+	requestBody, err := json.Marshal(r)
 	if err != nil {
-		return xerrors.Errorf(": %w", err)
-	}
-	requestSet.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
-	requestSet.HTTPRequest.Header.Set("Accept", "application/json; charset=utf-8")
-
-	requestMiddlewares := append(c.Middlewares, middlewares...)
-
-	r := c.do
-	for i := len(requestMiddlewares) - 1; i >= 0; i-- {
-		r = requestMiddlewares[i](r)
+		return xerrors.Errorf("encode: %w", err)
 	}
 
-	return r(ctx, requestSet, respData)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return xerrors.Errorf("create request struct failed: %w", err)
+	}
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Accept", "application/json; charset=utf-8")
+
+	f := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
+
+	return f(ctx, req, gqlInfo, respData, c.do)
 }
 
-// the response into the given object.
-func (c *Client) Post2(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, interceptors ...RequestInterceptor) error {
-	requestSet, err := NewRequestSet(ctx, c.BaseURL, operationName, query, vars)
-	if err != nil {
-		return xerrors.Errorf(": %w", err)
-	}
-	requestSet.HTTPRequest.Header.Set("Content-Type", "application/json; charset=utf-8")
-	requestSet.HTTPRequest.Header.Set("Accept", "application/json; charset=utf-8")
-
-	r := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
-
-	return r(ctx, requestSet, respData, c.do)
-}
-
-func (c *Client) do(_ context.Context, requestSet *RequestSet, res interface{}) error {
-	resp, err := c.Client.Do(requestSet.HTTPRequest)
+func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res interface{}) error {
+	resp, err := c.Client.Do(req)
 	if err != nil {
 		return xerrors.Errorf("request failed: %w", err)
 	}

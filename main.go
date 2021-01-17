@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Yamashou/gqlgenc/clientgenV2"
+
 	"github.com/99designs/gqlgen/api"
 	"github.com/Yamashou/gqlgenc/clientgen"
 	"github.com/Yamashou/gqlgenc/config"
@@ -19,8 +21,12 @@ func main() {
 		os.Exit(2)
 	}
 
-	clientPlugin := clientgen.New(cfg.Query, cfg.Client, cfg.Generate)
-	if err := generator.Generate(ctx, cfg, api.AddPlugin(clientPlugin)); err != nil {
+	clientGen := api.AddPlugin(clientgen.New(cfg.Query, cfg.Client, cfg.Generate))
+	if cfg.Generate.ClientV2 {
+		clientGen = api.AddPlugin(clientgenV2.New(cfg.Query, cfg.Client, cfg.Generate))
+	}
+
+	if err := generator.Generate(ctx, cfg, clientGen); err != nil {
 		fmt.Fprintf(os.Stderr, "%+v", err.Error())
 		os.Exit(4)
 	}
