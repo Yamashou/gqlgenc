@@ -231,6 +231,8 @@ func TestParseResponse(t *testing.T) {
 }
 
 func TestChainInterceptor(t *testing.T) {
+	t.Parallel()
+
 	someValue := 1
 	parentContext := context.WithValue(context.TODO(), "parent", someValue)
 	requestMessage := "hoge"
