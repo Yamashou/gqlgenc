@@ -1,8 +1,12 @@
 package clientv2
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -224,4 +228,51 @@ func TestParseResponse(t *testing.T) {
 
 		require.Nil(t, err)
 	})
+}
+
+func TestChainInterceptor(t *testing.T) {
+	someValue := 1
+	parentContext := context.WithValue(context.TODO(), "parent", someValue)
+	requestMessage := "hoge"
+	responseMessage := "foo"
+	parentGQLInfo := NewGQLRequestInfo(&Request{
+		Query:         "query GQL {id}",
+		OperationName: "GQL",
+	})
+	outputError := fmt.Errorf("some error")
+	requireContextValue := func(t *testing.T, ctx context.Context, key string, msg ...interface{}) {
+		val := ctx.Value(key)
+		require.NotNil(t, val, msg...)
+		require.Equal(t, someValue, val, msg...)
+	}
+
+	req, err := http.NewRequestWithContext(parentContext, http.MethodPost, "https://hogehoge/graphql", bytes.NewBuffer([]byte(requestMessage)))
+	require.Nil(t, err)
+
+	first := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
+		requireContextValue(t, ctx, "parent", "first must know the parent context value")
+
+		wrappedCtx := context.WithValue(ctx, "first", someValue)
+		return next(wrappedCtx, req, gqlInfo, res)
+	}
+
+	second := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
+		requireContextValue(t, ctx, "parent", "second must know the parent context value")
+		requireContextValue(t, ctx, "first", "second must know the first context value")
+
+		wrappedCtx := context.WithValue(ctx, "second", someValue)
+		return next(wrappedCtx, req, gqlInfo, res)
+	}
+
+	invoker := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}) error {
+		requireContextValue(t, ctx, "parent", "invoker must know the parent context value")
+		requireContextValue(t, ctx, "first", "invoker must know the first context value")
+		requireContextValue(t, ctx, "second", "invoker must know the second context value")
+
+		return outputError
+	}
+
+	chain := ChainInterceptor(first, second)
+	err = chain(parentContext, req, parentGQLInfo, responseMessage, invoker)
+	require.Equal(t, outputError, err, "chain must return invokers's error")
 }
