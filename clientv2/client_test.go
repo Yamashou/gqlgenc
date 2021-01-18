@@ -241,6 +241,7 @@ func TestChainInterceptor(t *testing.T) {
 	})
 	outputError := fmt.Errorf("some error")
 	requireContextValue := func(t *testing.T, ctx context.Context, key string, msg ...interface{}) {
+		t.Helper()
 		val := ctx.Value(key)
 		require.NotNil(t, val, msg...)
 		require.Equal(t, someValue, val, msg...)
