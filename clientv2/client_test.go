@@ -256,6 +256,7 @@ func TestChainInterceptor(t *testing.T) {
 		requireContextValue(t, ctx, "parent", "first must know the parent context value")
 
 		wrappedCtx := context.WithValue(ctx, "first", someValue)
+
 		return next(wrappedCtx, req, gqlInfo, res)
 	}
 
@@ -264,6 +265,7 @@ func TestChainInterceptor(t *testing.T) {
 		requireContextValue(t, ctx, "first", "second must know the first context value")
 
 		wrappedCtx := context.WithValue(ctx, "second", someValue)
+
 		return next(wrappedCtx, req, gqlInfo, res)
 	}
 
