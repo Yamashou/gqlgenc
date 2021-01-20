@@ -309,8 +309,8 @@ type MultipleRecord struct {
 	Work      *Work             `json:"work"`
 }
 
-func (MultipleRecord) IsNode()         {}
 func (MultipleRecord) IsActivityItem() {}
+func (MultipleRecord) IsNode()         {}
 
 type Organization struct {
 	AnnictID                   int64  `json:"annictId"`
@@ -328,8 +328,8 @@ type Organization struct {
 	WikipediaURLEn             string `json:"wikipediaUrlEn"`
 }
 
-func (Organization) IsStaffResourceItem() {}
 func (Organization) IsNode()              {}
+func (Organization) IsStaffResourceItem() {}
 
 // The connection type for Organization.
 type OrganizationConnection struct {
@@ -479,8 +479,8 @@ type Record struct {
 	Work               *Work        `json:"work"`
 }
 
-func (Record) IsActivityItem() {}
 func (Record) IsNode()         {}
+func (Record) IsActivityItem() {}
 
 // The connection type for Record.
 type RecordConnection struct {
