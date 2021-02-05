@@ -27,11 +27,13 @@ func TestParseIntrospectionQuery_Parse(t *testing.T) {
 
 			if test.expectedErr == nil {
 				require.NotPanics(t, func() {
-					ParseIntrospectionQuery(query)
+					ast := ParseIntrospectionQuery(query)
+					require.NotNil(t, ast)
 				})
 			} else {
 				require.PanicsWithValue(t, test.expectedErr, func() {
-					ParseIntrospectionQuery(query)
+					ast := ParseIntrospectionQuery(query)
+					require.Nil(t, ast)
 				})
 			}
 		})
