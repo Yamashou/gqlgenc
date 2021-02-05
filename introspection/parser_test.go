@@ -9,6 +9,8 @@ import (
 )
 
 func TestParseIntrospectionQuery_Parse(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name        string
 		filename    string
@@ -17,8 +19,10 @@ func TestParseIntrospectionQuery_Parse(t *testing.T) {
 		{"no mutation in schema", "testdata/introspection_result_no_mutation.json", nil},
 	}
 
-	for _, test := range tests {
+	for _, testCase := range tests {
+		test := testCase
 		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
 			query := readQueryResult(t, test.filename)
 
 			if test.expectedErr == nil {
@@ -35,6 +39,8 @@ func TestParseIntrospectionQuery_Parse(t *testing.T) {
 }
 
 func readQueryResult(t *testing.T, filename string) Query {
+	t.Helper()
+
 	data, err := ioutil.ReadFile(filename)
 	require.NoError(t, err)
 
