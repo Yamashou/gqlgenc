@@ -26,7 +26,6 @@ func ParseIntrospectionQuery(query Query) *ast.SchemaDocument {
 func parseSchemaDefinition(query Query, typeMap map[string]*FullType) *ast.SchemaDefinition {
 	def := ast.SchemaDefinition{}
 
-	// Is it possible to have an empty QueryType? I assume it would be possible but I'm not sure
 	if query.Schema.QueryType.Name != nil {
 		def.OperationTypes = append(def.OperationTypes,
 			parseOperationTypeDefinitionForQuery(typeMap[*query.Schema.QueryType.Name]),
