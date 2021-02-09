@@ -1,9 +1,15 @@
 package config
 
 import (
+	"context"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"runtime"
 	"testing"
 
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 )
 
@@ -72,4 +78,86 @@ func TestLoadConfig(t *testing.T) {
 		require.Equal(t, c.Generate.Prefix.Mutation, "Hoge")
 		require.Equal(t, c.Generate.Prefix.Query, "Data")
 	})
+}
+
+func TestLoadConfig_LoadSchema(t *testing.T) {
+	t.Parallel()
+
+	t.Run("correct schema", func(t *testing.T) {
+		t.Parallel()
+
+		mockServer, closeServer := newMockRemoteServer(t, responseFromFile("testdata/remote/response_ok.json"))
+		defer closeServer()
+
+		config := &Config{
+			GQLConfig: &config.Config{},
+			Endpoint: &EndPointConfig{
+				URL: mockServer.URL,
+			},
+		}
+
+		err := config.LoadSchema(context.Background())
+		require.NoError(t, err)
+	})
+
+	t.Run("invalid schema", func(t *testing.T) {
+		t.Parallel()
+
+		mockServer, closeServer := newMockRemoteServer(t, responseFromFile("testdata/remote/response_invalid_schema.json"))
+		defer closeServer()
+
+		config := &Config{
+			GQLConfig: &config.Config{},
+			Endpoint: &EndPointConfig{
+				URL: mockServer.URL,
+			},
+		}
+
+		err := config.LoadSchema(context.Background())
+		require.Equal(t, "load remote schema failed: validation error: remote:0: OBJECT must define one or more fields.", err.Error())
+	})
+}
+
+type mockRemoteServer struct {
+	*httptest.Server
+	body []byte
+}
+
+func newMockRemoteServer(t *testing.T, response interface{}) (mock *mockRemoteServer, closeServer func()) {
+	t.Helper()
+
+	mock = &mockRemoteServer{
+		Server: httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			var err error
+			mock.body, err = ioutil.ReadAll(req.Body)
+			require.NoError(t, err)
+
+			var responseBody []byte
+			switch v := response.(type) {
+			case json.RawMessage:
+				responseBody = v
+			case responseFromFile:
+				responseBody = v.load(t)
+			default:
+				responseBody, err = json.Marshal(response)
+				require.NoError(t, err)
+			}
+
+			_, err = rw.Write(responseBody)
+			require.NoError(t, err)
+		})),
+	}
+
+	return mock, func() { mock.Close() }
+}
+
+type responseFromFile string
+
+func (f responseFromFile) load(t *testing.T) []byte {
+	t.Helper()
+
+	content, err := ioutil.ReadFile(string(f))
+	require.NoError(t, err)
+
+	return content
 }

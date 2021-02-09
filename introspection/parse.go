@@ -11,6 +11,7 @@ func ParseIntrospectionQuery(query Query) *ast.SchemaDocument {
 	typeMap := query.Schema.Types.NameMap()
 
 	doc.Schema = append(doc.Schema, parseSchemaDefinition(query, typeMap))
+	doc.Position = cachedPosition
 
 	for _, typeVale := range typeMap {
 		doc.Definitions = append(doc.Definitions, parseTypeSystemDefinition(typeVale))
@@ -25,6 +26,7 @@ func ParseIntrospectionQuery(query Query) *ast.SchemaDocument {
 
 func parseSchemaDefinition(query Query, typeMap map[string]*FullType) *ast.SchemaDefinition {
 	def := ast.SchemaDefinition{}
+	def.Position = cachedPosition
 
 	def.OperationTypes = append(def.OperationTypes,
 		parseOperationTypeDefinitionForQuery(typeMap[*query.Schema.QueryType.Name]),
@@ -38,6 +40,7 @@ func parseOperationTypeDefinitionForQuery(fullType *FullType) *ast.OperationType
 	var op ast.OperationTypeDefinition
 	op.Operation = ast.Query
 	op.Type = *fullType.Name
+	op.Position = cachedPosition
 
 	return &op
 }
@@ -46,6 +49,7 @@ func parseOperationTypeDefinitionForMutation(fullType *FullType) *ast.OperationT
 	var op ast.OperationTypeDefinition
 	op.Operation = ast.Mutation
 	op.Type = *fullType.Name
+	op.Position = cachedPosition
 
 	return &op
 }
@@ -66,6 +70,7 @@ func parseDirectiveDefinition(directiveValue *DirectiveType) *ast.DirectiveDefin
 		Name:        directiveValue.Name,
 		Arguments:   args,
 		Locations:   locations,
+		Position:    cachedPosition,
 	}
 }
 
@@ -84,6 +89,7 @@ func parseObjectFields(typeVale *FullType) ast.FieldList {
 			Name:        field.Name,
 			Arguments:   args,
 			Type:        typ,
+			Position:    cachedPosition,
 		}
 		fieldList = append(fieldList, fieldDefinition)
 	}
@@ -99,6 +105,7 @@ func parseInputObjectFields(typeVale *FullType) ast.FieldList {
 			Description: pointerString(field.Description),
 			Name:        field.Name,
 			Type:        typ,
+			Position:    cachedPosition,
 		}
 		fieldList = append(fieldList, fieldDefinition)
 	}
@@ -118,6 +125,7 @@ func parseObjectTypeDefinition(typeVale *FullType) *ast.Definition {
 		enumValue := &ast.EnumValueDefinition{
 			Description: pointerString(enum.Description),
 			Name:        enum.Name,
+			Position:    cachedPosition,
 		}
 		enums = append(enums, enumValue)
 	}
@@ -129,7 +137,7 @@ func parseObjectTypeDefinition(typeVale *FullType) *ast.Definition {
 		Interfaces:  interfaces,
 		Fields:      fieldList,
 		EnumValues:  enums,
-		Position:    nil,
+		Position:    cachedPosition,
 		BuiltIn:     true,
 	}
 }
@@ -147,7 +155,7 @@ func parseInterfaceTypeDefinition(typeVale *FullType) *ast.Definition {
 		Name:        pointerString(typeVale.Name),
 		Interfaces:  interfaces,
 		Fields:      fieldList,
-		Position:    nil,
+		Position:    cachedPosition,
 		BuiltIn:     true,
 	}
 }
@@ -165,7 +173,7 @@ func parseInputObjectTypeDefinition(typeVale *FullType) *ast.Definition {
 		Name:        pointerString(typeVale.Name),
 		Interfaces:  interfaces,
 		Fields:      fieldList,
-		Position:    nil,
+		Position:    cachedPosition,
 		BuiltIn:     true,
 	}
 }
@@ -181,7 +189,7 @@ func parseUnionTypeDefinition(typeVale *FullType) *ast.Definition {
 		Description: pointerString(typeVale.Description),
 		Name:        pointerString(typeVale.Name),
 		Types:       unions,
-		Position:    nil,
+		Position:    cachedPosition,
 		BuiltIn:     true,
 	}
 }
@@ -192,6 +200,7 @@ func parseEnumTypeDefinition(typeVale *FullType) *ast.Definition {
 		enumValue := &ast.EnumValueDefinition{
 			Description: pointerString(enum.Description),
 			Name:        enum.Name,
+			Position:    cachedPosition,
 		}
 		enums = append(enums, enumValue)
 	}
@@ -201,7 +210,7 @@ func parseEnumTypeDefinition(typeVale *FullType) *ast.Definition {
 		Description: pointerString(typeVale.Description),
 		Name:        pointerString(typeVale.Name),
 		EnumValues:  enums,
-		Position:    nil,
+		Position:    cachedPosition,
 		BuiltIn:     true,
 	}
 }
@@ -211,7 +220,7 @@ func parseScalarTypeExtension(typeVale *FullType) *ast.Definition {
 		Kind:        ast.Scalar,
 		Description: pointerString(typeVale.Description),
 		Name:        pointerString(typeVale.Name),
-		Position:    nil,
+		Position:    cachedPosition,
 		BuiltIn:     true,
 	}
 }
@@ -251,8 +260,9 @@ func buildInputValue(input *InputValue) *ast.ArgumentDefinition {
 	var defaultValue *ast.Value
 	if input.DefaultValue != nil {
 		defaultValue = &ast.Value{
-			Raw:  pointerString(input.DefaultValue),
-			Kind: ast.Variable,
+			Raw:      pointerString(input.DefaultValue),
+			Kind:     ast.Variable,
+			Position: cachedPosition,
 		}
 	}
 
@@ -261,6 +271,7 @@ func buildInputValue(input *InputValue) *ast.ArgumentDefinition {
 		Name:         input.Name,
 		DefaultValue: defaultValue,
 		Type:         typ,
+		Position:     cachedPosition,
 	}
 }
 
@@ -271,7 +282,7 @@ func getType(typeRef *TypeRef) *ast.Type {
 			panic("Decorated type deeper than introspection query.")
 		}
 
-		return ast.ListType(getType(itemRef), nil)
+		return ast.ListType(getType(itemRef), cachedPosition)
 	}
 
 	if typeRef.Kind == TypeKindNonNull {
@@ -285,5 +296,10 @@ func getType(typeRef *TypeRef) *ast.Type {
 		return nullableType
 	}
 
-	return ast.NamedType(pointerString(typeRef.Name), nil)
+	return ast.NamedType(pointerString(typeRef.Name), cachedPosition)
 }
+
+var cachedPosition = &ast.Position{Src: &ast.Source{
+	Name:    "remote",
+	BuiltIn: false,
+}}
