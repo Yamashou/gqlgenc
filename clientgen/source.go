@@ -182,6 +182,10 @@ type Mutation struct {
 }
 
 func (s *Source) Mutation() (*Mutation, error) {
+	if s.schema.Mutation == nil {
+		return nil, nil
+	}
+
 	fields, err := s.sourceGenerator.NewResponseFieldsByDefinition(s.schema.Mutation)
 	if err != nil {
 		return nil, xerrors.Errorf("generate failed for mutation struct type : %w", err)
