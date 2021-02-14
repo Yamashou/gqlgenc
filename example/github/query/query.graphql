@@ -21,3 +21,4 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
         }
     }
 }
+
