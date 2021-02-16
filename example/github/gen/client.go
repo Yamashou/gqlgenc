@@ -201,23 +201,8 @@ type GetUser struct {
 		} "json:\"repositories\" graphql:\"repositories\""
 	} "json:\"viewer\" graphql:\"viewer\""
 }
-type GetUser2 struct {
-	Viewer struct {
-		ID           string  "json:\"id\" graphql:\"id\""
-		Name         *string "json:\"name\" graphql:\"name\""
-		Repositories struct {
-			Nodes []*struct {
-				ID        string "json:\"id\" graphql:\"id\""
-				Name      string "json:\"name\" graphql:\"name\""
-				Languages *struct {
-					Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
-				} "json:\"languages\" graphql:\"languages\""
-			} "json:\"nodes\" graphql:\"nodes\""
-		} "json:\"repositories\" graphql:\"repositories\""
-	} "json:\"viewer\" graphql:\"viewer\""
-}
 
-const GetUserQuery = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {
+const GetUserQuery = `query getUser ($repositoryFirst: Int!, $languageFirst: Int!) {
 	viewer {
 		id
 		name
@@ -247,44 +232,7 @@ func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst
 	}
 
 	var res GetUser
-	if err := c.Client.Post(ctx, "GetUser", GetUserQuery, &res, vars, httpRequestOptions...); err != nil {
-		return nil, err
-	}
-
-	return &res, nil
-}
-
-const GetUser2Query = `query getUser2 ($repositoryFirst: Int!, $languageFirst: Int!) {
-	viewer {
-		id
-		name
-		repositories(first: $repositoryFirst, orderBy: {field:CREATED_AT,direction:DESC}) {
-			nodes {
-				id
-				name
-				languages(first: $languageFirst) {
-					nodes {
-						... LanguageFragment
-					}
-				}
-			}
-		}
-	}
-}
-fragment LanguageFragment on Language {
-	id
-	name
-}
-`
-
-func (c *Client) GetUser2(ctx context.Context, repositoryFirst int, languageFirst int, httpRequestOptions ...client.HTTPRequestOption) (*GetUser2, error) {
-	vars := map[string]interface{}{
-		"repositoryFirst": repositoryFirst,
-		"languageFirst":   languageFirst,
-	}
-
-	var res GetUser2
-	if err := c.Client.Post(ctx, "getUser2", GetUser2Query, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "getUser", GetUserQuery, &res, vars, httpRequestOptions...); err != nil {
 		return nil, err
 	}
 

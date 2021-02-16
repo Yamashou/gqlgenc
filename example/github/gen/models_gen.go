@@ -646,8 +646,8 @@ type AddedToProjectEvent struct {
 }
 
 func (AddedToProjectEvent) IsPullRequestTimelineItems() {}
-func (AddedToProjectEvent) IsNode()                     {}
 func (AddedToProjectEvent) IsIssueTimelineItems()       {}
+func (AddedToProjectEvent) IsNode()                     {}
 
 // A GitHub App.
 type App struct {
@@ -707,10 +707,10 @@ type AssignedEvent struct {
 	User *User `json:"user"`
 }
 
-func (AssignedEvent) IsIssueTimelineItem()        {}
-func (AssignedEvent) IsPullRequestTimelineItem()  {}
 func (AssignedEvent) IsPullRequestTimelineItems() {}
 func (AssignedEvent) IsNode()                     {}
+func (AssignedEvent) IsPullRequestTimelineItem()  {}
+func (AssignedEvent) IsIssueTimelineItem()        {}
 func (AssignedEvent) IsIssueTimelineItems()       {}
 
 // Ordering options for Audit Log connections.
@@ -738,8 +738,8 @@ type AutoMergeDisabledEvent struct {
 	ReasonCode *string `json:"reasonCode"`
 }
 
-func (AutoMergeDisabledEvent) IsNode()                     {}
 func (AutoMergeDisabledEvent) IsPullRequestTimelineItems() {}
+func (AutoMergeDisabledEvent) IsNode()                     {}
 
 // Represents a 'auto_merge_enabled' event on a given pull request.
 type AutoMergeEnabledEvent struct {
@@ -822,8 +822,8 @@ type AutomaticBaseChangeFailedEvent struct {
 	PullRequest *PullRequest `json:"pullRequest"`
 }
 
-func (AutomaticBaseChangeFailedEvent) IsNode()                     {}
 func (AutomaticBaseChangeFailedEvent) IsPullRequestTimelineItems() {}
+func (AutomaticBaseChangeFailedEvent) IsNode()                     {}
 
 // Represents a 'automatic_base_change_succeeded' event on a given pull request.
 type AutomaticBaseChangeSucceededEvent struct {
@@ -840,8 +840,8 @@ type AutomaticBaseChangeSucceededEvent struct {
 	PullRequest *PullRequest `json:"pullRequest"`
 }
 
-func (AutomaticBaseChangeSucceededEvent) IsNode()                     {}
 func (AutomaticBaseChangeSucceededEvent) IsPullRequestTimelineItems() {}
+func (AutomaticBaseChangeSucceededEvent) IsNode()                     {}
 
 // Represents a 'base_ref_changed' event on a given issue or pull request.
 type BaseRefChangedEvent struct {
@@ -876,8 +876,8 @@ type BaseRefDeletedEvent struct {
 	PullRequest *PullRequest `json:"pullRequest"`
 }
 
-func (BaseRefDeletedEvent) IsPullRequestTimelineItem()  {}
 func (BaseRefDeletedEvent) IsPullRequestTimelineItems() {}
+func (BaseRefDeletedEvent) IsPullRequestTimelineItem()  {}
 func (BaseRefDeletedEvent) IsNode()                     {}
 
 // Represents a 'base_ref_force_pushed' event on a given pull request.
@@ -897,9 +897,9 @@ type BaseRefForcePushedEvent struct {
 	Ref *Ref `json:"ref"`
 }
 
-func (BaseRefForcePushedEvent) IsNode()                     {}
-func (BaseRefForcePushedEvent) IsPullRequestTimelineItem()  {}
 func (BaseRefForcePushedEvent) IsPullRequestTimelineItems() {}
+func (BaseRefForcePushedEvent) IsPullRequestTimelineItem()  {}
+func (BaseRefForcePushedEvent) IsNode()                     {}
 
 // Represents a Git blame.
 type Blame struct {
@@ -1496,9 +1496,9 @@ type ClosedEvent struct {
 	URL string `json:"url"`
 }
 
-func (ClosedEvent) IsIssueTimelineItem()        {}
-func (ClosedEvent) IsPullRequestTimelineItem()  {}
 func (ClosedEvent) IsPullRequestTimelineItems() {}
+func (ClosedEvent) IsPullRequestTimelineItem()  {}
+func (ClosedEvent) IsIssueTimelineItem()        {}
 func (ClosedEvent) IsNode()                     {}
 func (ClosedEvent) IsUniformResourceLocatable() {}
 func (ClosedEvent) IsIssueTimelineItems()       {}
@@ -1533,8 +1533,8 @@ type CommentDeletedEvent struct {
 	ID                   string `json:"id"`
 }
 
-func (CommentDeletedEvent) IsNode()                     {}
 func (CommentDeletedEvent) IsPullRequestTimelineItems() {}
+func (CommentDeletedEvent) IsNode()                     {}
 func (CommentDeletedEvent) IsIssueTimelineItems()       {}
 
 // Represents a Git commit.
@@ -1632,9 +1632,9 @@ type Commit struct {
 	ZipballURL string `json:"zipballUrl"`
 }
 
-func (Commit) IsIssueTimelineItem()        {}
-func (Commit) IsPullRequestTimelineItem()  {}
 func (Commit) IsCloser()                   {}
+func (Commit) IsPullRequestTimelineItem()  {}
+func (Commit) IsIssueTimelineItem()        {}
 func (Commit) IsNode()                     {}
 func (Commit) IsGitObject()                {}
 func (Commit) IsSubscribable()             {}
@@ -1828,8 +1828,8 @@ type ConnectedEvent struct {
 	Subject ReferencedSubject `json:"subject"`
 }
 
-func (ConnectedEvent) IsNode()                     {}
 func (ConnectedEvent) IsPullRequestTimelineItems() {}
+func (ConnectedEvent) IsNode()                     {}
 func (ConnectedEvent) IsIssueTimelineItems()       {}
 
 // A calendar of contributions made on GitHub by a user.
@@ -2027,8 +2027,8 @@ type ConvertedNoteToIssueEvent struct {
 	ID         string `json:"id"`
 }
 
-func (ConvertedNoteToIssueEvent) IsNode()                     {}
 func (ConvertedNoteToIssueEvent) IsPullRequestTimelineItems() {}
+func (ConvertedNoteToIssueEvent) IsNode()                     {}
 func (ConvertedNoteToIssueEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of CreateBranchProtectionRule
@@ -2427,8 +2427,8 @@ type CreatedIssueContribution struct {
 	User *User `json:"user"`
 }
 
-func (CreatedIssueContribution) IsContribution()                         {}
 func (CreatedIssueContribution) IsCreatedIssueOrRestrictedContribution() {}
+func (CreatedIssueContribution) IsContribution()                         {}
 
 // The connection type for CreatedIssueContribution.
 type CreatedIssueContributionConnection struct {
@@ -2470,8 +2470,8 @@ type CreatedPullRequestContribution struct {
 	User *User `json:"user"`
 }
 
-func (CreatedPullRequestContribution) IsCreatedPullRequestOrRestrictedContribution() {}
 func (CreatedPullRequestContribution) IsContribution()                               {}
+func (CreatedPullRequestContribution) IsCreatedPullRequestOrRestrictedContribution() {}
 
 // The connection type for CreatedPullRequestContribution.
 type CreatedPullRequestContributionConnection struct {
@@ -2559,8 +2559,8 @@ type CreatedRepositoryContribution struct {
 	User *User `json:"user"`
 }
 
-func (CreatedRepositoryContribution) IsContribution()                              {}
 func (CreatedRepositoryContribution) IsCreatedRepositoryOrRestrictedContribution() {}
+func (CreatedRepositoryContribution) IsContribution()                              {}
 
 // The connection type for CreatedRepositoryContribution.
 type CreatedRepositoryContributionConnection struct {
@@ -2605,12 +2605,12 @@ type CrossReferencedEvent struct {
 	WillCloseTarget bool `json:"willCloseTarget"`
 }
 
-func (CrossReferencedEvent) IsIssueTimelineItem()        {}
-func (CrossReferencedEvent) IsPullRequestTimelineItem()  {}
 func (CrossReferencedEvent) IsPullRequestTimelineItems() {}
-func (CrossReferencedEvent) IsIssueTimelineItems()       {}
+func (CrossReferencedEvent) IsPullRequestTimelineItem()  {}
+func (CrossReferencedEvent) IsIssueTimelineItem()        {}
 func (CrossReferencedEvent) IsNode()                     {}
 func (CrossReferencedEvent) IsUniformResourceLocatable() {}
+func (CrossReferencedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of DeclineTopicSuggestion
 type DeclineTopicSuggestionInput struct {
@@ -2861,10 +2861,10 @@ type DemilestonedEvent struct {
 	Subject MilestoneItem `json:"subject"`
 }
 
-func (DemilestonedEvent) IsIssueTimelineItem()        {}
-func (DemilestonedEvent) IsPullRequestTimelineItem()  {}
-func (DemilestonedEvent) IsPullRequestTimelineItems() {}
 func (DemilestonedEvent) IsNode()                     {}
+func (DemilestonedEvent) IsPullRequestTimelineItems() {}
+func (DemilestonedEvent) IsPullRequestTimelineItem()  {}
+func (DemilestonedEvent) IsIssueTimelineItem()        {}
 func (DemilestonedEvent) IsIssueTimelineItems()       {}
 
 // A repository deploy key.
@@ -2921,8 +2921,8 @@ type DeployedEvent struct {
 	Ref *Ref `json:"ref"`
 }
 
-func (DeployedEvent) IsPullRequestTimelineItem()  {}
 func (DeployedEvent) IsPullRequestTimelineItems() {}
+func (DeployedEvent) IsPullRequestTimelineItem()  {}
 func (DeployedEvent) IsNode()                     {}
 
 // Represents triggered deployment instance.
@@ -2999,8 +2999,8 @@ type DeploymentEnvironmentChangedEvent struct {
 	PullRequest *PullRequest `json:"pullRequest"`
 }
 
-func (DeploymentEnvironmentChangedEvent) IsPullRequestTimelineItem()  {}
 func (DeploymentEnvironmentChangedEvent) IsPullRequestTimelineItems() {}
+func (DeploymentEnvironmentChangedEvent) IsPullRequestTimelineItem()  {}
 func (DeploymentEnvironmentChangedEvent) IsNode()                     {}
 
 // Ordering options for deployment connections
@@ -3087,8 +3087,8 @@ type DisconnectedEvent struct {
 	Subject ReferencedSubject `json:"subject"`
 }
 
-func (DisconnectedEvent) IsNode()                     {}
 func (DisconnectedEvent) IsPullRequestTimelineItems() {}
+func (DisconnectedEvent) IsNode()                     {}
 func (DisconnectedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of DismissPullRequestReview
@@ -3201,8 +3201,8 @@ type Enterprise struct {
 }
 
 func (Enterprise) IsVerifiableDomainOwner() {}
-func (Enterprise) IsIPAllowListOwner()      {}
 func (Enterprise) IsNode()                  {}
+func (Enterprise) IsIPAllowListOwner()      {}
 
 // The connection type for User.
 type EnterpriseAdministratorConnection struct {
@@ -3800,9 +3800,9 @@ type EnterpriseUserAccount struct {
 	User *User `json:"user"`
 }
 
-func (EnterpriseUserAccount) IsEnterpriseMember() {}
 func (EnterpriseUserAccount) IsNode()             {}
 func (EnterpriseUserAccount) IsActor()            {}
+func (EnterpriseUserAccount) IsEnterpriseMember() {}
 
 // The connection type for EnterpriseUserAccount.
 type EnterpriseUserAccountConnection struct {
@@ -4205,9 +4205,9 @@ type HeadRefDeletedEvent struct {
 	PullRequest *PullRequest `json:"pullRequest"`
 }
 
+func (HeadRefDeletedEvent) IsPullRequestTimelineItems() {}
 func (HeadRefDeletedEvent) IsNode()                     {}
 func (HeadRefDeletedEvent) IsPullRequestTimelineItem()  {}
-func (HeadRefDeletedEvent) IsPullRequestTimelineItems() {}
 
 // Represents a 'head_ref_force_pushed' event on a given pull request.
 type HeadRefForcePushedEvent struct {
@@ -4226,9 +4226,9 @@ type HeadRefForcePushedEvent struct {
 	Ref *Ref `json:"ref"`
 }
 
-func (HeadRefForcePushedEvent) IsPullRequestTimelineItem()  {}
-func (HeadRefForcePushedEvent) IsPullRequestTimelineItems() {}
 func (HeadRefForcePushedEvent) IsNode()                     {}
+func (HeadRefForcePushedEvent) IsPullRequestTimelineItems() {}
+func (HeadRefForcePushedEvent) IsPullRequestTimelineItem()  {}
 
 // Represents a 'head_ref_restored' event on a given pull request.
 type HeadRefRestoredEvent struct {
@@ -4241,9 +4241,9 @@ type HeadRefRestoredEvent struct {
 	PullRequest *PullRequest `json:"pullRequest"`
 }
 
-func (HeadRefRestoredEvent) IsPullRequestTimelineItem()  {}
 func (HeadRefRestoredEvent) IsPullRequestTimelineItems() {}
 func (HeadRefRestoredEvent) IsNode()                     {}
+func (HeadRefRestoredEvent) IsPullRequestTimelineItem()  {}
 
 // Detail needed to display a hovercard for a user
 type Hovercard struct {
@@ -4414,7 +4414,10 @@ type Issue struct {
 }
 
 func (Issue) IsSearchResultItem()         {}
-func (Issue) IsMilestoneItem()            {}
+func (Issue) IsReferencedSubject()        {}
+func (Issue) IsProjectCardItem()          {}
+func (Issue) IsIssueOrPullRequest()       {}
+func (Issue) IsRenamedTitleSubject()      {}
 func (Issue) IsNode()                     {}
 func (Issue) IsAssignable()               {}
 func (Issue) IsClosable()                 {}
@@ -4427,10 +4430,7 @@ func (Issue) IsReactable()                {}
 func (Issue) IsRepositoryNode()           {}
 func (Issue) IsSubscribable()             {}
 func (Issue) IsUniformResourceLocatable() {}
-func (Issue) IsIssueOrPullRequest()       {}
-func (Issue) IsReferencedSubject()        {}
-func (Issue) IsRenamedTitleSubject()      {}
-func (Issue) IsProjectCardItem()          {}
+func (Issue) IsMilestoneItem()            {}
 
 // Represents a comment on an Issue.
 type IssueComment struct {
@@ -4497,10 +4497,7 @@ type IssueComment struct {
 	ViewerDidAuthor bool `json:"viewerDidAuthor"`
 }
 
-func (IssueComment) IsIssueTimelineItem()        {}
-func (IssueComment) IsPullRequestTimelineItem()  {}
 func (IssueComment) IsPullRequestTimelineItems() {}
-func (IssueComment) IsIssueTimelineItems()       {}
 func (IssueComment) IsNode()                     {}
 func (IssueComment) IsComment()                  {}
 func (IssueComment) IsDeletable()                {}
@@ -4509,6 +4506,9 @@ func (IssueComment) IsUpdatable()                {}
 func (IssueComment) IsUpdatableComment()         {}
 func (IssueComment) IsReactable()                {}
 func (IssueComment) IsRepositoryNode()           {}
+func (IssueComment) IsPullRequestTimelineItem()  {}
+func (IssueComment) IsIssueTimelineItem()        {}
+func (IssueComment) IsIssueTimelineItems()       {}
 
 // The connection type for IssueComment.
 type IssueCommentConnection struct {
@@ -4742,11 +4742,11 @@ type LabeledEvent struct {
 	Labelable Labelable `json:"labelable"`
 }
 
-func (LabeledEvent) IsIssueTimelineItem()        {}
-func (LabeledEvent) IsPullRequestTimelineItem()  {}
 func (LabeledEvent) IsPullRequestTimelineItems() {}
-func (LabeledEvent) IsIssueTimelineItems()       {}
+func (LabeledEvent) IsPullRequestTimelineItem()  {}
+func (LabeledEvent) IsIssueTimelineItem()        {}
 func (LabeledEvent) IsNode()                     {}
+func (LabeledEvent) IsIssueTimelineItems()       {}
 
 // Represents a given language found in repositories.
 type Language struct {
@@ -4887,9 +4887,9 @@ type LockedEvent struct {
 	Lockable Lockable `json:"lockable"`
 }
 
-func (LockedEvent) IsIssueTimelineItem()        {}
-func (LockedEvent) IsPullRequestTimelineItem()  {}
 func (LockedEvent) IsPullRequestTimelineItems() {}
+func (LockedEvent) IsPullRequestTimelineItem()  {}
+func (LockedEvent) IsIssueTimelineItem()        {}
 func (LockedEvent) IsNode()                     {}
 func (LockedEvent) IsIssueTimelineItems()       {}
 
@@ -4914,11 +4914,11 @@ type Mannequin struct {
 	URL string `json:"url"`
 }
 
+func (Mannequin) IsAssignee()                 {}
+func (Mannequin) IsRequestedReviewer()        {}
 func (Mannequin) IsNode()                     {}
 func (Mannequin) IsActor()                    {}
 func (Mannequin) IsUniformResourceLocatable() {}
-func (Mannequin) IsRequestedReviewer()        {}
-func (Mannequin) IsAssignee()                 {}
 
 // Autogenerated input type of MarkFileAsViewed
 type MarkFileAsViewedInput struct {
@@ -4970,8 +4970,8 @@ type MarkedAsDuplicateEvent struct {
 }
 
 func (MarkedAsDuplicateEvent) IsPullRequestTimelineItems() {}
-func (MarkedAsDuplicateEvent) IsIssueTimelineItems()       {}
 func (MarkedAsDuplicateEvent) IsNode()                     {}
+func (MarkedAsDuplicateEvent) IsIssueTimelineItems()       {}
 
 // A public description of a Marketplace category.
 type MarketplaceCategory struct {
@@ -5191,11 +5191,11 @@ type MembersCanDeleteReposClearAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (MembersCanDeleteReposClearAuditEntry) IsOrganizationAuditEntry()     {}
 func (MembersCanDeleteReposClearAuditEntry) IsNode()                       {}
 func (MembersCanDeleteReposClearAuditEntry) IsAuditEntry()                 {}
 func (MembersCanDeleteReposClearAuditEntry) IsEnterpriseAuditEntryData()   {}
 func (MembersCanDeleteReposClearAuditEntry) IsOrganizationAuditEntryData() {}
+func (MembersCanDeleteReposClearAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a members_can_delete_repos.disable event.
 type MembersCanDeleteReposDisableAuditEntry struct {
@@ -5242,11 +5242,11 @@ type MembersCanDeleteReposDisableAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (MembersCanDeleteReposDisableAuditEntry) IsOrganizationAuditEntry()     {}
 func (MembersCanDeleteReposDisableAuditEntry) IsNode()                       {}
 func (MembersCanDeleteReposDisableAuditEntry) IsAuditEntry()                 {}
 func (MembersCanDeleteReposDisableAuditEntry) IsEnterpriseAuditEntryData()   {}
 func (MembersCanDeleteReposDisableAuditEntry) IsOrganizationAuditEntryData() {}
+func (MembersCanDeleteReposDisableAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a members_can_delete_repos.enable event.
 type MembersCanDeleteReposEnableAuditEntry struct {
@@ -5311,8 +5311,8 @@ type MentionedEvent struct {
 }
 
 func (MentionedEvent) IsPullRequestTimelineItems() {}
-func (MentionedEvent) IsIssueTimelineItems()       {}
 func (MentionedEvent) IsNode()                     {}
+func (MentionedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of MergeBranch
 type MergeBranchInput struct {
@@ -5387,10 +5387,10 @@ type MergedEvent struct {
 	URL string `json:"url"`
 }
 
-func (MergedEvent) IsPullRequestTimelineItem()  {}
 func (MergedEvent) IsPullRequestTimelineItems() {}
 func (MergedEvent) IsNode()                     {}
 func (MergedEvent) IsUniformResourceLocatable() {}
+func (MergedEvent) IsPullRequestTimelineItem()  {}
 
 // Represents a Milestone object on a given repository.
 type Milestone struct {
@@ -5474,10 +5474,10 @@ type MilestonedEvent struct {
 	Subject MilestoneItem `json:"subject"`
 }
 
-func (MilestonedEvent) IsIssueTimelineItem()        {}
-func (MilestonedEvent) IsPullRequestTimelineItem()  {}
 func (MilestonedEvent) IsPullRequestTimelineItems() {}
 func (MilestonedEvent) IsNode()                     {}
+func (MilestonedEvent) IsPullRequestTimelineItem()  {}
+func (MilestonedEvent) IsIssueTimelineItem()        {}
 func (MilestonedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of MinimizeComment
@@ -5547,8 +5547,8 @@ type MovedColumnsInProjectEvent struct {
 	ID         string `json:"id"`
 }
 
-func (MovedColumnsInProjectEvent) IsNode()                     {}
 func (MovedColumnsInProjectEvent) IsPullRequestTimelineItems() {}
+func (MovedColumnsInProjectEvent) IsNode()                     {}
 func (MovedColumnsInProjectEvent) IsIssueTimelineItems()       {}
 
 // Audit log entry for a oauth_application.create event.
@@ -5651,10 +5651,10 @@ type OrgAddBillingManagerAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
+func (OrgAddBillingManagerAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgAddBillingManagerAuditEntry) IsNode()                       {}
 func (OrgAddBillingManagerAuditEntry) IsAuditEntry()                 {}
 func (OrgAddBillingManagerAuditEntry) IsOrganizationAuditEntryData() {}
-func (OrgAddBillingManagerAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.add_member
 type OrgAddMemberAuditEntry struct {
@@ -5793,10 +5793,10 @@ type OrgConfigDisableCollaboratorsOnlyAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgConfigDisableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgConfigDisableCollaboratorsOnlyAuditEntry) IsNode()                       {}
 func (OrgConfigDisableCollaboratorsOnlyAuditEntry) IsAuditEntry()                 {}
 func (OrgConfigDisableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgConfigDisableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.config.enable_collaborators_only event.
 type OrgConfigEnableCollaboratorsOnlyAuditEntry struct {
@@ -5837,10 +5837,10 @@ type OrgConfigEnableCollaboratorsOnlyAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgConfigEnableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgConfigEnableCollaboratorsOnlyAuditEntry) IsNode()                       {}
 func (OrgConfigEnableCollaboratorsOnlyAuditEntry) IsAuditEntry()                 {}
 func (OrgConfigEnableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgConfigEnableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.create event.
 type OrgCreateAuditEntry struct {
@@ -5927,10 +5927,10 @@ type OrgDisableOauthAppRestrictionsAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgDisableOauthAppRestrictionsAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgDisableOauthAppRestrictionsAuditEntry) IsNode()                       {}
 func (OrgDisableOauthAppRestrictionsAuditEntry) IsAuditEntry()                 {}
 func (OrgDisableOauthAppRestrictionsAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgDisableOauthAppRestrictionsAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.disable_saml event.
 type OrgDisableSamlAuditEntry struct {
@@ -5979,10 +5979,10 @@ type OrgDisableSamlAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgDisableSamlAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgDisableSamlAuditEntry) IsNode()                       {}
 func (OrgDisableSamlAuditEntry) IsAuditEntry()                 {}
 func (OrgDisableSamlAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgDisableSamlAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.disable_two_factor_requirement event.
 type OrgDisableTwoFactorRequirementAuditEntry struct {
@@ -6023,10 +6023,10 @@ type OrgDisableTwoFactorRequirementAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgDisableTwoFactorRequirementAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgDisableTwoFactorRequirementAuditEntry) IsNode()                       {}
 func (OrgDisableTwoFactorRequirementAuditEntry) IsAuditEntry()                 {}
 func (OrgDisableTwoFactorRequirementAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgDisableTwoFactorRequirementAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.enable_oauth_app_restrictions event.
 type OrgEnableOauthAppRestrictionsAuditEntry struct {
@@ -6119,10 +6119,10 @@ type OrgEnableSamlAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgEnableSamlAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgEnableSamlAuditEntry) IsNode()                       {}
 func (OrgEnableSamlAuditEntry) IsAuditEntry()                 {}
 func (OrgEnableSamlAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgEnableSamlAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.enable_two_factor_requirement event.
 type OrgEnableTwoFactorRequirementAuditEntry struct {
@@ -6163,10 +6163,10 @@ type OrgEnableTwoFactorRequirementAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgEnableTwoFactorRequirementAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgEnableTwoFactorRequirementAuditEntry) IsNode()                       {}
 func (OrgEnableTwoFactorRequirementAuditEntry) IsAuditEntry()                 {}
 func (OrgEnableTwoFactorRequirementAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgEnableTwoFactorRequirementAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.invite_member event.
 type OrgInviteMemberAuditEntry struct {
@@ -6211,10 +6211,10 @@ type OrgInviteMemberAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgInviteMemberAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgInviteMemberAuditEntry) IsNode()                       {}
 func (OrgInviteMemberAuditEntry) IsAuditEntry()                 {}
 func (OrgInviteMemberAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgInviteMemberAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.invite_to_business event.
 type OrgInviteToBusinessAuditEntry struct {
@@ -6261,11 +6261,11 @@ type OrgInviteToBusinessAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgInviteToBusinessAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgInviteToBusinessAuditEntry) IsNode()                       {}
 func (OrgInviteToBusinessAuditEntry) IsAuditEntry()                 {}
 func (OrgInviteToBusinessAuditEntry) IsEnterpriseAuditEntryData()   {}
 func (OrgInviteToBusinessAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgInviteToBusinessAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.oauth_app_access_approved event.
 type OrgOauthAppAccessApprovedAuditEntry struct {
@@ -6312,11 +6312,11 @@ type OrgOauthAppAccessApprovedAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgOauthAppAccessApprovedAuditEntry) IsOrganizationAuditEntry()         {}
 func (OrgOauthAppAccessApprovedAuditEntry) IsNode()                           {}
 func (OrgOauthAppAccessApprovedAuditEntry) IsAuditEntry()                     {}
 func (OrgOauthAppAccessApprovedAuditEntry) IsOauthApplicationAuditEntryData() {}
 func (OrgOauthAppAccessApprovedAuditEntry) IsOrganizationAuditEntryData()     {}
+func (OrgOauthAppAccessApprovedAuditEntry) IsOrganizationAuditEntry()         {}
 
 // Audit log entry for a org.oauth_app_access_denied event.
 type OrgOauthAppAccessDeniedAuditEntry struct {
@@ -6509,10 +6509,10 @@ type OrgRemoveMemberAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgRemoveMemberAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgRemoveMemberAuditEntry) IsNode()                       {}
 func (OrgRemoveMemberAuditEntry) IsAuditEntry()                 {}
 func (OrgRemoveMemberAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgRemoveMemberAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.remove_outside_collaborator event.
 type OrgRemoveOutsideCollaboratorAuditEntry struct {
@@ -6557,10 +6557,10 @@ type OrgRemoveOutsideCollaboratorAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgRemoveOutsideCollaboratorAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgRemoveOutsideCollaboratorAuditEntry) IsNode()                       {}
 func (OrgRemoveOutsideCollaboratorAuditEntry) IsAuditEntry()                 {}
 func (OrgRemoveOutsideCollaboratorAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgRemoveOutsideCollaboratorAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.restore_member event.
 type OrgRestoreMemberAuditEntry struct {
@@ -6615,10 +6615,10 @@ type OrgRestoreMemberAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgRestoreMemberAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgRestoreMemberAuditEntry) IsNode()                       {}
 func (OrgRestoreMemberAuditEntry) IsAuditEntry()                 {}
 func (OrgRestoreMemberAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgRestoreMemberAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Metadata for an organization membership for org.restore_member actions
 type OrgRestoreMemberMembershipOrganizationAuditEntryData struct {
@@ -6632,9 +6632,9 @@ type OrgRestoreMemberMembershipOrganizationAuditEntryData struct {
 	OrganizationURL *string `json:"organizationUrl"`
 }
 
-func (OrgRestoreMemberMembershipOrganizationAuditEntryData) IsOrganizationAuditEntryData() {}
 func (OrgRestoreMemberMembershipOrganizationAuditEntryData) IsOrgRestoreMemberAuditEntryMembership() {
 }
+func (OrgRestoreMemberMembershipOrganizationAuditEntryData) IsOrganizationAuditEntryData() {}
 
 // Metadata for a repository membership for org.restore_member actions
 type OrgRestoreMemberMembershipRepositoryAuditEntryData struct {
@@ -6663,8 +6663,8 @@ type OrgRestoreMemberMembershipTeamAuditEntryData struct {
 	TeamURL *string `json:"teamUrl"`
 }
 
-func (OrgRestoreMemberMembershipTeamAuditEntryData) IsOrgRestoreMemberAuditEntryMembership() {}
 func (OrgRestoreMemberMembershipTeamAuditEntryData) IsTeamAuditEntryData()                   {}
+func (OrgRestoreMemberMembershipTeamAuditEntryData) IsOrgRestoreMemberAuditEntryMembership() {}
 
 // Audit log entry for a org.unblock_user
 type OrgUnblockUserAuditEntry struct {
@@ -6713,10 +6713,10 @@ type OrgUnblockUserAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgUnblockUserAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgUnblockUserAuditEntry) IsNode()                       {}
 func (OrgUnblockUserAuditEntry) IsAuditEntry()                 {}
 func (OrgUnblockUserAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgUnblockUserAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.update_default_repository_permission
 type OrgUpdateDefaultRepositoryPermissionAuditEntry struct {
@@ -6809,10 +6809,10 @@ type OrgUpdateMemberAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgUpdateMemberAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgUpdateMemberAuditEntry) IsNode()                       {}
 func (OrgUpdateMemberAuditEntry) IsAuditEntry()                 {}
 func (OrgUpdateMemberAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgUpdateMemberAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.update_member_repository_creation_permission event.
 type OrgUpdateMemberRepositoryCreationPermissionAuditEntry struct {
@@ -6857,10 +6857,10 @@ type OrgUpdateMemberRepositoryCreationPermissionAuditEntry struct {
 	Visibility *OrgUpdateMemberRepositoryCreationPermissionAuditEntryVisibility `json:"visibility"`
 }
 
-func (OrgUpdateMemberRepositoryCreationPermissionAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgUpdateMemberRepositoryCreationPermissionAuditEntry) IsNode()                       {}
 func (OrgUpdateMemberRepositoryCreationPermissionAuditEntry) IsAuditEntry()                 {}
 func (OrgUpdateMemberRepositoryCreationPermissionAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgUpdateMemberRepositoryCreationPermissionAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a org.update_member_repository_invitation_permission event.
 type OrgUpdateMemberRepositoryInvitationPermissionAuditEntry struct {
@@ -6903,10 +6903,10 @@ type OrgUpdateMemberRepositoryInvitationPermissionAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (OrgUpdateMemberRepositoryInvitationPermissionAuditEntry) IsOrganizationAuditEntry()     {}
 func (OrgUpdateMemberRepositoryInvitationPermissionAuditEntry) IsNode()                       {}
 func (OrgUpdateMemberRepositoryInvitationPermissionAuditEntry) IsAuditEntry()                 {}
 func (OrgUpdateMemberRepositoryInvitationPermissionAuditEntry) IsOrganizationAuditEntryData() {}
+func (OrgUpdateMemberRepositoryInvitationPermissionAuditEntry) IsOrganizationAuditEntry()     {}
 
 // An account on GitHub, with one or more owners, that has repositories, members and teams.
 type Organization struct {
@@ -7033,8 +7033,14 @@ type Organization struct {
 	WebsiteURL *string `json:"websiteUrl"`
 }
 
-func (Organization) IsSponsor()                  {}
 func (Organization) IsSearchResultItem()         {}
+func (Organization) IsVerifiableDomainOwner()    {}
+func (Organization) IsSponsor()                  {}
+func (Organization) IsAuditEntryActor()          {}
+func (Organization) IsPermissionGranter()        {}
+func (Organization) IsAssignee()                 {}
+func (Organization) IsIPAllowListOwner()         {}
+func (Organization) IsSponsorableItem()          {}
 func (Organization) IsNode()                     {}
 func (Organization) IsActor()                    {}
 func (Organization) IsPackageOwner()             {}
@@ -7044,12 +7050,6 @@ func (Organization) IsUniformResourceLocatable() {}
 func (Organization) IsMemberStatusable()         {}
 func (Organization) IsProfileOwner()             {}
 func (Organization) IsSponsorable()              {}
-func (Organization) IsPermissionGranter()        {}
-func (Organization) IsAuditEntryActor()          {}
-func (Organization) IsVerifiableDomainOwner()    {}
-func (Organization) IsIPAllowListOwner()         {}
-func (Organization) IsAssignee()                 {}
-func (Organization) IsSponsorableItem()          {}
 
 // The connection type for OrganizationAuditEntry.
 type OrganizationAuditEntryConnection struct {
@@ -7447,8 +7447,8 @@ type PinnedEvent struct {
 }
 
 func (PinnedEvent) IsPullRequestTimelineItems() {}
-func (PinnedEvent) IsNode()                     {}
 func (PinnedEvent) IsIssueTimelineItems()       {}
+func (PinnedEvent) IsNode()                     {}
 
 // Audit log entry for a private_repository_forking.disable event.
 type PrivateRepositoryForkingDisableAuditEntry struct {
@@ -7503,12 +7503,12 @@ type PrivateRepositoryForkingDisableAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (PrivateRepositoryForkingDisableAuditEntry) IsOrganizationAuditEntry()     {}
 func (PrivateRepositoryForkingDisableAuditEntry) IsNode()                       {}
 func (PrivateRepositoryForkingDisableAuditEntry) IsAuditEntry()                 {}
 func (PrivateRepositoryForkingDisableAuditEntry) IsEnterpriseAuditEntryData()   {}
 func (PrivateRepositoryForkingDisableAuditEntry) IsOrganizationAuditEntryData() {}
 func (PrivateRepositoryForkingDisableAuditEntry) IsRepositoryAuditEntryData()   {}
+func (PrivateRepositoryForkingDisableAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a private_repository_forking.enable event.
 type PrivateRepositoryForkingEnableAuditEntry struct {
@@ -7563,12 +7563,12 @@ type PrivateRepositoryForkingEnableAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (PrivateRepositoryForkingEnableAuditEntry) IsOrganizationAuditEntry()     {}
 func (PrivateRepositoryForkingEnableAuditEntry) IsNode()                       {}
 func (PrivateRepositoryForkingEnableAuditEntry) IsAuditEntry()                 {}
 func (PrivateRepositoryForkingEnableAuditEntry) IsEnterpriseAuditEntryData()   {}
 func (PrivateRepositoryForkingEnableAuditEntry) IsOrganizationAuditEntryData() {}
 func (PrivateRepositoryForkingEnableAuditEntry) IsRepositoryAuditEntryData()   {}
+func (PrivateRepositoryForkingEnableAuditEntry) IsOrganizationAuditEntry()     {}
 
 // A curatable list of repositories relating to a repository owner, which defaults to showing the most popular repositories they own.
 type ProfileItemShowcase struct {
@@ -7981,6 +7981,11 @@ type PullRequest struct {
 	ViewerSubscription *SubscriptionState `json:"viewerSubscription"`
 }
 
+func (PullRequest) IsSearchResultItem()         {}
+func (PullRequest) IsReferencedSubject()        {}
+func (PullRequest) IsCloser()                   {}
+func (PullRequest) IsProjectCardItem()          {}
+func (PullRequest) IsIssueOrPullRequest()       {}
 func (PullRequest) IsNode()                     {}
 func (PullRequest) IsAssignable()               {}
 func (PullRequest) IsClosable()                 {}
@@ -7993,13 +7998,8 @@ func (PullRequest) IsReactable()                {}
 func (PullRequest) IsRepositoryNode()           {}
 func (PullRequest) IsSubscribable()             {}
 func (PullRequest) IsUniformResourceLocatable() {}
-func (PullRequest) IsSearchResultItem()         {}
-func (PullRequest) IsMilestoneItem()            {}
-func (PullRequest) IsIssueOrPullRequest()       {}
-func (PullRequest) IsReferencedSubject()        {}
-func (PullRequest) IsCloser()                   {}
 func (PullRequest) IsRenamedTitleSubject()      {}
-func (PullRequest) IsProjectCardItem()          {}
+func (PullRequest) IsMilestoneItem()            {}
 
 // A file changed in a pull request.
 type PullRequestChangedFile struct {
@@ -8194,8 +8194,8 @@ type PullRequestReview struct {
 	ViewerDidAuthor bool `json:"viewerDidAuthor"`
 }
 
-func (PullRequestReview) IsPullRequestTimelineItem()  {}
 func (PullRequestReview) IsPullRequestTimelineItems() {}
+func (PullRequestReview) IsPullRequestTimelineItem()  {}
 func (PullRequestReview) IsNode()                     {}
 func (PullRequestReview) IsComment()                  {}
 func (PullRequestReview) IsDeletable()                {}
@@ -8287,7 +8287,6 @@ type PullRequestReviewComment struct {
 	ViewerDidAuthor bool `json:"viewerDidAuthor"`
 }
 
-func (PullRequestReviewComment) IsPullRequestTimelineItem() {}
 func (PullRequestReviewComment) IsNode()                    {}
 func (PullRequestReviewComment) IsComment()                 {}
 func (PullRequestReviewComment) IsDeletable()               {}
@@ -8296,6 +8295,7 @@ func (PullRequestReviewComment) IsUpdatable()               {}
 func (PullRequestReviewComment) IsUpdatableComment()        {}
 func (PullRequestReviewComment) IsReactable()               {}
 func (PullRequestReviewComment) IsRepositoryNode()          {}
+func (PullRequestReviewComment) IsPullRequestTimelineItem() {}
 
 // The connection type for PullRequestReviewComment.
 type PullRequestReviewCommentConnection struct {
@@ -8384,9 +8384,9 @@ type PullRequestReviewThread struct {
 	ViewerCanUnresolve bool `json:"viewerCanUnresolve"`
 }
 
-func (PullRequestReviewThread) IsPullRequestTimelineItem()  {}
-func (PullRequestReviewThread) IsPullRequestTimelineItems() {}
 func (PullRequestReviewThread) IsNode()                     {}
+func (PullRequestReviewThread) IsPullRequestTimelineItems() {}
+func (PullRequestReviewThread) IsPullRequestTimelineItem()  {}
 
 // Review comment threads for a pull request review.
 type PullRequestReviewThreadConnection struct {
@@ -8627,9 +8627,9 @@ type ReadyForReviewEvent struct {
 	URL string `json:"url"`
 }
 
-func (ReadyForReviewEvent) IsPullRequestTimelineItems() {}
 func (ReadyForReviewEvent) IsNode()                     {}
 func (ReadyForReviewEvent) IsUniformResourceLocatable() {}
+func (ReadyForReviewEvent) IsPullRequestTimelineItems() {}
 
 // Represents a Git reference.
 type Ref struct {
@@ -8719,11 +8719,11 @@ type ReferencedEvent struct {
 	Subject ReferencedSubject `json:"subject"`
 }
 
-func (ReferencedEvent) IsIssueTimelineItem()        {}
-func (ReferencedEvent) IsPullRequestTimelineItem()  {}
 func (ReferencedEvent) IsPullRequestTimelineItems() {}
-func (ReferencedEvent) IsIssueTimelineItems()       {}
 func (ReferencedEvent) IsNode()                     {}
+func (ReferencedEvent) IsPullRequestTimelineItem()  {}
+func (ReferencedEvent) IsIssueTimelineItem()        {}
+func (ReferencedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of RegenerateEnterpriseIdentityProviderRecoveryCodes
 type RegenerateEnterpriseIdentityProviderRecoveryCodesInput struct {
@@ -9055,8 +9055,8 @@ type RemovedFromProjectEvent struct {
 	ID         string `json:"id"`
 }
 
-func (RemovedFromProjectEvent) IsPullRequestTimelineItems() {}
 func (RemovedFromProjectEvent) IsNode()                     {}
+func (RemovedFromProjectEvent) IsPullRequestTimelineItems() {}
 func (RemovedFromProjectEvent) IsIssueTimelineItems()       {}
 
 // Represents a 'renamed' event on a given issue or pull request
@@ -9074,11 +9074,11 @@ type RenamedTitleEvent struct {
 	Subject RenamedTitleSubject `json:"subject"`
 }
 
-func (RenamedTitleEvent) IsIssueTimelineItem()        {}
-func (RenamedTitleEvent) IsPullRequestTimelineItem()  {}
 func (RenamedTitleEvent) IsPullRequestTimelineItems() {}
-func (RenamedTitleEvent) IsIssueTimelineItems()       {}
+func (RenamedTitleEvent) IsPullRequestTimelineItem()  {}
 func (RenamedTitleEvent) IsNode()                     {}
+func (RenamedTitleEvent) IsIssueTimelineItem()        {}
+func (RenamedTitleEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of ReopenIssue
 type ReopenIssueInput struct {
@@ -9123,10 +9123,10 @@ type ReopenedEvent struct {
 	ID        string `json:"id"`
 }
 
-func (ReopenedEvent) IsIssueTimelineItem()        {}
+func (ReopenedEvent) IsPullRequestTimelineItems() {}
 func (ReopenedEvent) IsNode()                     {}
 func (ReopenedEvent) IsPullRequestTimelineItem()  {}
-func (ReopenedEvent) IsPullRequestTimelineItems() {}
+func (ReopenedEvent) IsIssueTimelineItem()        {}
 func (ReopenedEvent) IsIssueTimelineItems()       {}
 
 // Audit log entry for a repo.access event.
@@ -9178,11 +9178,11 @@ type RepoAccessAuditEntry struct {
 	Visibility *RepoAccessAuditEntryVisibility `json:"visibility"`
 }
 
-func (RepoAccessAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoAccessAuditEntry) IsNode()                       {}
 func (RepoAccessAuditEntry) IsAuditEntry()                 {}
 func (RepoAccessAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoAccessAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoAccessAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.add_member event.
 type RepoAddMemberAuditEntry struct {
@@ -9233,11 +9233,11 @@ type RepoAddMemberAuditEntry struct {
 	Visibility *RepoAddMemberAuditEntryVisibility `json:"visibility"`
 }
 
-func (RepoAddMemberAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoAddMemberAuditEntry) IsNode()                       {}
 func (RepoAddMemberAuditEntry) IsAuditEntry()                 {}
 func (RepoAddMemberAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoAddMemberAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoAddMemberAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.add_topic event.
 type RepoAddTopicAuditEntry struct {
@@ -9403,11 +9403,11 @@ type RepoChangeMergeSettingAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
+func (RepoChangeMergeSettingAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoChangeMergeSettingAuditEntry) IsNode()                       {}
 func (RepoChangeMergeSettingAuditEntry) IsAuditEntry()                 {}
 func (RepoChangeMergeSettingAuditEntry) IsRepositoryAuditEntryData()   {}
 func (RepoChangeMergeSettingAuditEntry) IsOrganizationAuditEntryData() {}
-func (RepoChangeMergeSettingAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.config.disable_anonymous_git_access event.
 type RepoConfigDisableAnonymousGitAccessAuditEntry struct {
@@ -9456,11 +9456,11 @@ type RepoConfigDisableAnonymousGitAccessAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepoConfigDisableAnonymousGitAccessAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoConfigDisableAnonymousGitAccessAuditEntry) IsNode()                       {}
 func (RepoConfigDisableAnonymousGitAccessAuditEntry) IsAuditEntry()                 {}
 func (RepoConfigDisableAnonymousGitAccessAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoConfigDisableAnonymousGitAccessAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoConfigDisableAnonymousGitAccessAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.config.disable_collaborators_only event.
 type RepoConfigDisableCollaboratorsOnlyAuditEntry struct {
@@ -9509,11 +9509,11 @@ type RepoConfigDisableCollaboratorsOnlyAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepoConfigDisableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoConfigDisableCollaboratorsOnlyAuditEntry) IsNode()                       {}
 func (RepoConfigDisableCollaboratorsOnlyAuditEntry) IsAuditEntry()                 {}
 func (RepoConfigDisableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoConfigDisableCollaboratorsOnlyAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoConfigDisableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.config.disable_contributors_only event.
 type RepoConfigDisableContributorsOnlyAuditEntry struct {
@@ -9615,11 +9615,11 @@ type RepoConfigDisableSockpuppetDisallowedAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepoConfigDisableSockpuppetDisallowedAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoConfigDisableSockpuppetDisallowedAuditEntry) IsNode()                       {}
 func (RepoConfigDisableSockpuppetDisallowedAuditEntry) IsAuditEntry()                 {}
 func (RepoConfigDisableSockpuppetDisallowedAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoConfigDisableSockpuppetDisallowedAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoConfigDisableSockpuppetDisallowedAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.config.enable_anonymous_git_access event.
 type RepoConfigEnableAnonymousGitAccessAuditEntry struct {
@@ -9668,11 +9668,11 @@ type RepoConfigEnableAnonymousGitAccessAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepoConfigEnableAnonymousGitAccessAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoConfigEnableAnonymousGitAccessAuditEntry) IsNode()                       {}
 func (RepoConfigEnableAnonymousGitAccessAuditEntry) IsAuditEntry()                 {}
 func (RepoConfigEnableAnonymousGitAccessAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoConfigEnableAnonymousGitAccessAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoConfigEnableAnonymousGitAccessAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.config.enable_collaborators_only event.
 type RepoConfigEnableCollaboratorsOnlyAuditEntry struct {
@@ -9721,11 +9721,11 @@ type RepoConfigEnableCollaboratorsOnlyAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepoConfigEnableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoConfigEnableCollaboratorsOnlyAuditEntry) IsNode()                       {}
 func (RepoConfigEnableCollaboratorsOnlyAuditEntry) IsAuditEntry()                 {}
 func (RepoConfigEnableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoConfigEnableCollaboratorsOnlyAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoConfigEnableCollaboratorsOnlyAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.config.enable_contributors_only event.
 type RepoConfigEnableContributorsOnlyAuditEntry struct {
@@ -9827,11 +9827,11 @@ type RepoConfigEnableSockpuppetDisallowedAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
+func (RepoConfigEnableSockpuppetDisallowedAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoConfigEnableSockpuppetDisallowedAuditEntry) IsNode()                       {}
 func (RepoConfigEnableSockpuppetDisallowedAuditEntry) IsAuditEntry()                 {}
 func (RepoConfigEnableSockpuppetDisallowedAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoConfigEnableSockpuppetDisallowedAuditEntry) IsRepositoryAuditEntryData()   {}
-func (RepoConfigEnableSockpuppetDisallowedAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.config.lock_anonymous_git_access event.
 type RepoConfigLockAnonymousGitAccessAuditEntry struct {
@@ -9880,11 +9880,11 @@ type RepoConfigLockAnonymousGitAccessAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepoConfigLockAnonymousGitAccessAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoConfigLockAnonymousGitAccessAuditEntry) IsNode()                       {}
 func (RepoConfigLockAnonymousGitAccessAuditEntry) IsAuditEntry()                 {}
 func (RepoConfigLockAnonymousGitAccessAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoConfigLockAnonymousGitAccessAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoConfigLockAnonymousGitAccessAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.config.unlock_anonymous_git_access event.
 type RepoConfigUnlockAnonymousGitAccessAuditEntry struct {
@@ -9933,11 +9933,11 @@ type RepoConfigUnlockAnonymousGitAccessAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepoConfigUnlockAnonymousGitAccessAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoConfigUnlockAnonymousGitAccessAuditEntry) IsNode()                       {}
 func (RepoConfigUnlockAnonymousGitAccessAuditEntry) IsAuditEntry()                 {}
 func (RepoConfigUnlockAnonymousGitAccessAuditEntry) IsOrganizationAuditEntryData() {}
 func (RepoConfigUnlockAnonymousGitAccessAuditEntry) IsRepositoryAuditEntryData()   {}
+func (RepoConfigUnlockAnonymousGitAccessAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.create event.
 type RepoCreateAuditEntry struct {
@@ -9992,11 +9992,11 @@ type RepoCreateAuditEntry struct {
 	Visibility *RepoCreateAuditEntryVisibility `json:"visibility"`
 }
 
-func (RepoCreateAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepoCreateAuditEntry) IsNode()                       {}
 func (RepoCreateAuditEntry) IsAuditEntry()                 {}
 func (RepoCreateAuditEntry) IsRepositoryAuditEntryData()   {}
 func (RepoCreateAuditEntry) IsOrganizationAuditEntryData() {}
+func (RepoCreateAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repo.destroy event.
 type RepoDestroyAuditEntry struct {
@@ -10365,7 +10365,6 @@ type Repository struct {
 }
 
 func (Repository) IsSearchResultItem()         {}
-func (Repository) IsPermissionGranter()        {}
 func (Repository) IsNode()                     {}
 func (Repository) IsProjectOwner()             {}
 func (Repository) IsPackageOwner()             {}
@@ -10373,6 +10372,7 @@ func (Repository) IsSubscribable()             {}
 func (Repository) IsStarrable()                {}
 func (Repository) IsUniformResourceLocatable() {}
 func (Repository) IsRepositoryInfo()           {}
+func (Repository) IsPermissionGranter()        {}
 func (Repository) IsPinnableItem()             {}
 
 // The connection type for User.
@@ -10574,11 +10574,11 @@ type RepositoryVisibilityChangeDisableAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepositoryVisibilityChangeDisableAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepositoryVisibilityChangeDisableAuditEntry) IsNode()                       {}
 func (RepositoryVisibilityChangeDisableAuditEntry) IsAuditEntry()                 {}
 func (RepositoryVisibilityChangeDisableAuditEntry) IsEnterpriseAuditEntryData()   {}
 func (RepositoryVisibilityChangeDisableAuditEntry) IsOrganizationAuditEntryData() {}
+func (RepositoryVisibilityChangeDisableAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a repository_visibility_change.enable event.
 type RepositoryVisibilityChangeEnableAuditEntry struct {
@@ -10625,11 +10625,11 @@ type RepositoryVisibilityChangeEnableAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (RepositoryVisibilityChangeEnableAuditEntry) IsOrganizationAuditEntry()     {}
 func (RepositoryVisibilityChangeEnableAuditEntry) IsNode()                       {}
 func (RepositoryVisibilityChangeEnableAuditEntry) IsAuditEntry()                 {}
 func (RepositoryVisibilityChangeEnableAuditEntry) IsEnterpriseAuditEntryData()   {}
 func (RepositoryVisibilityChangeEnableAuditEntry) IsOrganizationAuditEntryData() {}
+func (RepositoryVisibilityChangeEnableAuditEntry) IsOrganizationAuditEntry()     {}
 
 // A alert for a repository with an affected vulnerability.
 type RepositoryVulnerabilityAlert struct {
@@ -10757,10 +10757,10 @@ type RestrictedContribution struct {
 	User *User `json:"user"`
 }
 
+func (RestrictedContribution) IsCreatedIssueOrRestrictedContribution()       {}
 func (RestrictedContribution) IsCreatedPullRequestOrRestrictedContribution() {}
 func (RestrictedContribution) IsCreatedRepositoryOrRestrictedContribution()  {}
 func (RestrictedContribution) IsContribution()                               {}
-func (RestrictedContribution) IsCreatedIssueOrRestrictedContribution()       {}
 
 // A team or user who has the ability to dismiss a review on a protected branch.
 type ReviewDismissalAllowance struct {
@@ -10820,10 +10820,10 @@ type ReviewDismissedEvent struct {
 	URL string `json:"url"`
 }
 
-func (ReviewDismissedEvent) IsPullRequestTimelineItem()  {}
 func (ReviewDismissedEvent) IsPullRequestTimelineItems() {}
 func (ReviewDismissedEvent) IsNode()                     {}
 func (ReviewDismissedEvent) IsUniformResourceLocatable() {}
+func (ReviewDismissedEvent) IsPullRequestTimelineItem()  {}
 
 // A request for a user to review a pull request.
 type ReviewRequest struct {
@@ -10873,8 +10873,8 @@ type ReviewRequestRemovedEvent struct {
 	RequestedReviewer RequestedReviewer `json:"requestedReviewer"`
 }
 
-func (ReviewRequestRemovedEvent) IsPullRequestTimelineItem()  {}
 func (ReviewRequestRemovedEvent) IsPullRequestTimelineItems() {}
+func (ReviewRequestRemovedEvent) IsPullRequestTimelineItem()  {}
 func (ReviewRequestRemovedEvent) IsNode()                     {}
 
 // Represents an 'review_requested' event on a given pull request.
@@ -10890,9 +10890,9 @@ type ReviewRequestedEvent struct {
 	RequestedReviewer RequestedReviewer `json:"requestedReviewer"`
 }
 
-func (ReviewRequestedEvent) IsPullRequestTimelineItem()  {}
 func (ReviewRequestedEvent) IsPullRequestTimelineItems() {}
 func (ReviewRequestedEvent) IsNode()                     {}
+func (ReviewRequestedEvent) IsPullRequestTimelineItem()  {}
 
 // A hovercard context with a message describing the current code review state of the pull
 // request.
@@ -11535,8 +11535,8 @@ type StatusContext struct {
 	TargetURL *string `json:"targetUrl"`
 }
 
-func (StatusContext) IsNode()                     {}
 func (StatusContext) IsStatusCheckRollupContext() {}
+func (StatusContext) IsNode()                     {}
 
 // Autogenerated input type of SubmitPullRequestReview
 type SubmitPullRequestReviewInput struct {
@@ -11605,11 +11605,11 @@ type SubscribedEvent struct {
 	Subscribable Subscribable `json:"subscribable"`
 }
 
-func (SubscribedEvent) IsIssueTimelineItem()        {}
-func (SubscribedEvent) IsPullRequestTimelineItem()  {}
 func (SubscribedEvent) IsPullRequestTimelineItems() {}
-func (SubscribedEvent) IsIssueTimelineItems()       {}
 func (SubscribedEvent) IsNode()                     {}
+func (SubscribedEvent) IsPullRequestTimelineItem()  {}
+func (SubscribedEvent) IsIssueTimelineItem()        {}
+func (SubscribedEvent) IsIssueTimelineItems()       {}
 
 // A suggestion to review a pull request based on a user's commit history and review comments.
 type SuggestedReviewer struct {
@@ -11724,11 +11724,11 @@ type Team struct {
 	ViewerSubscription *SubscriptionState `json:"viewerSubscription"`
 }
 
+func (Team) IsReviewDismissalAllowanceActor() {}
 func (Team) IsPermissionGranter()             {}
 func (Team) IsNode()                          {}
 func (Team) IsSubscribable()                  {}
 func (Team) IsMemberStatusable()              {}
-func (Team) IsReviewDismissalAllowanceActor() {}
 func (Team) IsRequestedReviewer()             {}
 func (Team) IsPushAllowanceActor()            {}
 
@@ -11781,11 +11781,11 @@ type TeamAddMemberAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (TeamAddMemberAuditEntry) IsOrganizationAuditEntry()     {}
 func (TeamAddMemberAuditEntry) IsNode()                       {}
 func (TeamAddMemberAuditEntry) IsAuditEntry()                 {}
 func (TeamAddMemberAuditEntry) IsOrganizationAuditEntryData() {}
 func (TeamAddMemberAuditEntry) IsTeamAuditEntryData()         {}
+func (TeamAddMemberAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a team.add_repository event.
 type TeamAddRepositoryAuditEntry struct {
@@ -11844,12 +11844,12 @@ type TeamAddRepositoryAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (TeamAddRepositoryAuditEntry) IsOrganizationAuditEntry()     {}
 func (TeamAddRepositoryAuditEntry) IsNode()                       {}
 func (TeamAddRepositoryAuditEntry) IsAuditEntry()                 {}
 func (TeamAddRepositoryAuditEntry) IsOrganizationAuditEntryData() {}
 func (TeamAddRepositoryAuditEntry) IsRepositoryAuditEntryData()   {}
 func (TeamAddRepositoryAuditEntry) IsTeamAuditEntryData()         {}
+func (TeamAddRepositoryAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a team.change_parent_team event.
 type TeamChangeParentTeamAuditEntry struct {
@@ -12237,11 +12237,11 @@ type TeamRemoveMemberAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (TeamRemoveMemberAuditEntry) IsOrganizationAuditEntry()     {}
 func (TeamRemoveMemberAuditEntry) IsNode()                       {}
 func (TeamRemoveMemberAuditEntry) IsAuditEntry()                 {}
 func (TeamRemoveMemberAuditEntry) IsOrganizationAuditEntryData() {}
 func (TeamRemoveMemberAuditEntry) IsTeamAuditEntryData()         {}
+func (TeamRemoveMemberAuditEntry) IsOrganizationAuditEntry()     {}
 
 // Audit log entry for a team.remove_repository event.
 type TeamRemoveRepositoryAuditEntry struct {
@@ -12300,12 +12300,12 @@ type TeamRemoveRepositoryAuditEntry struct {
 	UserURL *string `json:"userUrl"`
 }
 
-func (TeamRemoveRepositoryAuditEntry) IsOrganizationAuditEntry()     {}
 func (TeamRemoveRepositoryAuditEntry) IsNode()                       {}
 func (TeamRemoveRepositoryAuditEntry) IsAuditEntry()                 {}
 func (TeamRemoveRepositoryAuditEntry) IsOrganizationAuditEntryData() {}
 func (TeamRemoveRepositoryAuditEntry) IsRepositoryAuditEntryData()   {}
 func (TeamRemoveRepositoryAuditEntry) IsTeamAuditEntryData()         {}
+func (TeamRemoveRepositoryAuditEntry) IsOrganizationAuditEntry()     {}
 
 // The connection type for Repository.
 type TeamRepositoryConnection struct {
@@ -12408,9 +12408,9 @@ type TransferredEvent struct {
 	Issue *Issue `json:"issue"`
 }
 
-func (TransferredEvent) IsIssueTimelineItem()        {}
 func (TransferredEvent) IsPullRequestTimelineItems() {}
 func (TransferredEvent) IsNode()                     {}
+func (TransferredEvent) IsIssueTimelineItem()        {}
 func (TransferredEvent) IsIssueTimelineItems()       {}
 
 // Represents a Git tree.
@@ -12488,10 +12488,10 @@ type UnassignedEvent struct {
 	User *User `json:"user"`
 }
 
-func (UnassignedEvent) IsNode()                     {}
-func (UnassignedEvent) IsIssueTimelineItem()        {}
-func (UnassignedEvent) IsPullRequestTimelineItem()  {}
 func (UnassignedEvent) IsPullRequestTimelineItems() {}
+func (UnassignedEvent) IsNode()                     {}
+func (UnassignedEvent) IsPullRequestTimelineItem()  {}
+func (UnassignedEvent) IsIssueTimelineItem()        {}
 func (UnassignedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of UnfollowUser
@@ -12543,11 +12543,11 @@ type UnlabeledEvent struct {
 	Labelable Labelable `json:"labelable"`
 }
 
-func (UnlabeledEvent) IsIssueTimelineItem()        {}
-func (UnlabeledEvent) IsPullRequestTimelineItem()  {}
 func (UnlabeledEvent) IsPullRequestTimelineItems() {}
-func (UnlabeledEvent) IsIssueTimelineItems()       {}
 func (UnlabeledEvent) IsNode()                     {}
+func (UnlabeledEvent) IsPullRequestTimelineItem()  {}
+func (UnlabeledEvent) IsIssueTimelineItem()        {}
+func (UnlabeledEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of UnlinkRepositoryFromProject
 type UnlinkRepositoryFromProjectInput struct {
@@ -12598,11 +12598,11 @@ type UnlockedEvent struct {
 	Lockable Lockable `json:"lockable"`
 }
 
-func (UnlockedEvent) IsIssueTimelineItem()        {}
-func (UnlockedEvent) IsPullRequestTimelineItem()  {}
 func (UnlockedEvent) IsPullRequestTimelineItems() {}
-func (UnlockedEvent) IsIssueTimelineItems()       {}
+func (UnlockedEvent) IsPullRequestTimelineItem()  {}
+func (UnlockedEvent) IsIssueTimelineItem()        {}
 func (UnlockedEvent) IsNode()                     {}
+func (UnlockedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of UnmarkFileAsViewed
 type UnmarkFileAsViewedInput struct {
@@ -12687,8 +12687,8 @@ type UnpinnedEvent struct {
 }
 
 func (UnpinnedEvent) IsPullRequestTimelineItems() {}
-func (UnpinnedEvent) IsIssueTimelineItems()       {}
 func (UnpinnedEvent) IsNode()                     {}
+func (UnpinnedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of UnresolveReviewThread
 type UnresolveReviewThreadInput struct {
@@ -12717,11 +12717,11 @@ type UnsubscribedEvent struct {
 	Subscribable Subscribable `json:"subscribable"`
 }
 
-func (UnsubscribedEvent) IsIssueTimelineItem()        {}
-func (UnsubscribedEvent) IsPullRequestTimelineItem()  {}
 func (UnsubscribedEvent) IsPullRequestTimelineItems() {}
-func (UnsubscribedEvent) IsIssueTimelineItems()       {}
+func (UnsubscribedEvent) IsPullRequestTimelineItem()  {}
+func (UnsubscribedEvent) IsIssueTimelineItem()        {}
 func (UnsubscribedEvent) IsNode()                     {}
+func (UnsubscribedEvent) IsIssueTimelineItems()       {}
 
 // Autogenerated input type of UpdateBranchProtectionRule
 type UpdateBranchProtectionRuleInput struct {
@@ -13681,15 +13681,11 @@ type User struct {
 	WebsiteURL *string `json:"websiteUrl"`
 }
 
-func (User) IsSponsor()                       {}
-func (User) IsSearchResultItem()              {}
-func (User) IsEnterpriseMember()              {}
-func (User) IsAuditEntryActor()               {}
 func (User) IsReviewDismissalAllowanceActor() {}
-func (User) IsRequestedReviewer()             {}
-func (User) IsPushAllowanceActor()            {}
+func (User) IsSearchResultItem()              {}
+func (User) IsSponsor()                       {}
+func (User) IsAuditEntryActor()               {}
 func (User) IsAssignee()                      {}
-func (User) IsSponsorableItem()               {}
 func (User) IsNode()                          {}
 func (User) IsActor()                         {}
 func (User) IsPackageOwner()                  {}
@@ -13698,6 +13694,10 @@ func (User) IsRepositoryOwner()               {}
 func (User) IsUniformResourceLocatable()      {}
 func (User) IsProfileOwner()                  {}
 func (User) IsSponsorable()                   {}
+func (User) IsRequestedReviewer()             {}
+func (User) IsPushAllowanceActor()            {}
+func (User) IsEnterpriseMember()              {}
+func (User) IsSponsorableItem()               {}
 
 // Represents a 'user_blocked' event on a given user.
 type UserBlockedEvent struct {
@@ -13712,11 +13712,11 @@ type UserBlockedEvent struct {
 	Subject *User `json:"subject"`
 }
 
-func (UserBlockedEvent) IsIssueTimelineItem()        {}
-func (UserBlockedEvent) IsPullRequestTimelineItem()  {}
 func (UserBlockedEvent) IsPullRequestTimelineItems() {}
-func (UserBlockedEvent) IsIssueTimelineItems()       {}
 func (UserBlockedEvent) IsNode()                     {}
+func (UserBlockedEvent) IsPullRequestTimelineItem()  {}
+func (UserBlockedEvent) IsIssueTimelineItem()        {}
+func (UserBlockedEvent) IsIssueTimelineItems()       {}
 
 // The connection type for User.
 type UserConnection struct {
