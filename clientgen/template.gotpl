@@ -24,7 +24,9 @@ func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOp
 
 type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 
-type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
+{{- if .Mutation }}
+  type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
+{{- end }}
 
 {{- range $name, $element := .Fragment }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
