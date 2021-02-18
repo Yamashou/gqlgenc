@@ -259,7 +259,7 @@ func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
 		return nil, xerrors.Errorf("introspection query failed: %w", err)
 	}
 
-	schema, err := validator.ValidateSchemaDocument(introspection.ParseIntrospectionQuery(res))
+	schema, err := validator.ValidateSchemaDocument(introspection.ParseIntrospectionQuery(c.Endpoint.URL, res))
 	if err != nil {
 		return nil, xerrors.Errorf("validation error: %w", err)
 	}
