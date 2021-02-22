@@ -70,7 +70,7 @@ query:
   - "./query/*.graphql" # Where are all the query files located?
 ```
 
-Execute the following command on same directory for .gqlgenc.yaml
+Execute the following command on same directory for .gqlgenc.yml
 
 ```shell script
 gqlgenc
