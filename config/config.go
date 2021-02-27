@@ -279,9 +279,21 @@ func (c *Config) loadLocalSchema() (*ast.Schema, error) {
 type GenerateConfig struct {
 	Prefix *NamingConfig `yaml:"prefix,omitempty"`
 	Suffix *NamingConfig `yaml:"suffix,omitempty"`
-	Client bool          `yaml:"client,omitempty"`
+	Client *bool         `yaml:"client,omitempty"`
 	// if true, used client v2 in generate code
 	ClientV2 bool `yaml:"clientV2,omitempty"`
+}
+
+func (c *GenerateConfig) ShouldGenerateClient() bool {
+	if c == nil {
+		return true
+	}
+
+	if c.Client != nil && !*c.Client {
+		return false
+	}
+
+	return true
 }
 
 type NamingConfig struct {
