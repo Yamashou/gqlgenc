@@ -77,7 +77,7 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	}
 
 	generateClient := true
-	if p.GenerateConfig != nil && p.GenerateConfig.Client == false && p.GenerateConfig.ClientV2 == false {
+	if p.GenerateConfig != nil && !p.GenerateConfig.Client && !p.GenerateConfig.ClientV2 {
 		generateClient = false
 	}
 
