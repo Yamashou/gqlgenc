@@ -7,6 +7,7 @@ schema:
 query:
   - "./queries/*.graphql"
 generate:
+  unamedPattern: Empty
   prefix:
     mutation: Hoge
     query: Data
