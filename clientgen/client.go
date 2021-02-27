@@ -1,8 +1,6 @@
 package clientgen
 
 import (
-	"fmt"
-
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
@@ -37,7 +35,7 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 
 	// 1. 全体のqueryDocumentを1度にparse
 	// 1. Parse document from source of query
-	queryDocument, err := ParseQueryDocuments(cfg.Schema, querySources)
+	queryDocument, err := ParseQueryDocuments(cfg.Schema, querySources, p.GenerateConfig)
 	if err != nil {
 		return xerrors.Errorf(": %w", err)
 	}
@@ -47,12 +45,6 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	queryDocuments, err := QueryDocumentsByOperations(cfg.Schema, queryDocument.Operations)
 	if err != nil {
 		return xerrors.Errorf("parse query document failed: %w", err)
-	}
-
-	for i, queryDocument := range queryDocuments {
-		if queryDocument.Operations[0].Name == "" {
-			queryDocument.Operations[0].Name = fmt.Sprintf("Unamed%d", i)
-		}
 	}
 
 	// 3. テンプレートと情報ソースを元にコード生成
