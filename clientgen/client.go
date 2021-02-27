@@ -76,7 +76,12 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 		return xerrors.Errorf("generating operation failed: %w", err)
 	}
 
-	if err := RenderTemplate(cfg, query, mutation, fragments, operations, operationResponses, p.Client); err != nil {
+	generateClient := true
+	if p.GenerateConfig != nil && p.GenerateConfig.Client == false && p.GenerateConfig.ClientV2 == false {
+		generateClient = false
+	}
+
+	if err := RenderTemplate(cfg, query, mutation, fragments, operations, operationResponses, generateClient, p.Client); err != nil {
 		return xerrors.Errorf("template failed: %w", err)
 	}
 
