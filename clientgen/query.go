@@ -16,12 +16,17 @@ type merger struct {
 	unamedPattern string
 }
 
-func ParseQueryDocuments(schema *ast.Schema, querySources []*ast.Source, generateConfig *config.GenerateConfig) (*ast.QueryDocument, error) {
-	merger := &merger{unamedPattern: generateConfig.UnamedPattern}
-	if merger.unamedPattern == "" {
-		merger.unamedPattern = "Unamed"
+func newMerger(generateConfig *config.GenerateConfig) *merger {
+	unamedPattern := "Unamed"
+	if generateConfig != nil && generateConfig.UnamedPattern != "" {
+		unamedPattern = generateConfig.UnamedPattern
 	}
 
+	return &merger{unamedPattern: unamedPattern}
+}
+
+func ParseQueryDocuments(schema *ast.Schema, querySources []*ast.Source, generateConfig *config.GenerateConfig) (*ast.QueryDocument, error) {
+	merger := newMerger(generateConfig)
 	for _, querySource := range querySources {
 		query, gqlerr := parser.ParseQuery(querySource)
 		if gqlerr != nil {
