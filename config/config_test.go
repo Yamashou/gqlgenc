@@ -81,7 +81,7 @@ func TestLoadConfig(t *testing.T) {
 		require.Equal(t, c.Generate.Prefix.Query, "Data")
 	})
 
-	t.Run("generate skip ckient", func(t *testing.T) {
+	t.Run("generate skip client", func(t *testing.T) {
 		t.Parallel()
 		c, err := LoadConfig("testdata/cfg/generate_client_false.yml")
 		require.NoError(t, err)
