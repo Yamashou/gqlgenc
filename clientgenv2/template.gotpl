@@ -35,7 +35,7 @@ type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
 {{- end }}
 
 {{- range $model := .Operation}}
-	const {{ $model.Name|go }}Query = `{{ $model.Operation }}`
+	const {{ $model.Name|go }}Document = `{{ $model.Operation }}`
 
 	func (c *Client) {{ $model.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, interceptors ...clientv2.RequestInterceptor) (*{{ $model.ResponseStructName | go }}, error) {
 	vars := map[string]interface{}{
@@ -45,7 +45,7 @@ type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
 	}
 
 	var res {{ $model.ResponseStructName | go }}
-	if err := c.Client.Post(ctx, "{{ $model.Name|go }}", {{ $model.Name|go }}Query, &res, vars, interceptors...); err != nil {
+	if err := c.Client.Post(ctx, "{{ $model.Name|go }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
 	return nil, err
 	}
 
