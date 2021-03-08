@@ -37,7 +37,7 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 {{- end }}
 
 {{- range $model := .Operation}}
-const {{ $model.Name|go }}Query = `{{ $model.Operation }}`
+const {{ $model.Name|go }}Document = `{{ $model.Operation }}`
 
 func (c *Client) {{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, httpRequestOptions ...client.HTTPRequestOption) (*{{ $model.ResponseStructName | go }}, error) {
 	vars := map[string]interface{}{
@@ -47,7 +47,7 @@ func (c *Client) {{ $model.Name | go }} (ctx context.Context{{- range $arg := .A
 	}
 
     var res {{ $model.ResponseStructName | go }}
-    if err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Query, &res, vars, httpRequestOptions...); err != nil {
+    if err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars, httpRequestOptions...); err != nil {
         return nil, err
     }
 
