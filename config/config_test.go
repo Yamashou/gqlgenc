@@ -74,11 +74,20 @@ func TestLoadConfig(t *testing.T) {
 		t.Parallel()
 		c, err := LoadConfig("testdata/cfg/generate.yml")
 		require.NoError(t, err)
-		require.Equal(t, "Empty", c.Generate.UnamedPattern)
-		require.Equal(t, "Bar", c.Generate.Suffix.Mutation)
-		require.Equal(t, "Foo", c.Generate.Suffix.Query)
-		require.Equal(t, "Hoge", c.Generate.Prefix.Mutation)
-		require.Equal(t, "Data", c.Generate.Prefix.Query)
+		require.Equal(t, true, c.Generate.ShouldGenerateClient())
+		require.Equal(t, c.Generate.UnamedPattern, "Empty")
+		require.Equal(t, c.Generate.Suffix.Mutation, "Bar")
+		require.Equal(t, c.Generate.Suffix.Query, "Foo")
+		require.Equal(t, c.Generate.Prefix.Mutation, "Hoge")
+		require.Equal(t, c.Generate.Prefix.Query, "Data")
+	})
+
+	t.Run("generate skip client", func(t *testing.T) {
+		t.Parallel()
+		c, err := LoadConfig("testdata/cfg/generate_client_false.yml")
+		require.NoError(t, err)
+
+		require.Equal(t, false, c.Generate.ShouldGenerateClient())
 	})
 }
 
