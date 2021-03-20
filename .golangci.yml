@@ -38,6 +38,8 @@ linters:
     - exhaustivestruct
     - errorlint # TODO able this lint
     - forbidigo
+    - cyclop
+    - revive
   fast: false
 
 issues:

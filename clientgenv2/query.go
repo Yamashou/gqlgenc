@@ -10,9 +10,9 @@ import (
 func ParseQueryDocuments(schema *ast.Schema, querySources []*ast.Source) (*ast.QueryDocument, error) {
 	var queryDocument ast.QueryDocument
 	for _, querySource := range querySources {
-		query, gqlerr := parser.ParseQuery(querySource)
-		if gqlerr != nil {
-			return nil, xerrors.Errorf(": %w", gqlerr)
+		query, err := parser.ParseQuery(querySource)
+		if err != nil {
+			return nil, xerrors.Errorf(": %w", err)
 		}
 
 		mergeQueryDocument(&queryDocument, query)

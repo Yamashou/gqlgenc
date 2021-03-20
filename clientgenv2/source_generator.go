@@ -31,8 +31,8 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
 	for _, filed := range rs {
-		//  クエリーのフィールドの子階層がFragmentの場合、このフィールドにそのFragmentの型を追加する
 		if filed.IsFragmentSpread {
+			// TODO ここを分けてstructを定義する必要がある
 			typ := filed.ResponseFields.StructType().Underlying().(*types.Struct)
 			for j := 0; j < typ.NumFields(); j++ {
 				vars = append(vars, typ.Field(j))
@@ -44,7 +44,19 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 		}
 	}
 
-	return types.NewStruct(vars, structTags)
+	varsMap := make(map[string]struct{})
+	uniqueVars := make([]*types.Var, 0)
+	uniqueTags := make([]string, 0)
+	for i, v := range vars {
+		_, ok := varsMap[v.Name()]
+		if !ok {
+			varsMap[v.Name()] = struct{}{}
+			uniqueVars = append(uniqueVars, v)
+			uniqueTags = append(uniqueTags, structTags[i])
+		}
+	}
+
+	return types.NewStruct(uniqueVars, uniqueTags)
 }
 
 func (rs ResponseFieldList) IsFragment() bool {
@@ -93,47 +105,69 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 			continue
 		}
 
-		var typ types.Type
-		if field.Type.Name() == "Query" || field.Type.Name() == "Mutation" {
-			var baseType types.Type
-			baseType, err := r.binder.FindType(r.client.Pkg().Path(), field.Type.Name())
-			if err != nil {
-				if !strings.Contains(err.Error(), "unable to find type") {
-					return nil, xerrors.Errorf("not found type: %w", err)
-				}
-
-				// create new type
-				baseType = types.NewPointer(types.NewNamed(
-					types.NewTypeName(0, r.client.Pkg(), templates.ToGo(field.Type.Name()), nil),
-					nil,
-					nil,
-				))
-			}
-
-			// for recursive struct field in go
-			typ = types.NewPointer(baseType)
-		} else {
-			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
-			if err != nil {
-				return nil, xerrors.Errorf("not found type: %w", err)
-			}
-
-			typ = r.binder.CopyModifiersFromAst(field.Type, baseType)
+		responseField, err := r.NewResponseFieldByFieldDefinition(field)
+		if err != nil {
+			return nil, xerrors.Errorf(": %w", err)
 		}
 
-		tags := []string{
-			fmt.Sprintf(`json:"%s"`, field.Name),
-			fmt.Sprintf(`graphql:"%s"`, field.Name),
-		}
-
-		fields = append(fields, &ResponseField{
-			Name: field.Name,
-			Type: typ,
-			Tags: tags,
-		})
+		fields = append(fields, responseField)
 	}
 
 	return fields, nil
+}
+
+func (r *SourceGenerator) NewResponseFieldByFieldDefinition(field *ast.FieldDefinition) (*ResponseField, error) {
+	typ, err := r.NewResponseFieldType(field)
+	if err != nil {
+		return nil, xerrors.Errorf(": %w", err)
+	}
+
+	return &ResponseField{
+		Name: field.Name,
+		Type: typ,
+		Tags: NewResponseFieldTags(field),
+	}, nil
+}
+
+func (r *SourceGenerator) NewResponseFieldType(field *ast.FieldDefinition) (types.Type, error) {
+	var typ types.Type
+	if field.Type.Name() == "Query" || field.Type.Name() == "Mutation" {
+		var baseType types.Type
+		baseType, err := r.binder.FindType(r.client.Pkg().Path(), field.Type.Name())
+		if err != nil {
+			if !strings.Contains(err.Error(), "unable to find type") {
+				return nil, xerrors.Errorf("not found type: %w", err)
+			}
+
+			// create new type
+			baseType = types.NewPointer(types.NewNamed(
+				types.NewTypeName(0, r.client.Pkg(), templates.ToGo(field.Type.Name()), nil),
+				nil,
+				nil,
+			))
+		}
+
+		// for recursive struct field in go
+		typ = types.NewPointer(baseType)
+	} else {
+		baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
+		if err != nil {
+			return nil, xerrors.Errorf("not found type: %w", err)
+		}
+
+		typ = r.binder.CopyModifiersFromAst(field.Type, baseType)
+	}
+
+	return typ, nil
+}
+
+func NewResponseFieldTags(field *ast.FieldDefinition) []string {
+	tags := []string{
+		fmt.Sprintf(`json:"%s"`, field.Name),
+		fmt.Sprintf(`graphql:"%s"`, field.Name),
+	}
+
+	return tags
 }
 
 func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseField {
@@ -150,6 +184,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
+			// TODO ここの処理をbaseTypeをstructではなくて、別のstructとして定義して、そのstructの名前を入れるようにする
 			baseType = fieldsResponseFields.StructType()
 		default:
 			// ここにきたらバグ

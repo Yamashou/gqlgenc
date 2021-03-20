@@ -22,3 +22,13 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
     }
 }
 
+query GetRepo($id: ID!) {
+    node(id: $id) {
+        ... on Repository {
+            id
+            name
+        }
+    }
+}
+
+

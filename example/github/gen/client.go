@@ -6,15 +6,15 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Yamashou/gqlgenc/client"
+	"github.com/Yamashou/gqlgenc/clientv2"
 )
 
 type Client struct {
-	Client *client.Client
+	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
-	return &Client{Client: client.NewClient(cli, baseURL, options...)}
+func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
+	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
 }
 
 type Query struct {
@@ -64,6 +64,7 @@ type Mutation struct {
 	AddReaction                                                 *AddReactionPayload                                                 "json:\"addReaction\" graphql:\"addReaction\""
 	AddStar                                                     *AddStarPayload                                                     "json:\"addStar\" graphql:\"addStar\""
 	AddVerifiableDomain                                         *AddVerifiableDomainPayload                                         "json:\"addVerifiableDomain\" graphql:\"addVerifiableDomain\""
+	ApproveVerifiableDomain                                     *ApproveVerifiableDomainPayload                                     "json:\"approveVerifiableDomain\" graphql:\"approveVerifiableDomain\""
 	ArchiveRepository                                           *ArchiveRepositoryPayload                                           "json:\"archiveRepository\" graphql:\"archiveRepository\""
 	CancelEnterpriseAdminInvitation                             *CancelEnterpriseAdminInvitationPayload                             "json:\"cancelEnterpriseAdminInvitation\" graphql:\"cancelEnterpriseAdminInvitation\""
 	ChangeUserStatus                                            *ChangeUserStatusPayload                                            "json:\"changeUserStatus\" graphql:\"changeUserStatus\""
@@ -114,6 +115,7 @@ type Mutation struct {
 	MinimizeComment                                             *MinimizeCommentPayload                                             "json:\"minimizeComment\" graphql:\"minimizeComment\""
 	MoveProjectCard                                             *MoveProjectCardPayload                                             "json:\"moveProjectCard\" graphql:\"moveProjectCard\""
 	MoveProjectColumn                                           *MoveProjectColumnPayload                                           "json:\"moveProjectColumn\" graphql:\"moveProjectColumn\""
+	PinIssue                                                    *PinIssuePayload                                                    "json:\"pinIssue\" graphql:\"pinIssue\""
 	RegenerateEnterpriseIdentityProviderRecoveryCodes           *RegenerateEnterpriseIdentityProviderRecoveryCodesPayload           "json:\"regenerateEnterpriseIdentityProviderRecoveryCodes\" graphql:\"regenerateEnterpriseIdentityProviderRecoveryCodes\""
 	RegenerateVerifiableDomainToken                             *RegenerateVerifiableDomainTokenPayload                             "json:\"regenerateVerifiableDomainToken\" graphql:\"regenerateVerifiableDomainToken\""
 	RemoveAssigneesFromAssignable                               *RemoveAssigneesFromAssignablePayload                               "json:\"removeAssigneesFromAssignable\" graphql:\"removeAssigneesFromAssignable\""
@@ -143,6 +145,7 @@ type Mutation struct {
 	UnmarkFileAsViewed                                          *UnmarkFileAsViewedPayload                                          "json:\"unmarkFileAsViewed\" graphql:\"unmarkFileAsViewed\""
 	UnmarkIssueAsDuplicate                                      *UnmarkIssueAsDuplicatePayload                                      "json:\"unmarkIssueAsDuplicate\" graphql:\"unmarkIssueAsDuplicate\""
 	UnminimizeComment                                           *UnminimizeCommentPayload                                           "json:\"unminimizeComment\" graphql:\"unminimizeComment\""
+	UnpinIssue                                                  *UnpinIssuePayload                                                  "json:\"unpinIssue\" graphql:\"unpinIssue\""
 	UnresolveReviewThread                                       *UnresolveReviewThreadPayload                                       "json:\"unresolveReviewThread\" graphql:\"unresolveReviewThread\""
 	UpdateBranchProtectionRule                                  *UpdateBranchProtectionRulePayload                                  "json:\"updateBranchProtectionRule\" graphql:\"updateBranchProtectionRule\""
 	UpdateCheckRun                                              *UpdateCheckRunPayload                                              "json:\"updateCheckRun\" graphql:\"updateCheckRun\""
@@ -182,10 +185,13 @@ type Mutation struct {
 	UpdateTopics                                                *UpdateTopicsPayload                                                "json:\"updateTopics\" graphql:\"updateTopics\""
 	VerifyVerifiableDomain                                      *VerifyVerifiableDomainPayload                                      "json:\"verifyVerifiableDomain\" graphql:\"verifyVerifiableDomain\""
 }
+
 type LanguageFragment struct {
-	ID   string "json:\"id\" graphql:\"id\""
-	Name string "json:\"name\" graphql:\"name\""
+	ID       string  "json:\"id\" graphql:\"id\""
+	Name     string  "json:\"name\" graphql:\"name\""
+	Typename *string "json:\"__typename\" graphql:\"__typename\""
 }
+
 type GetUser struct {
 	Viewer struct {
 		ID           string  "json:\"id\" graphql:\"id\""
@@ -195,14 +201,33 @@ type GetUser struct {
 				ID        string "json:\"id\" graphql:\"id\""
 				Name      string "json:\"name\" graphql:\"name\""
 				Languages *struct {
-					Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
+					Nodes []*struct {
+						ID       string  "json:\"id\" graphql:\"id\""
+						Name     string  "json:\"name\" graphql:\"name\""
+						Typename *string "json:\"__typename\" graphql:\"__typename\""
+					} "json:\"nodes\" graphql:\"nodes\""
+					Typename *string "json:\"__typename\" graphql:\"__typename\""
 				} "json:\"languages\" graphql:\"languages\""
+				Typename *string "json:\"__typename\" graphql:\"__typename\""
 			} "json:\"nodes\" graphql:\"nodes\""
+			Typename *string "json:\"__typename\" graphql:\"__typename\""
 		} "json:\"repositories\" graphql:\"repositories\""
+		Typename *string "json:\"__typename\" graphql:\"__typename\""
 	} "json:\"viewer\" graphql:\"viewer\""
 }
 
-const GetUserQuery = `query getUser ($repositoryFirst: Int!, $languageFirst: Int!) {
+type GetRepo struct {
+	Node *struct {
+		Repository struct {
+			ID       string  "json:\"id\" graphql:\"id\""
+			Name     string  "json:\"name\" graphql:\"name\""
+			Typename *string "json:\"__typename\" graphql:\"__typename\""
+		} "graphql:\"... on Repository\""
+		Typename *string "json:\"__typename\" graphql:\"__typename\""
+	} "json:\"node\" graphql:\"node\""
+}
+
+const GetUserDocument = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {
 	viewer {
 		id
 		name
@@ -213,26 +238,57 @@ const GetUserQuery = `query getUser ($repositoryFirst: Int!, $languageFirst: Int
 				languages(first: $languageFirst) {
 					nodes {
 						... LanguageFragment
+						__typename
 					}
+					__typename
 				}
+				__typename
 			}
+			__typename
 		}
+		__typename
 	}
 }
 fragment LanguageFragment on Language {
 	id
 	name
+	__typename
 }
 `
 
-func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, httpRequestOptions ...client.HTTPRequestOption) (*GetUser, error) {
+func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, interceptors ...clientv2.RequestInterceptor) (*GetUser, error) {
 	vars := map[string]interface{}{
 		"repositoryFirst": repositoryFirst,
 		"languageFirst":   languageFirst,
 	}
 
 	var res GetUser
-	if err := c.Client.Post(ctx, "getUser", GetUserQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetRepoDocument = `query GetRepo ($id: ID!) {
+	node(id: $id) {
+		... on Repository {
+			id
+			name
+			__typename
+		}
+		__typename
+	}
+}
+`
+
+func (c *Client) GetRepo(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetRepo, error) {
+	vars := map[string]interface{}{
+		"id": id,
+	}
+
+	var res GetRepo
+	if err := c.Client.Post(ctx, "GetRepo", GetRepoDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 
