@@ -15,23 +15,39 @@
 {{ reserveImport "github.com/Yamashou/gqlgenc/clientv2" }}
 
 type Client struct {
-Client *clientv2.Client
+	Client *clientv2.Client
 }
 
 func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
-return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
+	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
 }
 
 type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 
 type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
 
+{{- range $name, $element := .Interface }}
+	type {{ $element.Name | go }} {{ $element.Type | ref }}
+	{{- range $name1, $element1 := $element.InterfaceResponseTypes }}
+		type {{ $element1.Name | go }} {{ $element1.Type | ref }}
+		{{- range $name2, $element2 := $element1.ImplementsFuncs }}
+			func (r *{{ $element1.Name | go }}) {{ $element2.Name | go }}() *{{ $element2.ResponseTypeName | go }} {
+				{{if eq $element1.Name $element2.ResponseTypeName }}
+					return r
+				{{ else }}
+					return nil
+				{{ end }}
+			}
+		{{- end }}
+	{{- end }}
+{{- end}}
+
 {{- range $name, $element := .Fragment }}
-	type  {{ .Name | go  }} {{ .Type | ref }}
+	type  {{ $element.Name | go  }} {{ $element.Type | ref }}
 {{- end }}
 
 {{- range $name, $element := .OperationResponse }}
-	type  {{ .Name | go  }} {{ .Type | ref }}
+	type  {{ $element.Name | go  }} {{ $element.Type | ref }}
 {{- end }}
 
 {{- range $model := .Operation}}

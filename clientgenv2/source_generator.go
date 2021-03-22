@@ -23,6 +23,64 @@ type ResponseField struct {
 	Type             types.Type
 	Tags             []string
 	ResponseFields   ResponseFieldList
+	Interface        *ResponseInterface
+}
+
+type ImplementResponseInterfaceType struct {
+	Name            string
+	BaseTypeName    string
+	Type            types.Type
+	ImplementsFuncs []*ImplementsFunc
+}
+
+type ImplementsFunc struct {
+	Name             string
+	ResponseTypeName string
+	ResponseType     types.Type
+	IsMyType         bool
+}
+
+type ResponseInterface struct {
+	Name                   string
+	Type                   types.Type
+	InterfaceResponseTypes []*ImplementResponseInterfaceType
+}
+
+func (r *SourceGenerator) NewResponseInterface(name string, fieldsResponseFields ResponseFieldList, funcs []*ImplementsFunc, interfaceResponseTypes []*ImplementResponseInterfaceType) *ResponseInterface {
+	implementsFuncs := make([]*types.Func, 0)
+	for _, field := range funcs {
+		t := types.NewPointer(types.NewNamed(
+			types.NewTypeName(0, r.client.Pkg(), templates.ToGo(field.ResponseTypeName), nil),
+			fieldsResponseFields.StructType(),
+			nil,
+		))
+
+		implementsFuncs = append(implementsFuncs,
+			types.NewFunc(0, r.client.Pkg(), field.Name, types.NewSignature(nil, nil, types.NewTuple(types.NewVar(0, nil, "", t)), false)))
+	}
+
+	return &ResponseInterface{
+		Name:                   fmt.Sprintf("%sRandStr", name),
+		Type:                   types.NewInterfaceType(implementsFuncs, nil),
+		InterfaceResponseTypes: interfaceResponseTypes,
+	}
+}
+
+func NewImplementsFuncs(fieldsResponseFields ResponseFieldList) []*ImplementsFunc {
+	funcs := make([]*ImplementsFunc, 0)
+	for _, field := range fieldsResponseFields {
+		if len(field.ResponseFields) == 0 {
+			continue
+		}
+
+		funcs = append(funcs, &ImplementsFunc{
+			Name:         field.Name,
+			ResponseType: nil,
+			IsMyType:     false,
+		})
+	}
+
+	return funcs
 }
 
 type ResponseFieldList []*ResponseField
@@ -44,6 +102,7 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 		}
 	}
 
+	// TODO ユニーク処理を別関数に分ける
 	varsMap := make(map[string]struct{})
 	uniqueVars := make([]*types.Var, 0)
 	uniqueTags := make([]string, 0)
@@ -76,16 +135,18 @@ func (rs ResponseFieldList) IsStructType() bool {
 }
 
 type SourceGenerator struct {
-	cfg    *config.Config
-	binder *config.Binder
-	client config.PackageConfig
+	cfg        *config.Config
+	binder     *config.Binder
+	client     config.PackageConfig
+	interfaces []*ResponseInterface
 }
 
 func NewSourceGenerator(cfg *config.Config, client config.PackageConfig) *SourceGenerator {
 	return &SourceGenerator{
-		cfg:    cfg,
-		binder: cfg.NewBinder(),
-		client: client,
+		cfg:        cfg,
+		binder:     cfg.NewBinder(),
+		client:     client,
+		interfaces: make([]*ResponseInterface, 0),
 	}
 }
 
@@ -140,11 +201,11 @@ func (r *SourceGenerator) NewResponseFieldType(field *ast.FieldDefinition) (type
 			}
 
 			// create new type
-			baseType = types.NewPointer(types.NewNamed(
+			baseType = types.NewNamed(
 				types.NewTypeName(0, r.client.Pkg(), templates.ToGo(field.Type.Name()), nil),
 				nil,
 				nil,
-			))
+			)
 		}
 
 		// for recursive struct field in go
@@ -174,6 +235,34 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 	switch selection := selection.(type) {
 	case *ast.Field:
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
+		sonTyps := make([]*ImplementResponseInterfaceType, 0)
+		var resInterface *ResponseInterface
+		if _, ok := r.Type(selection.Definition.Type.Name()).Underlying().(*types.Interface); ok {
+			for _, typ := range fieldsResponseFields {
+				if len(typ.ResponseFields) > 0 {
+					sonTyps = append(sonTyps, &ImplementResponseInterfaceType{
+						Name:         fmt.Sprintf("%s_%s", typ.Name, "rond_str"),
+						BaseTypeName: typ.Name,
+						Type:         typ.Type,
+					})
+				}
+			}
+			implementsFuncs := NewImplementsFuncs(fieldsResponseFields)
+			for _, t := range sonTyps {
+				for _, it := range implementsFuncs {
+					if t.BaseTypeName == it.Name {
+						it.ResponseType = t.Type
+						it.ResponseTypeName = t.Name
+					}
+				}
+			}
+
+			for _, t := range sonTyps {
+				t.ImplementsFuncs = implementsFuncs
+			}
+			resInterface = r.NewResponseInterface(selection.Definition.Type.Name(), fieldsResponseFields, implementsFuncs, sonTyps)
+			r.interfaces = append(r.interfaces, resInterface)
+		}
 
 		var baseType types.Type
 		switch {
@@ -201,11 +290,27 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
 		}
 
+		if resInterface != nil {
+			t := types.NewNamed(
+				types.NewTypeName(0, r.client.Pkg(), templates.ToGo(resInterface.Name), nil),
+				fieldsResponseFields.StructType(),
+				nil,
+			)
+			return &ResponseField{
+				Name:           selection.Alias,
+				Type:           t,
+				Tags:           tags,
+				ResponseFields: fieldsResponseFields,
+				Interface:      resInterface,
+			}
+		}
+
 		return &ResponseField{
 			Name:           selection.Alias,
 			Type:           typ,
 			Tags:           tags,
 			ResponseFields: fieldsResponseFields,
+			Interface:      resInterface,
 		}
 
 	case *ast.FragmentSpread:
@@ -226,11 +331,13 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
+		// TODO TypeConditionごとにStructを作成するのと、そのTypeを返す関数を用意してそれをInterfaceに持たせる
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
+		typ := fieldsResponseFields.StructType()
 
 		return &ResponseField{
 			Name:             selection.TypeCondition,
-			Type:             fieldsResponseFields.StructType(),
+			Type:             typ,
 			IsInlineFragment: true,
 			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
 			ResponseFields:   fieldsResponseFields,

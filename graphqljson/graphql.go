@@ -95,7 +95,6 @@ func (d *Decoder) Decode(v interface{}) error {
 	if rv.Kind() != reflect.Ptr {
 		return xerrors.Errorf("cannot decode into non-pointer %T", v)
 	}
-
 	d.vs = [][]reflect.Value{{rv.Elem()}}
 	if err := d.decode(); err != nil {
 		return xerrors.Errorf(": %w", err)
@@ -137,6 +136,8 @@ func (d *Decoder) decode() error {
 						someFieldExist = true
 					}
 				}
+
+				// TODO Interfaceの時の処理を追加
 				d.vs[i] = append(d.vs[i], f)
 			}
 			if !someFieldExist {
@@ -176,7 +177,6 @@ func (d *Decoder) decode() error {
 		switch tok := tok.(type) {
 		case string, json.Number, bool, nil:
 			// Value.
-
 			for i := range d.vs {
 				v := d.vs[i][len(d.vs[i])-1]
 				if !v.IsValid() {

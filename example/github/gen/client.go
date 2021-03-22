@@ -186,6 +186,40 @@ type Mutation struct {
 	VerifyVerifiableDomain                                      *VerifyVerifiableDomainPayload                                      "json:\"verifyVerifiableDomain\" graphql:\"verifyVerifiableDomain\""
 }
 
+type NodeRandStr interface {
+	Gist() *GistRondStr
+	Repository() *RepositoryRondStr /* incomplete */
+}
+
+type RepositoryRondStr struct {
+	ID       string  "json:\"id\" graphql:\"id\""
+	Name     string  "json:\"name\" graphql:\"name\""
+	Typename *string "json:\"__typename\" graphql:\"__typename\""
+}
+
+func (r *RepositoryRondStr) Repository() *RepositoryRondStr {
+	return r
+}
+
+func (r *RepositoryRondStr) Gist() *GistRondStr {
+	return nil
+}
+
+type GistRondStr struct {
+	ID       string  "json:\"id\" graphql:\"id\""
+	Name     string  "json:\"name\" graphql:\"name\""
+	PushedAt *string "json:\"pushedAt\" graphql:\"pushedAt\""
+	Typename *string "json:\"__typename\" graphql:\"__typename\""
+}
+
+func (r *GistRondStr) Repository() *RepositoryRondStr {
+	return nil
+}
+
+func (r *GistRondStr) Gist() *GistRondStr {
+	return r
+}
+
 type LanguageFragment struct {
 	ID       string  "json:\"id\" graphql:\"id\""
 	Name     string  "json:\"name\" graphql:\"name\""
@@ -217,14 +251,7 @@ type GetUser struct {
 }
 
 type GetRepo struct {
-	Node *struct {
-		Repository struct {
-			ID       string  "json:\"id\" graphql:\"id\""
-			Name     string  "json:\"name\" graphql:\"name\""
-			Typename *string "json:\"__typename\" graphql:\"__typename\""
-		} "graphql:\"... on Repository\""
-		Typename *string "json:\"__typename\" graphql:\"__typename\""
-	} "json:\"node\" graphql:\"node\""
+	Node NodeRandStr "json:\"node\" graphql:\"node\""
 }
 
 const GetUserDocument = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {
@@ -275,6 +302,12 @@ const GetRepoDocument = `query GetRepo ($id: ID!) {
 		... on Repository {
 			id
 			name
+			__typename
+		}
+		... on Gist {
+			id
+			name
+			pushedAt
 			__typename
 		}
 		__typename

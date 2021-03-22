@@ -80,7 +80,7 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	operations := source.Operations(queryDocuments)
 
 	// 4. Generate client
-	if err := RenderTemplate(cfg, query, mutation, fragments, operations, operationResponses, p.Client); err != nil {
+	if err := RenderTemplate(cfg, query, mutation, fragments, operations, operationResponses, source.sourceGenerator.interfaces, p.Client); err != nil {
 		return xerrors.Errorf("template failed: %w", err)
 	}
 

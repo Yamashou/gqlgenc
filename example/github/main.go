@@ -39,6 +39,6 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Println(getRepo.Node.Repository.Name, *getRepo.Node.Typename)
+		fmt.Println(getRepo.Node.Repository().Name, getRepo.Node.Repository().Name)
 	}
 }

@@ -28,6 +28,11 @@ query GetRepo($id: ID!) {
             id
             name
         }
+        ... on Gist {
+            id
+            name
+            pushedAt
+        }
     }
 }
 
