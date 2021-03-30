@@ -35,7 +35,7 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 
 	// 1. 全体のqueryDocumentを1度にparse
 	// 1. Parse document from source of query
-	queryDocument, err := ParseQueryDocuments(cfg.Schema, querySources)
+	queryDocument, err := ParseQueryDocuments(cfg.Schema, querySources, p.GenerateConfig)
 	if err != nil {
 		return xerrors.Errorf(": %w", err)
 	}
