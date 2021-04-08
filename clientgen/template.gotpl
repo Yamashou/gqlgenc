@@ -19,7 +19,7 @@
 		Client *client.Client
 	}
 
-	func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
+	func NewClient(cli client.DoClient, baseURL string, options ...client.HTTPRequestOption) *Client {
 		return &Client{Client: client.NewClient(cli, baseURL, options...)}
 	}
 {{- end }}
