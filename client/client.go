@@ -13,12 +13,17 @@ import (
 	"golang.org/x/xerrors"
 )
 
+// DoClient client interface for only the Do method on the http client
+type DoClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // HTTPRequestOption represents the options applicable to the http client
 type HTTPRequestOption func(req *http.Request)
 
 // Client is the http client wrapper
 type Client struct {
-	Client             *http.Client
+	Client             DoClient
 	BaseURL            string
 	HTTPRequestOptions []HTTPRequestOption
 }
@@ -31,7 +36,7 @@ type Request struct {
 }
 
 // NewClient creates a new http client wrapper
-func NewClient(client *http.Client, baseURL string, options ...HTTPRequestOption) *Client {
+func NewClient(client DoClient, baseURL string, options ...HTTPRequestOption) *Client {
 	return &Client{
 		Client:             client,
 		BaseURL:            baseURL,
