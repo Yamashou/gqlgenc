@@ -38,7 +38,8 @@ func (s *Source) Fragments() ([]*Fragment, error) {
 	for _, fragment := range s.queryDocument.Fragments {
 		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet)
 		if s.sourceGenerator.cfg.Models.Exists(fragment.Name) {
-			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", fragment.Name))
+			fmt.Println(fmt.Sprintf("%s is duplicated", fragment.Name))
+			continue
 		}
 
 		fragment := &Fragment{
