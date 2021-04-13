@@ -135,7 +135,7 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet)
 		name := getResponseStructName(operation, s.generateConfig)
 		if s.sourceGenerator.cfg.Models.Exists(name) {
-			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", name))
+			continue
 		}
 		operationResponse = append(operationResponse, &OperationResponse{
 			Name: name,
