@@ -3,7 +3,7 @@ model:
 client:
   filename: ./gen/client.go
 models:
-  Date:
+  DateTime:
     model: github.com/99designs/gqlgen/graphql.Time
 endpoint:
   url: https://api.github.com/graphql

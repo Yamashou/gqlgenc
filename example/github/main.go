@@ -22,21 +22,14 @@ func main() {
 	githubClient := &gen.Client{
 		Client: client.NewClient(http.DefaultClient, "https://api.github.com/graphql", authHeader),
 	}
-	getUser, err := githubClient.GetUser(ctx, 10, 10)
+	getUser, err := githubClient.GetUser(ctx, 10)
 	if err != nil {
-		if handledError, ok := err.(*client.ErrorResponse); ok {
-			fmt.Fprintf(os.Stderr, "handled error: %s\n", handledError.Error())
-		} else {
-			fmt.Fprintf(os.Stderr, "unhandled error: %s\n", err.Error())
-		}
+		fmt.Fprintf(os.Stderr, "unhandled error: %s\n", err.Error())
 		os.Exit(1)
 	}
 
-	fmt.Println(*getUser.Viewer.Name, getUser.Viewer.Repositories.Nodes[0].Name)
+	fmt.Printf("User: %s\n", *getUser.Viewer.Name)
 	for _, repository := range getUser.Viewer.Repositories.Nodes {
-		fmt.Println(repository.Name)
-		for _, language := range repository.Languages.Nodes {
-			fmt.Println(language.Name)
-		}
+		fmt.Printf("Repository: %s\n", repository.Name)
 	}
 }
