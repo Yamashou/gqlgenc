@@ -205,6 +205,7 @@ const GetUserDocument = `query GetUser ($first: Int!) {
 	viewer {
 		id
 		name
+		createdAt
 		repositories(first: $first, privacy: PUBLIC) {
 			nodes {
 				id

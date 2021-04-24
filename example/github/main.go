@@ -28,7 +28,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("User: %s\n", *getUser.Viewer.Name)
+	fmt.Printf("User: %s, CreatedAt: %s\n", *getUser.Viewer.Name, getUser.Viewer.CreatedAt.String())
 	for _, repository := range getUser.Viewer.Repositories.Nodes {
 		fmt.Printf("Repository: %s\n", repository.Name)
 	}
