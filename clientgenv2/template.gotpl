@@ -10,7 +10,6 @@
 	{{ reserveImport "path" }}
 	{{ reserveImport "time" }}
 
-	{{ reserveImport "golang.org/x/xerrors" }}
 
 	{{ reserveImport "github.com/TripleMint/gqlgenc/graphqljson" }}
 	{{ reserveImport "github.com/TripleMint/gqlgenc/clientv2" }}

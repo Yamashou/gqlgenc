@@ -3,12 +3,12 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/xerrors"
 )
 
 const (
@@ -184,7 +184,7 @@ func TestParseResponse(t *testing.T) {
 		r := &fakeRes{}
 		err := parseResponse([]byte(withBadErrorsFormat), 200, r)
 
-		expectedType := xerrors.Errorf("%w", errors.New("some"))
+		expectedType := fmt.Errorf("%w", errors.New("some"))
 		require.IsType(t, expectedType, err)
 	})
 

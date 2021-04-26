@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -12,11 +13,9 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/TripleMint/gqlgenc/client"
 	"github.com/TripleMint/gqlgenc/introspection"
-	"github.com/pkg/errors"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/validator"
-	"golang.org/x/xerrors"
 	"gopkg.in/yaml.v2"
 )
 
@@ -62,7 +61,7 @@ func LoadConfigFromDefaultLocations() (*Config, error) {
 
 	err = os.Chdir(filepath.Dir(cfgFile))
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to enter config dir")
+		return nil, fmt.Errorf("unable to enter config dir: %w", err)
 	}
 
 	return LoadConfig(cfgFile)
@@ -79,7 +78,7 @@ type EndPointConfig struct {
 func findCfg() (string, error) {
 	dir, err := os.Getwd()
 	if err != nil {
-		return "", errors.Wrap(err, "unable to get working dir to findCfg")
+		return "", fmt.Errorf("unable to get working dir to findCfg: %w", err)
 	}
 
 	cfg := findCfgInDir(dir)
@@ -119,20 +118,20 @@ func LoadConfig(filename string) (*Config, error) {
 	var cfg Config
 	b, err := ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, xerrors.Errorf("unable to read config: %w", err)
+		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
 
 	confContent := []byte(os.ExpandEnv(string(b)))
 	if err := yaml.UnmarshalStrict(confContent, &cfg); err != nil {
-		return nil, xerrors.Errorf("unable to parse config: %w", err)
+		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
 
 	if cfg.SchemaFilename != nil && cfg.Endpoint != nil {
-		return nil, errors.New("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+		return nil, fmt.Errorf("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
 	if cfg.SchemaFilename == nil && cfg.Endpoint == nil {
-		return nil, errors.New("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+		return nil, fmt.Errorf("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
 	// https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/codegen/config/config.go#L120
@@ -159,12 +158,12 @@ func LoadConfig(filename string) (*Config, error) {
 
 				return nil
 			}); err != nil {
-				return nil, errors.Wrapf(err, "failed to walk schema at root %s", pathParts[0])
+				return nil, fmt.Errorf("failed to walk schema at root %s: %w", pathParts[0], err)
 			}
 		} else {
 			matches, err = filepath.Glob(f)
 			if err != nil {
-				return nil, errors.Wrapf(err, "failed to glob schema filename %s", f)
+				return nil, fmt.Errorf("failed to glob schema filename %s: %w", f, err)
 			}
 		}
 
@@ -191,7 +190,7 @@ func LoadConfig(filename string) (*Config, error) {
 		var schemaRaw []byte
 		schemaRaw, err = ioutil.ReadFile(filename)
 		if err != nil {
-			return nil, errors.Wrap(err, "unable to open schema")
+			return nil, fmt.Errorf("unable to open schema: %w", err)
 		}
 
 		sources = append(sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
@@ -207,7 +206,7 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 
 	if err := cfg.Client.Check(); err != nil {
-		return nil, xerrors.Errorf("config.exec: %w", err)
+		return nil, fmt.Errorf("config.exec: %w", err)
 	}
 
 	return &cfg, nil
@@ -220,14 +219,14 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 	if c.SchemaFilename != nil {
 		s, err := c.loadLocalSchema()
 		if err != nil {
-			return xerrors.Errorf("load local schema failed: %w", err)
+			return fmt.Errorf("load local schema failed: %w", err)
 		}
 
 		schema = s
 	} else {
 		s, err := c.loadRemoteSchema(ctx)
 		if err != nil {
-			return xerrors.Errorf("load remote schema failed: %w", err)
+			return fmt.Errorf("load remote schema failed: %w", err)
 		}
 
 		schema = s
@@ -256,12 +255,12 @@ func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
 
 	var res introspection.Query
 	if err := gqlclient.Post(ctx, "Query", introspection.Introspection, &res, nil); err != nil {
-		return nil, xerrors.Errorf("introspection query failed: %w", err)
+		return nil, fmt.Errorf("introspection query failed: %w", err)
 	}
 
 	schema, err := validator.ValidateSchemaDocument(introspection.ParseIntrospectionQuery(c.Endpoint.URL, res))
 	if err != nil {
-		return nil, xerrors.Errorf("validation error: %w", err)
+		return nil, fmt.Errorf("validation error: %w", err)
 	}
 
 	return schema, nil

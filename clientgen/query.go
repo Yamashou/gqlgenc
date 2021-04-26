@@ -7,7 +7,6 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/parser"
 	"github.com/vektah/gqlparser/v2/validator"
-	"golang.org/x/xerrors"
 )
 
 type merger struct {
@@ -30,14 +29,14 @@ func ParseQueryDocuments(schema *ast.Schema, querySources []*ast.Source, generat
 	for _, querySource := range querySources {
 		query, gqlerr := parser.ParseQuery(querySource)
 		if gqlerr != nil {
-			return nil, xerrors.Errorf(": %w", gqlerr)
+			return nil, fmt.Errorf(": %w", gqlerr)
 		}
 
 		merger.mergeQueryDocument(query)
 	}
 
 	if errs := validator.Validate(schema, &merger.document); errs != nil {
-		return nil, xerrors.Errorf(": %w", errs)
+		return nil, fmt.Errorf(": %w", errs)
 	}
 
 	return &merger.document, nil
@@ -68,7 +67,7 @@ func QueryDocumentsByOperations(schema *ast.Schema, operations ast.OperationList
 		}
 
 		if errs := validator.Validate(schema, queryDocument); errs != nil {
-			return nil, xerrors.Errorf(": %w", errs)
+			return nil, fmt.Errorf(": %w", errs)
 		}
 
 		queryDocuments = append(queryDocuments, queryDocument)
