@@ -1,10 +1,11 @@
 package clientgenv2
 
 import (
+	"fmt"
+
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/parser"
 	"github.com/vektah/gqlparser/v2/validator"
-	"golang.org/x/xerrors"
 )
 
 func ParseQueryDocuments(schema *ast.Schema, querySources []*ast.Source) (*ast.QueryDocument, error) {
@@ -12,14 +13,14 @@ func ParseQueryDocuments(schema *ast.Schema, querySources []*ast.Source) (*ast.Q
 	for _, querySource := range querySources {
 		query, gqlerr := parser.ParseQuery(querySource)
 		if gqlerr != nil {
-			return nil, xerrors.Errorf(": %w", gqlerr)
+			return nil, fmt.Errorf(": %w", gqlerr)
 		}
 
 		mergeQueryDocument(&queryDocument, query)
 	}
 
 	if errs := validator.Validate(schema, &queryDocument); errs != nil {
-		return nil, xerrors.Errorf(": %w", errs)
+		return nil, fmt.Errorf(": %w", errs)
 	}
 
 	return &queryDocument, nil
@@ -42,7 +43,7 @@ func QueryDocumentsByOperations(schema *ast.Schema, operations ast.OperationList
 		}
 
 		if errs := validator.Validate(schema, queryDocument); errs != nil {
-			return nil, xerrors.Errorf(": %w", errs)
+			return nil, fmt.Errorf(": %w", errs)
 		}
 
 		queryDocuments = append(queryDocuments, queryDocument)
