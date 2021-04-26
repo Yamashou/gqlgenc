@@ -1,7 +1,6 @@
 package clientgenv2
 
 import (
-
 	// nolint:golint, nolintlint
 	_ "embed"
 	"fmt"
