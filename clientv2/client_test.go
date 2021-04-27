@@ -155,14 +155,14 @@ func TestUnmarshal(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
 		err := unmarshal([]byte(withBadDataFormat), r)
-		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : json: cannot unmarshal string into Go value of type clientv2.fakeRes")
+		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : : json: cannot unmarshal string into Go value of type clientv2.fakeRes")
 	})
 
 	t.Run("bad data format", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
 		err := unmarshal([]byte(withBadErrorsFormat), r)
-		require.EqualError(t, err, "faild to parse graphql errors. Response content {\"errors\": \"bad\"} - json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List : json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List")
+		require.EqualError(t, err, "faild to parse graphql errors. Response content {\"errors\": \"bad\"} - json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List")
 	})
 }
 
