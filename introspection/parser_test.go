@@ -11,7 +11,7 @@ import (
 func TestParseIntrospectionQuery_Parse(t *testing.T) {
 	t.Parallel()
 
-	tests := []struct { //nolint:govet
+	tests := []struct {
 		name        string
 		filename    string
 		expectedErr error
