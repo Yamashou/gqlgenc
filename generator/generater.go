@@ -8,7 +8,7 @@ import (
 	codegenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/modelgen"
-	"github.com/Yamashou/gqlgenc/config"
+	"github.com/vanillaricewraps/gqlgenc/config"
 )
 
 // mutateHook adds the "omitempty" option to nilable fields.

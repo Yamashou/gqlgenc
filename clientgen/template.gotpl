@@ -11,8 +11,8 @@
 	{{ reserveImport "time" }}
 
 
-	{{ reserveImport "github.com/Yamashou/gqlgenc/graphqljson" }}
-	{{ reserveImport "github.com/Yamashou/gqlgenc/client" }}
+	{{ reserveImport "github.com/vanillaricewraps/gqlgenc/graphqljson" }}
+	{{ reserveImport "github.com/vanillaricewraps/gqlgenc/client" }}
 
 	{{- if .ClientInterfaceName }}
     	type {{ .ClientInterfaceName }} interface {

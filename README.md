@@ -18,7 +18,7 @@ So I want to automatically generate types.
 ## Installation
 
 ```shell script
-go get -u github.com/Yamashou/gqlgenc
+go get -u github.com/vanillaricewraps/gqlgenc
 ```
 
 ## How to use
@@ -90,7 +90,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Yamashou/gqlgenc/clientgen"
+	"github.com/vanillaricewraps/gqlgenc/clientgen"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -136,4 +136,4 @@ This client does not support subscription. If you need a subscription, please cr
 
 ### Pre-conditions
 
-[clientgen](https://github.com/Yamashou/gqlgenc/tree/master/clientgen) is created based on [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen). So if you don't have a modelgen, it may be a mysterious move.
+[clientgen](https://github.com/vanillaricewraps/gqlgenc/tree/master/clientgen) is created based on [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen). So if you don't have a modelgen, it may be a mysterious move.
