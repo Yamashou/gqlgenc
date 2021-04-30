@@ -6,7 +6,7 @@ import (
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/modelgen"
-	"github.com/Yamashou/gqlgenc/config"
+	"github.com/vanillaricewraps/gqlgenc/config"
 	"golang.org/x/xerrors"
 )
 
