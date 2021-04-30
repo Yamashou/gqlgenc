@@ -80,6 +80,16 @@ func NewSourceGenerator(cfg *config.Config, client config.PackageConfig) *Source
 func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
 	for _, selection := range selectionSet {
+		/*
+		switch v := selection.(type) {
+		case nil:
+			panic("nil")
+		case *ast.Field:
+			// fmt.Printf("alias %s %+v\n", v.Alias, v.SelectionSet)
+		default:
+			// fmt.Println("unknown", v)
+		}
+		*/
 		responseFields = append(responseFields, r.NewResponseField(selection))
 	}
 

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"go/types"
+	"strings"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/Yamashou/gqlgenc/config"
@@ -138,18 +139,63 @@ type OperationResponse struct {
 	Type types.Type
 }
 
+func getNestedTypes(source *Source, selectionSet ast.SelectionSet, parentName string, indent int) []*OperationResponse {
+	tabs := strings.Repeat("  ", indent)
+	var results []*OperationResponse
+	for _, selection := range selectionSet {
+		switch v := selection.(type) {
+		case nil:
+			panic("nil")
+		case *ast.Field:
+			// responseField := source.sourceGenerator.NewResponseField(selection)
+			responseFields := source.sourceGenerator.NewResponseFields(v.SelectionSet)
+			fmt.Printf("%s%s %s %+v\n", tabs, v.Alias, templates.ToGo(v.Alias), responseFields.IsStructType())
+			if responseFields.IsStructType() {
+				results = append(results, &OperationResponse{
+					Name: parentName + templates.ToGo(v.Alias),
+					// Type: types.NewStruct(nil, nil),
+					Type: responseFields.StructType(),
+				})
+				results = append(results, getNestedTypes(source, v.SelectionSet, parentName+templates.ToGo(v.Alias), indent+1)...)
+			}
+
+			/*
+				if len(v.SelectionSet) > 0 {
+					recursive(source, v.SelectionSet, indent+1)
+				}
+			*/
+
+		default:
+			fmt.Println("unknown", v)
+		}
+	}
+	return results
+}
+
 func (s *Source) OperationResponses() ([]*OperationResponse, error) {
-	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+	// operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+	var operationResponse []*OperationResponse
 	for _, operation := range s.queryDocument.Operations {
+		queryName := getResponseStructName(operation, s.generateConfig)
+		fmt.Printf("Query: %s\n", queryName)
+		nestedTypes := getNestedTypes(s, operation.SelectionSet, "", 0)
+		operationResponse = append(operationResponse, nestedTypes...)
+
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet)
-		name := getResponseStructName(operation, s.generateConfig)
-		if s.sourceGenerator.cfg.Models.Exists(name) {
-			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", name))
+
+		if s.sourceGenerator.cfg.Models.Exists(queryName) {
+			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", queryName))
 		}
 		operationResponse = append(operationResponse, &OperationResponse{
-			Name: name,
+			Name: queryName,
 			Type: responseFields.StructType(),
 		})
+		/*
+			operationResponse = append(operationResponse, &OperationResponse{
+				Name: responseFields.StructType,
+				Type: types.NewStruct(nil, nil),
+			})
+		*/
 	}
 
 	for _, operationResponse := range operationResponse {
