@@ -79,10 +79,10 @@ func NewSourceGenerator(cfg *config.Config, client config.PackageConfig) *Source
 	}
 }
 
-func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet) ResponseFieldList {
+func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, parentName string) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
 	for _, selection := range selectionSet {
-		responseFields = append(responseFields, r.NewResponseField(selection))
+		responseFields = append(responseFields, r.NewResponseField(selection, parentName))
 	}
 
 	return responseFields
@@ -138,10 +138,10 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 	return fields, nil
 }
 
-func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseField {
+func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentName string) *ResponseField {
 	switch selection := selection.(type) {
 	case *ast.Field:
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
+		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, selection.Alias)
 
 		var baseType types.Type
 		switch {
@@ -152,7 +152,13 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
-			baseType = fieldsResponseFields.StructType()
+			baseType = types.NewNamed(
+				types.NewTypeName(0, r.client.Pkg(), parentName+templates.ToGo(selection.Alias), nil),
+				fieldsResponseFields.StructType(),
+				nil,
+			)
+			fmt.Printf("+++ %s  parentName: %s\n", baseType.String(), parentName)
+			// baseType = fieldsResponseFields.StructType()
 		default:
 			// ここにきたらバグ
 			// here is bug
@@ -177,7 +183,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 
 	case *ast.FragmentSpread:
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
-		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet)
+		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, "")
 		typ := types.NewNamed(
 			types.NewTypeName(0, r.client.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
@@ -193,7 +199,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
+		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, "")
 
 		return &ResponseField{
 			Name:             selection.TypeCondition,
