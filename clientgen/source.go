@@ -36,7 +36,7 @@ type Fragment struct {
 func (s *Source) Fragments() ([]*Fragment, error) {
 	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
 	for _, fragment := range s.queryDocument.Fragments {
-		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet)
+		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, "")
 		if s.sourceGenerator.cfg.Models.Exists(fragment.Name) {
 			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", fragment.Name))
 		}
@@ -138,17 +138,65 @@ type OperationResponse struct {
 	Type types.Type
 }
 
+func getNestedTypes(source *Source, selectionSet ast.SelectionSet, parentName string, indent int) []*OperationResponse {
+	// tabs := strings.Repeat("  ", indent)
+	var results []*OperationResponse
+	for _, selection := range selectionSet {
+		switch v := selection.(type) {
+		case nil:
+			panic("nil")
+		case *ast.Field:
+			responseFields := source.sourceGenerator.NewResponseFields(v.SelectionSet, parentName+templates.ToGo(v.Alias))
+			if responseFields.IsStructType() {
+				/*
+					typ := types.NewNamed(
+						types.NewTypeName(0, source.sourceGenerator.client.Pkg(), templates.ToGo(v.Alias), nil),
+						responseFields.StructType(),
+						nil,
+					)
+				*/
+
+				// This is where we define the nested fields like Nodes
+				results = append(results, &OperationResponse{
+					Name: parentName + templates.ToGo(v.Alias),
+					// Type: typ,
+					Type: responseFields.StructType(),
+				})
+				fmt.Printf("Add %s\n", parentName+templates.ToGo(v.Alias))
+				results = append(results, getNestedTypes(source, v.SelectionSet, parentName+templates.ToGo(v.Alias), indent+1)...)
+			}
+
+			/*
+				if len(v.SelectionSet) > 0 {
+					recursive(source, v.SelectionSet, indent+1)
+				}
+			*/
+
+		default:
+			fmt.Println("unknown", v)
+		}
+	}
+	return results
+}
+
 func (s *Source) OperationResponses() ([]*OperationResponse, error) {
-	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+	// operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+	var operationResponse []*OperationResponse
 	for _, operation := range s.queryDocument.Operations {
-		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet)
-		name := getResponseStructName(operation, s.generateConfig)
-		if s.sourceGenerator.cfg.Models.Exists(name) {
-			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", name))
+		queryName := getResponseStructName(operation, s.generateConfig)
+		fmt.Printf("Query: %s\n", queryName)
+		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, queryName)
+
+		nestedTypes := getNestedTypes(s, operation.SelectionSet, queryName, 0)
+		operationResponse = append(operationResponse, nestedTypes...)
+
+		if s.sourceGenerator.cfg.Models.Exists(queryName) {
+			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", queryName))
 		}
 		operationResponse = append(operationResponse, &OperationResponse{
-			Name: name,
+			Name: queryName,
 			Type: responseFields.StructType(),
+			// Type: typ,
 		})
 	}
 
