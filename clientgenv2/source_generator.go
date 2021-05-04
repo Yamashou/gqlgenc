@@ -161,7 +161,15 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		case fieldsResponseFields.IsFragment():
 			// 子フィールドがFragmentの場合はこのFragmentがフィールドの型になる
 			// if a child field is fragment, this field type became fragment.
-			baseType = fieldsResponseFields[0].Type
+			r.StructSources = append(r.StructSources, &StructSource{
+				Name: typeName,
+				Type: fieldsResponseFields[0].Type,
+			})
+			baseType = types.NewNamed(
+				types.NewTypeName(0, r.client.Pkg(), typeName, nil),
+				nil,
+				nil,
+			)
 		case fieldsResponseFields.IsStructType():
 			structType := fieldsResponseFields.StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
@@ -213,11 +221,22 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, NewLayerTypeName(typeName, templates.ToGo(selection.TypeCondition)))
+		name := NewLayerTypeName(typeName, templates.ToGo(selection.TypeCondition))
+		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
+		structType := fieldsResponseFields.StructType()
+		r.StructSources = append(r.StructSources, &StructSource{
+			Name: name,
+			Type: structType,
+		})
+		typ := types.NewNamed(
+			types.NewTypeName(0, r.client.Pkg(), name, nil),
+			fieldsResponseFields.StructType(),
+			nil,
+		)
 
 		return &ResponseField{
 			Name:             selection.TypeCondition,
-			Type:             fieldsResponseFields.StructType(),
+			Type:             typ,
 			IsInlineFragment: true,
 			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
 			ResponseFields:   fieldsResponseFields,

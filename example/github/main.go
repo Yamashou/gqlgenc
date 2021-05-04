@@ -19,6 +19,7 @@ func main() {
 	githubClient := &gen.Client{
 		Client: clientv2.NewClient(http.DefaultClient, "https://api.github.com/graphql", func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res interface{}, next clientv2.RequestInterceptorFunc) error {
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+
 			return next(ctx, req, gqlInfo, res)
 		}),
 	}
@@ -38,5 +39,17 @@ func main() {
 		for _, language := range repository.Languages.Nodes {
 			fmt.Println(language.Name)
 		}
+
+		res, err := githubClient.GetNode(ctx, repository.ID)
+		if err != nil {
+			if handledError, ok := err.(*client.ErrorResponse); ok {
+				fmt.Fprintf(os.Stderr, "handled error: %s\n", handledError.Error())
+			} else {
+				fmt.Fprintf(os.Stderr, "unhandled error: %s\n", err.Error())
+			}
+			os.Exit(1)
+		}
+
+		fmt.Println(res.Node.Repository.ID, res.Node.Repository.Name)
 	}
 }

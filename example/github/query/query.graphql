@@ -24,11 +24,26 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
 
 query GetNode($id: ID!) {
     node(id: $id) {
-        id
-        ... on App {
-            databaseId
-            createdAt
+       ... on Repository {
+           id
+           name
+       }
+        ... on Reaction {
+            id
+            user {
+                id
+            }
         }
     }
 }
+
+query GetNode2($id: ID!) {
+    node(id: $id) {
+        ... on Release {
+            id
+            name
+        }
+    }
+}
+
 
