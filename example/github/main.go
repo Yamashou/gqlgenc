@@ -50,6 +50,6 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Println(res.Node.Repository.ID, res.Node.Repository.Name)
+		fmt.Println(res.Node.ID, res.Node.Repository.Name)
 	}
 }

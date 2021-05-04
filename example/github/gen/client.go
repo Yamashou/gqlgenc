@@ -230,6 +230,7 @@ type GetNodeNodeReaction struct {
 }
 
 type GetNodeNode struct {
+	ID         string                "json:\"id\" graphql:\"id\""
 	Repository GetNodeNodeRepository "graphql:\"... on Repository\""
 	Reaction   GetNodeNodeReaction   "graphql:\"... on Reaction\""
 }
@@ -293,6 +294,7 @@ func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst
 
 const GetNodeDocument = `query GetNode ($id: ID!) {
 	node(id: $id) {
+		id
 		... on Repository {
 			id
 			name
