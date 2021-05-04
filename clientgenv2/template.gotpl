@@ -34,7 +34,7 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 {{- end }}
 
 {{- range $name, $element := .StructSources }}
-	type {{ .Name | go }} {{ .Type | ref }}
+	type {{ .Name }} {{ .Type | ref }}
 {{- end}}
 
 {{- range $name, $element := .OperationResponse }}

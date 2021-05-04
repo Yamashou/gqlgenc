@@ -146,7 +146,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 }
 
 func NewLayerTypeName(base, thisField string) string {
-	return fmt.Sprintf("%s%s", base, thisField)
+	return fmt.Sprintf("%s_%s", base, thisField)
 }
 
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {

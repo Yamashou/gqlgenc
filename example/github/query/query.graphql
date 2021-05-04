@@ -1,7 +1,3 @@
-fragment LanguageFragment on Language {
-    id
-    name
-}
 
 
 query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
@@ -20,6 +16,11 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
             }
         }
     }
+}
+
+fragment LanguageFragment on Language {
+    id
+    name
 }
 
 query GetNode($id: ID!) {

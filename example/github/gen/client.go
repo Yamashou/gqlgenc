@@ -193,66 +193,66 @@ type LanguageFragment struct {
 }
 
 type (
-	GetUserViewerRepositoriesNodesLanguagesNodes LanguageFragment
-	GetUserViewerRepositoriesNodesLanguages      struct {
-		Nodes []*GetUserViewerRepositoriesNodesLanguagesNodes "json:\"nodes\" graphql:\"nodes\""
+	GetUser_Viewer_Repositories_Nodes_Languages_Nodes LanguageFragment
+	GetUser_Viewer_Repositories_Nodes_Languages       struct {
+		Nodes []*GetUser_Viewer_Repositories_Nodes_Languages_Nodes "json:\"nodes\" graphql:\"nodes\""
 	}
 )
 
-type GetUserViewerRepositoriesNodes struct {
-	ID        string                                   "json:\"id\" graphql:\"id\""
-	Name      string                                   "json:\"name\" graphql:\"name\""
-	Languages *GetUserViewerRepositoriesNodesLanguages "json:\"languages\" graphql:\"languages\""
+type GetUser_Viewer_Repositories_Nodes struct {
+	ID        string                                       "json:\"id\" graphql:\"id\""
+	Name      string                                       "json:\"name\" graphql:\"name\""
+	Languages *GetUser_Viewer_Repositories_Nodes_Languages "json:\"languages\" graphql:\"languages\""
 }
 
-type GetUserViewerRepositories struct {
-	Nodes []*GetUserViewerRepositoriesNodes "json:\"nodes\" graphql:\"nodes\""
+type GetUser_Viewer_Repositories struct {
+	Nodes []*GetUser_Viewer_Repositories_Nodes "json:\"nodes\" graphql:\"nodes\""
 }
 
-type GetUserViewer struct {
-	ID           string                    "json:\"id\" graphql:\"id\""
-	Name         *string                   "json:\"name\" graphql:\"name\""
-	Repositories GetUserViewerRepositories "json:\"repositories\" graphql:\"repositories\""
+type GetUser_Viewer struct {
+	ID           string                      "json:\"id\" graphql:\"id\""
+	Name         *string                     "json:\"name\" graphql:\"name\""
+	Repositories GetUser_Viewer_Repositories "json:\"repositories\" graphql:\"repositories\""
 }
 
-type GetNodeNodeRepository struct {
+type GetNode_Node_Repository struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
 
-type GetNodeNodeReactionUser struct {
+type GetNode_Node_Reaction_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
 
-type GetNodeNodeReaction struct {
-	ID   string                   "json:\"id\" graphql:\"id\""
-	User *GetNodeNodeReactionUser "json:\"user\" graphql:\"user\""
+type GetNode_Node_Reaction struct {
+	ID   string                      "json:\"id\" graphql:\"id\""
+	User *GetNode_Node_Reaction_User "json:\"user\" graphql:\"user\""
 }
 
-type GetNodeNode struct {
-	ID         string                "json:\"id\" graphql:\"id\""
-	Repository GetNodeNodeRepository "graphql:\"... on Repository\""
-	Reaction   GetNodeNodeReaction   "graphql:\"... on Reaction\""
+type GetNode_Node struct {
+	ID         string                  "json:\"id\" graphql:\"id\""
+	Repository GetNode_Node_Repository "graphql:\"... on Repository\""
+	Reaction   GetNode_Node_Reaction   "graphql:\"... on Reaction\""
 }
 
-type GetNode2NodeRelease struct {
+type GetNode2_Node_Release struct {
 	ID   string  "json:\"id\" graphql:\"id\""
 	Name *string "json:\"name\" graphql:\"name\""
 }
 
 type (
-	GetNode2Node GetNode2NodeRelease
-	GetUser      struct {
-		Viewer GetUserViewer "json:\"viewer\" graphql:\"viewer\""
+	GetNode2_Node GetNode2_Node_Release
+	GetUser       struct {
+		Viewer GetUser_Viewer "json:\"viewer\" graphql:\"viewer\""
 	}
 )
 
 type GetNode struct {
-	Node *GetNodeNode "json:\"node\" graphql:\"node\""
+	Node *GetNode_Node "json:\"node\" graphql:\"node\""
 }
 
 type GetNode2 struct {
-	Node *GetNode2Node "json:\"node\" graphql:\"node\""
+	Node *GetNode2_Node "json:\"node\" graphql:\"node\""
 }
 
 const GetUserDocument = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {
