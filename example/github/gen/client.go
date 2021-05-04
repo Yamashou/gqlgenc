@@ -5,16 +5,17 @@ package gen
 import (
 	"context"
 	"net/http"
+	"time"
 
-	"github.com/Yamashou/gqlgenc/client"
+	"github.com/Yamashou/gqlgenc/clientv2"
 )
 
 type Client struct {
-	Client *client.Client
+	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
-	return &Client{Client: client.NewClient(cli, baseURL, options...)}
+func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
+	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
 }
 
 type Query struct {
@@ -192,20 +193,40 @@ type LanguageFragment struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
+type GetUserViewerRepositoriesNodesLanguages struct {
+	Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
+}
+
+type GetUserViewerRepositoriesNodes struct {
+	ID        string                                   "json:\"id\" graphql:\"id\""
+	Name      string                                   "json:\"name\" graphql:\"name\""
+	Languages *GetUserViewerRepositoriesNodesLanguages "json:\"languages\" graphql:\"languages\""
+}
+
+type GetUserViewerRepositories struct {
+	Nodes []*GetUserViewerRepositoriesNodes "json:\"nodes\" graphql:\"nodes\""
+}
+
+type GetUserViewer struct {
+	ID           string                    "json:\"id\" graphql:\"id\""
+	Name         *string                   "json:\"name\" graphql:\"name\""
+	Repositories GetUserViewerRepositories "json:\"repositories\" graphql:\"repositories\""
+}
+
+type GetNodeNode struct {
+	ID  string "json:\"id\" graphql:\"id\""
+	App struct {
+		DatabaseID *int      "json:\"databaseId\" graphql:\"databaseId\""
+		CreatedAt  time.Time "json:\"createdAt\" graphql:\"createdAt\""
+	} "graphql:\"... on App\""
+}
+
 type GetUser struct {
-	Viewer struct {
-		ID           string  "json:\"id\" graphql:\"id\""
-		Name         *string "json:\"name\" graphql:\"name\""
-		Repositories struct {
-			Nodes []*struct {
-				ID        string "json:\"id\" graphql:\"id\""
-				Name      string "json:\"name\" graphql:\"name\""
-				Languages *struct {
-					Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
-				} "json:\"languages\" graphql:\"languages\""
-			} "json:\"nodes\" graphql:\"nodes\""
-		} "json:\"repositories\" graphql:\"repositories\""
-	} "json:\"viewer\" graphql:\"viewer\""
+	Viewer GetUserViewer "json:\"viewer\" graphql:\"viewer\""
+}
+
+type GetNode struct {
+	Node *GetNodeNode "json:\"node\" graphql:\"node\""
 }
 
 const GetUserDocument = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {
@@ -231,14 +252,38 @@ fragment LanguageFragment on Language {
 }
 `
 
-func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, httpRequestOptions ...client.HTTPRequestOption) (*GetUser, error) {
+func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, interceptors ...clientv2.RequestInterceptor) (*GetUser, error) {
 	vars := map[string]interface{}{
 		"repositoryFirst": repositoryFirst,
 		"languageFirst":   languageFirst,
 	}
 
 	var res GetUser
-	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetNodeDocument = `query GetNode ($id: ID!) {
+	node(id: $id) {
+		id
+		... on App {
+			databaseId
+			createdAt
+		}
+	}
+}
+`
+
+func (c *Client) GetNode(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode, error) {
+	vars := map[string]interface{}{
+		"id": id,
+	}
+
+	var res GetNode
+	if err := c.Client.Post(ctx, "GetNode", GetNodeDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 

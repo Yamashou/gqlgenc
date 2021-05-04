@@ -7,20 +7,20 @@ import (
 	"os"
 
 	"github.com/Yamashou/gqlgenc/client"
+	"github.com/Yamashou/gqlgenc/clientv2"
 	"github.com/Yamashou/gqlgenc/example/github/gen"
 )
 
 func main() {
 	// This example only read public repository. You don't need to select scopes.
 	token := os.Getenv("GITHUB_TOKEN")
-	authHeader := func(req *http.Request) {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-	}
-
 	ctx := context.Background()
 
 	githubClient := &gen.Client{
-		Client: client.NewClient(http.DefaultClient, "https://api.github.com/graphql", authHeader),
+		Client: clientv2.NewClient(http.DefaultClient, "https://api.github.com/graphql", func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res interface{}, next clientv2.RequestInterceptorFunc) error {
+			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+			return next(ctx, req, gqlInfo, res)
+		}),
 	}
 	getUser, err := githubClient.GetUser(ctx, 10, 10)
 	if err != nil {

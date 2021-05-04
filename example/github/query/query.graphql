@@ -22,3 +22,13 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
     }
 }
 
+query GetNode($id: ID!) {
+    node(id: $id) {
+        id
+        ... on App {
+            databaseId
+            createdAt
+        }
+    }
+}
+
