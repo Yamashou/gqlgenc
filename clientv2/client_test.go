@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/xerrors"
 )
 
 const (
@@ -156,14 +155,14 @@ func TestUnmarshal(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
 		err := unmarshal([]byte(withBadDataFormat), r)
-		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : json: cannot unmarshal string into Go value of type clientv2.fakeRes")
+		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : : json: cannot unmarshal string into Go value of type clientv2.fakeRes")
 	})
 
 	t.Run("bad data format", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
 		err := unmarshal([]byte(withBadErrorsFormat), r)
-		require.EqualError(t, err, "faild to parse graphql errors. Response content {\"errors\": \"bad\"} - json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List : json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List")
+		require.EqualError(t, err, "faild to parse graphql errors. Response content {\"errors\": \"bad\"} - json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List")
 	})
 }
 
@@ -188,7 +187,7 @@ func TestParseResponse(t *testing.T) {
 		r := &fakeRes{}
 		err := parseResponse([]byte(withBadErrorsFormat), 200, r)
 
-		expectedType := xerrors.Errorf("%w", errors.New("some"))
+		expectedType := fmt.Errorf("%w", errors.New("some"))
 		require.IsType(t, expectedType, err)
 	})
 

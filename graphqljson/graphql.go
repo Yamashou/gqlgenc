@@ -29,11 +29,11 @@ package graphqljson
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"reflect"
 	"strings"
-
-	"golang.org/x/xerrors"
 )
 
 // Reference: https://blog.gopheracademy.com/advent-2017/custom-json-unmarshaler-for-graphql-client/
@@ -46,7 +46,7 @@ import (
 func UnmarshalData(data json.RawMessage, v interface{}) error {
 	d := newDecoder(bytes.NewBuffer(data))
 	if err := d.Decode(v); err != nil {
-		return xerrors.Errorf(": %w", err)
+		return fmt.Errorf(": %w", err)
 	}
 
 	// TODO: この処理が本当に必要かは今後検討
@@ -57,10 +57,10 @@ func UnmarshalData(data json.RawMessage, v interface{}) error {
 		// tokens left after we've decoded v successfully.
 		return nil
 	case nil:
-		return xerrors.Errorf("invalid token '%v' after top-level value", tok)
+		return fmt.Errorf("invalid token '%v' after top-level value", tok)
 	}
 
-	return xerrors.Errorf("invalid token '%v' after top-level value", tok)
+	return fmt.Errorf("invalid token '%v' after top-level value", tok)
 }
 
 // Decoder is a JSON Decoder that performs custom unmarshaling behavior
@@ -93,12 +93,12 @@ func newDecoder(r io.Reader) *Decoder {
 func (d *Decoder) Decode(v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
-		return xerrors.Errorf("cannot decode into non-pointer %T", v)
+		return fmt.Errorf("cannot decode into non-pointer %T", v)
 	}
 
 	d.vs = [][]reflect.Value{{rv.Elem()}}
 	if err := d.decode(); err != nil {
-		return xerrors.Errorf(": %w", err)
+		return fmt.Errorf(": %w", err)
 	}
 
 	return nil
@@ -111,9 +111,9 @@ func (d *Decoder) decode() error {
 	for len(d.vs) > 0 {
 		tok, err := d.jsonDecoder.Token()
 		if err == io.EOF {
-			return xerrors.New("unexpected end of JSON input")
+			return errors.New("unexpected end of JSON input")
 		} else if err != nil {
-			return xerrors.Errorf(": %w", err)
+			return fmt.Errorf(": %w", err)
 		}
 
 		switch {
@@ -121,7 +121,7 @@ func (d *Decoder) decode() error {
 		case d.state() == '{' && tok != json.Delim('}'):
 			key, ok := tok.(string)
 			if !ok {
-				return xerrors.New("unexpected non-key in JSON input")
+				return errors.New("unexpected non-key in JSON input")
 			}
 
 			someFieldExist := false
@@ -140,16 +140,16 @@ func (d *Decoder) decode() error {
 				d.vs[i] = append(d.vs[i], f)
 			}
 			if !someFieldExist {
-				return xerrors.Errorf("struct field for %q doesn't exist in any of %v places to unmarshal", key, len(d.vs))
+				return fmt.Errorf("struct field for %q doesn't exist in any of %v places to unmarshal", key, len(d.vs))
 			}
 
 			// We've just consumed the current token, which was the key.
 			// Read the next token, which should be the value, and let the rest of code process it.
 			tok, err = d.jsonDecoder.Token()
 			if err == io.EOF {
-				return xerrors.New("unexpected end of JSON input")
+				return errors.New("unexpected end of JSON input")
 			} else if err != nil {
-				return xerrors.Errorf(": %w", err)
+				return fmt.Errorf(": %w", err)
 			}
 
 		// Are we inside an array and seeing next value (rather than end of array)?
@@ -169,7 +169,7 @@ func (d *Decoder) decode() error {
 				d.vs[i] = append(d.vs[i], f)
 			}
 			if !someSliceExist {
-				return xerrors.Errorf("slice doesn't exist in any of %v places to unmarshal", len(d.vs))
+				return fmt.Errorf("slice doesn't exist in any of %v places to unmarshal", len(d.vs))
 			}
 		}
 
@@ -184,7 +184,7 @@ func (d *Decoder) decode() error {
 				}
 				err := unmarshalValue(tok, v)
 				if err != nil {
-					return xerrors.Errorf(": %w", err)
+					return fmt.Errorf(": %w", err)
 				}
 			}
 			d.popAllVs()
@@ -250,10 +250,10 @@ func (d *Decoder) decode() error {
 				d.popAllVs()
 				d.popState()
 			default:
-				return xerrors.New("unexpected delimiter in JSON input")
+				return errors.New("unexpected delimiter in JSON input")
 			}
 		default:
-			return xerrors.New("unexpected token in JSON input")
+			return errors.New("unexpected token in JSON input")
 		}
 	}
 
@@ -348,8 +348,13 @@ func isGraphQLFragment(f reflect.StructField) bool {
 func unmarshalValue(value json.Token, v reflect.Value) error {
 	b, err := json.Marshal(value) // TODO: Short-circuit (if profiling says it's worth it).
 	if err != nil {
-		return xerrors.Errorf(": %w", err)
+		return fmt.Errorf(": %w", err)
 	}
 
-	return json.Unmarshal(b, v.Addr().Interface())
+	err = json.Unmarshal(b, v.Addr().Interface())
+	if err != nil {
+		return fmt.Errorf(": %w", err)
+	}
+
+	return nil
 }
