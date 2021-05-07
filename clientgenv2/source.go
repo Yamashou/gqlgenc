@@ -77,13 +77,21 @@ func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDo
 	}
 }
 
-func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
+func (s *Source) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, error) {
 	operations := make([]*Operation, 0, len(s.queryDocument.Operations))
+
+	operationNames := make(map[string]struct{})
 
 	queryDocumentsMap := queryDocumentMapByOperationName(queryDocuments)
 	operationArgsMap := s.operationArgsMapByOperationName()
 	for _, operation := range s.queryDocument.Operations {
 		queryDocument := queryDocumentsMap[operation.Name]
+
+		_, exist := operationNames[templates.ToGo(operation.Name)]
+		if exist {
+			return nil, fmt.Errorf("duplicate operation: %s", operation.Name)
+		}
+
 		args := operationArgsMap[operation.Name]
 		operations = append(operations, NewOperation(
 			operation,
@@ -93,7 +101,7 @@ func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
 		))
 	}
 
-	return operations
+	return operations, nil
 }
 
 func (s *Source) operationArgsMapByOperationName() map[string][]*Argument {
