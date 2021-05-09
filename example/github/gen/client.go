@@ -192,12 +192,15 @@ type LanguageFragment struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
-type (
-	GetUser_Viewer_Repositories_Nodes_Languages_Nodes LanguageFragment
-	GetUser_Viewer_Repositories_Nodes_Languages       struct {
-		Nodes []*GetUser_Viewer_Repositories_Nodes_Languages_Nodes "json:\"nodes\" graphql:\"nodes\""
-	}
-)
+type GetUser_Viewer_Repositories_Nodes_Languages_Nodes struct {
+	ID    string  "json:\"id\" graphql:\"id\""
+	Name  string  "json:\"name\" graphql:\"name\""
+	Color *string "json:\"color\" graphql:\"color\""
+}
+
+type GetUser_Viewer_Repositories_Nodes_Languages struct {
+	Nodes []*GetUser_Viewer_Repositories_Nodes_Languages_Nodes "json:\"nodes\" graphql:\"nodes\""
+}
 
 type GetUser_Viewer_Repositories_Nodes struct {
 	ID        string                                       "json:\"id\" graphql:\"id\""
@@ -266,6 +269,7 @@ const GetUserDocument = `query GetUser ($repositoryFirst: Int!, $languageFirst: 
 				languages(first: $languageFirst) {
 					nodes {
 						... LanguageFragment
+						color
 					}
 				}
 			}

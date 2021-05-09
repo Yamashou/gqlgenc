@@ -11,6 +11,7 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
                 languages(first: $languageFirst) {
                     nodes {
                         ...LanguageFragment
+                        color
                     }
                 }
             }
