@@ -161,15 +161,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		case fieldsResponseFields.IsFragment():
 			// 子フィールドがFragmentの場合はこのFragmentがフィールドの型になる
 			// if a child field is fragment, this field type became fragment.
-			r.StructSources = append(r.StructSources, &StructSource{
-				Name: typeName,
-				Type: fieldsResponseFields[0].Type,
-			})
-			baseType = types.NewNamed(
-				types.NewTypeName(0, r.client.Pkg(), typeName, nil),
-				nil,
-				nil,
-			)
+			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
 			structType := fieldsResponseFields.StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
