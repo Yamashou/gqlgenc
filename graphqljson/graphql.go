@@ -124,7 +124,8 @@ func (d *Decoder) decode() error {
 				return errors.New("unexpected non-key in JSON input")
 			}
 
-			someFieldExist := false
+			// The last matching one is the one considered
+			var matchingFieldValue *reflect.Value
 			for i := range d.vs {
 				v := d.vs[i][len(d.vs[i])-1]
 				if v.Kind() == reflect.Ptr {
@@ -134,18 +135,26 @@ func (d *Decoder) decode() error {
 				if v.Kind() == reflect.Struct {
 					f = fieldByGraphQLName(v, key)
 					if f.IsValid() {
-						someFieldExist = true
+						matchingFieldValue = &f
 					}
 				}
 				d.vs[i] = append(d.vs[i], f)
 			}
-			if !someFieldExist {
+			if matchingFieldValue == nil {
 				return fmt.Errorf("struct field for %q doesn't exist in any of %v places to unmarshal", key, len(d.vs))
 			}
 
 			// We've just consumed the current token, which was the key.
-			// Read the next token, which should be the value, and let the rest of code process it.
-			tok, err = d.jsonDecoder.Token()
+			// Read the next token, which should be the value.
+			// If it's of json.RawMessage type, decode the value.
+			if matchingFieldValue.Type() == reflect.TypeOf(json.RawMessage{}) {
+				var data json.RawMessage
+				err = d.jsonDecoder.Decode(&data)
+				tok = data
+			} else {
+				tok, err = d.jsonDecoder.Token()
+			}
+
 			if err == io.EOF {
 				return errors.New("unexpected end of JSON input")
 			} else if err != nil {
@@ -174,7 +183,7 @@ func (d *Decoder) decode() error {
 		}
 
 		switch tok := tok.(type) {
-		case string, json.Number, bool, nil:
+		case string, json.Number, bool, nil, json.RawMessage:
 			// Value.
 
 			for i := range d.vs {

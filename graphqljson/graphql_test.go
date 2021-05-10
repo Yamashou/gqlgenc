@@ -1,11 +1,13 @@
 package graphqljson_test
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
-	"github.com/Yamashou/gqlgenc/graphqljson"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/Yamashou/gqlgenc/graphqljson"
 )
 
 func TestUnmarshalGraphQL(t *testing.T) {
@@ -455,6 +457,110 @@ func TestUnmarshalGraphQL_arrayInsideInlineFragment(t *testing.T) {
 		URL string `graphql:"url"`
 	}, 1)
 	want.Search.Nodes[0].PullRequest.Commits.Nodes[0].URL = "https://example.org/commit/49e1"
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestUnmarshalGraphQL_jsonRawMessage(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		JSONBlob    json.RawMessage `json:"jsonBlob"`
+		JSONArray   json.RawMessage `json:"jsonArray"`
+		JSONNumber  json.RawMessage `json:"jsonNumber"`
+		JSONString  json.RawMessage `json:"jsonString"`
+		JSONOmmited json.RawMessage `json:"jsonOmmited"`
+		Number      int             `json:"number"`
+		String      string          `json:"string"`
+	}
+
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"jsonBlob": {
+			"foo": "bar"
+		},
+		"jsonArray": [1, "two", 3],
+		"jsonNumber": 2,
+		"jsonString": "json string",
+		"number": 1,
+		"string": "normal string"
+	}`), &got)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := query{
+		JSONBlob:    []byte(`{"foo":"bar"}`),
+		JSONArray:   []byte(`[1,"two",3]`),
+		JSONNumber:  []byte(`2`),
+		JSONString:  []byte(`"json string"`),
+		JSONOmmited: nil,
+		Number:      1,
+		String:      "normal string",
+	}
+
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestUnmarshalGraphQL_jsonRawMessageInFragment(t *testing.T) {
+	t.Parallel()
+	type Object struct {
+		Properties struct {
+			ID       string
+			Metadata json.RawMessage
+		} `graphql:"... on Properties"`
+		Value string
+	}
+	type query struct {
+		Object         Object
+		OptionalObject *Object
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"object": {
+			"id": "81beda46-02c1-4641-aa7b-09cc6634c783",
+			"metadata": {
+				"created": "2021-05-03T21:27:28+00:00"
+			},
+			"value": "object value 1"
+		},
+		"optionalObject": {
+			"id": "6f8af214-f307-4d4d-89d3-965d8b79e3bf",
+			"metadata": {
+				"created": "2021-05-03T21:27:28+00:00",
+				"deleted": "2021-05-04T21:27:28+00:00"
+			},
+			"value": "object value 2"
+		}
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var want query
+	want.Object = Object{
+		Properties: struct {
+			ID       string
+			Metadata json.RawMessage
+		}{
+			ID:       "81beda46-02c1-4641-aa7b-09cc6634c783",
+			Metadata: []byte(`{"created":"2021-05-03T21:27:28+00:00"}`),
+		},
+		Value: "object value 1",
+	}
+	want.OptionalObject = &Object{
+		Properties: struct {
+			ID       string
+			Metadata json.RawMessage
+		}{
+			ID:       "6f8af214-f307-4d4d-89d3-965d8b79e3bf",
+			Metadata: []byte(`{"created":"2021-05-03T21:27:28+00:00","deleted":"2021-05-04T21:27:28+00:00"}`),
+		},
+		Value: "object value 2",
+	}
+
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}
