@@ -11,3 +11,5 @@ endpoint:
     Authorization: "Bearer ${GITHUB_TOKEN}" # public access token
 query:
   - "./query/*.graphql"
+generate:
+  clientV2: true
