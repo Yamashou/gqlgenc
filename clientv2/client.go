@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/Yamashou/gqlgenc/graphqljson"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -196,7 +195,7 @@ func unmarshal(data []byte, res interface{}) error {
 		return errors
 	}
 
-	if err := graphqljson.UnmarshalData(resp.Data, res); err != nil {
+	if err := json.Unmarshal(resp.Data, res); err != nil {
 		return fmt.Errorf("failed to decode data into response %s: %w", string(data), err)
 	}
 
