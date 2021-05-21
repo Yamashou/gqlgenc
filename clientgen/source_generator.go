@@ -157,8 +157,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentName s
 				fieldsResponseFields.StructType(),
 				nil,
 			)
-			fmt.Printf("+++ %s  parentName: %s\n", baseType.String(), parentName)
-			// baseType = fieldsResponseFields.StructType()
 		default:
 			// ここにきたらバグ
 			// here is bug
