@@ -6,6 +6,6 @@
 /query/
 /.idea/
 
-bin/gqlgenc
+bin/
 
 coverage.out
