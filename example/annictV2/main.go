@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/vanillaricewraps/gqlgenc/clientv2"
-	"github.com/vanillaricewraps/gqlgenc/example/annictV2/gen"
+	"github.com/TripleMint/gqlgenc/clientv2"
+	"github.com/TripleMint/gqlgenc/example/annictV2/gen"
 )
 
 func main() {
