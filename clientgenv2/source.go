@@ -6,7 +6,7 @@ import (
 	"go/types"
 
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/vanillaricewraps/gqlgenc/config"
+	"github.com/TripleMint/gqlgenc/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 )

@@ -1,4 +1,4 @@
-module github.com/vanillaricewraps/gqlgenc
+module github.com/TripleMint/gqlgenc
 
 go 1.16
 
