@@ -6,7 +6,7 @@ import (
 	"go/types"
 
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/Yamashou/gqlgenc/config"
+	"github.com/TripleMint/gqlgenc/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 )
@@ -35,7 +35,7 @@ type Fragment struct {
 func (s *Source) Fragments() ([]*Fragment, error) {
 	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
 	for _, fragment := range s.queryDocument.Fragments {
-		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet)
+		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, "")
 		if s.sourceGenerator.cfg.Models.Exists(fragment.Name) {
 			return nil, fmt.Errorf("%s is duplicated", fragment.Name)
 		}
@@ -137,16 +137,47 @@ type OperationResponse struct {
 	Type types.Type
 }
 
+func getNestedTypes(source *Source, selectionSet ast.SelectionSet, parentName string, indent int) []*OperationResponse {
+	// tabs := strings.Repeat("  ", indent)
+	var results []*OperationResponse
+	for _, selection := range selectionSet {
+		switch v := selection.(type) {
+		case nil:
+			panic("nil")
+		case *ast.Field:
+			responseFields := source.sourceGenerator.NewResponseFields(v.SelectionSet, parentName+templates.ToGo(v.Alias))
+			if responseFields.IsStructType() {
+
+				// This is where we define the nested fields like Nodes
+				results = append(results, &OperationResponse{
+					Name: parentName + templates.ToGo(v.Alias),
+					Type: responseFields.StructType(),
+				})
+				results = append(results, getNestedTypes(source, v.SelectionSet, parentName+templates.ToGo(v.Alias), indent+1)...)
+			}
+
+		default:
+			fmt.Println("unknown", v)
+		}
+	}
+	return results
+}
+
 func (s *Source) OperationResponses() ([]*OperationResponse, error) {
-	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+	var operationResponse []*OperationResponse
 	for _, operation := range s.queryDocument.Operations {
-		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet)
+		queryName := getResponseStructName(operation, s.generateConfig)
+		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, queryName)
+
+		nestedTypes := getNestedTypes(s, operation.SelectionSet, queryName, 0)
+		operationResponse = append(operationResponse, nestedTypes...)
+
 		name := getResponseStructName(operation, s.generateConfig)
 		if s.sourceGenerator.cfg.Models.Exists(name) {
 			return nil, fmt.Errorf("%s is duplicated", name)
 		}
 		operationResponse = append(operationResponse, &OperationResponse{
-			Name: name,
+			Name: queryName,
 			Type: responseFields.StructType(),
 		})
 	}

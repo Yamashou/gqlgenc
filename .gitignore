@@ -6,4 +6,6 @@
 /query/
 /.idea/
 
+bin/
+
 coverage.out
