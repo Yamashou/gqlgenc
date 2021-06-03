@@ -14,13 +14,27 @@
 	{{ reserveImport "github.com/TripleMint/gqlgenc/graphqljson" }}
 	{{ reserveImport "github.com/TripleMint/gqlgenc/client" }}
 
-	type Client struct {
-		Client *client.Client
+    type gqlClient interface {
+        Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}) error
+    }
+
+	type generatedClient struct {
+		gqlClient gqlClient
 	}
 
-	func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
-		return &Client{Client: client.NewClient(cli, baseURL, options...)}
-	}
+    type GeneratedClient interface {
+    {{- range $model := .Operation}}
+        {{- if $.GenerateClient }}
+            {{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}) (*{{ $model.ResponseStructName | go }}, error)
+        {{- end}}
+    {{- end}}
+    }
+
+    func NewGeneratedClient(c gqlClient) GeneratedClient {
+        return &generatedClient{gqlClient: c}
+    }
+
+
 {{- end }}
 
 type {{ .Query.Name | go }} {{ .Query.Type | ref }}
@@ -41,7 +55,7 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 	const {{ $model.Name|go }}Document = `{{ $model.Operation }}`
 
 	{{- if $.GenerateClient }}
-		func (c *Client) {{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, httpRequestOptions ...client.HTTPRequestOption) (*{{ $model.ResponseStructName | go }}, error) {
+		func (c *generatedClient) {{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}) (*{{ $model.ResponseStructName | go }}, error) {
 			vars := map[string]interface{}{
 			{{- range $args := .VariableDefinitions}}
 				"{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
@@ -49,7 +63,7 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 			}
 
 			var res {{ $model.ResponseStructName | go }}
-			if err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars, httpRequestOptions...); err != nil {
+			if err := c.gqlClient.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars); err != nil {
 				return nil, err
 			}
 
