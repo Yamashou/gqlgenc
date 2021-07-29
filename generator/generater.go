@@ -11,26 +11,36 @@ import (
 	"github.com/Yamashou/gqlgenc/config"
 )
 
-// mutateHook adds the "omitempty" option to nilable fields.
+// mutateHook adds "omitempty" tag option to optional field from input type model as defined in graphql schema
 // For more info see https://github.com/99designs/gqlgen/blob/master/docs/content/recipes/modelgen-hook.md
-func mutateHook(b *modelgen.ModelBuild) *modelgen.ModelBuild {
-	for _, model := range b.Models {
-		for _, field := range model.Fields {
-			field.Tag = `json:"` + field.Name
-			if codegenconfig.IsNilable(field.Type) {
-				field.Tag += ",omitempty"
+func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.ModelBuild {
+	return func(b *modelgen.ModelBuild) *modelgen.ModelBuild {
+		for _, model := range b.Models {
+			// only handle input type model
+			if schemaModel, ok := cfg.GQLConfig.Schema.Types[model.Name]; ok && schemaModel.IsInputType() {
+				for _, field := range model.Fields {
+					// find field in graphql schema
+					for _, def := range schemaModel.Fields {
+						if def.Name == field.Name {
+							// only add 'omitempty' on optional field as defined in graphql schema
+							if !def.Type.NonNull && codegenconfig.IsNilable(field.Type) {
+								field.Tag = `json:"` + field.Name + `,omitempty"`
+							}
+							break
+						}
+					}
+				}
 			}
-			field.Tag += `"`
 		}
+		return b
 	}
-	return b
 }
 
 func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) error {
 	var plugins []plugin.Plugin
 	if cfg.Model.IsDefined() {
 		p := modelgen.Plugin{
-			MutateHook: mutateHook,
+			MutateHook: mutateHook(cfg),
 		}
 		plugins = append(plugins, &p)
 	}
