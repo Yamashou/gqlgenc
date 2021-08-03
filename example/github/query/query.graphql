@@ -22,3 +22,16 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
     }
 }
 
+
+mutation AddStar($input: AddStarInput!) {
+    addStar(input: $input) {
+        starrable {
+            id
+            viewerHasStarred
+            ... on Repository {
+                id
+                name
+            }
+        }
+    }
+}

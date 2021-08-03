@@ -23,6 +23,7 @@ func mutateHook(b *modelgen.ModelBuild) *modelgen.ModelBuild {
 			field.Tag += `"`
 		}
 	}
+
 	return b
 }
 
