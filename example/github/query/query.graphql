@@ -1,7 +1,3 @@
-fragment LanguageFragment on Language {
-    id
-    name
-}
 
 
 query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
@@ -22,6 +18,27 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
     }
 }
 
+fragment LanguageFragment on Language {
+    id
+    name
+}
+
+query GetNode($id: ID!) {
+    node(id: $id) {
+        id
+        ... on Repository {
+            id
+            name
+        }
+        ... on Reaction {
+            id
+            user {
+                id
+
+            }
+        }
+    }
+}
 
 mutation AddStar($input: AddStarInput!) {
     addStar(input: $input) {
@@ -35,3 +52,14 @@ mutation AddStar($input: AddStarInput!) {
         }
     }
 }
+
+query GetNode2($id: ID!) {
+    node(id: $id) {
+        ... on Release {
+            id
+            name
+        }
+    }
+}
+
+

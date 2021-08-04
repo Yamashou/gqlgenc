@@ -6,15 +6,15 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Yamashou/gqlgenc/client"
+	"github.com/Yamashou/gqlgenc/clientv2"
 )
 
 type Client struct {
-	Client *client.Client
+	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
-	return &Client{Client: client.NewClient(cli, baseURL, options...)}
+func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
+	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
 }
 
 type Query struct {
@@ -205,32 +205,65 @@ type LanguageFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+type GetUser_Viewer_Repositories_Nodes_Languages struct {
+	Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
+}
+type GetUser_Viewer_Repositories_Nodes struct {
+	ID        string                                       "json:\"id\" graphql:\"id\""
+	Name      string                                       "json:\"name\" graphql:\"name\""
+	Languages *GetUser_Viewer_Repositories_Nodes_Languages "json:\"languages\" graphql:\"languages\""
+}
+type GetUser_Viewer_Repositories struct {
+	Nodes []*GetUser_Viewer_Repositories_Nodes "json:\"nodes\" graphql:\"nodes\""
+}
+type GetUser_Viewer struct {
+	ID           string                      "json:\"id\" graphql:\"id\""
+	Name         *string                     "json:\"name\" graphql:\"name\""
+	Repositories GetUser_Viewer_Repositories "json:\"repositories\" graphql:\"repositories\""
+}
+type GetNode_Node_Repository struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+type GetNode_Node_Reaction_User struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+type GetNode_Node_Reaction struct {
+	ID   string                      "json:\"id\" graphql:\"id\""
+	User *GetNode_Node_Reaction_User "json:\"user\" graphql:\"user\""
+}
+type GetNode_Node struct {
+	ID         string                  "json:\"id\" graphql:\"id\""
+	Repository GetNode_Node_Repository "graphql:\"... on Repository\""
+	Reaction   GetNode_Node_Reaction   "graphql:\"... on Reaction\""
+}
+type AddStar_AddStar_Starrable_Repository struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+type AddStar_AddStar_Starrable struct {
+	ID               string                               "json:\"id\" graphql:\"id\""
+	ViewerHasStarred bool                                 "json:\"viewerHasStarred\" graphql:\"viewerHasStarred\""
+	Repository       AddStar_AddStar_Starrable_Repository "graphql:\"... on Repository\""
+}
+type AddStar_AddStar struct {
+	Starrable *AddStar_AddStar_Starrable "json:\"starrable\" graphql:\"starrable\""
+}
+type GetNode2_Node_Release struct {
+	ID   string  "json:\"id\" graphql:\"id\""
+	Name *string "json:\"name\" graphql:\"name\""
+}
 type GetUser struct {
-	Viewer struct {
-		ID           string  "json:\"id\" graphql:\"id\""
-		Name         *string "json:\"name\" graphql:\"name\""
-		Repositories struct {
-			Nodes []*struct {
-				ID        string "json:\"id\" graphql:\"id\""
-				Name      string "json:\"name\" graphql:\"name\""
-				Languages *struct {
-					Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
-				} "json:\"languages\" graphql:\"languages\""
-			} "json:\"nodes\" graphql:\"nodes\""
-		} "json:\"repositories\" graphql:\"repositories\""
-	} "json:\"viewer\" graphql:\"viewer\""
+	Viewer GetUser_Viewer "json:\"viewer\" graphql:\"viewer\""
+}
+type GetNode struct {
+	Node *GetNode_Node "json:\"node\" graphql:\"node\""
 }
 type AddStar struct {
-	AddStar *struct {
-		Starrable *struct {
-			ID               string "json:\"id\" graphql:\"id\""
-			ViewerHasStarred bool   "json:\"viewerHasStarred\" graphql:\"viewerHasStarred\""
-			Repository       struct {
-				ID   string "json:\"id\" graphql:\"id\""
-				Name string "json:\"name\" graphql:\"name\""
-			} "graphql:\"... on Repository\""
-		} "json:\"starrable\" graphql:\"starrable\""
-	} "json:\"addStar\" graphql:\"addStar\""
+	AddStar *AddStar_AddStar "json:\"addStar\" graphql:\"addStar\""
+}
+type GetNode2 struct {
+	Node *GetNode2_Node_Release "json:\"node\" graphql:\"node\""
 }
 
 const GetUserDocument = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {
@@ -256,14 +289,44 @@ fragment LanguageFragment on Language {
 }
 `
 
-func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, httpRequestOptions ...client.HTTPRequestOption) (*GetUser, error) {
+func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, interceptors ...clientv2.RequestInterceptor) (*GetUser, error) {
 	vars := map[string]interface{}{
 		"repositoryFirst": repositoryFirst,
 		"languageFirst":   languageFirst,
 	}
 
 	var res GetUser
-	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetNodeDocument = `query GetNode ($id: ID!) {
+	node(id: $id) {
+		id
+		... on Repository {
+			id
+			name
+		}
+		... on Reaction {
+			id
+			user {
+				id
+			}
+		}
+	}
+}
+`
+
+func (c *Client) GetNode(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode, error) {
+	vars := map[string]interface{}{
+		"id": id,
+	}
+
+	var res GetNode
+	if err := c.Client.Post(ctx, "GetNode", GetNodeDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 
@@ -284,13 +347,36 @@ const AddStarDocument = `mutation AddStar ($input: AddStarInput!) {
 }
 `
 
-func (c *Client) AddStar(ctx context.Context, input AddStarInput, httpRequestOptions ...client.HTTPRequestOption) (*AddStar, error) {
+func (c *Client) AddStar(ctx context.Context, input AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error) {
 	vars := map[string]interface{}{
 		"input": input,
 	}
 
 	var res AddStar
-	if err := c.Client.Post(ctx, "AddStar", AddStarDocument, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "AddStar", AddStarDocument, &res, vars, interceptors...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+const GetNode2Document = `query GetNode2 ($id: ID!) {
+	node(id: $id) {
+		... on Release {
+			id
+			name
+		}
+	}
+}
+`
+
+func (c *Client) GetNode2(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode2, error) {
+	vars := map[string]interface{}{
+		"id": id,
+	}
+
+	var res GetNode2
+	if err := c.Client.Post(ctx, "GetNode2", GetNode2Document, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 
