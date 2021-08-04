@@ -26,14 +26,28 @@ fragment LanguageFragment on Language {
 query GetNode($id: ID!) {
     node(id: $id) {
         id
-       ... on Repository {
-           id
-           name
-       }
+        ... on Repository {
+            id
+            name
+        }
         ... on Reaction {
             id
             user {
                 id
+
+            }
+        }
+    }
+}
+
+mutation AddStar($input: AddStarInput!) {
+    addStar(input: $input) {
+        starrable {
+            id
+            viewerHasStarred
+            ... on Repository {
+                id
+                name
             }
         }
     }
