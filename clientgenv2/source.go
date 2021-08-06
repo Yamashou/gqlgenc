@@ -60,20 +60,20 @@ func (s *Source) Fragments() ([]*Fragment, error) {
 }
 
 type Operation struct {
-	Name                string
-	ResponseStructName  string
-	Operation           string
-	Args                []*Argument
-	VariableDefinitions ast.VariableDefinitionList
+	Name               string
+	ResponseStructName string
+	Operation          string
+	Args               Arguments
+	ArgsType           types.Type
 }
 
-func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*Argument, generateConfig *config.GenerateConfig) *Operation {
+func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args Arguments, generateConfig *config.GenerateConfig) *Operation {
 	return &Operation{
-		Name:                operation.Name,
-		ResponseStructName:  getResponseStructName(operation, generateConfig),
-		Operation:           queryString(queryDocument),
-		Args:                args,
-		VariableDefinitions: operation.VariableDefinitions,
+		Name:               operation.Name,
+		ResponseStructName: getResponseStructName(operation, generateConfig),
+		Operation:          queryString(queryDocument),
+		Args:               args,
+		ArgsType:           args.StructType(),
 	}
 }
 
@@ -96,8 +96,8 @@ func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
 	return operations
 }
 
-func (s *Source) operationArgsMapByOperationName() map[string][]*Argument {
-	operationArgsMap := make(map[string][]*Argument)
+func (s *Source) operationArgsMapByOperationName() map[string]Arguments {
+	operationArgsMap := make(map[string]Arguments)
 	for _, operation := range s.queryDocument.Operations {
 		operationArgsMap[operation.Name] = s.sourceGenerator.OperationArguments(operation.VariableDefinitions)
 	}

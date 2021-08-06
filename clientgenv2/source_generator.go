@@ -12,7 +12,25 @@ import (
 
 type Argument struct {
 	Variable string
+	NonNull  bool
 	Type     types.Type
+}
+
+type Arguments []*Argument
+
+func (as Arguments) StructType() types.Type {
+	vars := make([]*types.Var, 0)
+	structTags := make([]string, 0)
+	for _, v := range as {
+		vars = append(vars, types.NewVar(0, nil, templates.ToGo(v.Variable), v.Type))
+		if !v.NonNull {
+			structTags = append(structTags, fmt.Sprintf(`json:"%s,omitempty"`, v.Variable))
+		} else {
+			structTags = append(structTags, fmt.Sprintf(`json:"%s"`, v.Variable))
+		}
+	}
+
+	return types.NewStruct(vars, structTags)
 }
 
 type ResponseField struct {
@@ -238,11 +256,12 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 	panic("unexpected selection type")
 }
 
-func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*Argument {
-	argumentTypes := make([]*Argument, 0, len(variableDefinitions))
+func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) Arguments {
+	argumentTypes := make(Arguments, 0, len(variableDefinitions))
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &Argument{
 			Variable: v.Variable,
+			NonNull:  v.Type.NonNull,
 			Type:     r.binder.CopyModifiersFromAst(v.Type, r.Type(v.Type.Name())),
 		})
 	}
@@ -250,7 +269,7 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 	return argumentTypes
 }
 
-// Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
+// Type 引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
 func (r *SourceGenerator) Type(typeName string) types.Type {
 	goType, err := r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
 	if err != nil {

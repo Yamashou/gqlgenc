@@ -221,9 +221,23 @@ type GetUser_Viewer struct {
 	Name         *string                     "json:\"name\" graphql:\"name\""
 	Repositories GetUser_Viewer_Repositories "json:\"repositories\" graphql:\"repositories\""
 }
+type GetNode_Node_Repository_PullRequests_Nodes struct {
+	ID     string "json:\"id\" graphql:\"id\""
+	Number int    "json:\"number\" graphql:\"number\""
+	Title  string "json:\"title\" graphql:\"title\""
+}
+type GetNode_Node_Repository_PullRequests_PageInfo struct {
+	EndCursor   *string "json:\"endCursor\" graphql:\"endCursor\""
+	HasNextPage bool    "json:\"hasNextPage\" graphql:\"hasNextPage\""
+}
+type GetNode_Node_Repository_PullRequests struct {
+	Nodes    []*GetNode_Node_Repository_PullRequests_Nodes "json:\"nodes\" graphql:\"nodes\""
+	PageInfo GetNode_Node_Repository_PullRequests_PageInfo "json:\"pageInfo\" graphql:\"pageInfo\""
+}
 type GetNode_Node_Repository struct {
-	ID   string "json:\"id\" graphql:\"id\""
-	Name string "json:\"name\" graphql:\"name\""
+	ID           string                               "json:\"id\" graphql:\"id\""
+	Name         string                               "json:\"name\" graphql:\"name\""
+	PullRequests GetNode_Node_Repository_PullRequests "json:\"pullRequests\" graphql:\"pullRequests\""
 }
 type GetNode_Node_Reaction_User struct {
 	ID string "json:\"id\" graphql:\"id\""
@@ -289,12 +303,16 @@ fragment LanguageFragment on Language {
 }
 `
 
-func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, interceptors ...clientv2.RequestInterceptor) (*GetUser, error) {
-	vars := map[string]interface{}{
-		"repositoryFirst": repositoryFirst,
-		"languageFirst":   languageFirst,
-	}
+type GetUserArgs struct {
+	RepositoryFirst int "json:\"repositoryFirst\""
+	LanguageFirst   int "json:\"languageFirst\""
+}
 
+func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, interceptors ...clientv2.RequestInterceptor) (*GetUser, error) {
+	vars := &GetUserArgs{
+		RepositoryFirst: repositoryFirst,
+		LanguageFirst:   languageFirst,
+	}
 	var res GetUser
 	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
@@ -303,12 +321,23 @@ func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst
 	return &res, nil
 }
 
-const GetNodeDocument = `query GetNode ($id: ID!) {
+const GetNodeDocument = `query GetNode ($id: ID!, $after: String) {
 	node(id: $id) {
 		id
 		... on Repository {
 			id
 			name
+			pullRequests(after: $after, first: 3) {
+				nodes {
+					id
+					number
+					title
+				}
+				pageInfo {
+					endCursor
+					hasNextPage
+				}
+			}
 		}
 		... on Reaction {
 			id
@@ -320,11 +349,16 @@ const GetNodeDocument = `query GetNode ($id: ID!) {
 }
 `
 
-func (c *Client) GetNode(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode, error) {
-	vars := map[string]interface{}{
-		"id": id,
-	}
+type GetNodeArgs struct {
+	ID    string  "json:\"id\""
+	After *string "json:\"after,omitempty\""
+}
 
+func (c *Client) GetNode(ctx context.Context, id string, after *string, interceptors ...clientv2.RequestInterceptor) (*GetNode, error) {
+	vars := &GetNodeArgs{
+		ID:    id,
+		After: after,
+	}
 	var res GetNode
 	if err := c.Client.Post(ctx, "GetNode", GetNodeDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
@@ -347,11 +381,14 @@ const AddStarDocument = `mutation AddStar ($input: AddStarInput!) {
 }
 `
 
-func (c *Client) AddStar(ctx context.Context, input AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error) {
-	vars := map[string]interface{}{
-		"input": input,
-	}
+type AddStarArgs struct {
+	Input AddStarInput "json:\"input\""
+}
 
+func (c *Client) AddStar(ctx context.Context, input AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error) {
+	vars := &AddStarArgs{
+		Input: input,
+	}
 	var res AddStar
 	if err := c.Client.Post(ctx, "AddStar", AddStarDocument, &res, vars, interceptors...); err != nil {
 		return nil, err
@@ -370,11 +407,14 @@ const GetNode2Document = `query GetNode2 ($id: ID!) {
 }
 `
 
-func (c *Client) GetNode2(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode2, error) {
-	vars := map[string]interface{}{
-		"id": id,
-	}
+type GetNode2Args struct {
+	ID string "json:\"id\""
+}
 
+func (c *Client) GetNode2(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode2, error) {
+	vars := &GetNode2Args{
+		ID: id,
+	}
 	var res GetNode2
 	if err := c.Client.Post(ctx, "GetNode2", GetNode2Document, &res, vars, interceptors...); err != nil {
 		return nil, err

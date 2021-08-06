@@ -40,7 +40,7 @@ func main() {
 			fmt.Println(language.Name)
 		}
 
-		res, err := githubClient.GetNode(ctx, repository.ID)
+		res, err := githubClient.GetNode(ctx, repository.ID, nil)
 		if err != nil {
 			if handledError, ok := err.(*client.ErrorResponse); ok {
 				fmt.Fprintf(os.Stderr, "handled error: %s\n", handledError.Error())
@@ -50,6 +50,19 @@ func main() {
 			os.Exit(1)
 		}
 
-		fmt.Println(res.Node.ID, res.Node.Repository.Name)
+		fmt.Println(res.Node.ID, res.Node.Repository.Name, res.Node.Repository.PullRequests.Nodes)
+		if res.Node.Repository.PullRequests.PageInfo.HasNextPage {
+			res2, err := githubClient.GetNode(ctx, repository.ID, res.Node.Repository.PullRequests.PageInfo.EndCursor)
+			if err != nil {
+				if handledError, ok := err.(*client.ErrorResponse); ok {
+					fmt.Fprintf(os.Stderr, "handled error: %s\n", handledError.Error())
+				} else {
+					fmt.Fprintf(os.Stderr, "unhandled error: %s\n", err.Error())
+				}
+				os.Exit(1)
+			}
+
+			fmt.Println(res2.Node.Repository.PullRequests.Nodes)
+		}
 	}
 }

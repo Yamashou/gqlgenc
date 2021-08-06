@@ -23,12 +23,23 @@ fragment LanguageFragment on Language {
     name
 }
 
-query GetNode($id: ID!) {
+query GetNode($id: ID!, $after: String) {
     node(id: $id) {
         id
         ... on Repository {
             id
             name
+            pullRequests(after: $after, first: 3) {
+                nodes {
+                    id
+                    number
+                    title
+                }
+                pageInfo {
+                    endCursor
+                    hasNextPage
+                }
+            }
         }
         ... on Reaction {
             id
@@ -61,5 +72,3 @@ query GetNode2($id: ID!) {
         }
     }
 }
-
-

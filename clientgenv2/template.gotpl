@@ -45,13 +45,13 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 	const {{ $model.Name|go }}Document = `{{ $model.Operation }}`
 
 	{{- if $.GenerateClient }}
+	    type {{ $model.Name | go }}Args {{ $model.ArgsType | ref }}
 		func (c *Client) {{ $model.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, interceptors ...clientv2.RequestInterceptor) (*{{ $model.ResponseStructName | go }}, error) {
-			vars := map[string]interface{}{
-			{{- range $args := .VariableDefinitions}}
-				"{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
+			vars := &{{ $model.Name | go }}Args{
+			{{- range $arg := .Args }}
+				{{ $arg.Variable | go }}: {{ $arg.Variable | goPrivate }},
 			{{- end }}
 			}
-
 			var res {{ $model.ResponseStructName | go }}
 			if err := c.Client.Post(ctx, "{{ $model.Name|go }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
 				return nil, err
