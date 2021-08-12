@@ -93,6 +93,7 @@ func IsUniqueName(os ast.OperationList) error {
 			return fmt.Errorf("duplicate operation: %s", operation.Name)
 		}
 	}
+
 	return nil
 }
 
