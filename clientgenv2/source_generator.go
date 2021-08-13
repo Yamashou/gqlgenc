@@ -130,9 +130,11 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 			typ = r.binder.CopyModifiersFromAst(field.Type, baseType)
 		}
 
-		tags := []string{
-			fmt.Sprintf(`json:"%s"`, field.Name),
-			fmt.Sprintf(`graphql:"%s"`, field.Name),
+		var tags []string
+		if !field.Type.NonNull {
+			tags = append(tags, fmt.Sprintf(`json:"%s,omitempty"`, field.Name), fmt.Sprintf(`graphql:"%s"`, field.Name))
+		} else {
+			tags = append(tags, fmt.Sprintf(`json:"%s"`, field.Name), fmt.Sprintf(`graphql:"%s"`, field.Name))
 		}
 
 		fields = append(fields, &ResponseField{
@@ -154,6 +156,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 	case *ast.Field:
 		typeName = NewLayerTypeName(typeName, templates.ToGo(selection.Alias))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
+
 		var baseType types.Type
 		switch {
 		case fieldsResponseFields.IsBasicType():
@@ -222,7 +225,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		})
 		typ := types.NewNamed(
 			types.NewTypeName(0, r.client.Pkg(), name, nil),
-			fieldsResponseFields.StructType(),
+			structType,
 			nil,
 		)
 
