@@ -77,13 +77,39 @@ func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDo
 	}
 }
 
-func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
+func ValidateOperationList(os ast.OperationList) error {
+	if err := IsUniqueName(os); err != nil {
+		return fmt.Errorf("is not unique operation name: %w", err)
+	}
+
+	return nil
+}
+
+func IsUniqueName(os ast.OperationList) error {
+	operationNames := make(map[string]struct{})
+	for _, operation := range os {
+		_, exist := operationNames[templates.ToGo(operation.Name)]
+		if exist {
+			return fmt.Errorf("duplicate operation: %s", operation.Name)
+		}
+	}
+
+	return nil
+}
+
+func (s *Source) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, error) {
 	operations := make([]*Operation, 0, len(s.queryDocument.Operations))
 
 	queryDocumentsMap := queryDocumentMapByOperationName(queryDocuments)
 	operationArgsMap := s.operationArgsMapByOperationName()
+
+	if err := ValidateOperationList(s.queryDocument.Operations); err != nil {
+		return nil, fmt.Errorf("validation error: %w", err)
+	}
+
 	for _, operation := range s.queryDocument.Operations {
 		queryDocument := queryDocumentsMap[operation.Name]
+
 		args := operationArgsMap[operation.Name]
 		operations = append(operations, NewOperation(
 			operation,
@@ -93,7 +119,7 @@ func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
 		))
 	}
 
-	return operations
+	return operations, nil
 }
 
 func (s *Source) operationArgsMapByOperationName() map[string]Arguments {

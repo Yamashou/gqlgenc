@@ -53,7 +53,7 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 			{{- end }}
 			}
 			var res {{ $model.ResponseStructName | go }}
-			if err := c.Client.Post(ctx, "{{ $model.Name|go }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
+			if err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
 				return nil, err
 			}
 
