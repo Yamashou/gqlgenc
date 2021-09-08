@@ -65,24 +65,31 @@ func (rs ResponseFieldList) IsStructType() bool {
 	return len(rs) > 0 && !rs.IsFragment()
 }
 
+type StructSource struct {
+	Name string
+	Type types.Type
+}
+
 type SourceGenerator struct {
-	cfg    *config.Config
-	binder *config.Binder
-	client config.PackageConfig
+	cfg           *config.Config
+	binder        *config.Binder
+	client        config.PackageConfig
+	StructSources []*StructSource
 }
 
 func NewSourceGenerator(cfg *config.Config, client config.PackageConfig) *SourceGenerator {
 	return &SourceGenerator{
-		cfg:    cfg,
-		binder: cfg.NewBinder(),
-		client: client,
+		cfg:           cfg,
+		binder:        cfg.NewBinder(),
+		client:        client,
+		StructSources: []*StructSource{},
 	}
 }
 
-func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet) ResponseFieldList {
+func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, typeName string) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
 	for _, selection := range selectionSet {
-		responseFields = append(responseFields, r.NewResponseField(selection))
+		responseFields = append(responseFields, r.NewResponseField(selection, typeName))
 	}
 
 	return responseFields
@@ -123,9 +130,11 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 			typ = r.binder.CopyModifiersFromAst(field.Type, baseType)
 		}
 
-		tags := []string{
-			fmt.Sprintf(`json:"%s"`, field.Name),
-			fmt.Sprintf(`graphql:"%s"`, field.Name),
+		var tags []string
+		if !field.Type.NonNull {
+			tags = append(tags, fmt.Sprintf(`json:"%s,omitempty"`, field.Name), fmt.Sprintf(`graphql:"%s"`, field.Name))
+		} else {
+			tags = append(tags, fmt.Sprintf(`json:"%s"`, field.Name), fmt.Sprintf(`graphql:"%s"`, field.Name))
 		}
 
 		fields = append(fields, &ResponseField{
@@ -138,10 +147,15 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 	return fields, nil
 }
 
-func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseField {
+func NewLayerTypeName(base, thisField string) string {
+	return fmt.Sprintf("%s_%s", base, thisField)
+}
+
+func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
 	switch selection := selection.(type) {
 	case *ast.Field:
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
+		typeName = NewLayerTypeName(typeName, templates.ToGo(selection.Alias))
+		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
 
 		var baseType types.Type
 		switch {
@@ -152,7 +166,16 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
-			baseType = fieldsResponseFields.StructType()
+			structType := fieldsResponseFields.StructType()
+			r.StructSources = append(r.StructSources, &StructSource{
+				Name: typeName,
+				Type: structType,
+			})
+			baseType = types.NewNamed(
+				types.NewTypeName(0, r.client.Pkg(), typeName, nil),
+				structType,
+				nil,
+			)
 		default:
 			// ここにきたらバグ
 			// here is bug
@@ -177,7 +200,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 
 	case *ast.FragmentSpread:
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
-		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet)
+		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, NewLayerTypeName(typeName, templates.ToGo(selection.Name)))
 		typ := types.NewNamed(
 			types.NewTypeName(0, r.client.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
@@ -193,11 +216,22 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
+		name := NewLayerTypeName(typeName, templates.ToGo(selection.TypeCondition))
+		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
+		structType := fieldsResponseFields.StructType()
+		r.StructSources = append(r.StructSources, &StructSource{
+			Name: name,
+			Type: structType,
+		})
+		typ := types.NewNamed(
+			types.NewTypeName(0, r.client.Pkg(), name, nil),
+			structType,
+			nil,
+		)
 
 		return &ResponseField{
 			Name:             selection.TypeCondition,
-			Type:             fieldsResponseFields.StructType(),
+			Type:             typ,
 			IsInlineFragment: true,
 			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
 			ResponseFields:   fieldsResponseFields,
