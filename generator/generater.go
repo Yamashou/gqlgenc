@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/99designs/gqlgen/api"
-	codegenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/modelgen"
 	"github.com/Yamashou/gqlgenc/config"
@@ -23,7 +22,7 @@ func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.Model
 					for _, def := range schemaModel.Fields {
 						if def.Name == field.Name {
 							// only add 'omitempty' on optional field as defined in graphql schema
-							if !def.Type.NonNull && codegenconfig.IsNilable(field.Type) {
+							if !def.Type.NonNull {
 								field.Tag = `json:"` + field.Name + `,omitempty"`
 							}
 							break
