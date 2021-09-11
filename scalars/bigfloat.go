@@ -1,6 +1,7 @@
 package scalars
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"strconv"
@@ -25,8 +26,29 @@ func (f *BigFloat) UnmarshalGQL(v interface{}) error {
 	floatValue, err := strconv.ParseFloat(stringValue, 64)
 	if err == nil {
 		*f = BigFloat(floatValue)
+
 		return nil
 	}
 
 	return err
+}
+
+func (f *BigFloat) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+
+	floatValue, err := strconv.ParseFloat(stringValue, 64)
+	if err == nil {
+		*f = BigFloat(floatValue)
+
+		return nil
+	}
+
+	return nil
+}
+
+func (f BigFloat) MarshalJSON() ([]byte, error) {
+	return json.Marshal(float64(f))
 }
