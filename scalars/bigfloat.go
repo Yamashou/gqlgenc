@@ -39,7 +39,7 @@ func (f *BigFloat) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	floatValue, err := strconv.ParseFloat(stringValue, 64)
+	floatValue, err := strconv.ParseFloat(s, 64)
 	if err == nil {
 		*f = BigFloat(floatValue)
 
