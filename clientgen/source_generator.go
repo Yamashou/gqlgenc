@@ -8,7 +8,6 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/v2/ast"
-	"golang.org/x/xerrors"
 )
 
 type Argument struct {
@@ -33,7 +32,10 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 	for _, filed := range rs {
 		//  クエリーのフィールドの子階層がFragmentの場合、このフィールドにそのFragmentの型を追加する
 		if filed.IsFragmentSpread {
-			typ := filed.ResponseFields.StructType().Underlying().(*types.Struct)
+			typ, ok := filed.ResponseFields.StructType().Underlying().(*types.Struct)
+			if !ok {
+				continue
+			}
 			for j := 0; j < typ.NumFields(); j++ {
 				vars = append(vars, typ.Field(j))
 				structTags = append(structTags, typ.Tag(j))
@@ -99,7 +101,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 			baseType, err := r.binder.FindType(r.client.Pkg().Path(), field.Type.Name())
 			if err != nil {
 				if !strings.Contains(err.Error(), "unable to find type") {
-					return nil, xerrors.Errorf("not found type: %w", err)
+					return nil, fmt.Errorf("not found type: %w", err)
 				}
 
 				// create new type
@@ -115,7 +117,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 		} else {
 			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
 			if err != nil {
-				return nil, xerrors.Errorf("not found type: %w", err)
+				return nil, fmt.Errorf("not found type: %w", err)
 			}
 
 			typ = r.binder.CopyModifiersFromAst(field.Type, baseType)

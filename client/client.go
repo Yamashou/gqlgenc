@@ -10,7 +10,6 @@ import (
 
 	"github.com/Yamashou/gqlgenc/graphqljson"
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"golang.org/x/xerrors"
 )
 
 // DoClient client interface for only the Do method on the http client
@@ -53,12 +52,12 @@ func (c *Client) newRequest(ctx context.Context, operationName, query string, va
 
 	requestBody, err := json.Marshal(r)
 	if err != nil {
-		return nil, xerrors.Errorf("encode: %w", err)
+		return nil, fmt.Errorf("encode: %w", err)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, bytes.NewBuffer(requestBody))
 	if err != nil {
-		return nil, xerrors.Errorf("create request struct failed: %w", err)
+		return nil, fmt.Errorf("create request struct failed: %w", err)
 	}
 
 	for _, httpRequestOption := range c.HTTPRequestOptions {
@@ -113,20 +112,20 @@ func (er *ErrorResponse) Error() string {
 func (c *Client) Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, httpRequestOptions ...HTTPRequestOption) error {
 	req, err := c.newRequest(ctx, operationName, query, vars, httpRequestOptions)
 	if err != nil {
-		return xerrors.Errorf("don't create request: %w", err)
+		return fmt.Errorf("don't create request: %w", err)
 	}
 	req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		return xerrors.Errorf("request failed: %w", err)
+		return fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return xerrors.Errorf("failed to read response body: %w", err)
+		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	return parseResponse(body, resp.StatusCode, respData)
@@ -167,21 +166,21 @@ type response struct {
 func unmarshal(data []byte, res interface{}) error {
 	resp := response{}
 	if err := json.Unmarshal(data, &resp); err != nil {
-		return xerrors.Errorf("failed to decode data %s: %w", string(data), err)
+		return fmt.Errorf("failed to decode data %s: %w", string(data), err)
 	}
 
 	if resp.Errors != nil && len(resp.Errors) > 0 {
 		// try to parse standard graphql error
 		errors := &GqlErrorList{}
 		if e := json.Unmarshal(data, errors); e != nil {
-			return xerrors.Errorf("faild to parse graphql errors. Response content %s - %w ", string(data), e)
+			return fmt.Errorf("faild to parse graphql errors. Response content %s - %w ", string(data), e)
 		}
 
 		return errors
 	}
 
 	if err := graphqljson.UnmarshalData(resp.Data, res); err != nil {
-		return xerrors.Errorf("failed to decode data into response %s: %w", string(data), err)
+		return fmt.Errorf("failed to decode data into response %s: %w", string(data), err)
 	}
 
 	return nil

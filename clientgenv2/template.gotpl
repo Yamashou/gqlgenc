@@ -10,7 +10,6 @@
 	{{ reserveImport "path" }}
 	{{ reserveImport "time" }}
 
-	{{ reserveImport "golang.org/x/xerrors" }}
 
 	{{ reserveImport "github.com/Yamashou/gqlgenc/graphqljson" }}
 	{{ reserveImport "github.com/Yamashou/gqlgenc/clientv2" }}
@@ -34,6 +33,10 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
 {{- end }}
 
+{{- range $name, $element := .StructSources }}
+	type {{ .Name }} {{ .Type | ref }}
+{{- end}}
+
 {{- range $name, $element := .OperationResponse }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
 {{- end }}
@@ -50,7 +53,7 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 			}
 
 			var res {{ $model.ResponseStructName | go }}
-			if err := c.Client.Post(ctx, "{{ $model.Name|go }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
+			if err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
 				return nil, err
 			}
 

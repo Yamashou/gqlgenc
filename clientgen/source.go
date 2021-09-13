@@ -9,7 +9,6 @@ import (
 	"github.com/Yamashou/gqlgenc/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
-	"golang.org/x/xerrors"
 )
 
 type Source struct {
@@ -38,7 +37,7 @@ func (s *Source) Fragments() ([]*Fragment, error) {
 	for _, fragment := range s.queryDocument.Fragments {
 		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet)
 		if s.sourceGenerator.cfg.Models.Exists(fragment.Name) {
-			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", fragment.Name))
+			return nil, fmt.Errorf("%s is duplicated", fragment.Name)
 		}
 
 		fragment := &Fragment{
@@ -90,7 +89,7 @@ func (s *Source) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, 
 
 		_, exist := operationNames[templates.ToGo(operation.Name)]
 		if exist {
-			return nil, xerrors.Errorf("duplicate operation: %s", operation.Name)
+			return nil, fmt.Errorf("duplicate operation: %s", operation.Name)
 		}
 		operationNames[templates.ToGo(operation.Name)] = struct{}{}
 
@@ -144,7 +143,7 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet)
 		name := getResponseStructName(operation, s.generateConfig)
 		if s.sourceGenerator.cfg.Models.Exists(name) {
-			return nil, xerrors.New(fmt.Sprintf("%s is duplicated", name))
+			return nil, fmt.Errorf("%s is duplicated", name)
 		}
 		operationResponse = append(operationResponse, &OperationResponse{
 			Name: name,
@@ -171,7 +170,7 @@ type Query struct {
 func (s *Source) Query() (*Query, error) {
 	fields, err := s.sourceGenerator.NewResponseFieldsByDefinition(s.schema.Query)
 	if err != nil {
-		return nil, xerrors.Errorf("generate failed for query struct type : %w", err)
+		return nil, fmt.Errorf("generate failed for query struct type : %w", err)
 	}
 
 	s.sourceGenerator.cfg.Models.Add(
@@ -197,7 +196,7 @@ func (s *Source) Mutation() (*Mutation, error) {
 
 	fields, err := s.sourceGenerator.NewResponseFieldsByDefinition(s.schema.Mutation)
 	if err != nil {
-		return nil, xerrors.Errorf("generate failed for mutation struct type : %w", err)
+		return nil, fmt.Errorf("generate failed for mutation struct type : %w", err)
 	}
 
 	s.sourceGenerator.cfg.Models.Add(
