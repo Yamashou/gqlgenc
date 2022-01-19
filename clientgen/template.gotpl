@@ -18,7 +18,7 @@
 		Client *client.Client
 	}
 
-	func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
+	func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) ClientInterface {
 		return &Client{Client: client.NewClient(cli, baseURL, options...)}
 	}
 {{- end }}
@@ -35,6 +35,14 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 
 {{- range $name, $element := .OperationResponse }}
     type  {{ .Name | go  }} {{ .Type | ref }}
+{{- end }}
+
+{{- if .Operation }}
+	type ClientInterface interface {
+		{{- range $model := .Operation }}
+			{{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, httpRequestOptions ...client.HTTPRequestOption) (*{{ $model.ResponseStructName | go }}, error)
+		{{- end }}
+	}
 {{- end }}
 
 {{- range $model := .Operation}}
