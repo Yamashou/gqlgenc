@@ -115,6 +115,10 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 			// for recursive struct field in go
 			typ = types.NewPointer(baseType)
 		} else {
+			if _, ok := r.cfg.Models[field.Type.Name()]; !ok {
+				continue
+			}
+
 			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
 			if err != nil {
 				return nil, fmt.Errorf("not found type: %w", err)
@@ -221,6 +225,11 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 
 // Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
 func (r *SourceGenerator) Type(typeName string) types.Type {
+	model, ok := r.cfg.Models[typeName]
+	if !ok || len(model.Model) == 0 {
+		return types.Typ[types.String]
+	}
+
 	goType, err := r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
 	if err != nil {
 		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
