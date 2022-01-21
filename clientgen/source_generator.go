@@ -115,6 +115,9 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 			// for recursive struct field in go
 			typ = types.NewPointer(baseType)
 		} else {
+			if _, ok := r.cfg.Models[field.Type.Name()]; !ok {
+				continue
+			}
 			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
 			if err != nil {
 				return nil, fmt.Errorf("not found type: %w", err)
