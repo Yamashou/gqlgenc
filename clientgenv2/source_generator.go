@@ -116,7 +116,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 			typ = types.NewPointer(baseType)
 		} else {
 			if _, ok := r.cfg.Models[field.Type.Name()]; !ok {
-				continue
+				return nil, fmt.Errorf("not found type of %v", field.Type.Name())
 			}
 
 			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
