@@ -27,23 +27,27 @@ func mutateHook(b *modelgen.ModelBuild) *modelgen.ModelBuild {
 }
 
 func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) error {
-	var plugins []plugin.Plugin
-	if cfg.Model.IsDefined() {
-		p := modelgen.Plugin{
-			MutateHook: mutateHook,
-		}
-		plugins = append(plugins, &p)
-	}
-	for _, o := range option {
-		o(cfg.GQLConfig, &plugins)
-	}
-
 	if err := cfg.LoadSchema(ctx); err != nil {
 		return fmt.Errorf("failed to load schema: %w", err)
 	}
 
 	if err := cfg.GQLConfig.Init(); err != nil {
 		return fmt.Errorf("generating core failed: %w", err)
+	}
+
+	var plugins []plugin.Plugin
+	for _, o := range option {
+		o(cfg.GQLConfig, &plugins)
+	}
+
+	if cfg.Model.IsDefined() {
+		p := modelgen.Plugin{
+			MutateHook: mutateHook,
+		}
+		err := p.MutateConfig(cfg.GQLConfig)
+		if err != nil {
+			return fmt.Errorf("%s failed: %w", p.Name(), err)
+		}
 	}
 
 	for _, p := range plugins {

@@ -227,7 +227,7 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 func (r *SourceGenerator) Type(typeName string) types.Type {
 	model, ok := r.cfg.Models[typeName]
 	if !ok || len(model.Model) == 0 {
-		return types.Typ[types.String]
+		panic(fmt.Sprintf("not found %v", typeName))
 	}
 
 	goType, err := r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
