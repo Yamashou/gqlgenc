@@ -52,7 +52,7 @@ func (s *Source) Fragments() ([]*Fragment, error) {
 		name := fragment.Name
 		s.sourceGenerator.cfg.Models.Add(
 			name,
-			fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(name)),
+			fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg().Path(), templates.ToGo(name)),
 		)
 	}
 
@@ -172,7 +172,7 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 		name := operationResponse.Name
 		s.sourceGenerator.cfg.Models.Add(
 			name,
-			fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(name)),
+			fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg().Path(), templates.ToGo(name)),
 		)
 	}
 
@@ -196,7 +196,7 @@ func (s *Source) Query() (*Query, error) {
 
 	s.sourceGenerator.cfg.Models.Add(
 		s.schema.Query.Name,
-		fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(s.schema.Query.Name)),
+		fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg().Path(), templates.ToGo(s.schema.Query.Name)),
 	)
 
 	return &Query{
@@ -218,7 +218,7 @@ func (s *Source) Mutation() (*Mutation, error) {
 
 	s.sourceGenerator.cfg.Models.Add(
 		s.schema.Mutation.Name,
-		fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(s.schema.Mutation.Name)),
+		fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg().Path(), templates.ToGo(s.schema.Mutation.Name)),
 	)
 
 	return &Mutation{
