@@ -48,6 +48,7 @@ type Query struct {
 	User                                     *User                              "json:\"user,omitempty\" graphql:\"user\""
 	Viewer                                   User                               "json:\"viewer\" graphql:\"viewer\""
 }
+
 type Mutation struct {
 	AcceptEnterpriseAdministratorInvitation                     *AcceptEnterpriseAdministratorInvitationPayload                     "json:\"acceptEnterpriseAdministratorInvitation,omitempty\" graphql:\"acceptEnterpriseAdministratorInvitation\""
 	AcceptTopicSuggestion                                       *AcceptTopicSuggestionPayload                                       "json:\"acceptTopicSuggestion,omitempty\" graphql:\"acceptTopicSuggestion\""
@@ -201,67 +202,84 @@ type Mutation struct {
 	UpdateTopics                                                *UpdateTopicsPayload                                                "json:\"updateTopics,omitempty\" graphql:\"updateTopics\""
 	VerifyVerifiableDomain                                      *VerifyVerifiableDomainPayload                                      "json:\"verifyVerifiableDomain,omitempty\" graphql:\"verifyVerifiableDomain\""
 }
+
 type LanguageFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
 type GetUser_Viewer_Repositories_Nodes_Languages struct {
 	Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
 }
+
 type GetUser_Viewer_Repositories_Nodes struct {
 	ID        string                                       "json:\"id\" graphql:\"id\""
 	Name      string                                       "json:\"name\" graphql:\"name\""
 	Languages *GetUser_Viewer_Repositories_Nodes_Languages "json:\"languages\" graphql:\"languages\""
 }
+
 type GetUser_Viewer_Repositories struct {
 	Nodes []*GetUser_Viewer_Repositories_Nodes "json:\"nodes\" graphql:\"nodes\""
 }
+
 type GetUser_Viewer struct {
 	ID           string                      "json:\"id\" graphql:\"id\""
 	Name         *string                     "json:\"name\" graphql:\"name\""
 	Repositories GetUser_Viewer_Repositories "json:\"repositories\" graphql:\"repositories\""
 }
+
 type GetNode_Node_Repository struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
 type GetNode_Node_Reaction_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
+
 type GetNode_Node_Reaction struct {
 	ID   string                      "json:\"id\" graphql:\"id\""
 	User *GetNode_Node_Reaction_User "json:\"user\" graphql:\"user\""
 }
+
 type GetNode_Node struct {
 	ID         string                  "json:\"id\" graphql:\"id\""
 	Repository GetNode_Node_Repository "graphql:\"... on Repository\""
 	Reaction   GetNode_Node_Reaction   "graphql:\"... on Reaction\""
 }
+
 type AddStar_AddStar_Starrable_Repository struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
 type AddStar_AddStar_Starrable struct {
 	ID               string                               "json:\"id\" graphql:\"id\""
 	ViewerHasStarred bool                                 "json:\"viewerHasStarred\" graphql:\"viewerHasStarred\""
 	Repository       AddStar_AddStar_Starrable_Repository "graphql:\"... on Repository\""
 }
+
 type AddStar_AddStar struct {
 	Starrable *AddStar_AddStar_Starrable "json:\"starrable\" graphql:\"starrable\""
 }
+
 type GetNode2_Node_Release struct {
 	ID   string  "json:\"id\" graphql:\"id\""
 	Name *string "json:\"name\" graphql:\"name\""
 }
+
 type GetUser struct {
 	Viewer GetUser_Viewer "json:\"viewer\" graphql:\"viewer\""
 }
+
 type GetNode struct {
 	Node *GetNode_Node "json:\"node\" graphql:\"node\""
 }
+
 type AddStar struct {
 	AddStar *AddStar_AddStar "json:\"addStar\" graphql:\"addStar\""
 }
+
 type GetNode2 struct {
 	Node *GetNode2_Node_Release "json:\"node\" graphql:\"node\""
 }
