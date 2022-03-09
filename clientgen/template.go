@@ -5,10 +5,10 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	config2 "github.com/Yamashou/gqlgenc/config"
+	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 )
 
-func RenderTemplate(cfg *config.Config, query *Query, mutation *Mutation, fragments []*Fragment, operations []*Operation, operationResponses []*OperationResponse, generateCfg *config2.GenerateConfig, client config.PackageConfig) error {
+func RenderTemplate(cfg *config.Config, query *Query, mutation *Mutation, fragments []*Fragment, operations []*Operation, operationResponses []*OperationResponse, generateCfg *gqlgencConfig.GenerateConfig, client config.PackageConfig) error {
 	if err := templates.Render(templates.Options{
 		PackageName: client.Package,
 		Filename:    client.Filename,
