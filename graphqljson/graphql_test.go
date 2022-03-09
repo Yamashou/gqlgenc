@@ -5,9 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-cmp/cmp"
-
 	"github.com/Yamashou/gqlgenc/graphqljson"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestUnmarshalGraphQL(t *testing.T) {
@@ -485,7 +484,6 @@ func TestUnmarshalGraphQL_jsonRawMessage(t *testing.T) {
 		"number": 1,
 		"string": "normal string"
 	}`), &got)
-
 	if err != nil {
 		t.Fatal(err)
 	}
