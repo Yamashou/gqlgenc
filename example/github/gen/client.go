@@ -9,11 +9,18 @@ import (
 	"github.com/Yamashou/gqlgenc/clientv2"
 )
 
+type GithubGraphQLClient interface {
+	GetUser(ctx context.Context, repositoryFirst int, languageFirst int, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
+	GetNode(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode, error)
+	AddStar(ctx context.Context, input AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error)
+	GetNode2(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode2, error)
+}
+
 type Client struct {
 	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
+func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) GithubGraphQLClient {
 	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
 }
 
@@ -226,6 +233,11 @@ type LanguageFragment struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
+type RepositoryFragment struct {
+	ID   string "json:\"id\" graphql:\"id\""
+	Name string "json:\"name\" graphql:\"name\""
+}
+
 type GetUser_Viewer_Repositories_Nodes_Languages struct {
 	Nodes []*LanguageFragment "json:\"nodes\" graphql:\"nodes\""
 }
@@ -246,11 +258,6 @@ type GetUser_Viewer struct {
 	Repositories GetUser_Viewer_Repositories "json:\"repositories\" graphql:\"repositories\""
 }
 
-type GetNode_Node_Repository struct {
-	ID   string "json:\"id\" graphql:\"id\""
-	Name string "json:\"name\" graphql:\"name\""
-}
-
 type GetNode_Node_Reaction_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -261,9 +268,9 @@ type GetNode_Node_Reaction struct {
 }
 
 type GetNode_Node struct {
-	ID         string                  "json:\"id\" graphql:\"id\""
-	Repository GetNode_Node_Repository "graphql:\"... on Repository\""
-	Reaction   GetNode_Node_Reaction   "graphql:\"... on Reaction\""
+	ID         string                "json:\"id\" graphql:\"id\""
+	Repository RepositoryFragment    "graphql:\"... on Repository\""
+	Reaction   GetNode_Node_Reaction "graphql:\"... on Reaction\""
 }
 
 type AddStar_AddStar_Starrable_Repository struct {
@@ -343,8 +350,7 @@ const GetNodeDocument = `query GetNode ($id: ID!) {
 	node(id: $id) {
 		id
 		... on Repository {
-			id
-			name
+			... RepositoryFragment
 		}
 		... on Reaction {
 			id
@@ -353,6 +359,10 @@ const GetNodeDocument = `query GetNode ($id: ID!) {
 			}
 		}
 	}
+}
+fragment RepositoryFragment on Repository {
+	id
+	name
 }
 `
 
