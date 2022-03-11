@@ -233,6 +233,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 				fieldsResponseFields.StructType(),
 				nil,
 			)
+
 			return &ResponseField{
 				Name:           selection.TypeCondition,
 				Type:           typ,
