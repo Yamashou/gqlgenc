@@ -297,6 +297,14 @@ func (c *GenerateConfig) ShouldGenerateClient() bool {
 	return true
 }
 
+func (c *GenerateConfig) GetClientInterfaceName() *string {
+	if c == nil {
+		return nil
+	}
+
+	return c.ClientInterfaceName
+}
+
 type NamingConfig struct {
 	Query    string `yaml:"query,omitempty"`
 	Mutation string `yaml:"mutation,omitempty"`
