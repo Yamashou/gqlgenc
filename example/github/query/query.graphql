@@ -27,8 +27,7 @@ query GetNode($id: ID!) {
     node(id: $id) {
         id
         ... on Repository {
-            id
-            name
+            ...RepositoryFragment
         }
         ... on Reaction {
             id
@@ -38,6 +37,11 @@ query GetNode($id: ID!) {
             }
         }
     }
+}
+
+fragment RepositoryFragment on Repository {
+    id
+    name
 }
 
 mutation AddStar($input: AddStarInput!) {
