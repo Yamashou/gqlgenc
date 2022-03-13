@@ -209,7 +209,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 	case *ast.FragmentSpread:
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, NewLayerTypeName(typeName, templates.ToGo(selection.Name)))
-		typ := types.NewNamed(
+		baseType := types.NewNamed(
 			types.NewTypeName(0, r.client.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
 			nil,
@@ -217,7 +217,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 
 		return &ResponseField{
 			Name:             selection.Name,
-			Type:             typ,
+			Type:             types.NewPointer(baseType),
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
 		}
