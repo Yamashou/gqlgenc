@@ -13,3 +13,4 @@ query:
   - "./query/*.graphql"
 generate:
   clientV2: true
+  clientInterfaceName: "GithubGraphQLClient"

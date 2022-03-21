@@ -10,7 +10,7 @@ import (
 	"github.com/Yamashou/gqlgenc/config"
 )
 
-// mutateHook adds "omitempty" tag option to optional field from input type model as defined in graphql schema
+// mutateHook adds the "omitempty" option to optional field from input type model as defined in graphql schema
 // For more info see https://github.com/99designs/gqlgen/blob/master/docs/content/recipes/modelgen-hook.md
 func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.ModelBuild {
 	return func(b *modelgen.ModelBuild) *modelgen.ModelBuild {

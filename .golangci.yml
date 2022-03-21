@@ -40,6 +40,10 @@ linters:
     - forbidigo
     - cyclop
     - govet
+    - errname
+    - varnamelen
+    - nilnil
+    - structcheck
   fast: false
 
 issues:
