@@ -13,8 +13,8 @@ import (
 // mutateHook adds the "omitempty" option to optional field from input type model as defined in graphql schema
 // For more info see https://github.com/99designs/gqlgen/blob/master/docs/content/recipes/modelgen-hook.md
 func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.ModelBuild {
-	return func(b *modelgen.ModelBuild) *modelgen.ModelBuild {
-		for _, model := range b.Models {
+	return func(build *modelgen.ModelBuild) *modelgen.ModelBuild {
+		for _, model := range build.Models {
 			// only handle input type model
 			if schemaModel, ok := cfg.GQLConfig.Schema.Types[model.Name]; ok && schemaModel.IsInputType() {
 				for _, field := range model.Fields {
@@ -31,7 +31,7 @@ func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.Model
 				}
 			}
 		}
-		return b
+		return build
 	}
 }
 
