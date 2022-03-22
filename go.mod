@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/99designs/gqlgen v0.17.2
 	github.com/agnivade/levenshtein v1.1.1 // indirect
-	github.com/google/go-cmp v0.5.4
+	github.com/google/go-cmp v0.5.7
 	github.com/stretchr/testify v1.4.0
 	github.com/vektah/gqlparser/v2 v2.4.1
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
