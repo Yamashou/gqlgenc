@@ -109,8 +109,12 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 	if err != nil {
 		return fmt.Errorf("don't create request: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Accept", "application/json; charset=utf-8")
+	if req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	}
+	if req.Header.Get("Accept") == "" {
+		req.Header.Set("Accept", "application/json; charset=utf-8")
+	}
 
 	resp, err := c.Client.Do(req)
 	if err != nil {

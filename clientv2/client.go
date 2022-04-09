@@ -125,8 +125,12 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 	if err != nil {
 		return fmt.Errorf("create request struct failed: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Accept", "application/json; charset=utf-8")
+	if req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	}
+	if req.Header.Get("Accept") == "" {
+		req.Header.Set("Accept", "application/json; charset=utf-8")
+	}
 
 	f := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
 
