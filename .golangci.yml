@@ -25,6 +25,7 @@ linters:
     - wsl
     - lll
     - dupl
+    - forcetypeassert
     - funlen
     - gochecknoinits
     - gochecknoglobals
