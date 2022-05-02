@@ -26,6 +26,14 @@ type ResponseField struct {
 
 type ResponseFieldList []*ResponseField
 
+func (rs ResponseFieldList) IsFragmentSpread() bool {
+	if len(rs) != 1 {
+		return false
+	}
+
+	return rs[0].IsFragmentSpread
+}
+
 func (rs ResponseFieldList) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
@@ -201,7 +209,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 	case *ast.FragmentSpread:
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, NewLayerTypeName(typeName, templates.ToGo(selection.Name)))
-		typ := types.NewNamed(
+		baseType := types.NewNamed(
 			types.NewTypeName(0, r.client.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
 			nil,
@@ -209,7 +217,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 
 		return &ResponseField{
 			Name:             selection.Name,
-			Type:             typ,
+			Type:             types.NewPointer(baseType),
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
 		}
@@ -218,6 +226,22 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
 		name := NewLayerTypeName(typeName, templates.ToGo(selection.TypeCondition))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
+
+		if fieldsResponseFields.IsFragmentSpread() {
+			typ := types.NewNamed(
+				types.NewTypeName(0, r.client.Pkg(), templates.ToGo(fieldsResponseFields[0].Name), nil),
+				fieldsResponseFields.StructType(),
+				nil,
+			)
+
+			return &ResponseField{
+				Name:           selection.TypeCondition,
+				Type:           typ,
+				Tags:           []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
+				ResponseFields: fieldsResponseFields,
+			}
+		}
+
 		structType := fieldsResponseFields.StructType()
 		r.StructSources = append(r.StructSources, &StructSource{
 			Name: name,

@@ -14,13 +14,27 @@
 	{{ reserveImport "github.com/Yamashou/gqlgenc/graphqljson" }}
 	{{ reserveImport "github.com/Yamashou/gqlgenc/client" }}
 
+	{{- if .ClientInterfaceName }}
+    	type {{ .ClientInterfaceName }} interface {
+    		{{- range $model := .Operation }}
+    			{{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, httpRequestOptions ...client.HTTPRequestOption) (*{{ $model.ResponseStructName | go }}, error)
+    		{{- end }}
+    	}
+    {{- end }}
+
 	type Client struct {
 		Client *client.Client
 	}
 
-	func NewClient(cli client.DoClient, baseURL string, options ...client.HTTPRequestOption) *Client {
+	{{- if .ClientInterfaceName }}
+	func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) {{ .ClientInterfaceName }} {
 		return &Client{Client: client.NewClient(cli, baseURL, options...)}
 	}
+	{{- else }}
+		func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
+			return &Client{Client: client.NewClient(cli, baseURL, options...)}
+		}
+	{{- end }}
 {{- end }}
 
 type {{ .Query.Name | go }} {{ .Query.Type | ref }}
@@ -36,6 +50,8 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 {{- range $name, $element := .OperationResponse }}
     type  {{ .Name | go  }} {{ .Type | ref }}
 {{- end }}
+
+
 
 {{- range $model := .Operation}}
 	const {{ $model.Name|go }}Document = `{{ $model.Operation }}`
