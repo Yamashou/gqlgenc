@@ -190,15 +190,7 @@ func unmarshal(data []byte, res interface{}) error {
 		// try to parse standard graphql error
 		errors := &GqlErrorList{}
 		if e := json.Unmarshal(data, errors); e != nil {
-<<<<<<< HEAD
-<<<<<<< HEAD
-			return fmt.Errorf("faild to parse graphql errors. Response content %s - %w", string(data), e)
-=======
 			return fmt.Errorf("faild to parse graphql errors. Response content %s - %w ", string(data), e)
->>>>>>> ab96c62 (reprace error)
-=======
-			return fmt.Errorf("faild to parse graphql errors. Response content %s - %w", string(data), e)
->>>>>>> 9bfbbb1 (fix error)
 		}
 
 		return errors
