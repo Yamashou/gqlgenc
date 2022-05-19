@@ -25,16 +25,22 @@
     type gqlClient interface {
         Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}) error
     }
-
-	{{- if .ClientInterfaceName }}
-	func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) {{ .ClientInterfaceName }} {
-		return &Client{Client: client.NewClient(cli, baseURL, options...)}
+    type generatedClient struct {
+		gqlClient gqlClient
 	}
-	{{- else }}
-		func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
-			return &Client{Client: client.NewClient(cli, baseURL, options...)}
-		}
-	{{- end }}
+
+    type GeneratedClient interface {
+    {{- range $model := .Operation}}
+        {{- if $.GenerateClient }}
+            {{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}) (*{{ $model.ResponseStructName | go }}, error)
+        {{- end}}
+    {{- end}}
+    }
+
+    func NewGeneratedClient(c gqlClient) GeneratedClient {
+        return &generatedClient{gqlClient: c}
+    }
+
 {{- end }}
 
 type {{ .Query.Name | go }} {{ .Query.Type | ref }}
