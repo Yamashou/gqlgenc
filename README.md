@@ -13,6 +13,16 @@ or in [patch.diff](./patch.diff).
 
 The rest of this doc is from the original repo.
 
+This is a fork of [gqlgenc](https://github.com/Yamashou/gqlgenc). We have made custom changes to
+- Handle BigFloat
+- Handle nested types
+- Allow injecting custom GraphQL client
+
+The changes we made can be viewed [here](https://github.com/Yamashou/gqlgenc/compare/master...TripleMint:master)
+or as [diff](https://github.com/Yamashou/gqlgenc/compare/master...TripleMint:master.diff).
+
+The rest of this doc is from the original repo.
+
 ## What is gqlgenc ?
 
 This is Go library for building GraphQL client with [gqlgen](https://github.com/99designs/gqlgen)

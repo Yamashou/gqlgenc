@@ -22,9 +22,9 @@
     	}
     {{- end }}
 
-	type Client struct {
-		Client *client.Client
-	}
+    type gqlClient interface {
+        Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}) error
+    }
 
 	{{- if .ClientInterfaceName }}
 	func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) {{ .ClientInterfaceName }} {
