@@ -5,7 +5,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
+	gqlgencConfig "github.com/TripleMint/gqlgenc/config"
 )
 
 func RenderTemplate(cfg *config.Config, query *Query, mutation *Mutation, fragments []*Fragment, operations []*Operation, operationResponses []*OperationResponse, generateCfg *gqlgencConfig.GenerateConfig, client config.PackageConfig) error {
