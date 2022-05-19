@@ -1,4 +1,4 @@
-# gqlgenc
+# Our Doc
 
 This is a fork of [gqlgenc](https://github.com/Yamashou/gqlgenc). We have made custom changes to
 - Handle BigFloat
@@ -7,6 +7,9 @@ This is a fork of [gqlgenc](https://github.com/Yamashou/gqlgenc). We have made c
 
 The changes we made can be viewed [here](https://github.com/Yamashou/gqlgenc/compare/master...TripleMint:master)
 or in [patch.diff](./patch.diff).
+
+
+# Upstream Repo Doc
 
 The rest of this doc is from the original repo.
 
