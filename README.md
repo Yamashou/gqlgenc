@@ -1,5 +1,13 @@
 # gqlgenc
 
+This is a fork of [gqlgenc](https://github.com/Yamashou/gqlgenc). We have made custom changes to
+- Handle BigFloat
+- Handle nested types
+- Allow injecting custom GraphQL client
+
+The changes we made can be viewed [here](https://github.com/Yamashou/gqlgenc/compare/master...TripleMint:master)
+or in [patch.diff](./patch.diff).
+
 ## What is gqlgenc ?
 
 This is Go library for building GraphQL client with [gqlgen](https://github.com/99designs/gqlgen)
@@ -7,13 +15,13 @@ This is Go library for building GraphQL client with [gqlgen](https://github.com/
 ## Motivation
 
 Now, if you build GraphQL api client for Go, have choice:
- 
+
  - [github.com/shurcooL/graphql](https://github.com/shurcooL/graphql)
  - [github.com/machinebox/graphql](https://github.com/machinebox/graphql)
 
-These libraries are very simple and easy to handle. 
+These libraries are very simple and easy to handle.
 However, as I work with [gqlgen](https://github.com/99designs/gqlgen) and [graphql-code-generator](https://graphql-code-generator.com/) every day, I find out the beauty of automatic generation.
-So I want to automatically generate types. 
+So I want to automatically generate types.
 
 ## Installation
 
@@ -25,7 +33,7 @@ go get -u github.com/TripleMint/gqlgenc
 
 ### Client Codes Only
 
-gqlgenc base is gqlgen with [plugins](https://gqlgen.com/reference/plugins/). So the setting is yaml in each format.  
+gqlgenc base is gqlgen with [plugins](https://gqlgen.com/reference/plugins/). So the setting is yaml in each format.
 gqlgenc can be configured using a `.gqlgenc.yml` file
 
 Load a schema from a remote server:
@@ -129,10 +137,10 @@ func main() {
 
 ### Japanese Comments
 These codes have Japanese comments. Replace with English.
- 
+
 ### Subscription
 
-This client does not support subscription. If you need a subscription, please create an issue or pull request. 
+This client does not support subscription. If you need a subscription, please create an issue or pull request.
 
 ### Pre-conditions
 
