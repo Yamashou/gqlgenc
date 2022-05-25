@@ -14,13 +14,23 @@
 	{{ reserveImport "github.com/TripleMint/gqlgenc/graphqljson" }}
 	{{ reserveImport "github.com/TripleMint/gqlgenc/clientv2" }}
 
+
+	{{- if .ClientInterfaceName }}
+        type {{ .ClientInterfaceName }} interface {
+            {{- range $model := .Operation }}
+                {{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, interceptors ...clientv2.RequestInterceptor) (*{{ $model.ResponseStructName | go }}, error)
+            {{- end }}
+        }
+    {{- end }}
+
 	type Client struct {
-	Client *clientv2.Client
+	    Client *clientv2.Client
 	}
 
-	func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
-	}
+    func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) {{- if .ClientInterfaceName }} {{ .ClientInterfaceName }} {{- else }} *Client {{- end }} {
+        return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
+    }
+
 {{- end }}
 
 type {{ .Query.Name | go }} {{ .Query.Type | ref }}
@@ -32,6 +42,10 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 {{- range $name, $element := .Fragment }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
 {{- end }}
+
+{{- range $name, $element := .StructSources }}
+	type {{ .Name }} {{ .Type | ref }}
+{{- end}}
 
 {{- range $name, $element := .OperationResponse }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
@@ -49,7 +63,7 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 			}
 
 			var res {{ $model.ResponseStructName | go }}
-			if err := c.Client.Post(ctx, "{{ $model.Name|go }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
+			if err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
 				return nil, err
 			}
 

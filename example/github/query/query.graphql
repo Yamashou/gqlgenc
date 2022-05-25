@@ -1,7 +1,3 @@
-fragment LanguageFragment on Language {
-    id
-    name
-}
 
 
 query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
@@ -21,4 +17,53 @@ query GetUser($repositoryFirst: Int!, $languageFirst: Int!) {
         }
     }
 }
+
+fragment LanguageFragment on Language {
+    id
+    name
+}
+
+query GetNode($id: ID!) {
+    node(id: $id) {
+        id
+        ... on Repository {
+            ...RepositoryFragment
+        }
+        ... on Reaction {
+            id
+            user {
+                id
+
+            }
+        }
+    }
+}
+
+fragment RepositoryFragment on Repository {
+    id
+    name
+}
+
+mutation AddStar($input: AddStarInput!) {
+    addStar(input: $input) {
+        starrable {
+            id
+            viewerHasStarred
+            ... on Repository {
+                id
+                name
+            }
+        }
+    }
+}
+
+query GetNode2($id: ID!) {
+    node(id: $id) {
+        ... on Release {
+            id
+            name
+        }
+    }
+}
+
 

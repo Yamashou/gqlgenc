@@ -14,11 +14,18 @@
 	{{ reserveImport "github.com/TripleMint/gqlgenc/graphqljson" }}
 	{{ reserveImport "github.com/TripleMint/gqlgenc/client" }}
 
+	{{- if .ClientInterfaceName }}
+    	type {{ .ClientInterfaceName }} interface {
+    		{{- range $model := .Operation }}
+    			{{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, httpRequestOptions ...client.HTTPRequestOption) (*{{ $model.ResponseStructName | go }}, error)
+    		{{- end }}
+    	}
+    {{- end }}
+
     type gqlClient interface {
         Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}) error
     }
-
-	type generatedClient struct {
+    type generatedClient struct {
 		gqlClient gqlClient
 	}
 
@@ -33,7 +40,6 @@
     func NewGeneratedClient(c gqlClient) GeneratedClient {
         return &generatedClient{gqlClient: c}
     }
-
 
 {{- end }}
 
@@ -50,6 +56,8 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 {{- range $name, $element := .OperationResponse }}
     type  {{ .Name | go  }} {{ .Type | ref }}
 {{- end }}
+
+
 
 {{- range $model := .Operation}}
 	const {{ $model.Name|go }}Document = `{{ $model.Operation }}`

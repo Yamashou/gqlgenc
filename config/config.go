@@ -200,7 +200,7 @@ func LoadConfig(filename string) (*Config, error) {
 		Model:  cfg.Model,
 		Models: models,
 		// TODO: gqlgen must be set exec but client not used
-		Exec:       config.PackageConfig{Filename: "generated.go"},
+		Exec:       config.ExecConfig{Filename: "generated.go"},
 		Directives: map[string]config.DirectiveConfig{},
 		Sources:    sources,
 	}
@@ -276,10 +276,11 @@ func (c *Config) loadLocalSchema() (*ast.Schema, error) {
 }
 
 type GenerateConfig struct {
-	Prefix        *NamingConfig `yaml:"prefix,omitempty"`
-	Suffix        *NamingConfig `yaml:"suffix,omitempty"`
-	UnamedPattern string        `yaml:"unamedPattern,omitempty"`
-	Client        *bool         `yaml:"client,omitempty"`
+	Prefix              *NamingConfig `yaml:"prefix,omitempty"`
+	Suffix              *NamingConfig `yaml:"suffix,omitempty"`
+	UnamedPattern       string        `yaml:"unamedPattern,omitempty"`
+	Client              *bool         `yaml:"client,omitempty"`
+	ClientInterfaceName *string       `yaml:"clientInterfaceName,omitempty"`
 	// if true, used client v2 in generate code
 	ClientV2 bool `yaml:"clientV2,omitempty"`
 }
@@ -294,6 +295,14 @@ func (c *GenerateConfig) ShouldGenerateClient() bool {
 	}
 
 	return true
+}
+
+func (c *GenerateConfig) GetClientInterfaceName() *string {
+	if c == nil {
+		return nil
+	}
+
+	return c.ClientInterfaceName
 }
 
 type NamingConfig struct {

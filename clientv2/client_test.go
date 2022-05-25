@@ -141,14 +141,14 @@ func TestUnmarshal(t *testing.T) {
 
 	t.Run("valid data", func(t *testing.T) {
 		t.Parallel()
-		r := &fakeRes{}
-		err := unmarshal([]byte(validData), r)
+		res := &fakeRes{}
+		err := unmarshal([]byte(validData), res)
 		require.NoError(t, err)
 
 		expected := &fakeRes{
 			Something: "some data",
 		}
-		require.Equal(t, r, expected)
+		require.Equal(t, res, expected)
 	})
 
 	t.Run("bad data format", func(t *testing.T) {
