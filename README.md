@@ -6,7 +6,25 @@ This is a fork of [gqlgenc](https://github.com/Yamashou/gqlgenc). We have made c
 - Allow injecting custom GraphQL client
 
 The changes we made can be viewed [here](https://github.com/Yamashou/gqlgenc/compare/master...TripleMint:master)
-or in [patch.diff](./patch.diff).
+
+## How to use this package
+
+Run `go get github.com/TripleMint/gqlgenc` to install the executable and update your `go.mod` and `go.sum` files.
+
+To prevent `go mod tidy` from removing this library, add a `tools.go` file with the following code:
+```
+// +build tools
+
+package tools
+
+import (
+	_ "github.com/TripleMint/gqlgenc"
+)
+```
+
+Add a `.gqlgenc.yml` configuration file in the directory where queries are stored.
+Then run `GRAPHQL_HOST=$HOST gqlgenc`. You should see files generated in the directories you have specified in the configuration file.
+
 
 
 # Upstream Repo Doc
