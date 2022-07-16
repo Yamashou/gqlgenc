@@ -55,6 +55,9 @@ func (c *Client) newRequest(ctx context.Context, operationName, query string, va
 		return nil, fmt.Errorf("create request struct failed: %w", err)
 	}
 
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Accept", "application/json; charset=utf-8")
+
 	for _, httpRequestOption := range c.HTTPRequestOptions {
 		httpRequestOption(req)
 	}
@@ -109,8 +112,6 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 	if err != nil {
 		return fmt.Errorf("don't create request: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Accept", "application/json; charset=utf-8")
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
