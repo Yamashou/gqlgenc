@@ -2,7 +2,7 @@ package introspection
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -43,7 +43,7 @@ func TestParseIntrospectionQuery_Parse(t *testing.T) {
 func readQueryResult(t *testing.T, filename string) Query {
 	t.Helper()
 
-	data, err := ioutil.ReadFile(filename)
+	data, err := os.ReadFile(filename)
 	require.NoError(t, err)
 
 	query := Query{}

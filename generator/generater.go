@@ -25,12 +25,14 @@ func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.Model
 							if !def.Type.NonNull {
 								field.Tag = `json:"` + field.Name + `,omitempty"`
 							}
+
 							break
 						}
 					}
 				}
 			}
 		}
+
 		return build
 	}
 }
