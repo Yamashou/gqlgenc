@@ -268,7 +268,7 @@ func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
 func (c *Config) loadLocalSchema() (*ast.Schema, error) {
 	schema, err := gqlparser.LoadSchema(c.GQLConfig.Sources...)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("loadLocalSchema: %w", err)
 	}
 
 	return schema, nil
