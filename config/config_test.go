@@ -4,9 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"runtime"
 	"testing"
 
@@ -140,7 +141,7 @@ func newMockRemoteServer(t *testing.T, response interface{}) (mock *mockRemoteSe
 	mock = &mockRemoteServer{
 		Server: httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 			var err error
-			mock.body, err = ioutil.ReadAll(req.Body)
+			mock.body, err = io.ReadAll(req.Body)
 			require.NoError(t, err)
 
 			var responseBody []byte
@@ -167,7 +168,7 @@ type responseFromFile string
 func (f responseFromFile) load(t *testing.T) []byte {
 	t.Helper()
 
-	content, err := ioutil.ReadFile(string(f))
+	content, err := os.ReadFile(string(f))
 	require.NoError(t, err)
 
 	return content
