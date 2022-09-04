@@ -22,7 +22,8 @@ func ParseIntrospectionQuery(url string, query Query) *ast.SchemaDocument {
 }
 
 type parser struct {
-	sharedPosition *ast.Position
+	sharedPosition                *ast.Position
+	deprecatedDirectiveDefinition *ast.DirectiveDefinition
 }
 
 func (p parser) parseIntrospectionQuery(query Query) *ast.SchemaDocument {
@@ -32,12 +33,15 @@ func (p parser) parseIntrospectionQuery(query Query) *ast.SchemaDocument {
 	doc.Schema = append(doc.Schema, p.parseSchemaDefinition(query, typeMap))
 	doc.Position = p.sharedPosition
 
-	for _, typeVale := range typeMap {
-		doc.Definitions = append(doc.Definitions, p.parseTypeSystemDefinition(typeVale))
-	}
-
+	// parseDirectiveDefinition before parseTypeSystemDefinition
+	// Because SystemDefinition depends on DirectiveDefinition
 	for _, directiveValue := range query.Schema.Directives {
 		doc.Directives = append(doc.Directives, p.parseDirectiveDefinition(directiveValue))
+	}
+	p.deprecatedDirectiveDefinition = doc.Directives.ForName("deprecated")
+
+	for _, typeVale := range typeMap {
+		doc.Definitions = append(doc.Definitions, p.parseTypeSystemDefinition(typeVale))
 	}
 
 	return &doc
@@ -116,6 +120,7 @@ func (p parser) parseObjectFields(typeVale *FullType) ast.FieldList {
 			Arguments:   args,
 			Type:        typ,
 			Position:    p.sharedPosition,
+			Directives:  p.buildDeprecatedDirective(field),
 		}
 		fieldList = append(fieldList, fieldDefinition)
 	}
@@ -315,6 +320,35 @@ func (p parser) getType(typeRef *TypeRef) *ast.Type {
 	}
 
 	return ast.NamedType(pointerString(typeRef.Name), p.sharedPosition)
+}
+
+func (p parser) buildDeprecatedDirective(field *FieldValue) ast.DirectiveList {
+	var directives ast.DirectiveList
+	if field.IsDeprecated {
+		var arguments ast.ArgumentList
+		if field.DeprecationReason != nil {
+			arguments = append(arguments, &ast.Argument{
+				Name: "reason",
+				Value: &ast.Value{
+					Raw:      *field.DeprecationReason,
+					Kind:     ast.StringValue,
+					Position: p.sharedPosition,
+				},
+				Position: p.sharedPosition,
+			})
+		}
+		deprecatedDirective := &ast.Directive{
+			Name:             "deprecated",
+			Arguments:        arguments,
+			Position:         p.sharedPosition,
+			ParentDefinition: nil,
+			Definition:       p.deprecatedDirectiveDefinition,
+			Location:         ast.LocationVariableDefinition,
+		}
+		directives = append(directives, deprecatedDirective)
+	}
+
+	return directives
 }
 
 func pointerString(s *string) string {
