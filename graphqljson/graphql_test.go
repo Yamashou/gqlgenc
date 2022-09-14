@@ -563,3 +563,29 @@ func TestUnmarshalGraphQL_jsonRawMessageInFragment(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+func TestUnmarshalGraphQL_map(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		Outputs map[string]interface{}
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+			"outputs":{
+                                 "vpc":"1",
+                                 "worker_role_arn":"2"
+        	}
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := query{
+		map[string]interface{}{
+			"vpc":             "1",
+			"worker_role_arn": "2",
+		},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
