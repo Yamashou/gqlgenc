@@ -2,6 +2,7 @@ package clientv2
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -139,6 +140,13 @@ func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res
 		return fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.Header.Get("Content-Encoding") == "gzip" {
+		resp.Body, err = gzip.NewReader(resp.Body)
+		if err != nil {
+			return fmt.Errorf("gzip decode failed: %w", err)
+		}
+	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
