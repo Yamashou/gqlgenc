@@ -1,8 +1,8 @@
 package main
 
 import (
-	"context"
 	"fmt"
+	"github.com/urfave/cli/v2"
 	"os"
 
 	"github.com/99designs/gqlgen/api"
@@ -12,23 +12,48 @@ import (
 	"github.com/Yamashou/gqlgenc/generator"
 )
 
-func main() {
-	ctx := context.Background()
-	cfg, err := config.LoadConfigFromDefaultLocations()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%+v", err.Error())
-		os.Exit(2)
-	}
-
-	clientGen := api.AddPlugin(clientgen.New(cfg.Query, cfg.Client, cfg.Generate))
-	if cfg.Generate != nil {
-		if cfg.Generate.ClientV2 {
-			clientGen = api.AddPlugin(clientgenv2.New(cfg.Query, cfg.Client, cfg.Generate))
+var generateCmd = &cli.Command{
+	Name:  "generate",
+	Usage: "generate a graphql client based on schema",
+	Flags: []cli.Flag{
+		&cli.StringFlag{Name: "configdir, c", Usage: "the directory with configuration file", Value: "."},
+	},
+	Action: func(ctx *cli.Context) error {
+		configDir := ctx.String("configdir")
+		cfg, err := config.LoadConfigFromDefaultLocations(configDir)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%+v", err.Error())
+			os.Exit(2)
 		}
+
+		clientGen := api.AddPlugin(clientgen.New(cfg.Query, cfg.Client, cfg.Generate))
+		if cfg.Generate != nil {
+			if cfg.Generate.ClientV2 {
+				clientGen = api.AddPlugin(clientgenv2.New(cfg.Query, cfg.Client, cfg.Generate))
+			}
+		}
+
+		if err := generator.Generate(ctx.Context, cfg, clientGen); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "%+v", err.Error())
+			os.Exit(4)
+		}
+		return nil
+	},
+}
+
+func main() {
+
+	app := cli.NewApp()
+	app.Name = "gqlgenc"
+	app.Description = "This is a library for quickly creating strictly typed graphql client in golang"
+	app.Usage = generateCmd.Usage
+	app.DefaultCommand = "generate"
+	app.Commands = []*cli.Command{
+		generateCmd,
 	}
 
-	if err := generator.Generate(ctx, cfg, clientGen); err != nil {
-		fmt.Fprintf(os.Stderr, "%+v", err.Error())
-		os.Exit(4)
+	if err := app.Run(os.Args); err != nil {
+		_, _ = fmt.Fprint(os.Stderr, err.Error()+"\n")
+		os.Exit(1)
 	}
 }

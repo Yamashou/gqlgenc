@@ -50,19 +50,13 @@ func (a StringList) Has(file string) bool {
 	return false
 }
 
-// LoadConfigFromDefaultLocations looks for a config file in the current directory, and all parent directories
+// LoadConfigFromDefaultLocations looks for a config file in the specified directory, and all parent directories
 // walking up the tree. The closest config file will be returned.
-func LoadConfigFromDefaultLocations() (*Config, error) {
-	cfgFile, err := findCfg()
+func LoadConfigFromDefaultLocations(dir string) (*Config, error) {
+	cfgFile, err := findCfg(dir)
 	if err != nil {
 		return nil, err
 	}
-
-	err = os.Chdir(filepath.Dir(cfgFile))
-	if err != nil {
-		return nil, fmt.Errorf("unable to enter config dir: %w", err)
-	}
-
 	return LoadConfig(cfgFile)
 }
 
@@ -74,10 +68,17 @@ type EndPointConfig struct {
 
 // findCfg searches for the config file in this directory and all parents up the tree
 // looking for the closest match
-func findCfg() (string, error) {
-	dir, err := os.Getwd()
+func findCfg(path string) (string, error) {
+	var err error
+	var dir string
+	if path == "." {
+		dir, err = os.Getwd()
+	} else {
+		dir = path
+		_, err = os.Stat(dir)
+	}
 	if err != nil {
-		return "", fmt.Errorf("unable to get working dir to findCfg: %w", err)
+		return "", fmt.Errorf("unable to get directory \"%s\" to findCfg: %w", dir, err)
 	}
 
 	cfg := findCfgInDir(dir)
