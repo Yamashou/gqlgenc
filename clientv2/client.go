@@ -7,8 +7,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
+	"strconv"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/Yamashou/gqlgenc/graphqljson"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
@@ -108,30 +111,177 @@ func (er *ErrorResponse) Error() string {
 	return string(content)
 }
 
-// the response into the given object.
+type MultipartFile struct {
+	File  graphql.Upload
+	Index int
+}
+
+type MultipartFilesGroup struct {
+	Files      []MultipartFile
+	IsMultiple bool
+}
+
+type FormField struct {
+	Name  string
+	Value interface{}
+}
+
+type header struct {
+	key, value string
+}
+
+// Post support send multipart form with files https://gqlgen.com/reference/file-upload/ https://github.com/jaydenseric/graphql-multipart-request-spec
 func (c *Client) Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, interceptors ...RequestInterceptor) error {
+	multipartFilesGroups, mapping, vars := parseMultipartFiles(vars)
+
 	r := &Request{
 		Query:         query,
 		Variables:     vars,
 		OperationName: operationName,
 	}
-	gqlInfo := NewGQLRequestInfo(r)
 
-	requestBody, err := json.Marshal(r)
-	if err != nil {
-		return fmt.Errorf("encode: %w", err)
+	gqlInfo := NewGQLRequestInfo(r)
+	body := new(bytes.Buffer)
+
+	var headers []header
+
+	if len(multipartFilesGroups) > 0 {
+		contentType, err := prepareMultipartFormBody(
+			body,
+			[]FormField{
+				{
+					Name:  "operations",
+					Value: r,
+				},
+				{
+					Name:  "map",
+					Value: mapping,
+				},
+			},
+			multipartFilesGroups,
+		)
+		if err != nil {
+			return fmt.Errorf("failed to prepare form body: %w", err)
+		}
+
+		headers = append(headers, header{key: "Content-Type", value: contentType})
+	} else {
+		requestBody, err := json.Marshal(r)
+		if err != nil {
+			return fmt.Errorf("encode: %w", err)
+		}
+
+		body = bytes.NewBuffer(requestBody)
+
+		headers = append(headers, header{key: "Content-Type", value: "application/json; charset=utf-8"})
+		headers = append(headers, header{key: "Accept", value: "application/json; charset=utf-8"})
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, body)
 	if err != nil {
 		return fmt.Errorf("create request struct failed: %w", err)
 	}
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Accept", "application/json; charset=utf-8")
+
+	for _, h := range headers {
+		req.Header.Set(h.key, h.value)
+	}
 
 	f := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
 
 	return f(ctx, req, gqlInfo, respData, c.do)
+}
+
+func parseMultipartFiles(
+	vars map[string]interface{},
+) ([]MultipartFilesGroup, map[string][]string, map[string]interface{}) {
+	var (
+		multipartFilesGroups []MultipartFilesGroup
+		mapping              = map[string][]string{}
+		i                    = 0
+	)
+
+	for k, v := range vars {
+		switch item := v.(type) {
+		case graphql.Upload:
+			iStr := strconv.Itoa(i)
+			vars[k] = nil
+			mapping[iStr] = []string{fmt.Sprintf("variables.%s", k)}
+
+			multipartFilesGroups = append(multipartFilesGroups, MultipartFilesGroup{
+				Files: []MultipartFile{
+					{
+						Index: i,
+						File:  item,
+					},
+				},
+			})
+
+			i++
+		case []*graphql.Upload:
+			vars[k] = make([]struct{}, len(item))
+			var groupFiles []MultipartFile
+
+			for itemI, itemV := range item {
+				iStr := strconv.Itoa(i)
+				mapping[iStr] = []string{fmt.Sprintf("variables.%s.%s", k, strconv.Itoa(itemI))}
+
+				groupFiles = append(groupFiles, MultipartFile{
+					Index: i,
+					File:  *itemV,
+				})
+
+				i++
+			}
+
+			multipartFilesGroups = append(multipartFilesGroups, MultipartFilesGroup{
+				Files:      groupFiles,
+				IsMultiple: true,
+			})
+		}
+	}
+
+	return multipartFilesGroups, mapping, vars
+}
+
+func prepareMultipartFormBody(
+	buffer *bytes.Buffer, formFields []FormField, files []MultipartFilesGroup,
+) (string, error) {
+	writer := multipart.NewWriter(buffer)
+	defer writer.Close()
+
+	// form fields
+	for _, field := range formFields {
+		fieldBody, err := json.Marshal(field.Value)
+		if err != nil {
+			return "", fmt.Errorf("encode %s: %w", field.Name, err)
+		}
+
+		err = writer.WriteField(field.Name, string(fieldBody))
+		if err != nil {
+			return "", fmt.Errorf("write %s: %w", field.Name, err)
+		}
+	}
+
+	// files
+	for _, filesGroup := range files {
+		for _, file := range filesGroup.Files {
+			part, err := writer.CreateFormFile(strconv.Itoa(file.Index), file.File.Filename)
+			if err != nil {
+				return "", fmt.Errorf("form file %w", err)
+			}
+
+			_, err = io.Copy(part, file.File.File)
+			if err != nil {
+				return "", fmt.Errorf("copy file %w", err)
+			}
+		}
+	}
+
+	if err := writer.Close(); err != nil {
+		return "", fmt.Errorf("writer close %w", err)
+	}
+
+	return writer.FormDataContentType(), nil
 }
 
 func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res interface{}) error {
