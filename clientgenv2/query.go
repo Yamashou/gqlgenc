@@ -63,7 +63,7 @@ func fragmentsUnique(fragments ast.FragmentDefinitionList) ast.FragmentDefinitio
 	seenFragments := make(map[string]struct{}, len(fragments))
 	uniqueFragments := make(ast.FragmentDefinitionList, 0, len(fragments))
 	for _, fragment := range fragments {
-		if _, seen := seenFragments[fragment.Name]; seen {
+		if _, ok := seenFragments[fragment.Name]; ok {
 			continue
 		}
 		uniqueFragments = append(uniqueFragments, fragment)
