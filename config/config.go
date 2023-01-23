@@ -280,6 +280,7 @@ type GenerateConfig struct {
 	UnamedPattern       string        `yaml:"unamedPattern,omitempty"`
 	Client              *bool         `yaml:"client,omitempty"`
 	ClientInterfaceName *string       `yaml:"clientInterfaceName,omitempty"`
+	OmitEmptyTypes      *bool         `yaml:"omitEmptyTypes,omitempty"`
 	// if true, used client v2 in generate code
 	ClientV2 bool `yaml:"clientV2,omitempty"`
 }
@@ -294,6 +295,18 @@ func (c *GenerateConfig) ShouldGenerateClient() bool {
 	}
 
 	return true
+}
+
+func (c *GenerateConfig) ShouldOmitEmptyTypes() bool {
+	if c == nil {
+		return false
+	}
+
+	if c.OmitEmptyTypes != nil && *c.OmitEmptyTypes {
+		return true
+	}
+
+	return false
 }
 
 func (c *GenerateConfig) GetClientInterfaceName() *string {

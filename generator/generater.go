@@ -16,7 +16,7 @@ func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.Model
 	return func(build *modelgen.ModelBuild) *modelgen.ModelBuild {
 		for _, model := range build.Models {
 			// only handle input type model
-			if schemaModel, ok := cfg.GQLConfig.Schema.Types[model.Name]; ok && schemaModel.IsInputType() {
+			if schemaModel, ok := cfg.GQLConfig.Schema.Types[model.Name]; ok && (schemaModel.IsInputType() || cfg.Generate.ShouldOmitEmptyTypes()) {
 				for _, field := range model.Fields {
 					// find field in graphql schema
 					for _, def := range schemaModel.Fields {
