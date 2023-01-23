@@ -60,14 +60,14 @@ func fragmentsInOperationDefinition(operation *ast.OperationDefinition) ast.Frag
 }
 
 func fragmentsUnique(fragments ast.FragmentDefinitionList) ast.FragmentDefinitionList {
-	uniqueMap := make(map[string]*ast.FragmentDefinition)
+	seenFragments := make(map[string]struct{}, len(fragments))
+	uniqueFragments := make(ast.FragmentDefinitionList, 0, len(fragments))
 	for _, fragment := range fragments {
-		uniqueMap[fragment.Name] = fragment
-	}
-
-	uniqueFragments := make(ast.FragmentDefinitionList, 0, len(uniqueMap))
-	for _, fragment := range uniqueMap {
+		if _, ok := seenFragments[fragment.Name]; ok {
+			continue
+		}
 		uniqueFragments = append(uniqueFragments, fragment)
+		seenFragments[fragment.Name] = struct{}{}
 	}
 
 	return uniqueFragments
