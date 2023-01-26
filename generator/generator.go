@@ -3,6 +3,7 @@ package generator
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/plugin"
@@ -55,6 +56,11 @@ func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) err
 
 	if err := cfg.GQLConfig.Init(); err != nil {
 		return fmt.Errorf("generating core failed: %w", err)
+	}
+
+	// sort Implements to ensure a deterministic output
+	for _, v := range cfg.GQLConfig.Schema.Implements {
+		sort.Slice(v, func(i, j int) bool { return v[i].Name < v[j].Name })
 	}
 
 	for _, p := range plugins {
