@@ -1,17 +1,21 @@
 package clientgen
 
 import (
+	_ "embed"
 	"fmt"
-
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 )
 
+//go:embed template.gotpl
+var template string
+
 func RenderTemplate(cfg *config.Config, query *Query, mutation *Mutation, fragments []*Fragment, operations []*Operation, operationResponses []*OperationResponse, generateCfg *gqlgencConfig.GenerateConfig, client config.PackageConfig) error {
 	if err := templates.Render(templates.Options{
 		PackageName: client.Package,
 		Filename:    client.Filename,
+		Template:    template,
 		Data: map[string]interface{}{
 			"Query":               query,
 			"Mutation":            mutation,
