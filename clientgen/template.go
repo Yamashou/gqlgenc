@@ -1,8 +1,9 @@
 package clientgen
 
 import (
-	_ "embed"
+	_ "embed" // blank import to embed the template
 	"fmt"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
