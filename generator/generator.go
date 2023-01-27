@@ -60,6 +60,7 @@ func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) err
 
 	// sort Implements to ensure a deterministic output
 	for _, v := range cfg.GQLConfig.Schema.Implements {
+		v := v
 		sort.Slice(v, func(i, j int) bool { return v[i].Name < v[j].Name })
 	}
 
