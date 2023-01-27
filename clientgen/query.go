@@ -82,6 +82,7 @@ func fragmentsInOperationDefinition(operation *ast.OperationDefinition) ast.Frag
 	uniqueFragments := fragmentsUnique(fragments)
 	// sort Fragments to ensure a deterministic output
 	sort.Slice(uniqueFragments, func(i, j int) bool { return uniqueFragments[i].Name < uniqueFragments[j].Name })
+
 	return uniqueFragments
 }
 
@@ -95,6 +96,7 @@ func fragmentsUnique(fragments ast.FragmentDefinitionList) ast.FragmentDefinitio
 	for _, fragment := range uniqueMap {
 		uniqueFragments = append(uniqueFragments, fragment)
 	}
+
 	return uniqueFragments
 }
 
