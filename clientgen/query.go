@@ -95,7 +95,6 @@ func fragmentsUnique(fragments ast.FragmentDefinitionList) ast.FragmentDefinitio
 	for _, fragment := range uniqueMap {
 		uniqueFragments = append(uniqueFragments, fragment)
 	}
-
 	return uniqueFragments
 }
 
