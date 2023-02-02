@@ -14,8 +14,8 @@ type Client struct {
 	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
+func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) *Client {
+	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type Query struct {

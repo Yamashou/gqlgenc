@@ -51,9 +51,10 @@ func ChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
 
 // Client is the http client wrapper
 type Client struct {
-	Client             *http.Client
-	BaseURL            string
-	RequestInterceptor RequestInterceptor
+	Client              *http.Client
+	BaseURL             string
+	RequestInterceptor  RequestInterceptor
+	ParseDataWhenErrors bool
 }
 
 // Request represents an outgoing GraphQL request
@@ -64,14 +65,23 @@ type Request struct {
 }
 
 // NewClient creates a new http client wrapper
-func NewClient(client *http.Client, baseURL string, interceptors ...RequestInterceptor) *Client {
-	return &Client{
+func NewClient(client *http.Client, baseURL string, options *Options, interceptors ...RequestInterceptor) *Client {
+	c := &Client{
 		Client:  client,
 		BaseURL: baseURL,
 		RequestInterceptor: ChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
 			return next(ctx, requestSet, gqlInfo, res)
 		}}, interceptors...)...),
 	}
+
+	if options != nil {
+		c.ParseDataWhenErrors = options.ParseDataWhenErrors
+	}
+	return c
+}
+
+type Options struct {
+	ParseDataWhenErrors bool
 }
 
 // GqlErrorList is the struct of a standard graphql error response
@@ -303,10 +313,10 @@ func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	return parseResponse(body, resp.StatusCode, res)
+	return c.parseResponse(body, resp.StatusCode, res)
 }
 
-func parseResponse(body []byte, httpCode int, result interface{}) error {
+func (c *Client) parseResponse(body []byte, httpCode int, result interface{}) error {
 	errResponse := &ErrorResponse{}
 	isKOCode := httpCode < 200 || 299 < httpCode
 	if isKOCode {
@@ -317,7 +327,7 @@ func parseResponse(body []byte, httpCode int, result interface{}) error {
 	}
 
 	// some servers return a graphql error with a non OK http code, try anyway to parse the body
-	if err := unmarshal(body, result); err != nil {
+	if err := c.unmarshal(body, result); err != nil {
 		if gqlErr, ok := err.(*GqlErrorList); ok {
 			errResponse.GqlErrors = &gqlErr.Errors
 		} else if !isKOCode { // if is KO code there is already the http error, this error should not be returned
@@ -338,25 +348,26 @@ type response struct {
 	Errors json.RawMessage `json:"errors"`
 }
 
-func unmarshal(data []byte, res interface{}) error {
+func (c *Client) unmarshal(data []byte, res interface{}) (err error) {
 	resp := response{}
-	if err := json.Unmarshal(data, &resp); err != nil {
+	if err = json.Unmarshal(data, &resp); err != nil {
 		return fmt.Errorf("failed to decode data %s: %w", string(data), err)
 	}
 
 	if resp.Errors != nil && len(resp.Errors) > 0 {
 		// try to parse standard graphql error
-		errors := &GqlErrorList{}
-		if e := json.Unmarshal(data, errors); e != nil {
+		err = &GqlErrorList{}
+		if e := json.Unmarshal(data, err); e != nil {
 			return fmt.Errorf("faild to parse graphql errors. Response content %s - %w", string(data), e)
 		}
 
-		return errors
+		if !c.ParseDataWhenErrors {
+			return err
+		}
 	}
 
 	if err := graphqljson.UnmarshalData(resp.Data, res); err != nil {
 		return fmt.Errorf("failed to decode data into response %s: %w", string(data), err)
 	}
-
-	return nil
+	return
 }

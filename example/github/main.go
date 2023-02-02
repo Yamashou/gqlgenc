@@ -17,11 +17,12 @@ func main() {
 	ctx := context.Background()
 
 	githubClient := &gen.Client{
-		Client: clientv2.NewClient(http.DefaultClient, "https://api.github.com/graphql", func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res interface{}, next clientv2.RequestInterceptorFunc) error {
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+		Client: clientv2.NewClient(http.DefaultClient, "https://api.github.com/graphql", nil,
+			func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res interface{}, next clientv2.RequestInterceptorFunc) error {
+				req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
-			return next(ctx, req, gqlInfo, res)
-		}),
+				return next(ctx, req, gqlInfo, res)
+			}),
 	}
 	getUser, err := githubClient.GetUser(ctx, 10, 10)
 	if err != nil {
