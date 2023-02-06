@@ -348,12 +348,13 @@ type response struct {
 	Errors json.RawMessage `json:"errors"`
 }
 
-func (c *Client) unmarshal(data []byte, res interface{}) (err error) {
+func (c *Client) unmarshal(data []byte, res interface{}) error {
 	resp := response{}
-	if err = json.Unmarshal(data, &resp); err != nil {
+	if err := json.Unmarshal(data, &resp); err != nil {
 		return fmt.Errorf("failed to decode data %s: %w", string(data), err)
 	}
 
+	var err error
 	if resp.Errors != nil && len(resp.Errors) > 0 {
 		// try to parse standard graphql error
 		err = &GqlErrorList{}
@@ -369,5 +370,5 @@ func (c *Client) unmarshal(data []byte, res interface{}) (err error) {
 	if err := graphqljson.UnmarshalData(resp.Data, res); err != nil {
 		return fmt.Errorf("failed to decode data into response %s: %w", string(data), err)
 	}
-	return
+	return err
 }
