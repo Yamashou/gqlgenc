@@ -82,6 +82,13 @@ Execute the following command on same directory for .gqlgenc.yml
 gqlgenc
 ```
 
+or if you want to specify a different directory where .gqlgenc.yml file resides
+(e.g. in this example the directory is *schemas*):
+
+```shell script
+gqlgenc generate --configdir schemas
+```
+
 ### With gqlgen
 
 Do this when creating a server and client for Go.
