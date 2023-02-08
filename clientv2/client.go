@@ -77,6 +77,7 @@ func NewClient(client *http.Client, baseURL string, options *Options, intercepto
 	if options != nil {
 		c.ParseDataWhenErrors = options.ParseDataWhenErrors
 	}
+	
 	return c
 }
 
@@ -370,5 +371,6 @@ func (c *Client) unmarshal(data []byte, res interface{}) error {
 	if err := graphqljson.UnmarshalData(resp.Data, res); err != nil {
 		return fmt.Errorf("failed to decode data into response %s: %w", string(data), err)
 	}
+
 	return err
 }
