@@ -2,6 +2,7 @@ package clientgen
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/Yamashou/gqlgenc/config"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -79,6 +80,8 @@ func QueryDocumentsByOperations(schema *ast.Schema, operations ast.OperationList
 func fragmentsInOperationDefinition(operation *ast.OperationDefinition) ast.FragmentDefinitionList {
 	fragments := fragmentsInOperationWalker(operation.SelectionSet)
 	uniqueFragments := fragmentsUnique(fragments)
+	// sort Fragments to ensure a deterministic output
+	sort.Slice(uniqueFragments, func(i, j int) bool { return uniqueFragments[i].Name < uniqueFragments[j].Name })
 
 	return uniqueFragments
 }
