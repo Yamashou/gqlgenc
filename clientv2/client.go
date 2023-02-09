@@ -77,7 +77,7 @@ func NewClient(client *http.Client, baseURL string, options *Options, intercepto
 	if options != nil {
 		c.ParseDataWhenErrors = options.ParseDataWhenErrors
 	}
-	
+
 	return c
 }
 

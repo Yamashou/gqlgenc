@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/urfave/cli/v2"
 	"os"
+
+	"github.com/urfave/cli/v2"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/Yamashou/gqlgenc/clientgen"
@@ -37,12 +38,12 @@ var generateCmd = &cli.Command{
 			_, _ = fmt.Fprintf(os.Stderr, "%+v", err.Error())
 			os.Exit(4)
 		}
+		
 		return nil
 	},
 }
 
 func main() {
-
 	app := cli.NewApp()
 	app.Name = "gqlgenc"
 	app.Description = "This is a library for quickly creating strictly typed graphql client in golang"
