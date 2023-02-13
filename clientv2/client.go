@@ -75,14 +75,17 @@ func NewClient(client *http.Client, baseURL string, options *Options, intercepto
 	}
 
 	if options != nil {
-		c.ParseDataWhenErrors = options.ParseDataWhenErrors
+		c.ParseDataWhenErrors = options.ParseDataAlongWithErrors
 	}
 
 	return c
 }
 
+// Options is a struct that holds some client-specific options that can be passed to NewClient.
 type Options struct {
-	ParseDataWhenErrors bool
+	// ParseDataAlongWithErrors is a flag that indicates whether the client should try to parse and return the data along with error
+	// when error appeared. So in the end you'll get list of gql errors and data.
+	ParseDataAlongWithErrors bool
 }
 
 // GqlErrorList is the struct of a standard graphql error response
@@ -363,13 +366,19 @@ func (c *Client) unmarshal(data []byte, res interface{}) error {
 			return fmt.Errorf("faild to parse graphql errors. Response content %s - %w", string(data), e)
 		}
 
+		// if ParseDataWhenErrors is true, try to parse data as well
 		if !c.ParseDataWhenErrors {
 			return err
 		}
 	}
 
-	if err := graphqljson.UnmarshalData(resp.Data, res); err != nil {
-		return fmt.Errorf("failed to decode data into response %s: %w", string(data), err)
+	if errData := graphqljson.UnmarshalData(resp.Data, res); errData != nil {
+		// if ParseDataWhenErrors is true, and we failed to unmarshal data, return the actual error
+		if c.ParseDataWhenErrors {
+			return err
+		}
+		
+		return fmt.Errorf("failed to decode data into response %s: %w", string(data), errData)
 	}
 
 	return err
