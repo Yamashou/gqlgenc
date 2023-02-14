@@ -7,13 +7,13 @@ This is Go library for building GraphQL client with [gqlgen](https://github.com/
 ## Motivation
 
 Now, if you build GraphQL api client for Go, have choice:
- 
+
  - [github.com/shurcooL/graphql](https://github.com/shurcooL/graphql)
  - [github.com/machinebox/graphql](https://github.com/machinebox/graphql)
 
-These libraries are very simple and easy to handle. 
+These libraries are very simple and easy to handle.
 However, as I work with [gqlgen](https://github.com/99designs/gqlgen) and [graphql-code-generator](https://graphql-code-generator.com/) every day, I find out the beauty of automatic generation.
-So I want to automatically generate types. 
+So I want to automatically generate types.
 
 ## Installation
 
@@ -25,7 +25,7 @@ go get -u github.com/Yamashou/gqlgenc
 
 ### Client Codes Only
 
-gqlgenc base is gqlgen with [plugins](https://gqlgen.com/reference/plugins/). So the setting is yaml in each format.  
+gqlgenc base is gqlgen with [plugins](https://gqlgen.com/reference/plugins/). So the setting is yaml in each format.
 gqlgenc can be configured using a `.gqlgenc.yml` file
 
 Load a schema from a remote server:
@@ -44,13 +44,13 @@ models:
     model: github.com/99designs/gqlgen/graphql.Time
 endpoint:
   url: https://api.annict.com/graphql # Where do you want to send your request?
-  headers:　# If you need header for getting introspection query, set it
+  headers: # If you need header for getting introspection query, set it
     Authorization: "Bearer ${ANNICT_KEY}" # support environment variables
 query:
   - "./query/*.graphql" # Where are all the query files located?
 generate:
   clientV2: true # Generate a Client that provides a new signature
-  clientInterfaceName: "GithubGraphQLClient"　# Determine the name of the generated client interface
+  clientInterfaceName: "GithubGraphQLClient" # Determine the name of the generated client interface
 ```
 
 Load a schema from a local file:
@@ -73,7 +73,7 @@ query:
   - "./query/*.graphql" # Where are all the query files located?
 generate:
   clientV2: true # Generate a Client that provides a new signature
-  clientInterfaceName: "GithubGraphQLClient"　# Determine the name of the generated client interface
+  clientInterfaceName: "GithubGraphQLClient" # Determine the name of the generated client interface
 ```
 
 Execute the following command on same directory for .gqlgenc.yml
@@ -142,10 +142,10 @@ func main() {
 
 ### Japanese Comments
 These codes have Japanese comments. Replace with English.
- 
+
 ### Subscription
 
-This client does not support subscription. If you need a subscription, please create an issue or pull request. 
+This client does not support subscription. If you need a subscription, please create an issue or pull request.
 
 ### Pre-conditions
 
