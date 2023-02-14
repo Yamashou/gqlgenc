@@ -40,6 +40,17 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 
 {{- range $name, $element := .Fragment }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
+
+{{- $structName := .Name|go }}
+{{- range $i, $field := .Type|getters }}
+func (t *{{ $structName | go  }}) Get{{ $field.Name }}() {{ $field.ReturnType }} {
+    if t == nil {
+        t =  &{{ $structName }}{}
+    }
+    return t.{{ $field.Name }}
+
+}
+{{- end }}
 {{- end }}
 
 {{- range $name, $element := .StructSources }}
@@ -48,6 +59,17 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 
 {{- range $name, $element := .OperationResponse }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
+
+{{- $structName := .Name|go }}
+{{- range $i, $field := .Type|getters }}
+func (t *{{ $structName | go  }}) Get{{ $field.Name }}() {{ $field.ReturnType }} {
+    if t == nil {
+        t =  &{{ $structName }}{}
+    }
+    return t.{{ $field.Name }}
+
+}
+{{- end }}
 {{- end }}
 
 {{- range $model := .Operation}}
