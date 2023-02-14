@@ -55,6 +55,17 @@ func (t *{{ $structName | go  }}) Get{{ $field.Name }}() {{ $field.ReturnType }}
 
 {{- range $name, $element := .StructSources }}
 	type {{ .Name }} {{ .Type | ref }}
+
+{{- $structName := .Name }}
+{{- range $i, $field := .Type|getters }}
+func (t *{{ $structName  }}) Get{{ $field.Name }}() {{ $field.ReturnType }} {
+    if t == nil {
+        t =  &{{ $structName }}{}
+    }
+    return t.{{ $field.Name }}
+
+}
+{{- end}}
 {{- end}}
 
 {{- range $name, $element := .OperationResponse }}
