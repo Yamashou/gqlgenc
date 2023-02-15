@@ -22,7 +22,7 @@ var generateCmd = &cli.Command{
 		configDir := ctx.String("configdir")
 		cfg, err := config.LoadConfigFromDefaultLocations(configDir)
 		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "%+v", err.Error())
+			_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
 			os.Exit(2)
 		}
 
@@ -34,7 +34,7 @@ var generateCmd = &cli.Command{
 		}
 
 		if err := generator.Generate(ctx.Context, cfg, clientGen); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "%+v", err.Error())
+			_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
 			os.Exit(4)
 		}
 		return nil
