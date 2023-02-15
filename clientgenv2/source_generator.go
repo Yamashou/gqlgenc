@@ -160,10 +160,13 @@ func NewLayerTypeName(base, thisField string) string {
 }
 
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
+	var nonNull bool
 	switch selection := selection.(type) {
 	case *ast.Field:
 		typeName = NewLayerTypeName(typeName, templates.ToGo(selection.Alias))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
+
+		nonNull = selection.Definition.Type.NonNull
 
 		var baseType types.Type
 		switch {
@@ -194,8 +197,12 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
+		jsonTag := fmt.Sprintf(`json:"%s,omitempty"`, selection.Alias)
+		if nonNull {
+			jsonTag = fmt.Sprintf(`json:"%s"`, selection.Alias)
+		}
 		tags := []string{
-			fmt.Sprintf(`json:"%s"`, selection.Alias),
+			jsonTag,
 			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
 		}
 
