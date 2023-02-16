@@ -83,12 +83,19 @@ func returnTypeName(t types.Type, nested bool) string {
 	case *types.Slice:
 		return "[]" + returnTypeName(it.Elem(), true)
 	case *types.Named:
+		isImported := it.Obj().Parent() != nil
+
 		s := strings.Split(it.String(), ".")
-		if nested {
-			return s[len(s)-1]
+		name := s[len(s)-1]
+		if isImported {
+			name = s[len(s)-2] + "." + name
 		}
 
-		return "*" + s[len(s)-1]
+		if nested {
+			return name
+		}
+
+		return "*" + name
 	default:
 		return fmt.Sprintf("%T", it)
 	}
