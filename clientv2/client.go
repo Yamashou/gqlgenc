@@ -377,7 +377,7 @@ func (c *Client) unmarshal(data []byte, res interface{}) error {
 		if c.ParseDataWhenErrors {
 			return err
 		}
-		
+
 		return fmt.Errorf("failed to decode data into response %s: %w", string(data), errData)
 	}
 
