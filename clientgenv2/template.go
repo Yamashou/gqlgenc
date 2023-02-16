@@ -4,7 +4,7 @@ import (
 
 	// nolint:golint, nolintlint
 	"bytes"
-	_ "embed"
+	_ "embed" // used to load template file
 	"fmt"
 	"go/types"
 	"strings"
