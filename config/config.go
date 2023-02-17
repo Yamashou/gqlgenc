@@ -57,6 +57,7 @@ func LoadConfigFromDefaultLocations(dir string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return LoadConfig(cfgFile)
 }
 
