@@ -20,8 +20,8 @@ type Client struct {
 	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) GithubGraphQLClient {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
+func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) GithubGraphQLClient {
+	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type Query struct {
@@ -340,7 +340,7 @@ func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst
 
 	var res GetUser
 	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil
@@ -373,7 +373,7 @@ func (c *Client) GetNode(ctx context.Context, id string, interceptors ...clientv
 
 	var res GetNode
 	if err := c.Client.Post(ctx, "GetNode", GetNodeDocument, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil
@@ -400,7 +400,7 @@ func (c *Client) AddStar(ctx context.Context, input AddStarInput, interceptors .
 
 	var res AddStar
 	if err := c.Client.Post(ctx, "AddStar", AddStarDocument, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil
@@ -423,7 +423,7 @@ func (c *Client) GetNode2(ctx context.Context, id string, interceptors ...client
 
 	var res GetNode2
 	if err := c.Client.Post(ctx, "GetNode2", GetNode2Document, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil

@@ -39,6 +39,7 @@ func main() {
 		clientv2.NewClient(
 			http.DefaultClient,
 			"http://localhost:8080/query",
+			nil,
 		),
 	)
 

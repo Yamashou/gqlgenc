@@ -14,8 +14,8 @@ type Client struct {
 	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, interceptors ...clientv2.RequestInterceptor) *Client {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, interceptors...)}
+func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) *Client {
+	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type Query struct {
@@ -258,7 +258,7 @@ func (c *Client) GetProfile(ctx context.Context, interceptors ...clientv2.Reques
 
 	var res GetProfile
 	if err := c.Client.Post(ctx, "GetProfile", GetProfileQuery, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil
@@ -306,7 +306,7 @@ func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *strin
 
 	var res ListWorks
 	if err := c.Client.Post(ctx, "ListWorks", ListWorksQuery, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil
@@ -355,7 +355,7 @@ func (c *Client) ListRecords(ctx context.Context, interceptors ...clientv2.Reque
 
 	var res ListRecords
 	if err := c.Client.Post(ctx, "ListRecords", ListRecordsQuery, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil
@@ -393,7 +393,7 @@ func (c *Client) ListNextEpisodes(ctx context.Context, interceptors ...clientv2.
 
 	var res ListNextEpisodes
 	if err := c.Client.Post(ctx, "ListNextEpisodes", ListNextEpisodesQuery, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil
@@ -434,7 +434,7 @@ func (c *Client) GetWork(ctx context.Context, ids []int64, interceptors ...clien
 
 	var res GetWork
 	if err := c.Client.Post(ctx, "GetWork", GetWorkQuery, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil
@@ -480,7 +480,7 @@ func (c *Client) SearchWorks(ctx context.Context, seasons []string, interceptors
 
 	var res SearchWorks
 	if err := c.Client.Post(ctx, "SearchWorks", SearchWorksQuery, &res, vars, interceptors...); err != nil {
-		return nil, err
+		return &res, err
 	}
 
 	return &res, nil

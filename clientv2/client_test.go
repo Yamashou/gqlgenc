@@ -36,7 +36,8 @@ func TestUnmarshal(t *testing.T) {
 		var path ast.Path
 		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
 		r := &fakeRes{}
-		err := unmarshal([]byte(qqlSingleErr), r)
+		c := &Client{}
+		err := c.unmarshal([]byte(qqlSingleErr), r)
 		expectedErr := &GqlErrorList{
 			Errors: gqlerror.List{{
 				Message: "Field 'nsodes' doesn't exist on type 'RepositoryConnection'",
@@ -64,7 +65,8 @@ func TestUnmarshal(t *testing.T) {
 		var path3 ast.Path
 		_ = json.Unmarshal([]byte(`["fragment LanguageFragment"]`), &path3)
 		r := &fakeRes{}
-		err := unmarshal([]byte(gqlMultipleErr), r)
+		c := &Client{}
+		err := c.unmarshal([]byte(gqlMultipleErr), r)
 		expectedErr := &GqlErrorList{
 			Errors: gqlerror.List{
 				{
@@ -114,7 +116,8 @@ func TestUnmarshal(t *testing.T) {
 		var path ast.Path
 		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
 		r := &fakeRes{}
-		err := unmarshal([]byte(gqlDataAndErr), r)
+		c := &Client{}
+		err := c.unmarshal([]byte(gqlDataAndErr), r)
 		expectedErr := &GqlErrorList{
 			Errors: gqlerror.List{{
 				Message: "Field 'nsodes' doesn't exist on type 'RepositoryConnection'",
@@ -132,18 +135,50 @@ func TestUnmarshal(t *testing.T) {
 		}
 		require.Equal(t, err, expectedErr)
 	})
+	t.Run("response data and error still parsed", func(t *testing.T) {
+		t.Parallel()
+		var path ast.Path
+		_ = json.Unmarshal([]byte(`["query GetUser","viewer","repositories","nsodes"]`), &path)
+		r := &fakeRes{}
+		c := &Client{ParseDataWhenErrors: true}
+
+		err := c.unmarshal([]byte(gqlDataAndErr), r)
+		expectedErr := &GqlErrorList{
+			Errors: gqlerror.List{{
+				Message: "Field 'nsodes' doesn't exist on type 'RepositoryConnection'",
+				Path:    path,
+				Locations: []gqlerror.Location{{
+					Line:   6,
+					Column: 4,
+				}},
+				Extensions: map[string]interface{}{
+					"code":      "undefinedField",
+					"typeName":  "RepositoryConnection",
+					"fieldName": "nsodes",
+				},
+			}},
+		}
+		expected := &fakeRes{
+			Something: "some data",
+		}
+
+		require.Equal(t, err, expectedErr)
+		require.Equal(t, r, expected)
+	})
 
 	t.Run("invalid json", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
-		err := unmarshal([]byte(invalidJSON), r)
+		c := &Client{}
+		err := c.unmarshal([]byte(invalidJSON), r)
 		require.EqualError(t, err, "failed to decode data invalid: invalid character 'i' looking for beginning of value")
 	})
 
 	t.Run("valid data", func(t *testing.T) {
 		t.Parallel()
 		res := &fakeRes{}
-		err := unmarshal([]byte(validData), res)
+		c := &Client{}
+		err := c.unmarshal([]byte(validData), res)
 		require.NoError(t, err)
 
 		expected := &fakeRes{
@@ -155,14 +190,16 @@ func TestUnmarshal(t *testing.T) {
 	t.Run("bad data format", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
-		err := unmarshal([]byte(withBadDataFormat), r)
+		c := &Client{}
+		err := c.unmarshal([]byte(withBadDataFormat), r)
 		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : : json: cannot unmarshal string into Go value of type clientv2.fakeRes")
 	})
 
 	t.Run("bad data format", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
-		err := unmarshal([]byte(withBadErrorsFormat), r)
+		c := &Client{}
+		err := c.unmarshal([]byte(withBadErrorsFormat), r)
 		require.EqualError(t, err, "faild to parse graphql errors. Response content {\"errors\": \"bad\"} - json: cannot unmarshal string into Go struct field GqlErrorList.errors of type gqlerror.List")
 	})
 }
@@ -172,7 +209,8 @@ func TestParseResponse(t *testing.T) {
 	t.Run("single error", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
-		err := parseResponse([]byte(qqlSingleErr), 200, r)
+		c := &Client{}
+		err := c.parseResponse([]byte(qqlSingleErr), 200, r)
 
 		expectedType := &ErrorResponse{}
 		require.IsType(t, expectedType, err)
@@ -186,7 +224,8 @@ func TestParseResponse(t *testing.T) {
 	t.Run("bad error format", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
-		err := parseResponse([]byte(withBadErrorsFormat), 200, r)
+		c := &Client{}
+		err := c.parseResponse([]byte(withBadErrorsFormat), 200, r)
 
 		expectedType := fmt.Errorf("%w", errors.New("some"))
 		require.IsType(t, expectedType, err)
@@ -195,7 +234,8 @@ func TestParseResponse(t *testing.T) {
 	t.Run("network error with valid gql error response", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
-		err := parseResponse([]byte(qqlSingleErr), 400, r)
+		c := &Client{}
+		err := c.parseResponse([]byte(qqlSingleErr), 400, r)
 
 		expectedType := &ErrorResponse{}
 		require.IsType(t, expectedType, err)
@@ -210,7 +250,8 @@ func TestParseResponse(t *testing.T) {
 	t.Run("network error with not valid gql error response", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
-		err := parseResponse([]byte(invalidJSON), 500, r)
+		c := &Client{}
+		err := c.parseResponse([]byte(invalidJSON), 500, r)
 
 		expectedType := &ErrorResponse{}
 		require.IsType(t, expectedType, err)
@@ -224,7 +265,8 @@ func TestParseResponse(t *testing.T) {
 	t.Run("no error", func(t *testing.T) {
 		t.Parallel()
 		r := &fakeRes{}
-		err := parseResponse([]byte(validData), 200, r)
+		c := &Client{}
+		err := c.parseResponse([]byte(validData), 200, r)
 
 		require.Nil(t, err)
 	})
