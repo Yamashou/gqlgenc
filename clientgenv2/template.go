@@ -96,7 +96,11 @@ func returnTypeName(t types.Type, nested bool) string {
 		}
 
 		return "*" + name
+	case *types.Interface:
+		return "interface{}"
+	case *types.Map:
+		return "map[" + returnTypeName(it.Key(), true) + "]" + returnTypeName(it.Elem(), true)
 	default:
-		return fmt.Sprintf("%T", it)
+		return fmt.Sprintf("%T----", it)
 	}
 }
