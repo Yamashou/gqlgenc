@@ -40,14 +40,20 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 
 {{- range $name, $element := .Fragment }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
+
+    {{ genGetters (.Name|go) .Type }}
 {{- end }}
 
 {{- range $name, $element := .StructSources }}
 	type {{ .Name }} {{ .Type | ref }}
+
+    {{ genGetters .Name .Type }}
 {{- end}}
 
 {{- range $name, $element := .OperationResponse }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
+
+    {{ genGetters (.Name|go) .Type }}
 {{- end }}
 
 {{- range $model := .Operation}}
