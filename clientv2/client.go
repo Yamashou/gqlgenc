@@ -140,10 +140,6 @@ type FormField struct {
 	Value interface{}
 }
 
-type header struct {
-	key, value string
-}
-
 // Post support send multipart form with files https://gqlgen.com/reference/file-upload/ https://github.com/jaydenseric/graphql-multipart-request-spec
 func (c *Client) Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, interceptors ...RequestInterceptor) error {
 	multipartFilesGroups, mapping, vars := parseMultipartFiles(vars)
@@ -157,7 +153,10 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 	gqlInfo := NewGQLRequestInfo(r)
 	body := new(bytes.Buffer)
 
-	var headers []header
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, body)
+	if err != nil {
+		return fmt.Errorf("create request struct failed: %w", err)
+	}
 
 	if len(multipartFilesGroups) > 0 {
 		contentType, err := prepareMultipartFormBody(
@@ -178,7 +177,7 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 			return fmt.Errorf("failed to prepare form body: %w", err)
 		}
 
-		headers = append(headers, header{key: "Content-Type", value: contentType})
+		req.Header.Set("Content-Type", contentType)
 	} else {
 		requestBody, err := json.Marshal(r)
 		if err != nil {
@@ -186,18 +185,14 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 		}
 
 		body = bytes.NewBuffer(requestBody)
-
-		headers = append(headers, header{key: "Content-Type", value: "application/json; charset=utf-8"})
-		headers = append(headers, header{key: "Accept", value: "application/json; charset=utf-8"})
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, body)
-	if err != nil {
-		return fmt.Errorf("create request struct failed: %w", err)
+	if req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	}
 
-	for _, h := range headers {
-		req.Header.Set(h.key, h.value)
+	if req.Header.Get("Accept") == "" {
+		req.Header.Set("Accept", "application/json; charset=utf-8")
 	}
 
 	f := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
