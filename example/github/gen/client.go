@@ -5,6 +5,7 @@ package gen
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/Yamashou/gqlgenc/clientv2"
 )
@@ -478,9 +479,21 @@ func (t *AddStar_AddStar) GetStarrable() *AddStar_AddStar_Starrable {
 	return t.Starrable
 }
 
+type GetNode2_Node_Release_ReactionGroups struct {
+	CreatedAt *time.Time "json:\"createdAt,omitempty\" graphql:\"createdAt\""
+}
+
+func (t *GetNode2_Node_Release_ReactionGroups) GetCreatedAt() *time.Time {
+	if t == nil {
+		t = &GetNode2_Node_Release_ReactionGroups{}
+	}
+	return t.CreatedAt
+}
+
 type GetNode2_Node_Release struct {
-	ID   string  "json:\"id\" graphql:\"id\""
-	Name *string "json:\"name,omitempty\" graphql:\"name\""
+	ID             string                                  "json:\"id\" graphql:\"id\""
+	Name           *string                                 "json:\"name,omitempty\" graphql:\"name\""
+	ReactionGroups []*GetNode2_Node_Release_ReactionGroups "json:\"reactionGroups,omitempty\" graphql:\"reactionGroups\""
 }
 
 func (t *GetNode2_Node_Release) GetID() string {
@@ -494,6 +507,12 @@ func (t *GetNode2_Node_Release) GetName() *string {
 		t = &GetNode2_Node_Release{}
 	}
 	return t.Name
+}
+func (t *GetNode2_Node_Release) GetReactionGroups() []*GetNode2_Node_Release_ReactionGroups {
+	if t == nil {
+		t = &GetNode2_Node_Release{}
+	}
+	return t.ReactionGroups
 }
 
 type GetUser struct {
@@ -642,6 +661,9 @@ const GetNode2Document = `query GetNode2 ($id: ID!) {
 		... on Release {
 			id
 			name
+			reactionGroups {
+				createdAt
+			}
 		}
 	}
 }

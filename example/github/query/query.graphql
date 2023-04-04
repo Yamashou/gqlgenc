@@ -62,8 +62,12 @@ query GetNode2($id: ID!) {
         ... on Release {
             id
             name
+            reactionGroups {
+               createdAt
+            }
         }
     }
 }
+
 
 
