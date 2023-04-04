@@ -88,7 +88,8 @@ func returnTypeName(t types.Type, nested bool) string {
 		s := strings.Split(it.String(), ".")
 		name := s[len(s)-1]
 		if isImported {
-			name = s[len(s)-2] + "." + name
+			t := strings.Split(s[len(s)-2], "/")
+			name = t[len(s)-1] + "." + name
 		}
 
 		if nested {

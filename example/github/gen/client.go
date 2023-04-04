@@ -87,6 +87,7 @@ type Mutation struct {
 	ClearProjectV2ItemFieldValue                                *ClearProjectV2ItemFieldValuePayload                                "json:\"clearProjectV2ItemFieldValue,omitempty\" graphql:\"clearProjectV2ItemFieldValue\""
 	CloneProject                                                *CloneProjectPayload                                                "json:\"cloneProject,omitempty\" graphql:\"cloneProject\""
 	CloneTemplateRepository                                     *CloneTemplateRepositoryPayload                                     "json:\"cloneTemplateRepository,omitempty\" graphql:\"cloneTemplateRepository\""
+	CloseDiscussion                                             *CloseDiscussionPayload                                             "json:\"closeDiscussion,omitempty\" graphql:\"closeDiscussion\""
 	CloseIssue                                                  *CloseIssuePayload                                                  "json:\"closeIssue,omitempty\" graphql:\"closeIssue\""
 	ClosePullRequest                                            *ClosePullRequestPayload                                            "json:\"closePullRequest,omitempty\" graphql:\"closePullRequest\""
 	ConvertProjectCardNoteToIssue                               *ConvertProjectCardNoteToIssuePayload                               "json:\"convertProjectCardNoteToIssue,omitempty\" graphql:\"convertProjectCardNoteToIssue\""
@@ -131,6 +132,7 @@ type Mutation struct {
 	DeleteProjectV2                                             *DeleteProjectV2Payload                                             "json:\"deleteProjectV2,omitempty\" graphql:\"deleteProjectV2\""
 	DeleteProjectV2Field                                        *DeleteProjectV2FieldPayload                                        "json:\"deleteProjectV2Field,omitempty\" graphql:\"deleteProjectV2Field\""
 	DeleteProjectV2Item                                         *DeleteProjectV2ItemPayload                                         "json:\"deleteProjectV2Item,omitempty\" graphql:\"deleteProjectV2Item\""
+	DeleteProjectV2Workflow                                     *DeleteProjectV2WorkflowPayload                                     "json:\"deleteProjectV2Workflow,omitempty\" graphql:\"deleteProjectV2Workflow\""
 	DeletePullRequestReview                                     *DeletePullRequestReviewPayload                                     "json:\"deletePullRequestReview,omitempty\" graphql:\"deletePullRequestReview\""
 	DeletePullRequestReviewComment                              *DeletePullRequestReviewCommentPayload                              "json:\"deletePullRequestReviewComment,omitempty\" graphql:\"deletePullRequestReviewComment\""
 	DeleteRef                                                   *DeleteRefPayload                                                   "json:\"deleteRef,omitempty\" graphql:\"deleteRef\""
@@ -174,6 +176,7 @@ type Mutation struct {
 	RemoveReaction                                              *RemoveReactionPayload                                              "json:\"removeReaction,omitempty\" graphql:\"removeReaction\""
 	RemoveStar                                                  *RemoveStarPayload                                                  "json:\"removeStar,omitempty\" graphql:\"removeStar\""
 	RemoveUpvote                                                *RemoveUpvotePayload                                                "json:\"removeUpvote,omitempty\" graphql:\"removeUpvote\""
+	ReopenDiscussion                                            *ReopenDiscussionPayload                                            "json:\"reopenDiscussion,omitempty\" graphql:\"reopenDiscussion\""
 	ReopenIssue                                                 *ReopenIssuePayload                                                 "json:\"reopenIssue,omitempty\" graphql:\"reopenIssue\""
 	ReopenPullRequest                                           *ReopenPullRequestPayload                                           "json:\"reopenPullRequest,omitempty\" graphql:\"reopenPullRequest\""
 	RequestReviews                                              *RequestReviewsPayload                                              "json:\"requestReviews,omitempty\" graphql:\"requestReviews\""
@@ -263,65 +266,278 @@ type LanguageFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
+func (t *LanguageFragment) GetID() string {
+	if t == nil {
+		t = &LanguageFragment{}
+	}
+	return t.ID
+}
+func (t *LanguageFragment) GetName() string {
+	if t == nil {
+		t = &LanguageFragment{}
+	}
+	return t.Name
+}
+
 type RepositoryFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
+func (t *RepositoryFragment) GetID() string {
+	if t == nil {
+		t = &RepositoryFragment{}
+	}
+	return t.ID
+}
+func (t *RepositoryFragment) GetName() string {
+	if t == nil {
+		t = &RepositoryFragment{}
+	}
+	return t.Name
+}
+
 type GetUser_Viewer_Repositories_Nodes_Languages struct {
 	Nodes []*LanguageFragment "json:\"nodes,omitempty\" graphql:\"nodes\""
 }
+
+func (t *GetUser_Viewer_Repositories_Nodes_Languages) GetNodes() []*LanguageFragment {
+	if t == nil {
+		t = &GetUser_Viewer_Repositories_Nodes_Languages{}
+	}
+	return t.Nodes
+}
+
 type GetUser_Viewer_Repositories_Nodes struct {
 	ID        string                                       "json:\"id\" graphql:\"id\""
 	Name      string                                       "json:\"name\" graphql:\"name\""
 	Languages *GetUser_Viewer_Repositories_Nodes_Languages "json:\"languages,omitempty\" graphql:\"languages\""
 }
+
+func (t *GetUser_Viewer_Repositories_Nodes) GetID() string {
+	if t == nil {
+		t = &GetUser_Viewer_Repositories_Nodes{}
+	}
+	return t.ID
+}
+func (t *GetUser_Viewer_Repositories_Nodes) GetName() string {
+	if t == nil {
+		t = &GetUser_Viewer_Repositories_Nodes{}
+	}
+	return t.Name
+}
+func (t *GetUser_Viewer_Repositories_Nodes) GetLanguages() *GetUser_Viewer_Repositories_Nodes_Languages {
+	if t == nil {
+		t = &GetUser_Viewer_Repositories_Nodes{}
+	}
+	return t.Languages
+}
+
 type GetUser_Viewer_Repositories struct {
 	Nodes []*GetUser_Viewer_Repositories_Nodes "json:\"nodes,omitempty\" graphql:\"nodes\""
 }
+
+func (t *GetUser_Viewer_Repositories) GetNodes() []*GetUser_Viewer_Repositories_Nodes {
+	if t == nil {
+		t = &GetUser_Viewer_Repositories{}
+	}
+	return t.Nodes
+}
+
 type GetUser_Viewer struct {
 	ID           string                      "json:\"id\" graphql:\"id\""
 	Name         *string                     "json:\"name,omitempty\" graphql:\"name\""
 	Repositories GetUser_Viewer_Repositories "json:\"repositories\" graphql:\"repositories\""
 }
+
+func (t *GetUser_Viewer) GetID() string {
+	if t == nil {
+		t = &GetUser_Viewer{}
+	}
+	return t.ID
+}
+func (t *GetUser_Viewer) GetName() *string {
+	if t == nil {
+		t = &GetUser_Viewer{}
+	}
+	return t.Name
+}
+func (t *GetUser_Viewer) GetRepositories() *GetUser_Viewer_Repositories {
+	if t == nil {
+		t = &GetUser_Viewer{}
+	}
+	return &t.Repositories
+}
+
 type GetNode_Node_Reaction_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
+
+func (t *GetNode_Node_Reaction_User) GetID() string {
+	if t == nil {
+		t = &GetNode_Node_Reaction_User{}
+	}
+	return t.ID
+}
+
 type GetNode_Node_Reaction struct {
 	ID   string                      "json:\"id\" graphql:\"id\""
 	User *GetNode_Node_Reaction_User "json:\"user,omitempty\" graphql:\"user\""
 }
+
+func (t *GetNode_Node_Reaction) GetID() string {
+	if t == nil {
+		t = &GetNode_Node_Reaction{}
+	}
+	return t.ID
+}
+func (t *GetNode_Node_Reaction) GetUser() *GetNode_Node_Reaction_User {
+	if t == nil {
+		t = &GetNode_Node_Reaction{}
+	}
+	return t.User
+}
+
 type GetNode_Node struct {
 	ID         string                "json:\"id\" graphql:\"id\""
 	Repository RepositoryFragment    "graphql:\"... on Repository\""
 	Reaction   GetNode_Node_Reaction "graphql:\"... on Reaction\""
 }
+
+func (t *GetNode_Node) GetID() string {
+	if t == nil {
+		t = &GetNode_Node{}
+	}
+	return t.ID
+}
+func (t *GetNode_Node) GetRepository() *RepositoryFragment {
+	if t == nil {
+		t = &GetNode_Node{}
+	}
+	return &t.Repository
+}
+func (t *GetNode_Node) GetReaction() *GetNode_Node_Reaction {
+	if t == nil {
+		t = &GetNode_Node{}
+	}
+	return &t.Reaction
+}
+
 type AddStar_AddStar_Starrable_Repository struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
+func (t *AddStar_AddStar_Starrable_Repository) GetID() string {
+	if t == nil {
+		t = &AddStar_AddStar_Starrable_Repository{}
+	}
+	return t.ID
+}
+func (t *AddStar_AddStar_Starrable_Repository) GetName() string {
+	if t == nil {
+		t = &AddStar_AddStar_Starrable_Repository{}
+	}
+	return t.Name
+}
+
 type AddStar_AddStar_Starrable struct {
 	ID               string                               "json:\"id\" graphql:\"id\""
 	ViewerHasStarred bool                                 "json:\"viewerHasStarred\" graphql:\"viewerHasStarred\""
 	Repository       AddStar_AddStar_Starrable_Repository "graphql:\"... on Repository\""
 }
+
+func (t *AddStar_AddStar_Starrable) GetID() string {
+	if t == nil {
+		t = &AddStar_AddStar_Starrable{}
+	}
+	return t.ID
+}
+func (t *AddStar_AddStar_Starrable) GetViewerHasStarred() bool {
+	if t == nil {
+		t = &AddStar_AddStar_Starrable{}
+	}
+	return t.ViewerHasStarred
+}
+func (t *AddStar_AddStar_Starrable) GetRepository() *AddStar_AddStar_Starrable_Repository {
+	if t == nil {
+		t = &AddStar_AddStar_Starrable{}
+	}
+	return &t.Repository
+}
+
 type AddStar_AddStar struct {
 	Starrable *AddStar_AddStar_Starrable "json:\"starrable,omitempty\" graphql:\"starrable\""
 }
+
+func (t *AddStar_AddStar) GetStarrable() *AddStar_AddStar_Starrable {
+	if t == nil {
+		t = &AddStar_AddStar{}
+	}
+	return t.Starrable
+}
+
 type GetNode2_Node_Release struct {
 	ID   string  "json:\"id\" graphql:\"id\""
 	Name *string "json:\"name,omitempty\" graphql:\"name\""
 }
+
+func (t *GetNode2_Node_Release) GetID() string {
+	if t == nil {
+		t = &GetNode2_Node_Release{}
+	}
+	return t.ID
+}
+func (t *GetNode2_Node_Release) GetName() *string {
+	if t == nil {
+		t = &GetNode2_Node_Release{}
+	}
+	return t.Name
+}
+
 type GetUser struct {
 	Viewer GetUser_Viewer "json:\"viewer\" graphql:\"viewer\""
 }
+
+func (t *GetUser) GetViewer() *GetUser_Viewer {
+	if t == nil {
+		t = &GetUser{}
+	}
+	return &t.Viewer
+}
+
 type GetNode struct {
 	Node *GetNode_Node "json:\"node,omitempty\" graphql:\"node\""
 }
+
+func (t *GetNode) GetNode() *GetNode_Node {
+	if t == nil {
+		t = &GetNode{}
+	}
+	return t.Node
+}
+
 type AddStar struct {
 	AddStar *AddStar_AddStar "json:\"addStar,omitempty\" graphql:\"addStar\""
 }
+
+func (t *AddStar) GetAddStar() *AddStar_AddStar {
+	if t == nil {
+		t = &AddStar{}
+	}
+	return t.AddStar
+}
+
 type GetNode2 struct {
 	Node *GetNode2_Node_Release "json:\"node,omitempty\" graphql:\"node\""
+}
+
+func (t *GetNode2) GetNode() *GetNode2_Node_Release {
+	if t == nil {
+		t = &GetNode2{}
+	}
+	return t.Node
 }
 
 const GetUserDocument = `query GetUser ($repositoryFirst: Int!, $languageFirst: Int!) {
