@@ -41,7 +41,7 @@ func TestReturnTypeName(t *testing.T) {
 			name:     "Named with package",
 			input:    types.NewNamed(types.NewTypeName(0, types.NewPackage("github.com/Yamashou/hoge", "hoge"), "MyType", nil), nil, nil),
 			nested:   false,
-			expected: "*MyType",
+			expected: "*hoge.MyType",
 		},
 		{
 			name:     "Interface",

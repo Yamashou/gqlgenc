@@ -6,12 +6,10 @@ import (
 	"bytes"
 	_ "embed" // used to load template file
 	"fmt"
-	"go/types"
-	"strings"
-
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
+	"go/types"
 )
 
 //go:embed template.gotpl
@@ -83,18 +81,7 @@ func returnTypeName(t types.Type, nested bool) string {
 	case *types.Slice:
 		return "[]" + returnTypeName(it.Elem(), true)
 	case *types.Named:
-		s := strings.Split(it.String(), ".")
-		name := s[len(s)-1]
-
-		isImported := it.Obj().Parent() != nil
-		if isImported {
-			if strings.Contains(s[len(s)-2], "/") {
-				t := strings.Split(s[len(s)-2], "/")
-				name = t[len(s)-1] + "." + name
-			} else {
-				name = s[len(s)-2] + "." + name
-			}
-		}
+		name := namedTypeString(it)
 
 		if nested {
 			return name
@@ -108,4 +95,14 @@ func returnTypeName(t types.Type, nested bool) string {
 	default:
 		return fmt.Sprintf("%T----", it)
 	}
+}
+
+func namedTypeString(named *types.Named) string {
+	pkg := named.Obj().Pkg()
+
+	if pkg == nil {
+		return named.Obj().Name()
+	}
+
+	return fmt.Sprintf("%s.%s", pkg.Name(), named.Obj().Name())
 }
