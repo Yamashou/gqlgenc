@@ -51,9 +51,13 @@ func TestReturnTypeName(t *testing.T) {
 		},
 	}
 
+	g := &GenGettersGenerator{
+		ClientPackageName: "hoge",
+	}
+
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			output := returnTypeName(test.input, test.nested)
+			output := g.returnTypeName(test.input, test.nested)
 			if output != test.expected {
 				t.Errorf("Expected %s, but got %s", test.expected, output)
 			}
