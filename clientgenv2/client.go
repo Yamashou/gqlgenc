@@ -5,6 +5,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
+
 	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 )
 
@@ -52,14 +53,21 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	// 3. Generate code from template and document source
 	sourceGenerator := NewSourceGenerator(cfg, p.Client)
 	source := NewSource(cfg.Schema, queryDocument, sourceGenerator, p.GenerateConfig)
-	query, err := source.Query()
-	if err != nil {
-		return fmt.Errorf("generating query object: %w", err)
+
+	var query *Query
+	if source.schema.Query != nil {
+		query, err = source.Query()
+		if err != nil {
+			return fmt.Errorf("generating query object: %w", err)
+		}
 	}
 
-	mutation, err := source.Mutation()
-	if err != nil {
-		return fmt.Errorf("generating mutation object: %w", err)
+	var mutation *Mutation
+	if source.schema.Mutation != nil {
+		mutation, err = source.Mutation()
+		if err != nil {
+			return fmt.Errorf("generating mutation object: %w", err)
+		}
 	}
 
 	fragments, err := source.Fragments()
