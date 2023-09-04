@@ -68,7 +68,12 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 			}
 
 			var res {{ $model.ResponseStructName | go }}
-			if err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
+			err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars, interceptors...)
+			if err != nil {
+				if c.Client.ParseDataWhenErrors && &res != nil {
+					return &res, err
+				}
+
 				return nil, err
 			}
 
