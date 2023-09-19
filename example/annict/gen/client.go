@@ -39,6 +39,7 @@ type Mutation struct {
 	UpdateReview *UpdateReviewPayload "json:\"updateReview\" graphql:\"updateReview\""
 	UpdateStatus *UpdateStatusPayload "json:\"updateStatus\" graphql:\"updateStatus\""
 }
+
 type ViewerFragment struct {
 	AvatarURL       *string "json:\"avatar_url\" graphql:\"avatar_url\""
 	RecordsCount    int64   "json:\"recordsCount\" graphql:\"recordsCount\""
@@ -46,6 +47,7 @@ type ViewerFragment struct {
 	WatchingCount   int64   "json:\"watchingCount\" graphql:\"watchingCount\""
 	WatchedCount    int64   "json:\"watchedCount\" graphql:\"watchedCount\""
 }
+
 type WorkFragment struct {
 	ID                string       "json:\"id\" graphql:\"id\""
 	Title             string       "json:\"title\" graphql:\"title\""
@@ -65,24 +67,29 @@ type WorkFragment struct {
 		} "json:\"nodes\" graphql:\"nodes\""
 	} "json:\"episodes\" graphql:\"episodes\""
 }
+
 type HogeCreateRecordMutationPayload struct {
 	CreateRecord *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"createRecord\" graphql:\"createRecord\""
 }
+
 type HogeUpdateStatusMutationPayload struct {
 	UpdateStatus *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"updateStatus\" graphql:\"updateStatus\""
 }
+
 type HogeUpdateWorkStatusPayload struct {
 	UpdateStatus *struct {
 		ClientMutationID *string "json:\"clientMutationId\" graphql:\"clientMutationId\""
 	} "json:\"updateStatus\" graphql:\"updateStatus\""
 }
+
 type GetProfile struct {
 	Viewer *ViewerFragment "json:\"viewer\" graphql:\"viewer\""
 }
+
 type ListWorks struct {
 	Viewer *struct {
 		Works *struct {
@@ -93,6 +100,7 @@ type ListWorks struct {
 		} "json:\"works\" graphql:\"works\""
 	} "json:\"viewer\" graphql:\"viewer\""
 }
+
 type ListRecords struct {
 	Viewer *struct {
 		Records *struct {
@@ -108,6 +116,7 @@ type ListRecords struct {
 		} "json:\"records\" graphql:\"records\""
 	} "json:\"viewer\" graphql:\"viewer\""
 }
+
 type ListNextEpisodes struct {
 	Viewer *struct {
 		Records *struct {
@@ -133,11 +142,13 @@ type ListNextEpisodes struct {
 		} "json:\"records\" graphql:\"records\""
 	} "json:\"viewer\" graphql:\"viewer\""
 }
+
 type GetWork struct {
 	SearchWorks *struct {
 		Nodes []*WorkFragment "json:\"nodes\" graphql:\"nodes\""
 	} "json:\"searchWorks\" graphql:\"searchWorks\""
 }
+
 type SearchWorks struct {
 	SearchWorks *struct {
 		Nodes []*struct {

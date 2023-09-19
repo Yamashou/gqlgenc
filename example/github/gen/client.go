@@ -55,6 +55,7 @@ type Query struct {
 	User                                     *User                              "json:\"user,omitempty\" graphql:\"user\""
 	Viewer                                   User                               "json:\"viewer\" graphql:\"viewer\""
 }
+
 type Mutation struct {
 	AbortQueuedMigrations                                       *AbortQueuedMigrationsPayload                                       "json:\"abortQueuedMigrations,omitempty\" graphql:\"abortQueuedMigrations\""
 	AcceptEnterpriseAdministratorInvitation                     *AcceptEnterpriseAdministratorInvitationPayload                     "json:\"acceptEnterpriseAdministratorInvitation,omitempty\" graphql:\"acceptEnterpriseAdministratorInvitation\""
@@ -73,6 +74,7 @@ type Mutation struct {
 	AddPullRequestReview                                        *AddPullRequestReviewPayload                                        "json:\"addPullRequestReview,omitempty\" graphql:\"addPullRequestReview\""
 	AddPullRequestReviewComment                                 *AddPullRequestReviewCommentPayload                                 "json:\"addPullRequestReviewComment,omitempty\" graphql:\"addPullRequestReviewComment\""
 	AddPullRequestReviewThread                                  *AddPullRequestReviewThreadPayload                                  "json:\"addPullRequestReviewThread,omitempty\" graphql:\"addPullRequestReviewThread\""
+	AddPullRequestReviewThreadReply                             *AddPullRequestReviewThreadReplyPayload                             "json:\"addPullRequestReviewThreadReply,omitempty\" graphql:\"addPullRequestReviewThreadReply\""
 	AddReaction                                                 *AddReactionPayload                                                 "json:\"addReaction,omitempty\" graphql:\"addReaction\""
 	AddStar                                                     *AddStarPayload                                                     "json:\"addStar,omitempty\" graphql:\"addStar\""
 	AddUpvote                                                   *AddUpvotePayload                                                   "json:\"addUpvote,omitempty\" graphql:\"addUpvote\""
@@ -112,9 +114,11 @@ type Mutation struct {
 	CreatePullRequest                                           *CreatePullRequestPayload                                           "json:\"createPullRequest,omitempty\" graphql:\"createPullRequest\""
 	CreateRef                                                   *CreateRefPayload                                                   "json:\"createRef,omitempty\" graphql:\"createRef\""
 	CreateRepository                                            *CreateRepositoryPayload                                            "json:\"createRepository,omitempty\" graphql:\"createRepository\""
+	CreateRepositoryRuleset                                     *CreateRepositoryRulesetPayload                                     "json:\"createRepositoryRuleset,omitempty\" graphql:\"createRepositoryRuleset\""
 	CreateSponsorsListing                                       *CreateSponsorsListingPayload                                       "json:\"createSponsorsListing,omitempty\" graphql:\"createSponsorsListing\""
 	CreateSponsorsTier                                          *CreateSponsorsTierPayload                                          "json:\"createSponsorsTier,omitempty\" graphql:\"createSponsorsTier\""
 	CreateSponsorship                                           *CreateSponsorshipPayload                                           "json:\"createSponsorship,omitempty\" graphql:\"createSponsorship\""
+	CreateSponsorships                                          *CreateSponsorshipsPayload                                          "json:\"createSponsorships,omitempty\" graphql:\"createSponsorships\""
 	CreateTeamDiscussion                                        *CreateTeamDiscussionPayload                                        "json:\"createTeamDiscussion,omitempty\" graphql:\"createTeamDiscussion\""
 	CreateTeamDiscussionComment                                 *CreateTeamDiscussionCommentPayload                                 "json:\"createTeamDiscussionComment,omitempty\" graphql:\"createTeamDiscussionComment\""
 	DeclineTopicSuggestion                                      *DeclineTopicSuggestionPayload                                      "json:\"declineTopicSuggestion,omitempty\" graphql:\"declineTopicSuggestion\""
@@ -137,13 +141,16 @@ type Mutation struct {
 	DeletePullRequestReview                                     *DeletePullRequestReviewPayload                                     "json:\"deletePullRequestReview,omitempty\" graphql:\"deletePullRequestReview\""
 	DeletePullRequestReviewComment                              *DeletePullRequestReviewCommentPayload                              "json:\"deletePullRequestReviewComment,omitempty\" graphql:\"deletePullRequestReviewComment\""
 	DeleteRef                                                   *DeleteRefPayload                                                   "json:\"deleteRef,omitempty\" graphql:\"deleteRef\""
+	DeleteRepositoryRuleset                                     *DeleteRepositoryRulesetPayload                                     "json:\"deleteRepositoryRuleset,omitempty\" graphql:\"deleteRepositoryRuleset\""
 	DeleteTeamDiscussion                                        *DeleteTeamDiscussionPayload                                        "json:\"deleteTeamDiscussion,omitempty\" graphql:\"deleteTeamDiscussion\""
 	DeleteTeamDiscussionComment                                 *DeleteTeamDiscussionCommentPayload                                 "json:\"deleteTeamDiscussionComment,omitempty\" graphql:\"deleteTeamDiscussionComment\""
 	DeleteVerifiableDomain                                      *DeleteVerifiableDomainPayload                                      "json:\"deleteVerifiableDomain,omitempty\" graphql:\"deleteVerifiableDomain\""
+	DequeuePullRequest                                          *DequeuePullRequestPayload                                          "json:\"dequeuePullRequest,omitempty\" graphql:\"dequeuePullRequest\""
 	DisablePullRequestAutoMerge                                 *DisablePullRequestAutoMergePayload                                 "json:\"disablePullRequestAutoMerge,omitempty\" graphql:\"disablePullRequestAutoMerge\""
 	DismissPullRequestReview                                    *DismissPullRequestReviewPayload                                    "json:\"dismissPullRequestReview,omitempty\" graphql:\"dismissPullRequestReview\""
 	DismissRepositoryVulnerabilityAlert                         *DismissRepositoryVulnerabilityAlertPayload                         "json:\"dismissRepositoryVulnerabilityAlert,omitempty\" graphql:\"dismissRepositoryVulnerabilityAlert\""
 	EnablePullRequestAutoMerge                                  *EnablePullRequestAutoMergePayload                                  "json:\"enablePullRequestAutoMerge,omitempty\" graphql:\"enablePullRequestAutoMerge\""
+	EnqueuePullRequest                                          *EnqueuePullRequestPayload                                          "json:\"enqueuePullRequest,omitempty\" graphql:\"enqueuePullRequest\""
 	FollowOrganization                                          *FollowOrganizationPayload                                          "json:\"followOrganization,omitempty\" graphql:\"followOrganization\""
 	FollowUser                                                  *FollowUserPayload                                                  "json:\"followUser,omitempty\" graphql:\"followUser\""
 	GrantEnterpriseOrganizationsMigratorRole                    *GrantEnterpriseOrganizationsMigratorRolePayload                    "json:\"grantEnterpriseOrganizationsMigratorRole,omitempty\" graphql:\"grantEnterpriseOrganizationsMigratorRole\""
@@ -155,6 +162,7 @@ type Mutation struct {
 	LockLockable                                                *LockLockablePayload                                                "json:\"lockLockable,omitempty\" graphql:\"lockLockable\""
 	MarkDiscussionCommentAsAnswer                               *MarkDiscussionCommentAsAnswerPayload                               "json:\"markDiscussionCommentAsAnswer,omitempty\" graphql:\"markDiscussionCommentAsAnswer\""
 	MarkFileAsViewed                                            *MarkFileAsViewedPayload                                            "json:\"markFileAsViewed,omitempty\" graphql:\"markFileAsViewed\""
+	MarkProjectV2AsTemplate                                     *MarkProjectV2AsTemplatePayload                                     "json:\"markProjectV2AsTemplate,omitempty\" graphql:\"markProjectV2AsTemplate\""
 	MarkPullRequestReadyForReview                               *MarkPullRequestReadyForReviewPayload                               "json:\"markPullRequestReadyForReview,omitempty\" graphql:\"markPullRequestReadyForReview\""
 	MergeBranch                                                 *MergeBranchPayload                                                 "json:\"mergeBranch,omitempty\" graphql:\"mergeBranch\""
 	MergePullRequest                                            *MergePullRequestPayload                                            "json:\"mergePullRequest,omitempty\" graphql:\"mergePullRequest\""
@@ -207,6 +215,7 @@ type Mutation struct {
 	UnmarkDiscussionCommentAsAnswer                             *UnmarkDiscussionCommentAsAnswerPayload                             "json:\"unmarkDiscussionCommentAsAnswer,omitempty\" graphql:\"unmarkDiscussionCommentAsAnswer\""
 	UnmarkFileAsViewed                                          *UnmarkFileAsViewedPayload                                          "json:\"unmarkFileAsViewed,omitempty\" graphql:\"unmarkFileAsViewed\""
 	UnmarkIssueAsDuplicate                                      *UnmarkIssueAsDuplicatePayload                                      "json:\"unmarkIssueAsDuplicate,omitempty\" graphql:\"unmarkIssueAsDuplicate\""
+	UnmarkProjectV2AsTemplate                                   *UnmarkProjectV2AsTemplatePayload                                   "json:\"unmarkProjectV2AsTemplate,omitempty\" graphql:\"unmarkProjectV2AsTemplate\""
 	UnminimizeComment                                           *UnminimizeCommentPayload                                           "json:\"unminimizeComment,omitempty\" graphql:\"unminimizeComment\""
 	UnpinIssue                                                  *UnpinIssuePayload                                                  "json:\"unpinIssue,omitempty\" graphql:\"unpinIssue\""
 	UnresolveReviewThread                                       *UnresolveReviewThreadPayload                                       "json:\"unresolveReviewThread,omitempty\" graphql:\"unresolveReviewThread\""
@@ -245,6 +254,7 @@ type Mutation struct {
 	UpdateProjectCard                                           *UpdateProjectCardPayload                                           "json:\"updateProjectCard,omitempty\" graphql:\"updateProjectCard\""
 	UpdateProjectColumn                                         *UpdateProjectColumnPayload                                         "json:\"updateProjectColumn,omitempty\" graphql:\"updateProjectColumn\""
 	UpdateProjectV2                                             *UpdateProjectV2Payload                                             "json:\"updateProjectV2,omitempty\" graphql:\"updateProjectV2\""
+	UpdateProjectV2Collaborators                                *UpdateProjectV2CollaboratorsPayload                                "json:\"updateProjectV2Collaborators,omitempty\" graphql:\"updateProjectV2Collaborators\""
 	UpdateProjectV2DraftIssue                                   *UpdateProjectV2DraftIssuePayload                                   "json:\"updateProjectV2DraftIssue,omitempty\" graphql:\"updateProjectV2DraftIssue\""
 	UpdateProjectV2ItemFieldValue                               *UpdateProjectV2ItemFieldValuePayload                               "json:\"updateProjectV2ItemFieldValue,omitempty\" graphql:\"updateProjectV2ItemFieldValue\""
 	UpdateProjectV2ItemPosition                                 *UpdateProjectV2ItemPositionPayload                                 "json:\"updateProjectV2ItemPosition,omitempty\" graphql:\"updateProjectV2ItemPosition\""
@@ -254,6 +264,7 @@ type Mutation struct {
 	UpdatePullRequestReviewComment                              *UpdatePullRequestReviewCommentPayload                              "json:\"updatePullRequestReviewComment,omitempty\" graphql:\"updatePullRequestReviewComment\""
 	UpdateRef                                                   *UpdateRefPayload                                                   "json:\"updateRef,omitempty\" graphql:\"updateRef\""
 	UpdateRepository                                            *UpdateRepositoryPayload                                            "json:\"updateRepository,omitempty\" graphql:\"updateRepository\""
+	UpdateRepositoryRuleset                                     *UpdateRepositoryRulesetPayload                                     "json:\"updateRepositoryRuleset,omitempty\" graphql:\"updateRepositoryRuleset\""
 	UpdateRepositoryWebCommitSignoffSetting                     *UpdateRepositoryWebCommitSignoffSettingPayload                     "json:\"updateRepositoryWebCommitSignoffSetting,omitempty\" graphql:\"updateRepositoryWebCommitSignoffSetting\""
 	UpdateSponsorshipPreferences                                *UpdateSponsorshipPreferencesPayload                                "json:\"updateSponsorshipPreferences,omitempty\" graphql:\"updateSponsorshipPreferences\""
 	UpdateSubscription                                          *UpdateSubscriptionPayload                                          "json:\"updateSubscription,omitempty\" graphql:\"updateSubscription\""
@@ -263,6 +274,7 @@ type Mutation struct {
 	UpdateTopics                                                *UpdateTopicsPayload                                                "json:\"updateTopics,omitempty\" graphql:\"updateTopics\""
 	VerifyVerifiableDomain                                      *VerifyVerifiableDomainPayload                                      "json:\"verifyVerifiableDomain,omitempty\" graphql:\"verifyVerifiableDomain\""
 }
+
 type LanguageFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -274,6 +286,7 @@ func (t *LanguageFragment) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *LanguageFragment) GetName() string {
 	if t == nil {
 		t = &LanguageFragment{}
@@ -292,6 +305,7 @@ func (t *RepositoryFragment) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *RepositoryFragment) GetName() string {
 	if t == nil {
 		t = &RepositoryFragment{}
@@ -322,12 +336,14 @@ func (t *GetUser_Viewer_Repositories_Nodes) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *GetUser_Viewer_Repositories_Nodes) GetName() string {
 	if t == nil {
 		t = &GetUser_Viewer_Repositories_Nodes{}
 	}
 	return t.Name
 }
+
 func (t *GetUser_Viewer_Repositories_Nodes) GetLanguages() *GetUser_Viewer_Repositories_Nodes_Languages {
 	if t == nil {
 		t = &GetUser_Viewer_Repositories_Nodes{}
@@ -358,12 +374,14 @@ func (t *GetUser_Viewer) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *GetUser_Viewer) GetName() *string {
 	if t == nil {
 		t = &GetUser_Viewer{}
 	}
 	return t.Name
 }
+
 func (t *GetUser_Viewer) GetRepositories() *GetUser_Viewer_Repositories {
 	if t == nil {
 		t = &GetUser_Viewer{}
@@ -393,6 +411,7 @@ func (t *GetNode_Node_Reaction) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *GetNode_Node_Reaction) GetUser() *GetNode_Node_Reaction_User {
 	if t == nil {
 		t = &GetNode_Node_Reaction{}
@@ -412,12 +431,14 @@ func (t *GetNode_Node) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *GetNode_Node) GetRepository() *RepositoryFragment {
 	if t == nil {
 		t = &GetNode_Node{}
 	}
 	return &t.Repository
 }
+
 func (t *GetNode_Node) GetReaction() *GetNode_Node_Reaction {
 	if t == nil {
 		t = &GetNode_Node{}
@@ -436,6 +457,7 @@ func (t *AddStar_AddStar_Starrable_Repository) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *AddStar_AddStar_Starrable_Repository) GetName() string {
 	if t == nil {
 		t = &AddStar_AddStar_Starrable_Repository{}
@@ -455,12 +477,14 @@ func (t *AddStar_AddStar_Starrable) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *AddStar_AddStar_Starrable) GetViewerHasStarred() bool {
 	if t == nil {
 		t = &AddStar_AddStar_Starrable{}
 	}
 	return t.ViewerHasStarred
 }
+
 func (t *AddStar_AddStar_Starrable) GetRepository() *AddStar_AddStar_Starrable_Repository {
 	if t == nil {
 		t = &AddStar_AddStar_Starrable{}
@@ -502,12 +526,14 @@ func (t *GetNode2_Node_Release) GetID() string {
 	}
 	return t.ID
 }
+
 func (t *GetNode2_Node_Release) GetName() *string {
 	if t == nil {
 		t = &GetNode2_Node_Release{}
 	}
 	return t.Name
 }
+
 func (t *GetNode2_Node_Release) GetReactionGroups() []*GetNode2_Node_Release_ReactionGroups {
 	if t == nil {
 		t = &GetNode2_Node_Release{}
@@ -590,7 +616,7 @@ func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst
 
 	var res GetUser
 	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, interceptors...); err != nil {
-		return &res, err
+		return nil, err
 	}
 
 	return &res, nil
@@ -623,7 +649,7 @@ func (c *Client) GetNode(ctx context.Context, id string, interceptors ...clientv
 
 	var res GetNode
 	if err := c.Client.Post(ctx, "GetNode", GetNodeDocument, &res, vars, interceptors...); err != nil {
-		return &res, err
+		return nil, err
 	}
 
 	return &res, nil
@@ -650,7 +676,7 @@ func (c *Client) AddStar(ctx context.Context, input AddStarInput, interceptors .
 
 	var res AddStar
 	if err := c.Client.Post(ctx, "AddStar", AddStarDocument, &res, vars, interceptors...); err != nil {
-		return &res, err
+		return nil, err
 	}
 
 	return &res, nil
@@ -676,7 +702,7 @@ func (c *Client) GetNode2(ctx context.Context, id string, interceptors ...client
 
 	var res GetNode2
 	if err := c.Client.Post(ctx, "GetNode2", GetNode2Document, &res, vars, interceptors...); err != nil {
-		return &res, err
+		return nil, err
 	}
 
 	return &res, nil

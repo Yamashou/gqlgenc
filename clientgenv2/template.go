@@ -1,8 +1,6 @@
 package clientgenv2
 
 import (
-
-	// nolint:golint, nolintlint
 	"bytes"
 	_ "embed" // used to load template file
 	"fmt"

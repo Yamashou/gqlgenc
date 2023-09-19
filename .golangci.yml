@@ -46,6 +46,15 @@ linters:
     - structcheck
     - exhaustruct
     - nonamedreturns
+    - golint
+    - ifshort
+    - nosnakecase
+    - deadcode
+    - scopelint
+    - varcheck
+    - depguard
+    - musttag
+    - paralleltest
   fast: false
 
 issues:
@@ -85,10 +94,6 @@ issues:
       text: "append to slice `frontier` with non-zero initialized length" # used in config/config.go
       linters:
         - makezero
-    - path: clientv2/client_test.go
-      text: "should not use basic type string as key in context.WithValue"
-      linters:
-        - golint
     - path: clientv2/client_test.go
       text: "should not use built-in type string as key for value; define your own type to avoid collisions"
       linters:

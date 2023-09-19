@@ -291,7 +291,7 @@ func TestChainInterceptor(t *testing.T) {
 		require.Equal(t, someValue, val, msg...)
 	}
 
-	req, err := http.NewRequestWithContext(parentContext, http.MethodPost, "https://hogehoge/graphql", bytes.NewBuffer([]byte(requestMessage)))
+	req, err := http.NewRequestWithContext(parentContext, http.MethodPost, "https://hogehoge/graphql", bytes.NewBufferString(requestMessage))
 	require.Nil(t, err)
 
 	first := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
