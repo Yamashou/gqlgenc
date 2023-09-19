@@ -1,7 +1,7 @@
 MAKEFLAGS=--no-builtin-rules --no-builtin-variables --always-make
 
 fmt:
-	gofumports -local github.com/Yamashou/gqlgenc -w .
+	goimports -local github.com/Yamashou/gqlgenc -w . && gofumpt -extra -w . && gci write -s Standard -s Default .
 
 lint:
 	golangci-lint cache clean && golangci-lint run

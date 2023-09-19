@@ -5,7 +5,6 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
-
 	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 )
 

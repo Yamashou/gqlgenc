@@ -23,122 +23,153 @@ type Query struct {
 	FilesInfo    FilesInfoResult "json:\"filesInfo\" graphql:\"filesInfo\""
 	GetListItems ListItemsResult "json:\"getListItems\" graphql:\"getListItems\""
 }
+
 type Mutation struct {
 	UploadFile  UploadFileResult  "json:\"uploadFile\" graphql:\"uploadFile\""
 	UploadFiles UploadFilesResult "json:\"uploadFiles\" graphql:\"uploadFiles\""
 	AddListItem AddListItemResult "json:\"addListItem\" graphql:\"addListItem\""
 }
+
 type FileDataFragment struct {
 	Mime string "json:\"mime\" graphql:\"mime\""
 	Name string "json:\"name\" graphql:\"name\""
 	Size string "json:\"size\" graphql:\"size\""
 }
+
 type UploadFile_UploadFile struct {
 	Typename *string           "json:\"__typename\" graphql:\"__typename\""
 	File     *FileDataFragment "json:\"file\" graphql:\"file\""
 }
+
 type UploadFiles_UploadFiles_UploadFilesResult struct {
 	Files []*FileDataFragment "json:\"files\" graphql:\"files\""
 }
+
 type UploadFiles_UploadFiles struct {
 	Typename          *string                                   "json:\"__typename\" graphql:\"__typename\""
 	UploadFilesResult UploadFiles_UploadFiles_UploadFilesResult "graphql:\"... on UploadFilesResult\""
 }
+
 type ManyMutationsInOne_UploadFile_File struct {
 	Mime string "json:\"mime\" graphql:\"mime\""
 	Name string "json:\"name\" graphql:\"name\""
 	Size string "json:\"size\" graphql:\"size\""
 }
+
 type ManyMutationsInOne_UploadFile struct {
 	Typename *string                            "json:\"__typename\" graphql:\"__typename\""
 	File     ManyMutationsInOne_UploadFile_File "json:\"file\" graphql:\"file\""
 }
+
 type ManyMutationsInOne_UploadFiles_UploadFilesResult_Files struct {
 	Mime string "json:\"mime\" graphql:\"mime\""
 	Name string "json:\"name\" graphql:\"name\""
 	Size string "json:\"size\" graphql:\"size\""
 }
+
 type ManyMutationsInOne_UploadFiles_UploadFilesResult struct {
 	Files []*ManyMutationsInOne_UploadFiles_UploadFilesResult_Files "json:\"files\" graphql:\"files\""
 }
+
 type ManyMutationsInOne_AddListItem_AddListItemResult_Item struct {
 	ID   int    "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
 type ManyMutationsInOne_AddListItem_AddListItemResult struct {
 	Item ManyMutationsInOne_AddListItem_AddListItemResult_Item "json:\"item\" graphql:\"item\""
 }
+
 type ManyMutationsInOne_AddListItem struct {
 	Typename          *string                                          "json:\"__typename\" graphql:\"__typename\""
 	AddListItemResult ManyMutationsInOne_AddListItem_AddListItemResult "graphql:\"... on AddListItemResult\""
 }
+
 type FileInfo_FileInfo struct {
 	Typename *string           "json:\"__typename\" graphql:\"__typename\""
 	File     *FileDataFragment "json:\"file\" graphql:\"file\""
 }
+
 type FilesInfo_FilesInfo_FilesInfoResult struct {
 	Files []*FileDataFragment "json:\"files\" graphql:\"files\""
 }
+
 type FilesInfo_FilesInfo struct {
 	Typename        *string                             "json:\"__typename\" graphql:\"__typename\""
 	FilesInfoResult FilesInfo_FilesInfo_FilesInfoResult "graphql:\"... on FilesInfoResult\""
 }
+
 type AllFilesInfo_Result struct {
 	Typename *string           "json:\"__typename\" graphql:\"__typename\""
 	File     *FileDataFragment "json:\"file\" graphql:\"file\""
 }
+
 type AllFilesInfo_Result2_FilesInfoResult struct {
 	Files []*FileDataFragment "json:\"files\" graphql:\"files\""
 }
+
 type AllFilesInfoWithListItems_FileInfo_File struct {
 	Mime string "json:\"mime\" graphql:\"mime\""
 	Name string "json:\"name\" graphql:\"name\""
 	Size string "json:\"size\" graphql:\"size\""
 }
+
 type AllFilesInfoWithListItems_FileInfo struct {
 	Typename *string                                 "json:\"__typename\" graphql:\"__typename\""
 	File     AllFilesInfoWithListItems_FileInfo_File "json:\"file\" graphql:\"file\""
 }
+
 type AllFilesInfoWithListItems_FilesInfo_FilesInfoResult_Files struct {
 	Mime string "json:\"mime\" graphql:\"mime\""
 	Name string "json:\"name\" graphql:\"name\""
 	Size string "json:\"size\" graphql:\"size\""
 }
+
 type AllFilesInfoWithListItems_FilesInfo_FilesInfoResult struct {
 	Files []*AllFilesInfoWithListItems_FilesInfo_FilesInfoResult_Files "json:\"files\" graphql:\"files\""
 }
+
 type AllFilesInfoWithListItems_GetListItems_ListItemsResult_Items struct {
 	ID   int    "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
 }
+
 type AllFilesInfoWithListItems_GetListItems_ListItemsResult struct {
 	Items []*AllFilesInfoWithListItems_GetListItems_ListItemsResult_Items "json:\"items\" graphql:\"items\""
 }
+
 type AllFilesInfoWithListItems_GetListItems struct {
 	Typename        *string                                                "json:\"__typename\" graphql:\"__typename\""
 	ListItemsResult AllFilesInfoWithListItems_GetListItems_ListItemsResult "graphql:\"... on ListItemsResult\""
 }
+
 type UploadFile struct {
 	UploadFile UploadFile_UploadFile "json:\"uploadFile\" graphql:\"uploadFile\""
 }
+
 type UploadFiles struct {
 	UploadFiles UploadFiles_UploadFiles "json:\"uploadFiles\" graphql:\"uploadFiles\""
 }
+
 type ManyMutationsInOne struct {
 	UploadFile  ManyMutationsInOne_UploadFile                    "json:\"uploadFile\" graphql:\"uploadFile\""
 	UploadFiles ManyMutationsInOne_UploadFiles_UploadFilesResult "json:\"uploadFiles\" graphql:\"uploadFiles\""
 	AddListItem ManyMutationsInOne_AddListItem                   "json:\"addListItem\" graphql:\"addListItem\""
 }
+
 type FileInfo struct {
 	FileInfo FileInfo_FileInfo "json:\"fileInfo\" graphql:\"fileInfo\""
 }
+
 type FilesInfo struct {
 	FilesInfo FilesInfo_FilesInfo "json:\"filesInfo\" graphql:\"filesInfo\""
 }
+
 type AllFilesInfo struct {
 	Result  AllFilesInfo_Result                  "json:\"result\" graphql:\"result\""
 	Result2 AllFilesInfo_Result2_FilesInfoResult "json:\"result2\" graphql:\"result2\""
 }
+
 type AllFilesInfoWithListItems struct {
 	FileInfo     AllFilesInfoWithListItems_FileInfo                  "json:\"fileInfo\" graphql:\"fileInfo\""
 	FilesInfo    AllFilesInfoWithListItems_FilesInfo_FilesInfoResult "json:\"filesInfo\" graphql:\"filesInfo\""
