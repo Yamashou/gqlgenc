@@ -3,6 +3,8 @@ package clientgenv2
 import (
 	"fmt"
 	"go/types"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -156,7 +158,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 }
 
 func NewLayerTypeName(base, thisField string) string {
-	return fmt.Sprintf("%s_%s", base, thisField)
+	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
 }
 
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
