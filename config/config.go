@@ -55,7 +55,7 @@ func (a StringList) Has(file string) bool {
 func LoadConfigFromDefaultLocations(dir string) (*Config, error) {
 	cfgFile, err := findCfg(dir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("not found Config. Config could not be found. Please make sure the name of the file is correct. want={.gqlgenc.yml, gqlgenc.yml, gqlgenc.yaml}, got=%s: %w", dir, err)
 	}
 
 	return LoadConfig(cfgFile)
