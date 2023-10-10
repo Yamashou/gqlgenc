@@ -140,10 +140,6 @@ type FormField struct {
 	Value interface{}
 }
 
-type header struct {
-	key, value string
-}
-
 // Post support send multipart form with files https://gqlgen.com/reference/file-upload/ https://github.com/jaydenseric/graphql-multipart-request-spec
 func (c *Client) Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, interceptors ...RequestInterceptor) error {
 	multipartFilesGroups, mapping, vars := parseMultipartFiles(vars)
