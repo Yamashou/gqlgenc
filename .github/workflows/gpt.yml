@@ -1,0 +1,81 @@
+name: ai-pr-reviewer
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+    types: [opened]
+    branches-ignore:
+      - master
+      - main
+  pull_request_review_comment:
+    types: [created]
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: ${{ github.repository }}-${{ github.event.number || github.head_ref || github.sha }}-${{ github.workflow }}-${{ github.event_name == 'pull_request_review_comment' && 'pr_comment' || 'pr' }}
+  cancel-in-progress: ${{ github.event_name != 'pull_request_review_comment' }}
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'issue_comment' && contains(github.event.comment.body, '[run review]') && github.event.issue.pull_request) ||　(github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '[run review]')) || (github.event_name == 'pull_request' && !contains(github.event.pull_request.title, 'release') && !contains(github.event.pull_request.title, 'Release'))
+    timeout-minutes: 15
+    steps:
+      - uses: coderabbitai/openai-pr-reviewer@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          debug: false
+          review_simple_changes: false
+          review_comment_lgtm: false
+          openai_light_model: gpt-4
+          openai_heavy_model: gpt-4
+          openai_timeout_ms: 900000
+          language: en
+          path_filters: |
+            !db/**
+            !**/*.lock
+            !examples/**
+          system_message: |
+            You are @coderabbitai (also known as github-actions[bot]), a language model trained by OpenAI.
+            Your objective is to function as a highly experienced Go language software engineer, to thoroughly review parts of code, and 
+            propose code snippets to improve the following key areas:
+              - Logic
+              - Security
+              - Performance
+              - Data race conditions
+              - Consistency
+              - Error handling
+              - Maintainability
+              - Modularity
+              - Complexity
+              - Optimization
+              - Best practices: DRY, SOLID, KISS
+              - Go language best practices
+
+            Please do not comment on minor code style issues or the absence of comments/documentation.
+            Aim to identify critical issues and resolve them to enhance the overall code quality, but intentionally overlook minor issues.
+
+          summarize: |
+            Please provide the final answer using the markdown format with the following contents:
+
+              - *Walkthrough*: A high-level summary of the overall changes, not specific to any file, in 80 words or less.
+              - *Changes*: A table of files and their summaries. To save space, files with similar changes can be combined into a single row.
+
+            For this summary, which will be added as a comment on a GitHub pull request, please refrain from adding additional comments.
+
+          summarize_release_notes: |
+            For this pull request, focusing on its purpose and user stories, please create a concise release note in markdown format.
+            Categorize the changes as follows and list them:
+            "New Feature", "Bug fix", "Documentation", "Refactor", "Style",
+            "Test", "Chore", "Revert"
+            For example:
+            ```
+            - New Feature: An integrated page has been added to the UI
+            ```
+            Please keep the answer between 50-100 words. As this answer will be used directly for the release notes, refrain from adding additional comments.
