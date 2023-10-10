@@ -152,12 +152,7 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 
 	gqlInfo := NewGQLRequestInfo(r)
 	body := new(bytes.Buffer)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, body)
-	if err != nil {
-		return fmt.Errorf("create request struct failed: %w", err)
-	}
-
+	var multipartFilesGroupsContentType string
 	if len(multipartFilesGroups) > 0 {
 		contentType, err := prepareMultipartFormBody(
 			body,
@@ -177,7 +172,7 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 			return fmt.Errorf("failed to prepare form body: %w", err)
 		}
 
-		req.Header.Set("Content-Type", contentType)
+		multipartFilesGroupsContentType = contentType
 	} else {
 		requestBody, err := json.Marshal(r)
 		if err != nil {
@@ -187,8 +182,17 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 		body = bytes.NewBuffer(requestBody)
 	}
 
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, body)
+	if err != nil {
+		return fmt.Errorf("create request struct failed: %w", err)
+	}
+
 	if req.Header.Get("Content-Type") == "" {
-		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+		if multipartFilesGroupsContentType != "" {
+			req.Header.Set("Content-Type", multipartFilesGroupsContentType)
+		} else {
+			req.Header.Set("Content-Type", "application/json; charset=utf-8")
+		}
 	}
 
 	if req.Header.Get("Accept") == "" {
