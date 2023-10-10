@@ -157,8 +157,6 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 	gqlInfo := NewGQLRequestInfo(r)
 	body := new(bytes.Buffer)
 
-	var headers []header
-
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, body)
 	if err != nil {
 		return fmt.Errorf("create request struct failed: %w", err)
@@ -191,9 +189,6 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 		}
 
 		body = bytes.NewBuffer(requestBody)
-
-		headers = append(headers, header{key: "Content-Type", value: "application/json; charset=utf-8"})
-		headers = append(headers, header{key: "Accept", value: "application/json; charset=utf-8"})
 	}
 
 	if req.Header.Get("Content-Type") == "" {
