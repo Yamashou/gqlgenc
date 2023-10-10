@@ -159,6 +159,11 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 
 	var headers []header
 
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, body)
+	if err != nil {
+		return fmt.Errorf("create request struct failed: %w", err)
+	}
+
 	if len(multipartFilesGroups) > 0 {
 		contentType, err := prepareMultipartFormBody(
 			body,
@@ -178,7 +183,7 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 			return fmt.Errorf("failed to prepare form body: %w", err)
 		}
 
-		headers = append(headers, header{key: "Content-Type", value: contentType})
+		req.Header.Set("Content-Type", contentType)
 	} else {
 		requestBody, err := json.Marshal(r)
 		if err != nil {
@@ -191,13 +196,12 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 		headers = append(headers, header{key: "Accept", value: "application/json; charset=utf-8"})
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.BaseURL, body)
-	if err != nil {
-		return fmt.Errorf("create request struct failed: %w", err)
+	if req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
 	}
 
-	for _, h := range headers {
-		req.Header.Set(h.key, h.value)
+	if req.Header.Get("Accept") == "" {
+		req.Header.Set("Accept", "application/json; charset=utf-8")
 	}
 
 	f := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)

@@ -55,14 +55,19 @@ func (c *Client) newRequest(ctx context.Context, operationName, query string, va
 		return nil, fmt.Errorf("create request struct failed: %w", err)
 	}
 
-	req.Header.Set("Content-Type", "application/json; charset=utf-8")
-	req.Header.Set("Accept", "application/json; charset=utf-8")
-
 	for _, httpRequestOption := range c.HTTPRequestOptions {
 		httpRequestOption(req)
 	}
 	for _, httpRequestOption := range httpRequestOptions {
 		httpRequestOption(req)
+	}
+
+	if req.Header.Get("Content-Type") == "" {
+		req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	}
+
+	if req.Header.Get("Accept") == "" {
+		req.Header.Set("Accept", "application/json; charset=utf-8")
 	}
 
 	return req, nil
