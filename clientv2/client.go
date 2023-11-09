@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -271,6 +272,7 @@ func prepareMultipartFormBody(
 	defer func(writer *multipart.Writer) {
 		err := writer.Close()
 		if err != nil {
+			log.Fatal(err)
 		}
 	}(writer)
 
@@ -317,6 +319,7 @@ func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
+			log.Fatal(err)
 		}
 	}(resp.Body)
 
@@ -344,8 +347,6 @@ func (c *Client) parseResponse(body []byte, httpCode int, result interface{}) er
 			Message: fmt.Sprintf("Response body %s", string(body)),
 		}
 	}
-
-	fmt.Println("body", string(body))
 
 	// some servers return a graphql error with a non OK http code, try anyway to parse the body
 	if err := c.unmarshal(body, result); err != nil {
