@@ -55,9 +55,9 @@ type Query struct {
 	User                                     *User                              "json:\"user,omitempty\" graphql:\"user\""
 	Viewer                                   User                               "json:\"viewer\" graphql:\"viewer\""
 }
-
 type Mutation struct {
 	AbortQueuedMigrations                                       *AbortQueuedMigrationsPayload                                       "json:\"abortQueuedMigrations,omitempty\" graphql:\"abortQueuedMigrations\""
+	AbortRepositoryMigration                                    *AbortRepositoryMigrationPayload                                    "json:\"abortRepositoryMigration,omitempty\" graphql:\"abortRepositoryMigration\""
 	AcceptEnterpriseAdministratorInvitation                     *AcceptEnterpriseAdministratorInvitationPayload                     "json:\"acceptEnterpriseAdministratorInvitation,omitempty\" graphql:\"acceptEnterpriseAdministratorInvitation\""
 	AcceptTopicSuggestion                                       *AcceptTopicSuggestionPayload                                       "json:\"acceptTopicSuggestion,omitempty\" graphql:\"acceptTopicSuggestion\""
 	AddAssigneesToAssignable                                    *AddAssigneesToAssignablePayload                                    "json:\"addAssigneesToAssignable,omitempty\" graphql:\"addAssigneesToAssignable\""
@@ -274,7 +274,6 @@ type Mutation struct {
 	UpdateTopics                                                *UpdateTopicsPayload                                                "json:\"updateTopics,omitempty\" graphql:\"updateTopics\""
 	VerifyVerifiableDomain                                      *VerifyVerifiableDomainPayload                                      "json:\"verifyVerifiableDomain,omitempty\" graphql:\"verifyVerifiableDomain\""
 }
-
 type LanguageFragment struct {
 	ID   string "json:\"id\" graphql:\"id\""
 	Name string "json:\"name\" graphql:\"name\""
@@ -286,7 +285,6 @@ func (t *LanguageFragment) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *LanguageFragment) GetName() string {
 	if t == nil {
 		t = &LanguageFragment{}
@@ -305,7 +303,6 @@ func (t *RepositoryFragment) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *RepositoryFragment) GetName() string {
 	if t == nil {
 		t = &RepositoryFragment{}
@@ -336,14 +333,12 @@ func (t *GetUser_Viewer_Repositories_Nodes) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *GetUser_Viewer_Repositories_Nodes) GetName() string {
 	if t == nil {
 		t = &GetUser_Viewer_Repositories_Nodes{}
 	}
 	return t.Name
 }
-
 func (t *GetUser_Viewer_Repositories_Nodes) GetLanguages() *GetUser_Viewer_Repositories_Nodes_Languages {
 	if t == nil {
 		t = &GetUser_Viewer_Repositories_Nodes{}
@@ -374,14 +369,12 @@ func (t *GetUser_Viewer) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *GetUser_Viewer) GetName() *string {
 	if t == nil {
 		t = &GetUser_Viewer{}
 	}
 	return t.Name
 }
-
 func (t *GetUser_Viewer) GetRepositories() *GetUser_Viewer_Repositories {
 	if t == nil {
 		t = &GetUser_Viewer{}
@@ -411,7 +404,6 @@ func (t *GetNode_Node_Reaction) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *GetNode_Node_Reaction) GetUser() *GetNode_Node_Reaction_User {
 	if t == nil {
 		t = &GetNode_Node_Reaction{}
@@ -431,14 +423,12 @@ func (t *GetNode_Node) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *GetNode_Node) GetRepository() *RepositoryFragment {
 	if t == nil {
 		t = &GetNode_Node{}
 	}
 	return &t.Repository
 }
-
 func (t *GetNode_Node) GetReaction() *GetNode_Node_Reaction {
 	if t == nil {
 		t = &GetNode_Node{}
@@ -457,7 +447,6 @@ func (t *AddStar_AddStar_Starrable_Repository) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *AddStar_AddStar_Starrable_Repository) GetName() string {
 	if t == nil {
 		t = &AddStar_AddStar_Starrable_Repository{}
@@ -477,14 +466,12 @@ func (t *AddStar_AddStar_Starrable) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *AddStar_AddStar_Starrable) GetViewerHasStarred() bool {
 	if t == nil {
 		t = &AddStar_AddStar_Starrable{}
 	}
 	return t.ViewerHasStarred
 }
-
 func (t *AddStar_AddStar_Starrable) GetRepository() *AddStar_AddStar_Starrable_Repository {
 	if t == nil {
 		t = &AddStar_AddStar_Starrable{}
@@ -526,14 +513,12 @@ func (t *GetNode2_Node_Release) GetID() string {
 	}
 	return t.ID
 }
-
 func (t *GetNode2_Node_Release) GetName() *string {
 	if t == nil {
 		t = &GetNode2_Node_Release{}
 	}
 	return t.Name
 }
-
 func (t *GetNode2_Node_Release) GetReactionGroups() []*GetNode2_Node_Release_ReactionGroups {
 	if t == nil {
 		t = &GetNode2_Node_Release{}
@@ -616,6 +601,10 @@ func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst
 
 	var res GetUser
 	if err := c.Client.Post(ctx, "GetUser", GetUserDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -649,6 +638,10 @@ func (c *Client) GetNode(ctx context.Context, id string, interceptors ...clientv
 
 	var res GetNode
 	if err := c.Client.Post(ctx, "GetNode", GetNodeDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -676,6 +669,10 @@ func (c *Client) AddStar(ctx context.Context, input AddStarInput, interceptors .
 
 	var res AddStar
 	if err := c.Client.Post(ctx, "AddStar", AddStarDocument, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
@@ -702,8 +699,19 @@ func (c *Client) GetNode2(ctx context.Context, id string, interceptors ...client
 
 	var res GetNode2
 	if err := c.Client.Post(ctx, "GetNode2", GetNode2Document, &res, vars, interceptors...); err != nil {
+		if c.Client.ParseDataWhenErrors {
+			return &res, err
+		}
+
 		return nil, err
 	}
 
 	return &res, nil
+}
+
+var DocumentOperationNames = map[string]string{
+	GetUserDocument:  "GetUser",
+	GetNodeDocument:  "GetNode",
+	AddStarDocument:  "AddStar",
+	GetNode2Document: "GetNode2",
 }
