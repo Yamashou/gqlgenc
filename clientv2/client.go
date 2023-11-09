@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
@@ -54,6 +55,7 @@ type Client struct {
 	Client              *http.Client
 	BaseURL             string
 	RequestInterceptor  RequestInterceptor
+	CustomDo            RequestInterceptorFunc
 	ParseDataWhenErrors bool
 }
 
@@ -202,6 +204,11 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 
 	f := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
 
+	// if custom do is set, use it instead of the default one
+	if c.CustomDo != nil {
+		return f(ctx, req, gqlInfo, respData, c.CustomDo)
+	}
+
 	return f(ctx, req, gqlInfo, respData, c.do)
 }
 
@@ -261,7 +268,11 @@ func prepareMultipartFormBody(
 	buffer *bytes.Buffer, formFields []FormField, files []MultipartFilesGroup,
 ) (string, error) {
 	writer := multipart.NewWriter(buffer)
-	defer writer.Close()
+	defer func(writer *multipart.Writer) {
+		err := writer.Close()
+		if err != nil {
+		}
+	}(writer)
 
 	// form fields
 	for _, field := range formFields {
@@ -303,7 +314,11 @@ func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+		}
+	}(resp.Body)
 
 	if resp.Header.Get("Content-Encoding") == "gzip" {
 		resp.Body, err = gzip.NewReader(resp.Body)
@@ -330,12 +345,13 @@ func (c *Client) parseResponse(body []byte, httpCode int, result interface{}) er
 		}
 	}
 
+	fmt.Println("body", string(body))
+
 	// some servers return a graphql error with a non OK http code, try anyway to parse the body
 	if err := c.unmarshal(body, result); err != nil {
-		if gqlErr, ok := err.(*GqlErrorList); ok {
+		var gqlErr *GqlErrorList
+		if errors.As(err, &gqlErr) {
 			errResponse.GqlErrors = &gqlErr.Errors
-		} else if !isKOCode { // if is KO code there is already the http error, this error should not be returned
-			return err
 		}
 	}
 
