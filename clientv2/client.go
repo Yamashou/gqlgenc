@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -269,12 +268,7 @@ func prepareMultipartFormBody(
 	buffer *bytes.Buffer, formFields []FormField, files []MultipartFilesGroup,
 ) (string, error) {
 	writer := multipart.NewWriter(buffer)
-	defer func(writer *multipart.Writer) {
-		err := writer.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(writer)
+	defer writer.Close()
 
 	// form fields
 	for _, field := range formFields {
@@ -316,12 +310,7 @@ func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	if resp.Header.Get("Content-Encoding") == "gzip" {
 		resp.Body, err = gzip.NewReader(resp.Body)
