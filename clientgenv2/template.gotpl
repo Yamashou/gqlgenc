@@ -80,3 +80,9 @@ type {{ .Query.Name | go }} {{ .Query.Type | ref }}
 		}
 	{{- end}}
 {{- end}}
+
+var DocumentOperationNames = map[string]string{
+   {{- range $model := .Operation}}
+    {{ $model.Name|go }}Document: "{{ $model.Name }}",
+   {{- end}}
+}
