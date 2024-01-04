@@ -176,7 +176,9 @@ func LoadConfig(filename string) (*Config, error) {
 		}
 	}
 
-	cfg.SchemaFilename = files
+	if len(files) > 0 {
+		cfg.SchemaFilename = files
+	}
 
 	models := make(config.TypeMap)
 	if cfg.Models != nil {
