@@ -24,6 +24,7 @@ type Config struct {
 	SchemaFilename StringList           `yaml:"schema,omitempty"`
 	Model          config.PackageConfig `yaml:"model,omitempty"`
 	Client         config.PackageConfig `yaml:"client,omitempty"`
+	Federation     config.PackageConfig `yaml:"federation,omitempty"`
 	Models         config.TypeMap       `yaml:"models,omitempty"`
 	Endpoint       *EndPointConfig      `yaml:"endpoint,omitempty"`
 	Generate       *GenerateConfig      `yaml:"generate,omitempty"`

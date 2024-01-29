@@ -42,6 +42,8 @@ models:
     model: github.com/99designs/gqlgen/graphql.Int64
   Date:
     model: github.com/99designs/gqlgen/graphql.Time
+federation: # Add this if your schema includes Apollo Federation related directives
+  version: 2
 endpoint:
   url: https://api.annict.com/graphql # Where do you want to send your request?
   headers: # If you need header for getting introspection query, set it
@@ -67,6 +69,8 @@ models:
     model: github.com/99designs/gqlgen/graphql.Int64
   Date:
     model: github.com/99designs/gqlgen/graphql.Time
+federation: # Add this if your schema includes Apollo Federation related directives
+  version: 2
 schema:
   - "schema/**/*.graphql" # Where are all the schema files located?
 query:
