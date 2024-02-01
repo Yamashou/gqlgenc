@@ -53,20 +53,14 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	sourceGenerator := NewSourceGenerator(cfg, p.Client)
 	source := NewSource(cfg.Schema, queryDocument, sourceGenerator, p.GenerateConfig)
 
-	var query *Query
-	if source.schema.Query != nil {
-		query, err = source.Query()
-		if err != nil {
-			return fmt.Errorf("generating query object: %w", err)
-		}
+	query, err := source.Query()
+	if err != nil {
+		return fmt.Errorf("generating query object: %w", err)
 	}
 
-	var mutation *Mutation
-	if source.schema.Mutation != nil {
-		mutation, err = source.Mutation()
-		if err != nil {
-			return fmt.Errorf("generating mutation object: %w", err)
-		}
+	mutation, err := source.Mutation()
+	if err != nil {
+		return fmt.Errorf("generating mutation object: %w", err)
 	}
 
 	fragments, err := source.Fragments()
