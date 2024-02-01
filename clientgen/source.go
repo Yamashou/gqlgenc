@@ -168,6 +168,10 @@ type Query struct {
 }
 
 func (s *Source) Query() (*Query, error) {
+	if !s.generateConfig.ShouldGenerateQuery() {
+		return nil, nil
+	}
+
 	fields, err := s.sourceGenerator.NewResponseFieldsByDefinition(s.schema.Query)
 	if err != nil {
 		return nil, fmt.Errorf("generate failed for query struct type : %w", err)
@@ -190,6 +194,9 @@ type Mutation struct {
 }
 
 func (s *Source) Mutation() (*Mutation, error) {
+	if !s.generateConfig.ShouldGenerateMutation() {
+		return nil, nil
+	}
 	if s.schema.Mutation == nil {
 		return nil, nil
 	}

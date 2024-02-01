@@ -36,7 +36,9 @@
 	{{- end }}
 {{- end }}
 
-type {{ .Query.Name | go }} {{ .Query.Type | ref }}
+{{ if .Query }}
+    type {{ .Query.Name | go }} {{ .Query.Type | ref }}
+{{ end }}
 
 {{- if .Mutation }}
 	type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
