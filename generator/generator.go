@@ -2,11 +2,13 @@ package generator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"sort"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/plugin"
+	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/99designs/gqlgen/plugin/modelgen"
 	"github.com/Yamashou/gqlgenc/config"
 )
@@ -48,6 +50,16 @@ func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) err
 	}
 	for _, o := range option {
 		o(cfg.GQLConfig, &plugins)
+	}
+
+	if cfg.Federation.Version != 0 {
+		if fed, ok := federation.New(cfg.Federation.Version).(plugin.EarlySourceInjector); ok {
+			if source := fed.InjectSourceEarly(); source != nil {
+				cfg.GQLConfig.Sources = append(cfg.GQLConfig.Sources, source)
+			}
+		} else {
+			return errors.New("failed to inject federation directives")
+		}
 	}
 
 	if err := cfg.LoadSchema(ctx); err != nil {
