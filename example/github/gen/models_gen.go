@@ -133,6 +133,7 @@ type Comment interface {
 	GetCreatedViaEmail() bool
 	// The actor who edited the comment.
 	GetEditor() Actor
+	// The Node ID of the Comment object
 	GetID() string
 	// Check if this comment was edited and includes an edit with the creation data
 	GetIncludesCreatedEdit() bool
@@ -219,6 +220,7 @@ type GitObject interface {
 	GetCommitResourcePath() string
 	// The HTTP URL for this Git object
 	GetCommitURL() string
+	// The Node ID of the GitObject object
 	GetID() string
 	// The Git object ID
 	GetOid() string
@@ -308,6 +310,7 @@ type Migration interface {
 	GetDatabaseID() *string
 	// The reason the migration failed.
 	GetFailureReason() *string
+	// The Node ID of the Migration object
 	GetID() string
 	// The URL for the migration log (expires 1 day after migration completes).
 	GetMigrationLogURL() *string
@@ -388,6 +391,7 @@ type OrganizationOrUser interface {
 // Represents an owner of a package.
 type PackageOwner interface {
 	IsPackageOwner()
+	// The Node ID of the PackageOwner object
 	GetID() string
 	// A list of packages under the owner.
 	GetPackages() PackageConnection
@@ -410,6 +414,7 @@ type ProfileOwner interface {
 	GetAnyPinnableItems() bool
 	// The public profile email.
 	GetEmail() *string
+	// The Node ID of the ProfileOwner object
 	GetID() string
 	// Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
 	GetItemShowcase() ProfileItemShowcase
@@ -439,6 +444,7 @@ type ProjectCardItem interface {
 // Represents an owner of a Project.
 type ProjectOwner interface {
 	IsProjectOwner()
+	// The Node ID of the ProjectOwner object
 	GetID() string
 	// Find project by number.
 	GetProject() *Project
@@ -466,6 +472,7 @@ type ProjectV2FieldCommon interface {
 	GetDataType() ProjectV2FieldType
 	// Identifies the primary key from the database.
 	GetDatabaseID() *int
+	// The Node ID of the ProjectV2FieldCommon object
 	GetID() string
 	// The project field's name.
 	GetName() string
@@ -501,6 +508,7 @@ type ProjectV2ItemFieldValueCommon interface {
 	GetDatabaseID() *int
 	// The project field that contains this value.
 	GetField() ProjectV2FieldConfiguration
+	// The Node ID of the ProjectV2ItemFieldValueCommon object
 	GetID() string
 	// The project item that contains this value.
 	GetItem() ProjectV2Item
@@ -508,9 +516,10 @@ type ProjectV2ItemFieldValueCommon interface {
 	GetUpdatedAt() time.Time
 }
 
-// Represents an owner of a project (beta).
+// Represents an owner of a project.
 type ProjectV2Owner interface {
 	IsProjectV2Owner()
+	// The Node ID of the ProjectV2Owner object
 	GetID() string
 	// Find a project by number.
 	GetProjectV2() *ProjectV2
@@ -545,6 +554,7 @@ type Reactable interface {
 	IsReactable()
 	// Identifies the primary key from the database.
 	GetDatabaseID() *int
+	// The Node ID of the Reactable object
 	GetID() string
 	// A list of reactions grouped by content left on the subject.
 	GetReactionGroups() []*ReactionGroup
@@ -675,6 +685,7 @@ type RepositoryOwner interface {
 	IsRepositoryOwner()
 	// A URL pointing to the owner's public avatar.
 	GetAvatarURL() string
+	// The Node ID of the RepositoryOwner object
 	GetID() string
 	// The username used to login.
 	GetLogin() string
@@ -736,6 +747,8 @@ type Sponsorable interface {
 	GetIsSponsoredBy() bool
 	// True if the viewer is sponsored by this user/organization.
 	GetIsSponsoringViewer() bool
+	// Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
+	GetLifetimeReceivedSponsorshipValues() SponsorAndLifetimeValueConnection
 	// The estimated monthly GitHub Sponsors income for this user/organization in cents (USD).
 	GetMonthlyEstimatedSponsorsIncomeInCents() int
 	// List of users and organizations this entity is sponsoring.
@@ -777,6 +790,7 @@ type SponsorsListingFeatureableItem interface {
 // Things that can be starred.
 type Starrable interface {
 	IsStarrable()
+	// The Node ID of the Starrable object
 	GetID() string
 	// Returns a count of how many stargazers there are on this object
 	//
@@ -795,6 +809,7 @@ type StatusCheckRollupContext interface {
 // Entities that can be subscribed to for web and email notifications.
 type Subscribable interface {
 	IsSubscribable()
+	// The Node ID of the Subscribable object
 	GetID() string
 	// Check if the viewer is able to change their subscription status for the repository.
 	GetViewerCanSubscribe() bool
@@ -805,6 +820,7 @@ type Subscribable interface {
 // Entities that can be subscribed to for web and email notifications.
 type SubscribableThread interface {
 	IsSubscribableThread()
+	// The Node ID of the SubscribableThread object
 	GetID() string
 	// Identifies the viewer's thread subscription form action.
 	GetViewerThreadSubscriptionFormAction() *ThreadSubscriptionFormAction
@@ -855,6 +871,11 @@ type UpdatableComment interface {
 	IsUpdatableComment()
 	// Reasons why the current viewer can not update this comment.
 	GetViewerCannotUpdateReasons() []CommentCannotUpdateReason
+}
+
+// Types that can be added to a user list.
+type UserListItems interface {
+	IsUserListItems()
 }
 
 // Types that can own a verifiable domain.
@@ -926,9 +947,19 @@ type AcceptEnterpriseAdministratorInvitationPayload struct {
 // Autogenerated input type of AcceptTopicSuggestion
 type AcceptTopicSuggestionInput struct {
 	// The Node ID of the repository.
-	RepositoryID string `json:"repositoryId"`
+	//
+	// **Upcoming Change on 2024-04-01 UTC**
+	// **Description:** `repositoryId` will be removed.
+	// **Reason:** Suggested topics are no longer supported
+	//
+	RepositoryID *string `json:"repositoryId,omitempty"`
 	// The name of the suggested topic.
-	Name string `json:"name"`
+	//
+	// **Upcoming Change on 2024-04-01 UTC**
+	// **Description:** `name` will be removed.
+	// **Reason:** Suggested topics are no longer supported
+	//
+	Name *string `json:"name,omitempty"`
 	// A unique identifier for the client performing the mutation.
 	ClientMutationID *string `json:"clientMutationId,omitempty"`
 }
@@ -1400,8 +1431,9 @@ type AddedToMergeQueueEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The user who added this Pull Request to the merge queue
-	Enqueuer *User  `json:"enqueuer,omitempty"`
-	ID       string `json:"id"`
+	Enqueuer *User `json:"enqueuer,omitempty"`
+	// The Node ID of the AddedToMergeQueueEvent object
+	ID string `json:"id"`
 	// The merge queue where this pull request was added to.
 	MergeQueue *MergeQueue `json:"mergeQueue,omitempty"`
 	// PullRequest referenced by event.
@@ -1422,8 +1454,9 @@ type AddedToProjectEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the AddedToProjectEvent object
+	ID string `json:"id"`
 }
 
 func (AddedToProjectEvent) IsIssueTimelineItems() {}
@@ -1443,7 +1476,8 @@ type App struct {
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The description of the app.
 	Description *string `json:"description,omitempty"`
-	ID          string  `json:"id"`
+	// The Node ID of the App object
+	ID string `json:"id"`
 	// The IP addresses of the app.
 	IPAllowListEntries IPAllowListEntryConnection `json:"ipAllowListEntries"`
 	// The hex color code, without the leading '#', for the logo background.
@@ -1557,7 +1591,8 @@ type AssignedEvent struct {
 	Assignee Assignee `json:"assignee,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the AssignedEvent object
+	ID string `json:"id"`
 	// Identifies the user who was assigned.
 	User *User `json:"user,omitempty"`
 }
@@ -1590,8 +1625,9 @@ type AutoMergeDisabledEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The user who disabled auto-merge for this Pull Request
-	Disabler *User  `json:"disabler,omitempty"`
-	ID       string `json:"id"`
+	Disabler *User `json:"disabler,omitempty"`
+	// The Node ID of the AutoMergeDisabledEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event
 	PullRequest *PullRequest `json:"pullRequest,omitempty"`
 	// The reason auto-merge was disabled
@@ -1614,8 +1650,9 @@ type AutoMergeEnabledEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The user who enabled auto-merge for this Pull Request
-	Enabler *User  `json:"enabler,omitempty"`
-	ID      string `json:"id"`
+	Enabler *User `json:"enabler,omitempty"`
+	// The Node ID of the AutoMergeEnabledEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest *PullRequest `json:"pullRequest,omitempty"`
 }
@@ -1652,8 +1689,9 @@ type AutoRebaseEnabledEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The user who enabled auto-merge (rebase) for this Pull Request
-	Enabler *User  `json:"enabler,omitempty"`
-	ID      string `json:"id"`
+	Enabler *User `json:"enabler,omitempty"`
+	// The Node ID of the AutoRebaseEnabledEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest *PullRequest `json:"pullRequest,omitempty"`
 }
@@ -1672,8 +1710,9 @@ type AutoSquashEnabledEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The user who enabled auto-merge (squash) for this Pull Request
-	Enabler *User  `json:"enabler,omitempty"`
-	ID      string `json:"id"`
+	Enabler *User `json:"enabler,omitempty"`
+	// The Node ID of the AutoSquashEnabledEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest *PullRequest `json:"pullRequest,omitempty"`
 }
@@ -1691,7 +1730,8 @@ type AutomaticBaseChangeFailedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the AutomaticBaseChangeFailedEvent object
+	ID string `json:"id"`
 	// The new base for this PR
 	NewBase string `json:"newBase"`
 	// The old base for this PR
@@ -1713,7 +1753,8 @@ type AutomaticBaseChangeSucceededEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the AutomaticBaseChangeSucceededEvent object
+	ID string `json:"id"`
 	// The new base for this PR
 	NewBase string `json:"newBase"`
 	// The old base for this PR
@@ -1738,8 +1779,9 @@ type BaseRefChangedEvent struct {
 	// Identifies the name of the base ref for the pull request after it was changed.
 	CurrentRefName string `json:"currentRefName"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the BaseRefChangedEvent object
+	ID string `json:"id"`
 	// Identifies the name of the base ref for the pull request before it was changed.
 	PreviousRefName string `json:"previousRefName"`
 	// PullRequest referenced by event.
@@ -1761,7 +1803,8 @@ type BaseRefDeletedEvent struct {
 	BaseRefName *string `json:"baseRefName,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the BaseRefDeletedEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest *PullRequest `json:"pullRequest,omitempty"`
 }
@@ -1785,7 +1828,8 @@ type BaseRefForcePushedEvent struct {
 	BeforeCommit *Commit `json:"beforeCommit,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the BaseRefForcePushedEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 	// Identifies the fully qualified ref name for the 'base_ref_force_pushed' event.
@@ -1829,7 +1873,8 @@ type Blob struct {
 	CommitResourcePath string `json:"commitResourcePath"`
 	// The HTTP URL for this Git object
 	CommitURL string `json:"commitUrl"`
-	ID        string `json:"id"`
+	// The Node ID of the Blob object
+	ID string `json:"id"`
 	// Indicates whether the Blob is binary or text. Returns null if unable to determine the encoding.
 	IsBinary *bool `json:"isBinary,omitempty"`
 	// Indicates whether the contents is truncated
@@ -1852,7 +1897,9 @@ func (this Blob) GetCommitResourcePath() string { return this.CommitResourcePath
 
 // The HTTP URL for this Git object
 func (this Blob) GetCommitURL() string { return this.CommitURL }
-func (this Blob) GetID() string        { return this.ID }
+
+// The Node ID of the GitObject object
+func (this Blob) GetID() string { return this.ID }
 
 // The Git object ID
 func (this Blob) GetOid() string { return this.Oid }
@@ -1871,8 +1918,9 @@ type Bot struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the Bot object
+	ID string `json:"id"`
 	// The username of the actor.
 	Login string `json:"login"`
 	// The HTTP path for this bot
@@ -1961,9 +2009,10 @@ type BranchProtectionRule struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// Will new commits pushed to matching branches dismiss pull request review approvals.
-	DismissesStaleReviews bool   `json:"dismissesStaleReviews"`
-	ID                    string `json:"id"`
-	// Can admins overwrite branch protection.
+	DismissesStaleReviews bool `json:"dismissesStaleReviews"`
+	// The Node ID of the BranchProtectionRule object
+	ID string `json:"id"`
+	// Can admins override branch protection.
 	IsAdminEnforced bool `json:"isAdminEnforced"`
 	// Whether users can pull changes from upstream when the branch is locked. Set to `true` to allow fork syncing. Set to `false` to prevent fork syncing.
 	LockAllowsFetchAndMerge bool `json:"lockAllowsFetchAndMerge"`
@@ -2082,7 +2131,8 @@ type BypassForcePushAllowance struct {
 	Actor BranchActorAllowanceActor `json:"actor,omitempty"`
 	// Identifies the branch protection rule associated with the allowed user, team, or app.
 	BranchProtectionRule *BranchProtectionRule `json:"branchProtectionRule,omitempty"`
-	ID                   string                `json:"id"`
+	// The Node ID of the BypassForcePushAllowance object
+	ID string `json:"id"`
 }
 
 func (BypassForcePushAllowance) IsNode() {}
@@ -2116,7 +2166,8 @@ type BypassPullRequestAllowance struct {
 	Actor BranchActorAllowanceActor `json:"actor,omitempty"`
 	// Identifies the branch protection rule associated with the allowed user, team, or app.
 	BranchProtectionRule *BranchProtectionRule `json:"branchProtectionRule,omitempty"`
-	ID                   string                `json:"id"`
+	// The Node ID of the BypassPullRequestAllowance object
+	ID string `json:"id"`
 }
 
 func (BypassPullRequestAllowance) IsNode() {}
@@ -2158,7 +2209,8 @@ type Cwe struct {
 	CweID string `json:"cweId"`
 	// A detailed description of this CWE
 	Description string `json:"description"`
-	ID          string `json:"id"`
+	// The Node ID of the CWE object
+	ID string `json:"id"`
 	// The name of this CWE
 	Name string `json:"name"`
 }
@@ -2354,7 +2406,8 @@ type CheckRun struct {
 	DetailsURL *string `json:"detailsUrl,omitempty"`
 	// A reference for the check run on the integrator's system.
 	ExternalID *string `json:"externalId,omitempty"`
-	ID         string  `json:"id"`
+	// The Node ID of the CheckRun object
+	ID string `json:"id"`
 	// Whether this is required to pass before merging for a specific pull request.
 	IsRequired bool `json:"isRequired"`
 	// The name of the check for this check run.
@@ -2538,8 +2591,9 @@ type CheckSuite struct {
 	// The user who triggered the check suite.
 	Creator *User `json:"creator,omitempty"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the CheckSuite object
+	ID string `json:"id"`
 	// A list of open pull requests matching the check suite.
 	MatchingPullRequests *PullRequestConnection `json:"matchingPullRequests,omitempty"`
 	// The push that triggered this check suite.
@@ -2751,7 +2805,8 @@ type ClosedEvent struct {
 	Closer Closer `json:"closer,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the ClosedEvent object
+	ID string `json:"id"`
 	// The HTTP path for this closed event.
 	ResourcePath string `json:"resourcePath"`
 	// The reason the issue state was changed to closed.
@@ -2785,7 +2840,8 @@ func (this ClosedEvent) GetURL() string { return this.URL }
 type CodeOfConduct struct {
 	// The body of the Code of Conduct
 	Body *string `json:"body,omitempty"`
-	ID   string  `json:"id"`
+	// The Node ID of the CodeOfConduct object
+	ID string `json:"id"`
 	// The key for the Code of Conduct
 	Key string `json:"key"`
 	// The formal name of the Code of Conduct
@@ -2810,8 +2866,9 @@ type CommentDeletedEvent struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The user who authored the deleted comment.
-	DeletedCommentAuthor Actor  `json:"deletedCommentAuthor,omitempty"`
-	ID                   string `json:"id"`
+	DeletedCommentAuthor Actor `json:"deletedCommentAuthor,omitempty"`
+	// The Node ID of the CommentDeletedEvent object
+	ID string `json:"id"`
 }
 
 func (CommentDeletedEvent) IsIssueTimelineItems() {}
@@ -2869,7 +2926,8 @@ type Commit struct {
 	File *TreeEntry `json:"file,omitempty"`
 	// The linear commit history starting from (and including) this commit, in the same order as `git log`.
 	History CommitHistoryConnection `json:"history"`
-	ID      string                  `json:"id"`
+	// The Node ID of the Commit object
+	ID string `json:"id"`
 	// The Git commit message
 	Message string `json:"message"`
 	// The Git commit message body
@@ -2932,7 +2990,9 @@ func (this Commit) GetCommitResourcePath() string { return this.CommitResourcePa
 
 // The HTTP URL for this Git object
 func (this Commit) GetCommitURL() string { return this.CommitURL }
-func (this Commit) GetID() string        { return this.ID }
+
+// The Node ID of the GitObject object
+func (this Commit) GetID() string { return this.ID }
 
 // The Git object ID
 func (this Commit) GetOid() string { return this.Oid }
@@ -2949,6 +3009,8 @@ func (Commit) IsNode() {}
 func (Commit) IsPullRequestTimelineItem() {}
 
 func (Commit) IsSubscribable() {}
+
+// The Node ID of the Subscribable object
 
 // Check if the viewer is able to change their subscription status for the repository.
 func (this Commit) GetViewerCanSubscribe() bool { return this.ViewerCanSubscribe }
@@ -3019,8 +3081,9 @@ type CommitComment struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The actor who edited the comment.
-	Editor Actor  `json:"editor,omitempty"`
-	ID     string `json:"id"`
+	Editor Actor `json:"editor,omitempty"`
+	// The Node ID of the CommitComment object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Returns whether or not a comment has been minimized.
@@ -3090,7 +3153,9 @@ func (this CommitComment) GetCreatedViaEmail() bool { return this.CreatedViaEmai
 
 // The actor who edited the comment.
 func (this CommitComment) GetEditor() Actor { return this.Editor }
-func (this CommitComment) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this CommitComment) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this CommitComment) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -3136,6 +3201,8 @@ func (CommitComment) IsReactable() {}
 
 // Identifies the primary key from the database.
 func (this CommitComment) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the Reactable object
 
 // A list of reactions grouped by content left on the subject.
 func (this CommitComment) GetReactionGroups() []*ReactionGroup {
@@ -3205,7 +3272,8 @@ type CommitCommentThread struct {
 	Comments CommitCommentConnection `json:"comments"`
 	// The commit the comments were made on.
 	Commit *Commit `json:"commit,omitempty"`
-	ID     string  `json:"id"`
+	// The Node ID of the CommitCommentThread object
+	ID string `json:"id"`
 	// The file the comments were made on.
 	Path *string `json:"path,omitempty"`
 	// The position in the diff for the commit that the comment was made on.
@@ -3380,7 +3448,8 @@ type Comparison struct {
 	Commits ComparisonCommitConnection `json:"commits"`
 	// The head revision of this comparison.
 	HeadTarget GitObject `json:"headTarget"`
-	ID         string    `json:"id"`
+	// The Node ID of the Comparison object
+	ID string `json:"id"`
 	// The status of this comparison.
 	Status ComparisonStatus `json:"status"`
 }
@@ -3410,7 +3479,8 @@ type ConnectedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the ConnectedEvent object
+	ID string `json:"id"`
 	// Reference originated in a different repository.
 	IsCrossRepository bool `json:"isCrossRepository"`
 	// Issue or pull request that made the reference.
@@ -3627,7 +3697,8 @@ type ConvertToDraftEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the ConvertToDraftEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 	// The HTTP path for this convert to draft event.
@@ -3658,8 +3729,9 @@ type ConvertedNoteToIssueEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the ConvertedNoteToIssueEvent object
+	ID string `json:"id"`
 }
 
 func (ConvertedNoteToIssueEvent) IsIssueTimelineItems() {}
@@ -3679,7 +3751,8 @@ type ConvertedToDiscussionEvent struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// The discussion that the issue was converted into.
 	Discussion *Discussion `json:"discussion,omitempty"`
-	ID         string      `json:"id"`
+	// The Node ID of the ConvertedToDiscussionEvent object
+	ID string `json:"id"`
 }
 
 func (ConvertedToDiscussionEvent) IsIssueTimelineItems() {}
@@ -3757,7 +3830,7 @@ type CreateBranchProtectionRuleInput struct {
 	AllowsForcePushes *bool `json:"allowsForcePushes,omitempty"`
 	// Can this branch be deleted.
 	AllowsDeletions *bool `json:"allowsDeletions,omitempty"`
-	// Can admins overwrite branch protection.
+	// Can admins override branch protection.
 	IsAdminEnforced *bool `json:"isAdminEnforced,omitempty"`
 	// Are status checks required to update matching branches.
 	RequiresStatusChecks *bool `json:"requiresStatusChecks,omitempty"`
@@ -4403,7 +4476,7 @@ type CreateTeamDiscussionInput struct {
 	// **Reason:** The Team Discussions feature is deprecated in favor of Organization Discussions.
 	//
 	Body *string `json:"body,omitempty"`
-	// If true, restricts the visibility of this discussion to team members and organization admins. If false or not specified, allows any organization member to view this discussion.
+	// If true, restricts the visibility of this discussion to team members and organization owners. If false or not specified, allows any organization member to view this discussion.
 	//
 	// **Upcoming Change on 2024-07-01 UTC**
 	// **Description:** `private` will be removed. Follow the guide at https://github.blog/changelog/2023-02-08-sunset-notice-team-discussions/ to find a suitable replacement.
@@ -4420,6 +4493,28 @@ type CreateTeamDiscussionPayload struct {
 	ClientMutationID *string `json:"clientMutationId,omitempty"`
 	// The new discussion.
 	TeamDiscussion *TeamDiscussion `json:"teamDiscussion,omitempty"`
+}
+
+// Autogenerated input type of CreateUserList
+type CreateUserListInput struct {
+	// The name of the new list
+	Name string `json:"name"`
+	// A description of the list
+	Description *string `json:"description,omitempty"`
+	// Whether or not the list is private
+	IsPrivate *bool `json:"isPrivate,omitempty"`
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+}
+
+// Autogenerated return type of CreateUserList
+type CreateUserListPayload struct {
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+	// The list that was just created
+	List *UserList `json:"list,omitempty"`
+	// The user who created the list
+	Viewer *User `json:"viewer,omitempty"`
 }
 
 // Represents the contribution a user made by committing to a repository.
@@ -4736,7 +4831,8 @@ type CrossReferencedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the CrossReferencedEvent object
+	ID string `json:"id"`
 	// Reference originated in a different repository.
 	IsCrossRepository bool `json:"isCrossRepository"`
 	// Identifies when the reference was made.
@@ -4777,11 +4873,26 @@ func (this CrossReferencedEvent) GetURL() string { return this.URL }
 // Autogenerated input type of DeclineTopicSuggestion
 type DeclineTopicSuggestionInput struct {
 	// The Node ID of the repository.
-	RepositoryID string `json:"repositoryId"`
+	//
+	// **Upcoming Change on 2024-04-01 UTC**
+	// **Description:** `repositoryId` will be removed.
+	// **Reason:** Suggested topics are no longer supported
+	//
+	RepositoryID *string `json:"repositoryId,omitempty"`
 	// The name of the suggested topic.
-	Name string `json:"name"`
+	//
+	// **Upcoming Change on 2024-04-01 UTC**
+	// **Description:** `name` will be removed.
+	// **Reason:** Suggested topics are no longer supported
+	//
+	Name *string `json:"name,omitempty"`
 	// The reason why the suggested topic is declined.
-	Reason TopicSuggestionDeclineReason `json:"reason"`
+	//
+	// **Upcoming Change on 2024-04-01 UTC**
+	// **Description:** `reason` will be removed.
+	// **Reason:** Suggested topics are no longer supported
+	//
+	Reason *TopicSuggestionDeclineReason `json:"reason,omitempty"`
 	// A unique identifier for the client performing the mutation.
 	ClientMutationID *string `json:"clientMutationId,omitempty"`
 }
@@ -5140,6 +5251,22 @@ type DeleteTeamDiscussionPayload struct {
 	ClientMutationID *string `json:"clientMutationId,omitempty"`
 }
 
+// Autogenerated input type of DeleteUserList
+type DeleteUserListInput struct {
+	// The ID of the list to delete.
+	ListID string `json:"listId"`
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+}
+
+// Autogenerated return type of DeleteUserList
+type DeleteUserListPayload struct {
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+	// The owner of the list that will be deleted
+	User *User `json:"user,omitempty"`
+}
+
 // Autogenerated input type of DeleteVerifiableDomain
 type DeleteVerifiableDomainInput struct {
 	// The ID of the verifiable domain to delete.
@@ -5162,7 +5289,8 @@ type DemilestonedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the DemilestonedEvent object
+	ID string `json:"id"`
 	// Identifies the milestone title associated with the 'demilestoned' event.
 	MilestoneTitle string `json:"milestoneTitle"`
 	// Object referenced by event.
@@ -5211,7 +5339,8 @@ type DependabotUpdateError struct {
 type DeployKey struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the DeployKey object
+	ID string `json:"id"`
 	// The deploy key.
 	Key string `json:"key"`
 	// Whether or not the deploy key is read only.
@@ -5257,7 +5386,8 @@ type DeployedEvent struct {
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The deployment associated with the 'deployed' event.
 	Deployment Deployment `json:"deployment"`
-	ID         string     `json:"id"`
+	// The Node ID of the DeployedEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 	// The ref associated with the 'deployed' event.
@@ -5289,7 +5419,8 @@ type Deployment struct {
 	Description *string `json:"description,omitempty"`
 	// The latest environment to which this deployment was made.
 	Environment *string `json:"environment,omitempty"`
-	ID          string  `json:"id"`
+	// The Node ID of the Deployment object
+	ID string `json:"id"`
 	// The latest environment to which this deployment was made.
 	LatestEnvironment *string `json:"latestEnvironment,omitempty"`
 	// The latest status of this deployment.
@@ -5345,7 +5476,8 @@ type DeploymentEnvironmentChangedEvent struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// The deployment status that updated the deployment environment.
 	DeploymentStatus DeploymentStatus `json:"deploymentStatus"`
-	ID               string           `json:"id"`
+	// The Node ID of the DeploymentEnvironmentChangedEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 }
@@ -5443,7 +5575,8 @@ type DeploymentReview struct {
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The environments approved or rejected
 	Environments EnvironmentConnection `json:"environments"`
-	ID           string                `json:"id"`
+	// The Node ID of the DeploymentReview object
+	ID string `json:"id"`
 	// The decision of the user.
 	State DeploymentReviewState `json:"state"`
 	// The user that reviewed the deployment.
@@ -5507,7 +5640,8 @@ type DeploymentStatus struct {
 	Description *string `json:"description,omitempty"`
 	// Identifies the environment URL of the deployment.
 	EnvironmentURL *string `json:"environmentUrl,omitempty"`
-	ID             string  `json:"id"`
+	// The Node ID of the DeploymentStatus object
+	ID string `json:"id"`
 	// Identifies the log URL of the deployment.
 	LogURL *string `json:"logUrl,omitempty"`
 	// Identifies the current state of the deployment.
@@ -5581,7 +5715,8 @@ type DisconnectedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the DisconnectedEvent object
+	ID string `json:"id"`
 	// Reference originated in a different repository.
 	IsCrossRepository bool `json:"isCrossRepository"`
 	// Issue or pull request from which the issue was disconnected.
@@ -5634,8 +5769,9 @@ type Discussion struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The actor who edited the comment.
-	Editor Actor  `json:"editor,omitempty"`
-	ID     string `json:"id"`
+	Editor Actor `json:"editor,omitempty"`
+	// The Node ID of the Discussion object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Only return answered/unanswered discussions
@@ -5733,7 +5869,9 @@ func (this Discussion) GetCreatedViaEmail() bool { return this.CreatedViaEmail }
 
 // The actor who edited the comment.
 func (this Discussion) GetEditor() Actor { return this.Editor }
-func (this Discussion) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this Discussion) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this Discussion) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -5780,6 +5918,8 @@ func (Discussion) IsReactable() {}
 // Identifies the primary key from the database.
 func (this Discussion) GetDatabaseID() *int { return this.DatabaseID }
 
+// The Node ID of the Reactable object
+
 // A list of reactions grouped by content left on the subject.
 func (this Discussion) GetReactionGroups() []*ReactionGroup {
 	if this.ReactionGroups == nil {
@@ -5806,6 +5946,8 @@ func (this Discussion) GetRepository() Repository { return this.Repository }
 func (Discussion) IsSearchResultItem() {}
 
 func (Discussion) IsSubscribable() {}
+
+// The Node ID of the Subscribable object
 
 // Check if the viewer is able to change their subscription status for the repository.
 func (this Discussion) GetViewerCanSubscribe() bool { return this.ViewerCanSubscribe }
@@ -5839,7 +5981,8 @@ type DiscussionCategory struct {
 	Emoji string `json:"emoji"`
 	// This category's emoji rendered as HTML.
 	EmojiHTML string `json:"emojiHTML"`
-	ID        string `json:"id"`
+	// The Node ID of the DiscussionCategory object
+	ID string `json:"id"`
 	// Whether or not discussions in this category support choosing an answer with the markDiscussionCommentAsAnswer mutation.
 	IsAnswerable bool `json:"isAnswerable"`
 	// The name of this category.
@@ -5905,8 +6048,9 @@ type DiscussionComment struct {
 	// The discussion this comment was created in
 	Discussion *Discussion `json:"discussion,omitempty"`
 	// The actor who edited the comment.
-	Editor Actor  `json:"editor,omitempty"`
-	ID     string `json:"id"`
+	Editor Actor `json:"editor,omitempty"`
+	// The Node ID of the DiscussionComment object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Has this comment been chosen as the answer of its discussion?
@@ -5986,7 +6130,9 @@ func (this DiscussionComment) GetCreatedViaEmail() bool { return this.CreatedVia
 
 // The actor who edited the comment.
 func (this DiscussionComment) GetEditor() Actor { return this.Editor }
-func (this DiscussionComment) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this DiscussionComment) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this DiscussionComment) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -6032,6 +6178,8 @@ func (DiscussionComment) IsReactable() {}
 
 // Identifies the primary key from the database.
 func (this DiscussionComment) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the Reactable object
 
 // A list of reactions grouped by content left on the subject.
 func (this DiscussionComment) GetReactionGroups() []*ReactionGroup {
@@ -6133,7 +6281,8 @@ type DiscussionOrder struct {
 type DiscussionPoll struct {
 	// The discussion that this poll belongs to.
 	Discussion *Discussion `json:"discussion,omitempty"`
-	ID         string      `json:"id"`
+	// The Node ID of the DiscussionPoll object
+	ID string `json:"id"`
 	// The options for this poll.
 	Options *DiscussionPollOptionConnection `json:"options,omitempty"`
 	// The question that is being asked by this poll.
@@ -6153,6 +6302,7 @@ func (this DiscussionPoll) GetID() string { return this.ID }
 
 // An option for a discussion poll.
 type DiscussionPollOption struct {
+	// The Node ID of the DiscussionPollOption object
 	ID string `json:"id"`
 	// The text for this option.
 	Option string `json:"option"`
@@ -6246,8 +6396,9 @@ type DraftIssue struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The actor who created this draft issue.
-	Creator Actor  `json:"creator,omitempty"`
-	ID      string `json:"id"`
+	Creator Actor `json:"creator,omitempty"`
+	// The Node ID of the DraftIssue object
+	ID string `json:"id"`
 	// List of items linked with the draft issue (currently draft issue can be linked to only one item).
 	ProjectV2Items ProjectV2ItemConnection `json:"projectV2Items"`
 	// Projects that link to this draft issue (currently draft issue can be linked to only one project).
@@ -6349,6 +6500,8 @@ type Enterprise struct {
 	AnnouncementUserDismissible *bool `json:"announcementUserDismissible,omitempty"`
 	// A URL pointing to the enterprise's public avatar.
 	AvatarURL string `json:"avatarUrl"`
+	// The enterprise's billing email.
+	BillingEmail *string `json:"billingEmail,omitempty"`
 	// Enterprise billing information visible to enterprise billing managers.
 	BillingInfo *EnterpriseBillingInfo `json:"billingInfo,omitempty"`
 	// Identifies the date and time when the object was created.
@@ -6359,7 +6512,8 @@ type Enterprise struct {
 	Description *string `json:"description,omitempty"`
 	// The description of the enterprise as HTML.
 	DescriptionHTML string `json:"descriptionHTML"`
-	ID              string `json:"id"`
+	// The Node ID of the Enterprise object
+	ID string `json:"id"`
 	// The location of the enterprise.
 	Location *string `json:"location,omitempty"`
 	// A list of users who are members of this enterprise.
@@ -6434,7 +6588,8 @@ type EnterpriseAdministratorInvitation struct {
 	Email *string `json:"email,omitempty"`
 	// The enterprise the invitation is for.
 	Enterprise Enterprise `json:"enterprise"`
-	ID         string     `json:"id"`
+	// The Node ID of the EnterpriseAdministratorInvitation object
+	ID string `json:"id"`
 	// The user who was invited to the enterprise.
 	Invitee *User `json:"invitee,omitempty"`
 	// The user who created the invitation.
@@ -6550,7 +6705,8 @@ type EnterpriseIdentityProvider struct {
 	Enterprise *Enterprise `json:"enterprise,omitempty"`
 	// ExternalIdentities provisioned by this identity provider.
 	ExternalIdentities ExternalIdentityConnection `json:"externalIdentities"`
-	ID                 string                     `json:"id"`
+	// The Node ID of the EnterpriseIdentityProvider object
+	ID string `json:"id"`
 	// The x509 certificate used by the identity provider to sign assertions and responses.
 	IdpCertificate *string `json:"idpCertificate,omitempty"`
 	// The Issuer Entity ID for the SAML identity provider.
@@ -6778,6 +6934,7 @@ type EnterprisePendingMemberInvitationEdge struct {
 
 // A subset of repository information queryable from an enterprise.
 type EnterpriseRepositoryInfo struct {
+	// The Node ID of the EnterpriseRepositoryInfo object
 	ID string `json:"id"`
 	// Identifies if the repository is private or internal.
 	IsPrivate bool `json:"isPrivate"`
@@ -6820,7 +6977,8 @@ type EnterpriseServerInstallation struct {
 	CustomerName string `json:"customerName"`
 	// The host name of the Enterprise Server installation.
 	HostName string `json:"hostName"`
-	ID       string `json:"id"`
+	// The Node ID of the EnterpriseServerInstallation object
+	ID string `json:"id"`
 	// Whether or not the installation is connected to an Enterprise Server installation via GitHub Connect.
 	IsConnected bool `json:"isConnected"`
 	// Identifies the date and time when the object was last updated.
@@ -6894,7 +7052,8 @@ type EnterpriseServerUserAccount struct {
 	Emails EnterpriseServerUserAccountEmailConnection `json:"emails"`
 	// The Enterprise Server installation on which this user account exists.
 	EnterpriseServerInstallation EnterpriseServerInstallation `json:"enterpriseServerInstallation"`
-	ID                           string                       `json:"id"`
+	// The Node ID of the EnterpriseServerUserAccount object
+	ID string `json:"id"`
 	// Whether the user account is a site administrator on the Enterprise Server installation.
 	IsSiteAdmin bool `json:"isSiteAdmin"`
 	// The login of the user account on the Enterprise Server installation.
@@ -6940,7 +7099,8 @@ type EnterpriseServerUserAccountEmail struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// The email address.
 	Email string `json:"email"`
-	ID    string `json:"id"`
+	// The Node ID of the EnterpriseServerUserAccountEmail object
+	ID string `json:"id"`
 	// Indicates whether this is the primary email of the associated user account.
 	IsPrimary bool `json:"isPrimary"`
 	// Identifies the date and time when the object was last updated.
@@ -6998,7 +7158,8 @@ type EnterpriseServerUserAccountsUpload struct {
 	Enterprise Enterprise `json:"enterprise"`
 	// The Enterprise Server installation for which this upload was generated.
 	EnterpriseServerInstallation EnterpriseServerInstallation `json:"enterpriseServerInstallation"`
-	ID                           string                       `json:"id"`
+	// The Node ID of the EnterpriseServerUserAccountsUpload object
+	ID string `json:"id"`
 	// The name of the file uploaded.
 	Name string `json:"name"`
 	// The synchronization state of the upload
@@ -7050,7 +7211,8 @@ type EnterpriseUserAccount struct {
 	Enterprise Enterprise `json:"enterprise"`
 	// A list of Enterprise Server installations this user is a member of.
 	EnterpriseInstallations EnterpriseServerInstallationMembershipConnection `json:"enterpriseInstallations"`
-	ID                      string                                           `json:"id"`
+	// The Node ID of the EnterpriseUserAccount object
+	ID string `json:"id"`
 	// An identifier for the enterprise user account, a login or email address
 	Login string `json:"login"`
 	// The name of the enterprise user account
@@ -7091,8 +7253,9 @@ func (this EnterpriseUserAccount) GetID() string { return this.ID }
 // An environment.
 type Environment struct {
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the Environment object
+	ID string `json:"id"`
 	// The name of the environment
 	Name string `json:"name"`
 	// The protection rules defined for this environment
@@ -7136,7 +7299,8 @@ type Environments struct {
 type ExternalIdentity struct {
 	// The GUID for this identity
 	GUID string `json:"guid"`
-	ID   string `json:"id"`
+	// The Node ID of the ExternalIdentity object
+	ID string `json:"id"`
 	// Organization invitation for this SCIM-provisioned external identity
 	OrganizationInvitation *OrganizationInvitation `json:"organizationInvitation,omitempty"`
 	// SAML Identity attributes
@@ -7438,7 +7602,8 @@ type Gist struct {
 	Files []*GistFile `json:"files,omitempty"`
 	// A list of forks associated with the gist
 	Forks GistConnection `json:"forks"`
-	ID    string         `json:"id"`
+	// The Node ID of the Gist object
+	ID string `json:"id"`
 	// Identifies if the gist is a fork.
 	IsFork bool `json:"isFork"`
 	// Whether the gist is public or not.
@@ -7472,6 +7637,8 @@ func (this Gist) GetID() string { return this.ID }
 func (Gist) IsPinnableItem() {}
 
 func (Gist) IsStarrable() {}
+
+// The Node ID of the Starrable object
 
 // Returns a count of how many stargazers there are on this object
 func (this Gist) GetStargazerCount() int { return this.StargazerCount }
@@ -7511,8 +7678,9 @@ type GistComment struct {
 	// The actor who edited the comment.
 	Editor Actor `json:"editor,omitempty"`
 	// The associated gist.
-	Gist Gist   `json:"gist"`
-	ID   string `json:"id"`
+	Gist Gist `json:"gist"`
+	// The Node ID of the GistComment object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Returns whether or not a comment has been minimized.
@@ -7566,7 +7734,9 @@ func (this GistComment) GetCreatedViaEmail() bool { return this.CreatedViaEmail 
 
 // The actor who edited the comment.
 func (this GistComment) GetEditor() Actor { return this.Editor }
-func (this GistComment) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this GistComment) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this GistComment) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -7840,7 +8010,8 @@ type HeadRefDeletedEvent struct {
 	HeadRef *Ref `json:"headRef,omitempty"`
 	// Identifies the name of the Ref associated with the `head_ref_deleted` event.
 	HeadRefName string `json:"headRefName"`
-	ID          string `json:"id"`
+	// The Node ID of the HeadRefDeletedEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 }
@@ -7864,7 +8035,8 @@ type HeadRefForcePushedEvent struct {
 	BeforeCommit *Commit `json:"beforeCommit,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the HeadRefForcePushedEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 	// Identifies the fully qualified ref name for the 'head_ref_force_pushed' event.
@@ -7886,7 +8058,8 @@ type HeadRefRestoredEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the HeadRefRestoredEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 }
@@ -7934,7 +8107,8 @@ type IPAllowListEntry struct {
 	AllowListValue string `json:"allowListValue"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the IpAllowListEntry object
+	ID string `json:"id"`
 	// Whether the entry is currently active.
 	IsActive bool `json:"isActive"`
 	// The name of the IP allow list entry.
@@ -8016,7 +8190,8 @@ type Issue struct {
 	FullDatabaseID *string `json:"fullDatabaseId,omitempty"`
 	// The hovercard information for this issue
 	Hovercard Hovercard `json:"hovercard"`
-	ID        string    `json:"id"`
+	// The Node ID of the Issue object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Indicates whether or not this issue is currently pinned to the repository issues list
@@ -8147,7 +8322,9 @@ func (this Issue) GetCreatedViaEmail() bool { return this.CreatedViaEmail }
 
 // The actor who edited the comment.
 func (this Issue) GetEditor() Actor { return this.Editor }
-func (this Issue) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this Issue) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this Issue) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -8199,6 +8376,8 @@ func (Issue) IsProjectV2ItemContent() {}
 
 func (Issue) IsProjectV2Owner() {}
 
+// The Node ID of the ProjectV2Owner object
+
 // Find a project by number.
 func (this Issue) GetProjectV2() *ProjectV2 { return this.ProjectV2 }
 
@@ -8209,6 +8388,8 @@ func (Issue) IsReactable() {}
 
 // Identifies the primary key from the database.
 func (this Issue) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the Reactable object
 
 // A list of reactions grouped by content left on the subject.
 func (this Issue) GetReactionGroups() []*ReactionGroup {
@@ -8241,6 +8422,8 @@ func (Issue) IsSearchResultItem() {}
 
 func (Issue) IsSubscribable() {}
 
+// The Node ID of the Subscribable object
+
 // Check if the viewer is able to change their subscription status for the repository.
 func (this Issue) GetViewerCanSubscribe() bool { return this.ViewerCanSubscribe }
 
@@ -8248,6 +8431,8 @@ func (this Issue) GetViewerCanSubscribe() bool { return this.ViewerCanSubscribe 
 func (this Issue) GetViewerSubscription() *SubscriptionState { return this.ViewerSubscription }
 
 func (Issue) IsSubscribableThread() {}
+
+// The Node ID of the SubscribableThread object
 
 // Identifies the viewer's thread subscription form action.
 func (this Issue) GetViewerThreadSubscriptionFormAction() *ThreadSubscriptionFormAction {
@@ -8308,7 +8493,8 @@ type IssueComment struct {
 	Editor Actor `json:"editor,omitempty"`
 	// Identifies the primary key from the database as a BigInt.
 	FullDatabaseID *string `json:"fullDatabaseId,omitempty"`
-	ID             string  `json:"id"`
+	// The Node ID of the IssueComment object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Returns whether or not a comment has been minimized.
@@ -8380,7 +8566,9 @@ func (this IssueComment) GetCreatedViaEmail() bool { return this.CreatedViaEmail
 
 // The actor who edited the comment.
 func (this IssueComment) GetEditor() Actor { return this.Editor }
-func (this IssueComment) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this IssueComment) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this IssueComment) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -8434,6 +8622,8 @@ func (IssueComment) IsReactable() {}
 
 // Identifies the primary key from the database.
 func (this IssueComment) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the Reactable object
 
 // A list of reactions grouped by content left on the subject.
 func (this IssueComment) GetReactionGroups() []*ReactionGroup {
@@ -8672,7 +8862,8 @@ type Label struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// A brief description of this label.
 	Description *string `json:"description,omitempty"`
-	ID          string  `json:"id"`
+	// The Node ID of the Label object
+	ID string `json:"id"`
 	// Indicates whether or not this is a default label.
 	IsDefault bool `json:"isDefault"`
 	// A list of issues associated with this label.
@@ -8730,7 +8921,8 @@ type LabeledEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the LabeledEvent object
+	ID string `json:"id"`
 	// Identifies the label associated with the 'labeled' event.
 	Label Label `json:"label"`
 	// Identifies the `Labelable` associated with the event.
@@ -8754,7 +8946,8 @@ func (LabeledEvent) IsPullRequestTimelineItems() {}
 type Language struct {
 	// The color defined for the current language.
 	Color *string `json:"color,omitempty"`
-	ID    string  `json:"id"`
+	// The Node ID of the Language object
+	ID string `json:"id"`
 	// The name of the current language.
 	Name string `json:"name"`
 }
@@ -8805,8 +8998,9 @@ type License struct {
 	// Whether the license should be featured
 	Featured bool `json:"featured"`
 	// Whether the license should be displayed in license pickers
-	Hidden bool   `json:"hidden"`
-	ID     string `json:"id"`
+	Hidden bool `json:"hidden"`
+	// The Node ID of the License object
+	ID string `json:"id"`
 	// Instructions on how to implement the license
 	Implementation *string `json:"implementation,omitempty"`
 	// The lowercased SPDX ID of the license
@@ -8900,6 +9094,7 @@ type LinkRepositoryToProjectPayload struct {
 
 // A branch linked to an issue.
 type LinkedBranch struct {
+	// The Node ID of the LinkedBranch object
 	ID string `json:"id"`
 	// The branch's ref.
 	Ref *Ref `json:"ref,omitempty"`
@@ -8956,7 +9151,8 @@ type LockedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the LockedEvent object
+	ID string `json:"id"`
 	// Reason that the conversation was locked (optional).
 	LockReason *LockReason `json:"lockReason,omitempty"`
 	// Object that was locked.
@@ -8988,7 +9184,8 @@ type Mannequin struct {
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The mannequin's email on the source instance.
 	Email *string `json:"email,omitempty"`
-	ID    string  `json:"id"`
+	// The Node ID of the Mannequin object
+	ID string `json:"id"`
 	// The username of the actor.
 	Login string `json:"login"`
 	// The HTML path to this resource.
@@ -9136,7 +9333,8 @@ type MarkedAsDuplicateEvent struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// The issue or pull request which has been marked as a duplicate of another.
 	Duplicate IssueOrPullRequest `json:"duplicate,omitempty"`
-	ID        string             `json:"id"`
+	// The Node ID of the MarkedAsDuplicateEvent object
+	ID string `json:"id"`
 	// Canonical and duplicate belong to different repositories.
 	IsCrossRepository bool `json:"isCrossRepository"`
 }
@@ -9156,7 +9354,8 @@ type MarketplaceCategory struct {
 	Description *string `json:"description,omitempty"`
 	// The technical description of how apps listed in this category work with GitHub.
 	HowItWorks *string `json:"howItWorks,omitempty"`
-	ID         string  `json:"id"`
+	// The Node ID of the MarketplaceCategory object
+	ID string `json:"id"`
 	// The category's name.
 	Name string `json:"name"`
 	// How many Marketplace listings have this as their primary category.
@@ -9206,7 +9405,8 @@ type MarketplaceListing struct {
 	HowItWorks *string `json:"howItWorks,omitempty"`
 	// The listing's technical description rendered to HTML.
 	HowItWorksHTML string `json:"howItWorksHTML"`
-	ID             string `json:"id"`
+	// The Node ID of the MarketplaceListing object
+	ID string `json:"id"`
 	// URL to install the product to the viewer's account or organization.
 	InstallationURL *string `json:"installationUrl,omitempty"`
 	// Whether this listing's app has been installed for the current viewer
@@ -9330,6 +9530,23 @@ type MarketplaceListingEdge struct {
 	Node *MarketplaceListing `json:"node,omitempty"`
 }
 
+// Represents a member feature request notification
+type MemberFeatureRequestNotification struct {
+	// Represents member feature request body containing organization name and the number of feature requests
+	Body string `json:"body"`
+	// The Node ID of the MemberFeatureRequestNotification object
+	ID string `json:"id"`
+	// Represents member feature request notification title
+	Title string `json:"title"`
+	// Identifies the date and time when the object was last updated.
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+func (MemberFeatureRequestNotification) IsNode() {}
+
+// ID of the object.
+func (this MemberFeatureRequestNotification) GetID() string { return this.ID }
+
 // Audit log entry for a members_can_delete_repos.clear event.
 type MembersCanDeleteReposClearAuditEntry struct {
 	// The action name
@@ -9354,7 +9571,8 @@ type MembersCanDeleteReposClearAuditEntry struct {
 	EnterpriseSlug *string `json:"enterpriseSlug,omitempty"`
 	// The HTTP URL for this enterprise.
 	EnterpriseURL *string `json:"enterpriseUrl,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the MembersCanDeleteReposClearAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -9494,7 +9712,8 @@ type MembersCanDeleteReposDisableAuditEntry struct {
 	EnterpriseSlug *string `json:"enterpriseSlug,omitempty"`
 	// The HTTP URL for this enterprise.
 	EnterpriseURL *string `json:"enterpriseUrl,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the MembersCanDeleteReposDisableAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -9634,7 +9853,8 @@ type MembersCanDeleteReposEnableAuditEntry struct {
 	EnterpriseSlug *string `json:"enterpriseSlug,omitempty"`
 	// The HTTP URL for this enterprise.
 	EnterpriseURL *string `json:"enterpriseUrl,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the MembersCanDeleteReposEnableAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -9757,8 +9977,9 @@ type MentionedEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the MentionedEvent object
+	ID string `json:"id"`
 }
 
 func (MentionedEvent) IsIssueTimelineItems() {}
@@ -9828,7 +10049,8 @@ type MergeQueue struct {
 	Configuration *MergeQueueConfiguration `json:"configuration,omitempty"`
 	// The entries in the queue
 	Entries *MergeQueueEntryConnection `json:"entries,omitempty"`
-	ID      string                     `json:"id"`
+	// The Node ID of the MergeQueue object
+	ID string `json:"id"`
 	// The estimated time in seconds until a newly added entry would be merged
 	NextEntryEstimatedTimeToMerge *int `json:"nextEntryEstimatedTimeToMerge,omitempty"`
 	// The repository this merge queue belongs to
@@ -9874,7 +10096,8 @@ type MergeQueueEntry struct {
 	EstimatedTimeToMerge *int `json:"estimatedTimeToMerge,omitempty"`
 	// The head commit for this entry
 	HeadCommit *Commit `json:"headCommit,omitempty"`
-	ID         string  `json:"id"`
+	// The Node ID of the MergeQueueEntry object
+	ID string `json:"id"`
 	// Whether this pull request should jump the queue
 	Jump bool `json:"jump"`
 	// The merge queue that this entry belongs to
@@ -9922,7 +10145,8 @@ type MergedEvent struct {
 	Commit *Commit `json:"commit,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the MergedEvent object
+	ID string `json:"id"`
 	// Identifies the Ref associated with the `merge` event.
 	MergeRef *Ref `json:"mergeRef,omitempty"`
 	// Identifies the name of the Ref associated with the `merge` event.
@@ -9954,6 +10178,7 @@ func (this MergedEvent) GetURL() string { return this.URL }
 
 // A GitHub Enterprise Importer (GEI) migration source.
 type MigrationSource struct {
+	// The Node ID of the MigrationSource object
 	ID string `json:"id"`
 	// The migration source name.
 	Name string `json:"name"`
@@ -9982,7 +10207,8 @@ type Milestone struct {
 	Description *string `json:"description,omitempty"`
 	// Identifies the due date of the milestone.
 	DueOn *time.Time `json:"dueOn,omitempty"`
-	ID    string     `json:"id"`
+	// The Node ID of the Milestone object
+	ID string `json:"id"`
 	// A list of issues associated with the milestone.
 	Issues IssueConnection `json:"issues"`
 	// Identifies the number of the milestone.
@@ -10070,7 +10296,8 @@ type MilestonedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the MilestonedEvent object
+	ID string `json:"id"`
 	// Identifies the milestone title associated with the 'milestoned' event.
 	MilestoneTitle string `json:"milestoneTitle"`
 	// Object referenced by event.
@@ -10153,8 +10380,9 @@ type MovedColumnsInProjectEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the MovedColumnsInProjectEvent object
+	ID string `json:"id"`
 }
 
 func (MovedColumnsInProjectEvent) IsIssueTimelineItems() {}
@@ -10172,7 +10400,8 @@ type OIDCProvider struct {
 	Enterprise *Enterprise `json:"enterprise,omitempty"`
 	// ExternalIdentities provisioned by this identity provider.
 	ExternalIdentities ExternalIdentityConnection `json:"externalIdentities"`
-	ID                 string                     `json:"id"`
+	// The Node ID of the OIDCProvider object
+	ID string `json:"id"`
 	// The OIDC identity provider type
 	ProviderType OIDCProviderType `json:"providerType"`
 	// The id of the tenant this provider is attached to
@@ -10206,7 +10435,8 @@ type OauthApplicationCreateAuditEntry struct {
 	CallbackURL *string `json:"callbackUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OauthApplicationCreateAuditEntry object
+	ID string `json:"id"`
 	// The name of the OAuth application.
 	OauthApplicationName *string `json:"oauthApplicationName,omitempty"`
 	// The HTTP path for the OAuth application
@@ -10350,7 +10580,8 @@ type OrgAddBillingManagerAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgAddBillingManagerAuditEntry object
+	ID string `json:"id"`
 	// The email address used to invite a billing manager for the organization.
 	InvitationEmail *string `json:"invitationEmail,omitempty"`
 	// The corresponding operation type for the action
@@ -10465,7 +10696,8 @@ type OrgAddMemberAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgAddMemberAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -10578,7 +10810,8 @@ type OrgBlockUserAuditEntry struct {
 	BlockedUserURL *string `json:"blockedUserUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgBlockUserAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -10681,7 +10914,8 @@ type OrgConfigDisableCollaboratorsOnlyAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgConfigDisableCollaboratorsOnlyAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -10800,7 +11034,8 @@ type OrgConfigEnableCollaboratorsOnlyAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgConfigEnableCollaboratorsOnlyAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -10921,7 +11156,8 @@ type OrgCreateAuditEntry struct {
 	BillingPlan *OrgCreateAuditEntryBillingPlan `json:"billingPlan,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgCreateAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -11024,7 +11260,8 @@ type OrgDisableOauthAppRestrictionsAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgDisableOauthAppRestrictionsAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -11143,7 +11380,8 @@ type OrgDisableSamlAuditEntry struct {
 	CreatedAt string `json:"createdAt"`
 	// The SAML provider's digest algorithm URL.
 	DigestMethodURL *string `json:"digestMethodUrl,omitempty"`
-	ID              string  `json:"id"`
+	// The Node ID of the OrgDisableSamlAuditEntry object
+	ID string `json:"id"`
 	// The SAML provider's issuer URL.
 	IssuerURL *string `json:"issuerUrl,omitempty"`
 	// The corresponding operation type for the action
@@ -11252,7 +11490,8 @@ type OrgDisableTwoFactorRequirementAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgDisableTwoFactorRequirementAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -11369,7 +11608,8 @@ type OrgEnableOauthAppRestrictionsAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgEnableOauthAppRestrictionsAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -11488,7 +11728,8 @@ type OrgEnableSamlAuditEntry struct {
 	CreatedAt string `json:"createdAt"`
 	// The SAML provider's digest algorithm URL.
 	DigestMethodURL *string `json:"digestMethodUrl,omitempty"`
-	ID              string  `json:"id"`
+	// The Node ID of the OrgEnableSamlAuditEntry object
+	ID string `json:"id"`
 	// The SAML provider's issuer URL.
 	IssuerURL *string `json:"issuerUrl,omitempty"`
 	// The corresponding operation type for the action
@@ -11597,7 +11838,8 @@ type OrgEnableTwoFactorRequirementAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgEnableTwoFactorRequirementAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -11724,7 +11966,8 @@ type OrgInviteMemberAuditEntry struct {
 	CreatedAt string `json:"createdAt"`
 	// The email address of the organization invitation.
 	Email *string `json:"email,omitempty"`
-	ID    string  `json:"id"`
+	// The Node ID of the OrgInviteMemberAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -11835,7 +12078,8 @@ type OrgInviteToBusinessAuditEntry struct {
 	EnterpriseSlug *string `json:"enterpriseSlug,omitempty"`
 	// The HTTP URL for this enterprise.
 	EnterpriseURL *string `json:"enterpriseUrl,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the OrgInviteToBusinessAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -11957,7 +12201,8 @@ type OrgOauthAppAccessApprovedAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgOauthAppAccessApprovedAuditEntry object
+	ID string `json:"id"`
 	// The name of the OAuth application.
 	OauthApplicationName *string `json:"oauthApplicationName,omitempty"`
 	// The HTTP path for the OAuth application
@@ -12097,7 +12342,8 @@ type OrgOauthAppAccessBlockedAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgOauthAppAccessBlockedAuditEntry object
+	ID string `json:"id"`
 	// The name of the OAuth application.
 	OauthApplicationName *string `json:"oauthApplicationName,omitempty"`
 	// The HTTP path for the OAuth application
@@ -12237,7 +12483,8 @@ type OrgOauthAppAccessDeniedAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgOauthAppAccessDeniedAuditEntry object
+	ID string `json:"id"`
 	// The name of the OAuth application.
 	OauthApplicationName *string `json:"oauthApplicationName,omitempty"`
 	// The HTTP path for the OAuth application
@@ -12377,7 +12624,8 @@ type OrgOauthAppAccessRequestedAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgOauthAppAccessRequestedAuditEntry object
+	ID string `json:"id"`
 	// The name of the OAuth application.
 	OauthApplicationName *string `json:"oauthApplicationName,omitempty"`
 	// The HTTP path for the OAuth application
@@ -12517,7 +12765,8 @@ type OrgOauthAppAccessUnblockedAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgOauthAppAccessUnblockedAuditEntry object
+	ID string `json:"id"`
 	// The name of the OAuth application.
 	OauthApplicationName *string `json:"oauthApplicationName,omitempty"`
 	// The HTTP path for the OAuth application
@@ -12657,7 +12906,8 @@ type OrgRemoveBillingManagerAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgRemoveBillingManagerAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -12776,7 +13026,8 @@ type OrgRemoveMemberAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgRemoveMemberAuditEntry object
+	ID string `json:"id"`
 	// The types of membership the member has with the organization.
 	MembershipTypes []OrgRemoveMemberAuditEntryMembershipType `json:"membershipTypes,omitempty"`
 	// The corresponding operation type for the action
@@ -12883,7 +13134,8 @@ type OrgRemoveOutsideCollaboratorAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgRemoveOutsideCollaboratorAuditEntry object
+	ID string `json:"id"`
 	// The types of membership the outside collaborator has with the organization.
 	MembershipTypes []OrgRemoveOutsideCollaboratorAuditEntryMembershipType `json:"membershipTypes,omitempty"`
 	// The corresponding operation type for the action
@@ -13004,7 +13256,8 @@ type OrgRestoreMemberAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgRestoreMemberAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -13232,7 +13485,8 @@ type OrgUnblockUserAuditEntry struct {
 	BlockedUserURL *string `json:"blockedUserUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgUnblockUserAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -13335,7 +13589,8 @@ type OrgUpdateDefaultRepositoryPermissionAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgUpdateDefaultRepositoryPermissionAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -13466,7 +13721,8 @@ type OrgUpdateMemberAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgUpdateMemberAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -13575,7 +13831,8 @@ type OrgUpdateMemberRepositoryCreationPermissionAuditEntry struct {
 	CanCreateRepositories *bool `json:"canCreateRepositories,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgUpdateMemberRepositoryCreationPermissionAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -13712,7 +13969,8 @@ type OrgUpdateMemberRepositoryInvitationPermissionAuditEntry struct {
 	CanInviteOutsideCollaboratorsToRepositories *bool `json:"canInviteOutsideCollaboratorsToRepositories,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the OrgUpdateMemberRepositoryInvitationPermissionAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -13860,8 +14118,9 @@ type Organization struct {
 	// The estimated next GitHub Sponsors payout for this user/organization in cents (USD).
 	EstimatedNextSponsorsPayoutInCents int `json:"estimatedNextSponsorsPayoutInCents"`
 	// True if this user/organization has a GitHub Sponsors listing.
-	HasSponsorsListing bool   `json:"hasSponsorsListing"`
-	ID                 string `json:"id"`
+	HasSponsorsListing bool `json:"hasSponsorsListing"`
+	// The Node ID of the Organization object
+	ID string `json:"id"`
 	// The interaction ability settings for this organization.
 	InteractionAbility *RepositoryInteractionAbility `json:"interactionAbility,omitempty"`
 	// The setting value for whether the organization has an IP allow list enabled.
@@ -13878,6 +14137,8 @@ type Organization struct {
 	IsVerified bool `json:"isVerified"`
 	// Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
 	ItemShowcase ProfileItemShowcase `json:"itemShowcase"`
+	// Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
+	LifetimeReceivedSponsorshipValues SponsorAndLifetimeValueConnection `json:"lifetimeReceivedSponsorshipValues"`
 	// The organization's public profile location.
 	Location *string `json:"location,omitempty"`
 	// The organization's login name.
@@ -14051,6 +14312,8 @@ func (Organization) IsOrganizationOrUser() {}
 
 func (Organization) IsPackageOwner() {}
 
+// The Node ID of the PackageOwner object
+
 // A list of packages under the owner.
 func (this Organization) GetPackages() PackageConnection { return this.Packages }
 
@@ -14063,6 +14326,8 @@ func (this Organization) GetAnyPinnableItems() bool { return this.AnyPinnableIte
 
 // The public profile email.
 func (this Organization) GetEmail() *string { return this.Email }
+
+// The Node ID of the ProfileOwner object
 
 // Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
 func (this Organization) GetItemShowcase() ProfileItemShowcase { return this.ItemShowcase }
@@ -14092,6 +14357,8 @@ func (this Organization) GetWebsiteURL() *string { return this.WebsiteURL }
 
 func (Organization) IsProjectOwner() {}
 
+// The Node ID of the ProjectOwner object
+
 // Find project by number.
 func (this Organization) GetProject() *Project { return this.Project }
 
@@ -14108,6 +14375,8 @@ func (this Organization) GetProjectsURL() string { return this.ProjectsURL }
 func (this Organization) GetViewerCanCreateProjects() bool { return this.ViewerCanCreateProjects }
 
 func (Organization) IsProjectV2Owner() {}
+
+// The Node ID of the ProjectV2Owner object
 
 // Find a project by number.
 func (this Organization) GetProjectV2() *ProjectV2 { return this.ProjectV2 }
@@ -14139,6 +14408,8 @@ func (this Organization) GetRepositoryDiscussionComments() DiscussionCommentConn
 func (Organization) IsRepositoryOwner() {}
 
 // A URL pointing to the owner's public avatar.
+
+// The Node ID of the RepositoryOwner object
 
 // The username used to login.
 
@@ -14173,6 +14444,11 @@ func (this Organization) GetIsSponsoredBy() bool { return this.IsSponsoredBy }
 
 // True if the viewer is sponsored by this user/organization.
 func (this Organization) GetIsSponsoringViewer() bool { return this.IsSponsoringViewer }
+
+// Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
+func (this Organization) GetLifetimeReceivedSponsorshipValues() SponsorAndLifetimeValueConnection {
+	return this.LifetimeReceivedSponsorshipValues
+}
 
 // The estimated monthly GitHub Sponsors income for this user/organization in cents (USD).
 func (this Organization) GetMonthlyEstimatedSponsorsIncomeInCents() int {
@@ -14307,7 +14583,8 @@ type OrganizationIdentityProvider struct {
 	DigestMethod *string `json:"digestMethod,omitempty"`
 	// External Identities provisioned by this Identity Provider
 	ExternalIdentities ExternalIdentityConnection `json:"externalIdentities"`
-	ID                 string                     `json:"id"`
+	// The Node ID of the OrganizationIdentityProvider object
+	ID string `json:"id"`
 	// The x509 certificate used by the Identity Provider to sign assertions and responses.
 	IdpCertificate *string `json:"idpCertificate,omitempty"`
 	// The Issuer Entity ID for the SAML Identity Provider
@@ -14331,7 +14608,8 @@ type OrganizationInvitation struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// The email address of the user invited to the organization.
 	Email *string `json:"email,omitempty"`
-	ID    string  `json:"id"`
+	// The Node ID of the OrganizationInvitation object
+	ID string `json:"id"`
 	// The source of the invitation.
 	InvitationSource OrganizationInvitationSource `json:"invitationSource"`
 	// The type of invitation that was sent (e.g. email, user).
@@ -14340,6 +14618,8 @@ type OrganizationInvitation struct {
 	Invitee *User `json:"invitee,omitempty"`
 	// The user who created the invitation.
 	Inviter User `json:"inviter"`
+	// The user who created the invitation.
+	InviterActor *User `json:"inviterActor,omitempty"`
 	// The organization the invite is for
 	Organization Organization `json:"organization"`
 	// The user's pending role in the organization (e.g. member, owner).
@@ -14403,7 +14683,8 @@ type OrganizationMigration struct {
 	DatabaseID *string `json:"databaseId,omitempty"`
 	// The reason the organization migration failed.
 	FailureReason *string `json:"failureReason,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the OrganizationMigration object
+	ID string `json:"id"`
 	// The remaining amount of repos to be migrated.
 	RemainingRepositoriesCount *int `json:"remainingRepositoriesCount,omitempty"`
 	// The name of the source organization to be migrated.
@@ -14477,6 +14758,7 @@ func (this OrganizationsHovercardContext) GetOcticon() string { return this.Octi
 
 // Information for an uploaded package.
 type Package struct {
+	// The Node ID of the Package object
 	ID string `json:"id"`
 	// Find the latest version for the package.
 	LatestVersion *PackageVersion `json:"latestVersion,omitempty"`
@@ -14521,6 +14803,7 @@ type PackageEdge struct {
 
 // A file in a package version.
 type PackageFile struct {
+	// The Node ID of the PackageFile object
 	ID string `json:"id"`
 	// MD5 hash of the file.
 	Md5 *string `json:"md5,omitempty"`
@@ -14589,6 +14872,7 @@ type PackageStatistics struct {
 
 // A version tag contains the mapping between a tag name and a version.
 type PackageTag struct {
+	// The Node ID of the PackageTag object
 	ID string `json:"id"`
 	// Identifies the tag name of the version.
 	Name string `json:"name"`
@@ -14605,7 +14889,8 @@ func (this PackageTag) GetID() string { return this.ID }
 type PackageVersion struct {
 	// List of files associated with this package version
 	Files PackageFileConnection `json:"files"`
-	ID    string                `json:"id"`
+	// The Node ID of the PackageVersion object
+	ID string `json:"id"`
 	// The package associated with this version.
 	Package *Package `json:"package,omitempty"`
 	// The platform this version was built for.
@@ -14733,7 +15018,8 @@ type PinnedDiscussion struct {
 	Discussion Discussion `json:"discussion"`
 	// Color stops of the chosen gradient
 	GradientStopColors []string `json:"gradientStopColors"`
-	ID                 string   `json:"id"`
+	// The Node ID of the PinnedDiscussion object
+	ID string `json:"id"`
 	// Background texture pattern
 	Pattern PinnedDiscussionPattern `json:"pattern"`
 	// The actor that pinned this discussion.
@@ -14782,7 +15068,8 @@ type PinnedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the PinnedEvent object
+	ID string `json:"id"`
 	// Identifies the issue associated with the event.
 	Issue Issue `json:"issue"`
 }
@@ -14802,7 +15089,8 @@ type PinnedIssue struct {
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// Identifies the primary key from the database as a BigInt.
 	FullDatabaseID *string `json:"fullDatabaseId,omitempty"`
-	ID             string  `json:"id"`
+	// The Node ID of the PinnedIssue object
+	ID string `json:"id"`
 	// The issue that was pinned.
 	Issue Issue `json:"issue"`
 	// The actor that pinned this issue.
@@ -14860,7 +15148,8 @@ type PrivateRepositoryForkingDisableAuditEntry struct {
 	EnterpriseSlug *string `json:"enterpriseSlug,omitempty"`
 	// The HTTP URL for this enterprise.
 	EnterpriseURL *string `json:"enterpriseUrl,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the PrivateRepositoryForkingDisableAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -15030,7 +15319,8 @@ type PrivateRepositoryForkingEnableAuditEntry struct {
 	EnterpriseSlug *string `json:"enterpriseSlug,omitempty"`
 	// The HTTP URL for this enterprise.
 	EnterpriseURL *string `json:"enterpriseUrl,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the PrivateRepositoryForkingEnableAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -15201,8 +15491,9 @@ type Project struct {
 	// The actor who originally created the project.
 	Creator Actor `json:"creator,omitempty"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the Project object
+	ID string `json:"id"`
 	// The project's name.
 	Name string `json:"name"`
 	// The project's number.
@@ -15268,8 +15559,9 @@ type ProjectCard struct {
 	// The actor who created this card
 	Creator Actor `json:"creator,omitempty"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the ProjectCard object
+	ID string `json:"id"`
 	// Whether the card is archived
 	IsArchived bool `json:"isArchived"`
 	// The card note
@@ -15318,8 +15610,9 @@ type ProjectColumn struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the ProjectColumn object
+	ID string `json:"id"`
 	// The project column's name.
 	Name string `json:"name"`
 	// The project that contains this column.
@@ -15421,7 +15714,8 @@ type ProjectV2 struct {
 	Field ProjectV2FieldConfiguration `json:"field,omitempty"`
 	// List of fields and their constraints in the project
 	Fields ProjectV2FieldConfigurationConnection `json:"fields"`
-	ID     string                                `json:"id"`
+	// The Node ID of the ProjectV2 object
+	ID string `json:"id"`
 	// List of items in the project
 	Items ProjectV2ItemConnection `json:"items"`
 	// The project's number.
@@ -15545,8 +15839,9 @@ type ProjectV2Field struct {
 	// The field's type.
 	DataType ProjectV2FieldType `json:"dataType"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the ProjectV2Field object
+	ID string `json:"id"`
 	// The project field's name.
 	Name string `json:"name"`
 	// The project that contains this field.
@@ -15570,6 +15865,8 @@ func (this ProjectV2Field) GetDataType() ProjectV2FieldType { return this.DataTy
 
 // Identifies the primary key from the database.
 func (this ProjectV2Field) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the ProjectV2FieldCommon object
 
 // The project field's name.
 func (this ProjectV2Field) GetName() string { return this.Name }
@@ -15664,7 +15961,8 @@ type ProjectV2Item struct {
 	FieldValueByName ProjectV2ItemFieldValue `json:"fieldValueByName,omitempty"`
 	// The field values that are set on the item.
 	FieldValues ProjectV2ItemFieldValueConnection `json:"fieldValues"`
-	ID          string                            `json:"id"`
+	// The Node ID of the ProjectV2Item object
+	ID string `json:"id"`
 	// Whether the item is archived.
 	IsArchived bool `json:"isArchived"`
 	// The project that contains this item.
@@ -15712,7 +16010,8 @@ type ProjectV2ItemFieldDateValue struct {
 	Date *string `json:"date,omitempty"`
 	// The project field that contains this value.
 	Field ProjectV2FieldConfiguration `json:"field"`
-	ID    string                      `json:"id"`
+	// The Node ID of the ProjectV2ItemFieldDateValue object
+	ID string `json:"id"`
 	// The project item that contains this value.
 	Item ProjectV2Item `json:"item"`
 	// Identifies the date and time when the object was last updated.
@@ -15740,6 +16039,8 @@ func (this ProjectV2ItemFieldDateValue) GetDatabaseID() *int { return this.Datab
 // The project field that contains this value.
 func (this ProjectV2ItemFieldDateValue) GetField() ProjectV2FieldConfiguration { return this.Field }
 
+// The Node ID of the ProjectV2ItemFieldValueCommon object
+
 // The project item that contains this value.
 func (this ProjectV2ItemFieldDateValue) GetItem() ProjectV2Item { return this.Item }
 
@@ -15758,7 +16059,8 @@ type ProjectV2ItemFieldIterationValue struct {
 	Duration int `json:"duration"`
 	// The project field that contains this value.
 	Field ProjectV2FieldConfiguration `json:"field"`
-	ID    string                      `json:"id"`
+	// The Node ID of the ProjectV2ItemFieldIterationValue object
+	ID string `json:"id"`
 	// The project item that contains this value.
 	Item ProjectV2Item `json:"item"`
 	// The ID of the iteration.
@@ -15796,6 +16098,8 @@ func (this ProjectV2ItemFieldIterationValue) GetField() ProjectV2FieldConfigurat
 	return this.Field
 }
 
+// The Node ID of the ProjectV2ItemFieldValueCommon object
+
 // The project item that contains this value.
 func (this ProjectV2ItemFieldIterationValue) GetItem() ProjectV2Item { return this.Item }
 
@@ -15832,7 +16136,8 @@ type ProjectV2ItemFieldNumberValue struct {
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The project field that contains this value.
 	Field ProjectV2FieldConfiguration `json:"field"`
-	ID    string                      `json:"id"`
+	// The Node ID of the ProjectV2ItemFieldNumberValue object
+	ID string `json:"id"`
 	// The project item that contains this value.
 	Item ProjectV2Item `json:"item"`
 	// Number as a float(8)
@@ -15861,6 +16166,8 @@ func (this ProjectV2ItemFieldNumberValue) GetDatabaseID() *int { return this.Dat
 
 // The project field that contains this value.
 func (this ProjectV2ItemFieldNumberValue) GetField() ProjectV2FieldConfiguration { return this.Field }
+
+// The Node ID of the ProjectV2ItemFieldValueCommon object
 
 // The project item that contains this value.
 func (this ProjectV2ItemFieldNumberValue) GetItem() ProjectV2Item { return this.Item }
@@ -15914,7 +16221,8 @@ type ProjectV2ItemFieldSingleSelectValue struct {
 	DescriptionHTML *string `json:"descriptionHTML,omitempty"`
 	// The project field that contains this value.
 	Field ProjectV2FieldConfiguration `json:"field"`
-	ID    string                      `json:"id"`
+	// The Node ID of the ProjectV2ItemFieldSingleSelectValue object
+	ID string `json:"id"`
 	// The project item that contains this value.
 	Item ProjectV2Item `json:"item"`
 	// The name of the selected single select option.
@@ -15950,6 +16258,8 @@ func (this ProjectV2ItemFieldSingleSelectValue) GetField() ProjectV2FieldConfigu
 	return this.Field
 }
 
+// The Node ID of the ProjectV2ItemFieldValueCommon object
+
 // The project item that contains this value.
 func (this ProjectV2ItemFieldSingleSelectValue) GetItem() ProjectV2Item { return this.Item }
 
@@ -15966,7 +16276,8 @@ type ProjectV2ItemFieldTextValue struct {
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The project field that contains this value.
 	Field ProjectV2FieldConfiguration `json:"field"`
-	ID    string                      `json:"id"`
+	// The Node ID of the ProjectV2ItemFieldTextValue object
+	ID string `json:"id"`
 	// The project item that contains this value.
 	Item ProjectV2Item `json:"item"`
 	// Text value of a field
@@ -15995,6 +16306,8 @@ func (this ProjectV2ItemFieldTextValue) GetDatabaseID() *int { return this.Datab
 
 // The project field that contains this value.
 func (this ProjectV2ItemFieldTextValue) GetField() ProjectV2FieldConfiguration { return this.Field }
+
+// The Node ID of the ProjectV2ItemFieldValueCommon object
 
 // The project item that contains this value.
 func (this ProjectV2ItemFieldTextValue) GetItem() ProjectV2Item { return this.Item }
@@ -16057,8 +16370,9 @@ type ProjectV2IterationField struct {
 	// The field's type.
 	DataType ProjectV2FieldType `json:"dataType"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the ProjectV2IterationField object
+	ID string `json:"id"`
 	// The project field's name.
 	Name string `json:"name"`
 	// The project that contains this field.
@@ -16082,6 +16396,8 @@ func (this ProjectV2IterationField) GetDataType() ProjectV2FieldType { return th
 
 // Identifies the primary key from the database.
 func (this ProjectV2IterationField) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the ProjectV2FieldCommon object
 
 // The project field's name.
 func (this ProjectV2IterationField) GetName() string { return this.Name }
@@ -16135,8 +16451,9 @@ type ProjectV2SingleSelectField struct {
 	// The field's type.
 	DataType ProjectV2FieldType `json:"dataType"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the ProjectV2SingleSelectField object
+	ID string `json:"id"`
 	// The project field's name.
 	Name string `json:"name"`
 	// Options for the single select field
@@ -16162,6 +16479,8 @@ func (this ProjectV2SingleSelectField) GetDataType() ProjectV2FieldType { return
 
 // Identifies the primary key from the database.
 func (this ProjectV2SingleSelectField) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the ProjectV2FieldCommon object
 
 // The project field's name.
 func (this ProjectV2SingleSelectField) GetName() string { return this.Name }
@@ -16270,7 +16589,8 @@ type ProjectV2View struct {
 	GroupBy *ProjectV2FieldConnection `json:"groupBy,omitempty"`
 	// The view's group-by field.
 	GroupByFields *ProjectV2FieldConfigurationConnection `json:"groupByFields,omitempty"`
-	ID            string                                 `json:"id"`
+	// The Node ID of the ProjectV2View object
+	ID string `json:"id"`
 	// The project view's layout.
 	Layout ProjectV2ViewLayout `json:"layout"`
 	// The project view's name.
@@ -16332,12 +16652,13 @@ type ProjectV2Workflow struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
-	// The workflows' enabled state.
-	Enabled bool   `json:"enabled"`
-	ID      string `json:"id"`
-	// The workflows' name.
+	// Whether the workflow is enabled.
+	Enabled bool `json:"enabled"`
+	// The Node ID of the ProjectV2Workflow object
+	ID string `json:"id"`
+	// The name of the workflow.
 	Name string `json:"name"`
-	// The workflows' number.
+	// The number of the workflow.
 	Number int `json:"number"`
 	// The project that contains this workflow.
 	Project ProjectV2 `json:"project"`
@@ -16378,6 +16699,22 @@ type ProjectV2WorkflowOrder struct {
 	Direction OrderDirection `json:"direction"`
 }
 
+// A property that must match
+type PropertyTargetDefinition struct {
+	// The name of the property
+	Name string `json:"name"`
+	// The values to match for
+	PropertyValues []string `json:"propertyValues"`
+}
+
+// A property that must match
+type PropertyTargetDefinitionInput struct {
+	// The name of the property
+	Name string `json:"name"`
+	// The values to match for
+	PropertyValues []string `json:"propertyValues"`
+}
+
 // A user's public key.
 type PublicKey struct {
 	// The last time this authorization was used to perform an action. Values will be null for keys not owned by the user.
@@ -16386,7 +16723,8 @@ type PublicKey struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// The fingerprint for this PublicKey.
 	Fingerprint string `json:"fingerprint"`
-	ID          string `json:"id"`
+	// The Node ID of the PublicKey object
+	ID string `json:"id"`
 	// Whether this PublicKey is read-only or not. Values will be null for keys not owned by the user.
 	IsReadOnly *bool `json:"isReadOnly,omitempty"`
 	// The public key string.
@@ -16504,13 +16842,18 @@ type PullRequest struct {
 	HeadRepositoryOwner RepositoryOwner `json:"headRepositoryOwner,omitempty"`
 	// The hovercard information for this issue
 	Hovercard Hovercard `json:"hovercard"`
-	ID        string    `json:"id"`
+	// The Node ID of the PullRequest object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// The head and base repositories are different.
 	IsCrossRepository bool `json:"isCrossRepository"`
 	// Identifies if the pull request is a draft.
 	IsDraft bool `json:"isDraft"`
+	// Indicates whether the pull request is in a merge queue
+	IsInMergeQueue bool `json:"isInMergeQueue"`
+	// Indicates whether the pull request's base ref has a merge queue enabled.
+	IsMergeQueueEnabled bool `json:"isMergeQueueEnabled"`
 	// Is this pull request read by the viewer
 	IsReadByViewer *bool `json:"isReadByViewer,omitempty"`
 	// A list of labels associated with the object.
@@ -16527,6 +16870,8 @@ type PullRequest struct {
 	MaintainerCanModify bool `json:"maintainerCanModify"`
 	// The commit that was created when this pull request was merged.
 	MergeCommit *Commit `json:"mergeCommit,omitempty"`
+	// The merge queue for the pull request's base branch
+	MergeQueue *MergeQueue `json:"mergeQueue,omitempty"`
 	// The merge queue entry of the pull request in the base branch's merge queue
 	MergeQueueEntry *MergeQueueEntry `json:"mergeQueueEntry,omitempty"`
 	// Whether or not the pull request can be merged based on the existence of merge conflicts.
@@ -16687,7 +17032,9 @@ func (this PullRequest) GetCreatedViaEmail() bool { return this.CreatedViaEmail 
 
 // The actor who edited the comment.
 func (this PullRequest) GetEditor() Actor { return this.Editor }
-func (this PullRequest) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this PullRequest) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this PullRequest) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -16736,6 +17083,8 @@ func (PullRequest) IsProjectV2ItemContent() {}
 
 func (PullRequest) IsProjectV2Owner() {}
 
+// The Node ID of the ProjectV2Owner object
+
 // Find a project by number.
 func (this PullRequest) GetProjectV2() *ProjectV2 { return this.ProjectV2 }
 
@@ -16746,6 +17095,8 @@ func (PullRequest) IsReactable() {}
 
 // Identifies the primary key from the database.
 func (this PullRequest) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the Reactable object
 
 // A list of reactions grouped by content left on the subject.
 func (this PullRequest) GetReactionGroups() []*ReactionGroup {
@@ -16777,6 +17128,8 @@ func (this PullRequest) GetRepository() Repository { return this.Repository }
 func (PullRequest) IsSearchResultItem() {}
 
 func (PullRequest) IsSubscribable() {}
+
+// The Node ID of the Subscribable object
 
 // Check if the viewer is able to change their subscription status for the repository.
 func (this PullRequest) GetViewerCanSubscribe() bool { return this.ViewerCanSubscribe }
@@ -16849,7 +17202,8 @@ type PullRequestChangedFileEdge struct {
 type PullRequestCommit struct {
 	// The Git commit object
 	Commit Commit `json:"commit"`
-	ID     string `json:"id"`
+	// The Node ID of the PullRequestCommit object
+	ID string `json:"id"`
 	// The pull request this commit belongs to
 	PullRequest PullRequest `json:"pullRequest"`
 	// The HTTP path for this pull request commit
@@ -16879,7 +17233,8 @@ type PullRequestCommitCommentThread struct {
 	Comments CommitCommentConnection `json:"comments"`
 	// The commit the comments were made on.
 	Commit Commit `json:"commit"`
-	ID     string `json:"id"`
+	// The Node ID of the PullRequestCommitCommentThread object
+	ID string `json:"id"`
 	// The file the comments were made on.
 	Path *string `json:"path,omitempty"`
 	// The position in the diff for the commit that the comment was made on.
@@ -17013,8 +17368,9 @@ type PullRequestReview struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The actor who edited the comment.
-	Editor Actor  `json:"editor,omitempty"`
-	ID     string `json:"id"`
+	Editor Actor `json:"editor,omitempty"`
+	// The Node ID of the PullRequestReview object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Returns whether or not a comment has been minimized.
@@ -17088,7 +17444,9 @@ func (this PullRequestReview) GetCreatedViaEmail() bool { return this.CreatedVia
 
 // The actor who edited the comment.
 func (this PullRequestReview) GetEditor() Actor { return this.Editor }
-func (this PullRequestReview) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this PullRequestReview) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this PullRequestReview) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -17138,6 +17496,8 @@ func (PullRequestReview) IsReactable() {}
 
 // Identifies the primary key from the database.
 func (this PullRequestReview) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the Reactable object
 
 // A list of reactions grouped by content left on the subject.
 func (this PullRequestReview) GetReactionGroups() []*ReactionGroup {
@@ -17206,8 +17566,9 @@ type PullRequestReviewComment struct {
 	// Identifies when the comment was created in a draft state.
 	DraftedAt time.Time `json:"draftedAt"`
 	// The actor who edited the comment.
-	Editor Actor  `json:"editor,omitempty"`
-	ID     string `json:"id"`
+	Editor Actor `json:"editor,omitempty"`
+	// The Node ID of the PullRequestReviewComment object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Returns whether or not a comment has been minimized.
@@ -17301,7 +17662,9 @@ func (this PullRequestReviewComment) GetCreatedViaEmail() bool { return this.Cre
 
 // The actor who edited the comment.
 func (this PullRequestReviewComment) GetEditor() Actor { return this.Editor }
-func (this PullRequestReviewComment) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this PullRequestReviewComment) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this PullRequestReviewComment) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -17349,6 +17712,8 @@ func (PullRequestReviewComment) IsReactable() {}
 
 // Identifies the primary key from the database.
 func (this PullRequestReviewComment) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the Reactable object
 
 // A list of reactions grouped by content left on the subject.
 func (this PullRequestReviewComment) GetReactionGroups() []*ReactionGroup {
@@ -17446,7 +17811,8 @@ type PullRequestReviewThread struct {
 	Comments PullRequestReviewCommentConnection `json:"comments"`
 	// The side of the diff on which this thread was placed.
 	DiffSide DiffSide `json:"diffSide"`
-	ID       string   `json:"id"`
+	// The Node ID of the PullRequestReviewThread object
+	ID string `json:"id"`
 	// Whether or not the thread has been collapsed (resolved)
 	IsCollapsed bool `json:"isCollapsed"`
 	// Indicates whether this thread was outdated by newer changes.
@@ -17538,7 +17904,8 @@ type PullRequestThread struct {
 	Comments PullRequestReviewCommentConnection `json:"comments"`
 	// The side of the diff on which this thread was placed.
 	DiffSide DiffSide `json:"diffSide"`
-	ID       string   `json:"id"`
+	// The Node ID of the PullRequestThread object
+	ID string `json:"id"`
 	// Whether or not the thread has been collapsed (resolved)
 	IsCollapsed bool `json:"isCollapsed"`
 	// Indicates whether this thread was outdated by newer changes.
@@ -17622,6 +17989,7 @@ type PullRequestTimelineItemsEdge struct {
 
 // A Git push.
 type Push struct {
+	// The Node ID of the Push object
 	ID string `json:"id"`
 	// The SHA after the push
 	NextSha *string `json:"nextSha,omitempty"`
@@ -17646,7 +18014,8 @@ type PushAllowance struct {
 	Actor PushAllowanceActor `json:"actor,omitempty"`
 	// Identifies the branch protection rule associated with the allowed user, team, or app.
 	BranchProtectionRule *BranchProtectionRule `json:"branchProtectionRule,omitempty"`
-	ID                   string                `json:"id"`
+	// The Node ID of the PushAllowance object
+	ID string `json:"id"`
 }
 
 func (PushAllowance) IsNode() {}
@@ -17718,8 +18087,9 @@ type Reaction struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the Reaction object
+	ID string `json:"id"`
 	// The reactable piece of content
 	Reactable Reactable `json:"reactable"`
 	// Identifies the user who created this reaction.
@@ -17805,7 +18175,8 @@ type ReadyForReviewEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the ReadyForReviewEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 	// The HTTP path for this ready for review event.
@@ -17837,7 +18208,8 @@ type Ref struct {
 	BranchProtectionRule *BranchProtectionRule `json:"branchProtectionRule,omitempty"`
 	// Compares the current ref as a base ref to another head ref, if the comparison can be made.
 	Compare *Comparison `json:"compare,omitempty"`
-	ID      string      `json:"id"`
+	// The Node ID of the Ref object
+	ID string `json:"id"`
 	// The ref name.
 	Name string `json:"name"`
 	// The ref's prefix, such as `refs/heads/` or `refs/tags/`.
@@ -17846,6 +18218,8 @@ type Ref struct {
 	RefUpdateRule *RefUpdateRule `json:"refUpdateRule,omitempty"`
 	// The repository the ref belongs to.
 	Repository Repository `json:"repository"`
+	// A list of rules from active Repository and Organization rulesets that apply to this ref.
+	Rules *RepositoryRuleConnection `json:"rules,omitempty"`
 	// The object the ref points to. Returns null when object does not exist.
 	Target GitObject `json:"target,omitempty"`
 }
@@ -17899,7 +18273,7 @@ type RefOrder struct {
 	Direction OrderDirection `json:"direction"`
 }
 
-// A ref update rules for a viewer.
+// Branch protection rules that are enforced on the viewer.
 type RefUpdateRule struct {
 	// Can this branch be deleted.
 	AllowsDeletions bool `json:"allowsDeletions"`
@@ -17937,7 +18311,8 @@ type ReferencedEvent struct {
 	CommitRepository Repository `json:"commitRepository"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the ReferencedEvent object
+	ID string `json:"id"`
 	// Reference originated in a different repository.
 	IsCrossRepository bool `json:"isCrossRepository"`
 	// Checks if the commit message itself references the subject. Can be false in the case of a commit comment reference.
@@ -18023,7 +18398,8 @@ type Release struct {
 	Description *string `json:"description,omitempty"`
 	// The description of this release rendered to HTML.
 	DescriptionHTML *string `json:"descriptionHTML,omitempty"`
-	ID              string  `json:"id"`
+	// The Node ID of the Release object
+	ID string `json:"id"`
 	// Whether or not the release is a draft
 	IsDraft bool `json:"isDraft"`
 	// Whether or not the release is the latest releast
@@ -18072,6 +18448,8 @@ func (Release) IsReactable() {}
 // Identifies the primary key from the database.
 func (this Release) GetDatabaseID() *int { return this.DatabaseID }
 
+// The Node ID of the Reactable object
+
 // A list of reactions grouped by content left on the subject.
 func (this Release) GetReactionGroups() []*ReactionGroup {
 	if this.ReactionGroups == nil {
@@ -18108,7 +18486,8 @@ type ReleaseAsset struct {
 	DownloadCount int `json:"downloadCount"`
 	// Identifies the URL where you can download the release asset via the browser.
 	DownloadURL string `json:"downloadUrl"`
-	ID          string `json:"id"`
+	// The Node ID of the ReleaseAsset object
+	ID string `json:"id"`
 	// Identifies the title of the release asset.
 	Name string `json:"name"`
 	// Release that the asset is associated with
@@ -18395,8 +18774,9 @@ type RemovedFromMergeQueueEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The user who removed this Pull Request from the merge queue
-	Enqueuer *User  `json:"enqueuer,omitempty"`
-	ID       string `json:"id"`
+	Enqueuer *User `json:"enqueuer,omitempty"`
+	// The Node ID of the RemovedFromMergeQueueEvent object
+	ID string `json:"id"`
 	// The merge queue where this pull request was removed from.
 	MergeQueue *MergeQueue `json:"mergeQueue,omitempty"`
 	// PullRequest referenced by event.
@@ -18419,8 +18799,9 @@ type RemovedFromProjectEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the RemovedFromProjectEvent object
+	ID string `json:"id"`
 }
 
 func (RemovedFromProjectEvent) IsIssueTimelineItems() {}
@@ -18440,7 +18821,8 @@ type RenamedTitleEvent struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the current title of the issue or pull request.
 	CurrentTitle string `json:"currentTitle"`
-	ID           string `json:"id"`
+	// The Node ID of the RenamedTitleEvent object
+	ID string `json:"id"`
 	// Identifies the previous title of the issue or pull request.
 	PreviousTitle string `json:"previousTitle"`
 	// Subject that was renamed.
@@ -18516,7 +18898,8 @@ type ReopenedEvent struct {
 	Closable Closable `json:"closable"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the ReopenedEvent object
+	ID string `json:"id"`
 	// The reason the issue state was changed to open.
 	StateReason *IssueStateReason `json:"stateReason,omitempty"`
 }
@@ -18552,7 +18935,8 @@ type RepoAccessAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoAccessAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -18681,7 +19065,8 @@ type RepoAddMemberAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoAddMemberAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -18810,7 +19195,8 @@ type RepoAddTopicAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoAddTopicAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -18949,7 +19335,8 @@ type RepoArchivedAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoArchivedAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -19078,7 +19465,8 @@ type RepoChangeMergeSettingAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoChangeMergeSettingAuditEntry object
+	ID string `json:"id"`
 	// Whether the change was to enable (true) or disable (false) the merge type
 	IsEnabled *bool `json:"isEnabled,omitempty"`
 	// The merge method affected by the change
@@ -19223,7 +19611,8 @@ type RepoConfigDisableAnonymousGitAccessAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigDisableAnonymousGitAccessAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -19378,7 +19767,8 @@ type RepoConfigDisableCollaboratorsOnlyAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigDisableCollaboratorsOnlyAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -19531,7 +19921,8 @@ type RepoConfigDisableContributorsOnlyAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigDisableContributorsOnlyAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -19680,7 +20071,8 @@ type RepoConfigDisableSockpuppetDisallowedAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigDisableSockpuppetDisallowedAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -19837,7 +20229,8 @@ type RepoConfigEnableAnonymousGitAccessAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigEnableAnonymousGitAccessAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -19990,7 +20383,8 @@ type RepoConfigEnableCollaboratorsOnlyAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigEnableCollaboratorsOnlyAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -20139,7 +20533,8 @@ type RepoConfigEnableContributorsOnlyAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigEnableContributorsOnlyAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -20288,7 +20683,8 @@ type RepoConfigEnableSockpuppetDisallowedAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigEnableSockpuppetDisallowedAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -20445,7 +20841,8 @@ type RepoConfigLockAnonymousGitAccessAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigLockAnonymousGitAccessAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -20594,7 +20991,8 @@ type RepoConfigUnlockAnonymousGitAccessAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoConfigUnlockAnonymousGitAccessAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -20751,7 +21149,8 @@ type RepoCreateAuditEntry struct {
 	ForkParentName *string `json:"forkParentName,omitempty"`
 	// The name of the root repository for this network.
 	ForkSourceName *string `json:"forkSourceName,omitempty"`
-	ID             string  `json:"id"`
+	// The Node ID of the RepoCreateAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -20880,7 +21279,8 @@ type RepoDestroyAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoDestroyAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -21009,7 +21409,8 @@ type RepoRemoveMemberAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoRemoveMemberAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -21138,7 +21539,8 @@ type RepoRemoveTopicAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the RepoRemoveTopicAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -21333,7 +21735,8 @@ type Repository struct {
 	HasWikiEnabled bool `json:"hasWikiEnabled"`
 	// The repository's URL.
 	HomepageURL *string `json:"homepageUrl,omitempty"`
-	ID          string  `json:"id"`
+	// The Node ID of the Repository object
+	ID string `json:"id"`
 	// The interaction ability settings for this repository.
 	InteractionAbility *RepositoryInteractionAbility `json:"interactionAbility,omitempty"`
 	// Indicates if the repository is unmaintained.
@@ -21526,6 +21929,8 @@ func (this Repository) GetID() string { return this.ID }
 
 func (Repository) IsPackageOwner() {}
 
+// The Node ID of the PackageOwner object
+
 // A list of packages under the owner.
 func (this Repository) GetPackages() PackageConnection { return this.Packages }
 
@@ -21534,6 +21939,8 @@ func (Repository) IsPermissionGranter() {}
 func (Repository) IsPinnableItem() {}
 
 func (Repository) IsProjectOwner() {}
+
+// The Node ID of the ProjectOwner object
 
 // Find project by number.
 func (this Repository) GetProject() *Project { return this.Project }
@@ -21658,6 +22065,8 @@ func (Repository) IsSponsorsListingFeatureableItem() {}
 
 func (Repository) IsStarrable() {}
 
+// The Node ID of the Starrable object
+
 // Returns a count of how many stargazers there are on this object
 func (this Repository) GetStargazerCount() int { return this.StargazerCount }
 
@@ -21668,6 +22077,8 @@ func (this Repository) GetStargazers() StargazerConnection { return this.Stargaz
 func (this Repository) GetViewerHasStarred() bool { return this.ViewerHasStarred }
 
 func (Repository) IsSubscribable() {}
+
+// The Node ID of the Subscribable object
 
 // Check if the viewer is able to change their subscription status for the repository.
 func (this Repository) GetViewerCanSubscribe() bool { return this.ViewerCanSubscribe }
@@ -21680,6 +22091,8 @@ func (Repository) IsUniformResourceLocatable() {}
 // The HTML path to this resource.
 
 // The URL to this resource.
+
+func (Repository) IsUserListItems() {}
 
 // Information extracted from a repository's `CODEOWNERS` file.
 type RepositoryCodeowners struct {
@@ -21786,7 +22199,8 @@ type RepositoryInteractionAbility struct {
 type RepositoryInvitation struct {
 	// The email address that received the invitation.
 	Email *string `json:"email,omitempty"`
-	ID    string  `json:"id"`
+	// The Node ID of the RepositoryInvitation object
+	ID string `json:"id"`
 	// The user who received the invitation.
 	Invitee *User `json:"invitee,omitempty"`
 	// The user who created the invitation.
@@ -21842,7 +22256,8 @@ type RepositoryMigration struct {
 	DatabaseID *string `json:"databaseId,omitempty"`
 	// The reason the migration failed.
 	FailureReason *string `json:"failureReason,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the RepositoryMigration object
+	ID string `json:"id"`
 	// The URL for the migration log (expires 1 day after migration completes).
 	MigrationLogURL *string `json:"migrationLogUrl,omitempty"`
 	// The migration source.
@@ -21870,7 +22285,9 @@ func (this RepositoryMigration) GetDatabaseID() *string { return this.DatabaseID
 
 // The reason the migration failed.
 func (this RepositoryMigration) GetFailureReason() *string { return this.FailureReason }
-func (this RepositoryMigration) GetID() string             { return this.ID }
+
+// The Node ID of the Migration object
+func (this RepositoryMigration) GetID() string { return this.ID }
 
 // The URL for the migration log (expires 1 day after migration completes).
 func (this RepositoryMigration) GetMigrationLogURL() *string { return this.MigrationLogURL }
@@ -21950,8 +22367,25 @@ type RepositoryOrder struct {
 	Direction OrderDirection `json:"direction"`
 }
 
+// Parameters to be used for the repository_property condition
+type RepositoryPropertyConditionTarget struct {
+	// Array of repository properties that must not match.
+	Exclude []*PropertyTargetDefinition `json:"exclude"`
+	// Array of repository properties that must match
+	Include []*PropertyTargetDefinition `json:"include"`
+}
+
+// Parameters to be used for the repository_property condition
+type RepositoryPropertyConditionTargetInput struct {
+	// Array of repository properties that must not match.
+	Exclude []*PropertyTargetDefinitionInput `json:"exclude"`
+	// Array of repository properties that must match
+	Include []*PropertyTargetDefinitionInput `json:"include"`
+}
+
 // A repository rule.
 type RepositoryRule struct {
+	// The Node ID of the RepositoryRule object
 	ID string `json:"id"`
 	// The parameters for this rule.
 	Parameters RuleParameters `json:"parameters,omitempty"`
@@ -21974,6 +22408,8 @@ type RepositoryRuleConditions struct {
 	RepositoryID *RepositoryIDConditionTarget `json:"repositoryId,omitempty"`
 	// Configuration for the repository_name condition
 	RepositoryName *RepositoryNameConditionTarget `json:"repositoryName,omitempty"`
+	// Configuration for the repository_property condition
+	RepositoryProperty *RepositoryPropertyConditionTarget `json:"repositoryProperty,omitempty"`
 }
 
 // Specifies the conditions required for a ruleset to evaluate
@@ -21984,6 +22420,8 @@ type RepositoryRuleConditionsInput struct {
 	RepositoryName *RepositoryNameConditionTargetInput `json:"repositoryName,omitempty"`
 	// Configuration for the repository_id condition
 	RepositoryID *RepositoryIDConditionTargetInput `json:"repositoryId,omitempty"`
+	// Configuration for the repository_property condition
+	RepositoryProperty *RepositoryPropertyConditionTargetInput `json:"repositoryProperty,omitempty"`
 }
 
 // The connection type for RepositoryRule.
@@ -22016,6 +22454,14 @@ type RepositoryRuleInput struct {
 	Parameters *RuleParametersInput `json:"parameters,omitempty"`
 }
 
+// Ordering options for repository rules.
+type RepositoryRuleOrder struct {
+	// The field to order repository rules by.
+	Field RepositoryRuleOrderField `json:"field"`
+	// The ordering direction.
+	Direction OrderDirection `json:"direction"`
+}
+
 // A repository ruleset.
 type RepositoryRuleset struct {
 	// The actors that can bypass this ruleset
@@ -22028,7 +22474,8 @@ type RepositoryRuleset struct {
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The enforcement level of this ruleset
 	Enforcement RuleEnforcement `json:"enforcement"`
-	ID          string          `json:"id"`
+	// The Node ID of the RepositoryRuleset object
+	ID string `json:"id"`
 	// Name of the ruleset.
 	Name string `json:"name"`
 	// List of rules.
@@ -22052,8 +22499,9 @@ type RepositoryRulesetBypassActor struct {
 	Actor BypassActor `json:"actor,omitempty"`
 	// The mode for the bypass actor
 	BypassMode *RepositoryRulesetBypassActorBypassMode `json:"bypassMode,omitempty"`
-	ID         string                                  `json:"id"`
-	// This actor represents the ability for an organization admin to bypass
+	// The Node ID of the RepositoryRulesetBypassActor object
+	ID string `json:"id"`
+	// This actor represents the ability for an organization owner to bypass
 	OrganizationAdmin bool `json:"organizationAdmin"`
 	// If the actor is a repository role, the repository role's ID that can bypass
 	RepositoryRoleDatabaseID *int `json:"repositoryRoleDatabaseId,omitempty"`
@@ -22094,7 +22542,7 @@ type RepositoryRulesetBypassActorInput struct {
 	ActorID *string `json:"actorId,omitempty"`
 	// For role bypasses, the role database ID
 	RepositoryRoleDatabaseID *int `json:"repositoryRoleDatabaseId,omitempty"`
-	// For org admin bupasses, true
+	// For organization owner bypasses, true
 	OrganizationAdmin *bool `json:"organizationAdmin,omitempty"`
 	// The bypass mode for this actor.
 	BypassMode RepositoryRulesetBypassActorBypassMode `json:"bypassMode"`
@@ -22122,6 +22570,7 @@ type RepositoryRulesetEdge struct {
 
 // A repository-topic connects a repository to a topic.
 type RepositoryTopic struct {
+	// The Node ID of the RepositoryTopic object
 	ID string `json:"id"`
 	// The HTTP path for this repository-topic.
 	ResourcePath string `json:"resourcePath"`
@@ -22188,7 +22637,8 @@ type RepositoryVisibilityChangeDisableAuditEntry struct {
 	EnterpriseSlug *string `json:"enterpriseSlug,omitempty"`
 	// The HTTP URL for this enterprise.
 	EnterpriseURL *string `json:"enterpriseUrl,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the RepositoryVisibilityChangeDisableAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -22330,7 +22780,8 @@ type RepositoryVisibilityChangeEnableAuditEntry struct {
 	EnterpriseSlug *string `json:"enterpriseSlug,omitempty"`
 	// The HTTP URL for this enterprise.
 	EnterpriseURL *string `json:"enterpriseUrl,omitempty"`
-	ID            string  `json:"id"`
+	// The Node ID of the RepositoryVisibilityChangeEnableAuditEntry object
+	ID string `json:"id"`
 	// The corresponding operation type for the action
 	OperationType *OperationType `json:"operationType,omitempty"`
 	// The Organization associated with the Audit Entry.
@@ -22468,7 +22919,8 @@ type RepositoryVulnerabilityAlert struct {
 	Dismisser *User `json:"dismisser,omitempty"`
 	// When was the alert fixed?
 	FixedAt *time.Time `json:"fixedAt,omitempty"`
-	ID      string     `json:"id"`
+	// The Node ID of the RepositoryVulnerabilityAlert object
+	ID string `json:"id"`
 	// Identifies the alert number.
 	Number int `json:"number"`
 	// The associated repository
@@ -22734,7 +23186,8 @@ type ReviewDismissalAllowance struct {
 	Actor ReviewDismissalAllowanceActor `json:"actor,omitempty"`
 	// Identifies the branch protection rule associated with the allowed user, team, or app.
 	BranchProtectionRule *BranchProtectionRule `json:"branchProtectionRule,omitempty"`
-	ID                   string                `json:"id"`
+	// The Node ID of the ReviewDismissalAllowance object
+	ID string `json:"id"`
 }
 
 func (ReviewDismissalAllowance) IsNode() {}
@@ -22774,7 +23227,8 @@ type ReviewDismissedEvent struct {
 	DismissalMessage *string `json:"dismissalMessage,omitempty"`
 	// Identifies the optional message associated with the event, rendered to HTML.
 	DismissalMessageHTML *string `json:"dismissalMessageHTML,omitempty"`
-	ID                   string  `json:"id"`
+	// The Node ID of the ReviewDismissedEvent object
+	ID string `json:"id"`
 	// Identifies the previous state of the review with the 'review_dismissed' event.
 	PreviousReviewState PullRequestReviewState `json:"previousReviewState"`
 	// PullRequest referenced by event.
@@ -22811,8 +23265,9 @@ type ReviewRequest struct {
 	// Whether this request was created for a code owner
 	AsCodeOwner bool `json:"asCodeOwner"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the ReviewRequest object
+	ID string `json:"id"`
 	// Identifies the pull request associated with this review request.
 	PullRequest PullRequest `json:"pullRequest"`
 	// The reviewer that is requested.
@@ -22850,7 +23305,8 @@ type ReviewRequestRemovedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the ReviewRequestRemovedEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 	// Identifies the reviewer whose review request was removed.
@@ -22872,7 +23328,8 @@ type ReviewRequestedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the ReviewRequestedEvent object
+	ID string `json:"id"`
 	// PullRequest referenced by event.
 	PullRequest PullRequest `json:"pullRequest"`
 	// Identifies the reviewer whose review was requested.
@@ -22976,8 +23433,9 @@ type SavedReply struct {
 	// The saved reply body rendered to HTML.
 	BodyHTML string `json:"bodyHTML"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the SavedReply object
+	ID string `json:"id"`
 	// The title of the saved reply.
 	Title string `json:"title"`
 	// The user that saved this reply.
@@ -23063,7 +23521,8 @@ type SecurityAdvisory struct {
 	Description string `json:"description"`
 	// The GitHub Security Advisory ID
 	GhsaID string `json:"ghsaId"`
-	ID     string `json:"id"`
+	// The Node ID of the SecurityAdvisory object
+	ID string `json:"id"`
 	// A list of identifiers for this advisory
 	Identifiers []*SecurityAdvisoryIdentifier `json:"identifiers"`
 	// The permalink for the advisory's dependabot alerts page
@@ -23365,6 +23824,46 @@ type SocialAccountEdge struct {
 	Node *SocialAccount `json:"node,omitempty"`
 }
 
+// A GitHub account and the total amount in USD they've paid for sponsorships to a particular maintainer. Does not include payments made via Patreon.
+type SponsorAndLifetimeValue struct {
+	// The amount in cents.
+	AmountInCents int `json:"amountInCents"`
+	// The amount in USD, formatted as a string.
+	FormattedAmount string `json:"formattedAmount"`
+	// The sponsor's GitHub account.
+	Sponsor Sponsorable `json:"sponsor"`
+	// The maintainer's GitHub account.
+	Sponsorable Sponsorable `json:"sponsorable"`
+}
+
+// The connection type for SponsorAndLifetimeValue.
+type SponsorAndLifetimeValueConnection struct {
+	// A list of edges.
+	Edges []*SponsorAndLifetimeValueEdge `json:"edges,omitempty"`
+	// A list of nodes.
+	Nodes []*SponsorAndLifetimeValue `json:"nodes,omitempty"`
+	// Information to aid in pagination.
+	PageInfo PageInfo `json:"pageInfo"`
+	// Identifies the total count of items in the connection.
+	TotalCount int `json:"totalCount"`
+}
+
+// An edge in a connection.
+type SponsorAndLifetimeValueEdge struct {
+	// A cursor for use in pagination.
+	Cursor string `json:"cursor"`
+	// The item at the end of the edge.
+	Node *SponsorAndLifetimeValue `json:"node,omitempty"`
+}
+
+// Ordering options for connections to get sponsor entities and associated USD amounts for GitHub Sponsors.
+type SponsorAndLifetimeValueOrder struct {
+	// The field to order results by.
+	Field SponsorAndLifetimeValueOrderField `json:"field"`
+	// The ordering direction.
+	Direction OrderDirection `json:"direction"`
+}
+
 // The connection type for Sponsor.
 type SponsorConnection struct {
 	// A list of edges.
@@ -23427,7 +23926,10 @@ type SponsorsActivity struct {
 	Action SponsorsActivityAction `json:"action"`
 	// The sponsor's current privacy level.
 	CurrentPrivacyLevel *SponsorshipPrivacy `json:"currentPrivacyLevel,omitempty"`
-	ID                  string              `json:"id"`
+	// The Node ID of the SponsorsActivity object
+	ID string `json:"id"`
+	// The platform that was used to pay for the sponsorship.
+	PaymentSource *SponsorshipPaymentSource `json:"paymentSource,omitempty"`
 	// The tier that the sponsorship used to use, for tier change events.
 	PreviousSponsorsTier *SponsorsTier `json:"previousSponsorsTier,omitempty"`
 	// The user or organization who triggered this activity and was/is sponsoring the sponsorable.
@@ -23513,7 +24015,8 @@ type SponsorsListing struct {
 	FullDescription string `json:"fullDescription"`
 	// The full description of the listing rendered to HTML.
 	FullDescriptionHTML string `json:"fullDescriptionHTML"`
-	ID                  string `json:"id"`
+	// The Node ID of the SponsorsListing object
+	ID string `json:"id"`
 	// Whether this listing is publicly visible.
 	IsPublic bool `json:"isPublic"`
 	// The listing's full name.
@@ -23549,7 +24052,8 @@ type SponsorsListingFeaturedItem struct {
 	Description *string `json:"description,omitempty"`
 	// The record that is featured on the GitHub Sponsors profile.
 	Featureable SponsorsListingFeatureableItem `json:"featureable"`
-	ID          string                         `json:"id"`
+	// The Node ID of the SponsorsListingFeaturedItem object
+	ID string `json:"id"`
 	// The position of this featured item on the GitHub Sponsors profile with a lower position indicating higher precedence. Starts at 1.
 	Position int `json:"position"`
 	// The GitHub Sponsors profile that features this record.
@@ -23575,7 +24079,8 @@ type SponsorsTier struct {
 	Description string `json:"description"`
 	// The tier description rendered to HTML
 	DescriptionHTML string `json:"descriptionHTML"`
-	ID              string `json:"id"`
+	// The Node ID of the SponsorsTier object
+	ID string `json:"id"`
 	// Whether this tier was chosen at checkout time by the sponsor rather than defined ahead of time by the maintainer who manages the Sponsors listing.
 	IsCustomAmount bool `json:"isCustomAmount"`
 	// Whether this tier is only for use with one-time sponsorships.
@@ -23641,7 +24146,8 @@ type SponsorsTierOrder struct {
 type Sponsorship struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the Sponsorship object
+	ID string `json:"id"`
 	// Whether the sponsorship is active. False implies the sponsor is a past sponsor of the maintainer, while true implies they are a current sponsor.
 	IsActive bool `json:"isActive"`
 	// Whether this sponsorship represents a one-time payment versus a recurring sponsorship.
@@ -23650,6 +24156,8 @@ type Sponsorship struct {
 	IsSponsorOptedIntoEmail *bool `json:"isSponsorOptedIntoEmail,omitempty"`
 	// The entity that is being sponsored
 	Maintainer User `json:"maintainer"`
+	// The platform that was most recently used to pay for the sponsorship.
+	PaymentSource *SponsorshipPaymentSource `json:"paymentSource,omitempty"`
 	// The privacy level for this sponsorship.
 	PrivacyLevel SponsorshipPrivacy `json:"privacyLevel"`
 	// The user that is sponsoring. Returns null if the sponsorship is private or if sponsor is not a user.
@@ -23701,7 +24209,8 @@ type SponsorshipNewsletter struct {
 	Body string `json:"body"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the SponsorshipNewsletter object
+	ID string `json:"id"`
 	// Indicates if the newsletter has been made available to sponsors.
 	IsPublished bool `json:"isPublished"`
 	// The user or organization this newsletter is from.
@@ -23918,7 +24427,8 @@ type Status struct {
 	Context *StatusContext `json:"context,omitempty"`
 	// The individual status contexts for this commit.
 	Contexts []*StatusContext `json:"contexts"`
-	ID       string           `json:"id"`
+	// The Node ID of the Status object
+	ID string `json:"id"`
 	// The combined commit status.
 	State StatusState `json:"state"`
 }
@@ -23950,7 +24460,8 @@ type StatusCheckRollup struct {
 	Commit *Commit `json:"commit,omitempty"`
 	// A list of status contexts and check runs for this commit.
 	Contexts StatusCheckRollupContextConnection `json:"contexts"`
-	ID       string                             `json:"id"`
+	// The Node ID of the StatusCheckRollup object
+	ID string `json:"id"`
 	// The combined status for the commit.
 	State StatusState `json:"state"`
 }
@@ -24002,7 +24513,8 @@ type StatusContext struct {
 	Creator Actor `json:"creator,omitempty"`
 	// The description for this status context.
 	Description *string `json:"description,omitempty"`
-	ID          string  `json:"id"`
+	// The Node ID of the StatusContext object
+	ID string `json:"id"`
 	// Whether this is required to pass before merging for a specific pull request.
 	IsRequired bool `json:"isRequired"`
 	// The state of this status context.
@@ -24113,7 +24625,8 @@ type SubscribedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the SubscribedEvent object
+	ID string `json:"id"`
 	// Object referenced by event.
 	Subscribable Subscribable `json:"subscribable"`
 }
@@ -24149,7 +24662,8 @@ type Tag struct {
 	CommitResourcePath string `json:"commitResourcePath"`
 	// The HTTP URL for this Git object
 	CommitURL string `json:"commitUrl"`
-	ID        string `json:"id"`
+	// The Node ID of the Tag object
+	ID string `json:"id"`
 	// The Git tag message.
 	Message *string `json:"message,omitempty"`
 	// The Git tag name.
@@ -24174,7 +24688,9 @@ func (this Tag) GetCommitResourcePath() string { return this.CommitResourcePath 
 
 // The HTTP URL for this Git object
 func (this Tag) GetCommitURL() string { return this.CommitURL }
-func (this Tag) GetID() string        { return this.ID }
+
+// The Node ID of the GitObject object
+func (this Tag) GetID() string { return this.ID }
 
 // The Git object ID
 func (this Tag) GetOid() string { return this.Oid }
@@ -24240,7 +24756,8 @@ type Team struct {
 	EditTeamResourcePath string `json:"editTeamResourcePath"`
 	// The HTTP URL for editing this team
 	EditTeamURL string `json:"editTeamUrl"`
-	ID          string `json:"id"`
+	// The Node ID of the Team object
+	ID string `json:"id"`
 	// A list of pending invitations for users to this team
 	Invitations *OrganizationInvitationConnection `json:"invitations,omitempty"`
 	// Get the status messages members of this entity have set that are either public or visible only to the organization.
@@ -24323,6 +24840,8 @@ func (Team) IsReviewDismissalAllowanceActor() {}
 
 func (Team) IsSubscribable() {}
 
+// The Node ID of the Subscribable object
+
 // Check if the viewer is able to change their subscription status for the repository.
 func (this Team) GetViewerCanSubscribe() bool { return this.ViewerCanSubscribe }
 
@@ -24347,7 +24866,8 @@ type TeamAddMemberAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the TeamAddMemberAuditEntry object
+	ID string `json:"id"`
 	// Whether the team was mapped to an LDAP Group.
 	IsLdapMapped *bool `json:"isLdapMapped,omitempty"`
 	// The corresponding operation type for the action
@@ -24474,7 +24994,8 @@ type TeamAddRepositoryAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the TeamAddRepositoryAuditEntry object
+	ID string `json:"id"`
 	// Whether the team was mapped to an LDAP Group.
 	IsLdapMapped *bool `json:"isLdapMapped,omitempty"`
 	// The corresponding operation type for the action
@@ -24625,7 +25146,8 @@ type TeamChangeParentTeamAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the TeamChangeParentTeamAuditEntry object
+	ID string `json:"id"`
 	// Whether the team was mapped to an LDAP Group.
 	IsLdapMapped *bool `json:"isLdapMapped,omitempty"`
 	// The corresponding operation type for the action
@@ -24801,13 +25323,14 @@ type TeamDiscussion struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The actor who edited the comment.
-	Editor Actor  `json:"editor,omitempty"`
-	ID     string `json:"id"`
+	Editor Actor `json:"editor,omitempty"`
+	// The Node ID of the TeamDiscussion object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// Whether or not the discussion is pinned.
 	IsPinned bool `json:"isPinned"`
-	// Whether or not the discussion is only visible to team members and org admins.
+	// Whether or not the discussion is only visible to team members and organization owners.
 	IsPrivate bool `json:"isPrivate"`
 	// The moment the editor made the last edit
 	LastEditedAt *time.Time `json:"lastEditedAt,omitempty"`
@@ -24876,7 +25399,9 @@ func (this TeamDiscussion) GetCreatedViaEmail() bool { return this.CreatedViaEma
 
 // The actor who edited the comment.
 func (this TeamDiscussion) GetEditor() Actor { return this.Editor }
-func (this TeamDiscussion) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this TeamDiscussion) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this TeamDiscussion) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -24912,6 +25437,8 @@ func (TeamDiscussion) IsReactable() {}
 // Identifies the primary key from the database.
 func (this TeamDiscussion) GetDatabaseID() *int { return this.DatabaseID }
 
+// The Node ID of the Reactable object
+
 // A list of reactions grouped by content left on the subject.
 func (this TeamDiscussion) GetReactionGroups() []*ReactionGroup {
 	if this.ReactionGroups == nil {
@@ -24931,6 +25458,8 @@ func (this TeamDiscussion) GetReactions() ReactionConnection { return this.React
 func (this TeamDiscussion) GetViewerCanReact() bool { return this.ViewerCanReact }
 
 func (TeamDiscussion) IsSubscribable() {}
+
+// The Node ID of the Subscribable object
 
 // Check if the viewer is able to change their subscription status for the repository.
 func (this TeamDiscussion) GetViewerCanSubscribe() bool { return this.ViewerCanSubscribe }
@@ -24988,8 +25517,9 @@ type TeamDiscussionComment struct {
 	// The discussion this comment is about.
 	Discussion TeamDiscussion `json:"discussion"`
 	// The actor who edited the comment.
-	Editor Actor  `json:"editor,omitempty"`
-	ID     string `json:"id"`
+	Editor Actor `json:"editor,omitempty"`
+	// The Node ID of the TeamDiscussionComment object
+	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
 	IncludesCreatedEdit bool `json:"includesCreatedEdit"`
 	// The moment the editor made the last edit
@@ -25049,7 +25579,9 @@ func (this TeamDiscussionComment) GetCreatedViaEmail() bool { return this.Create
 
 // The actor who edited the comment.
 func (this TeamDiscussionComment) GetEditor() Actor { return this.Editor }
-func (this TeamDiscussionComment) GetID() string    { return this.ID }
+
+// The Node ID of the Comment object
+func (this TeamDiscussionComment) GetID() string { return this.ID }
 
 // Check if this comment was edited and includes an edit with the creation data
 func (this TeamDiscussionComment) GetIncludesCreatedEdit() bool { return this.IncludesCreatedEdit }
@@ -25084,6 +25616,8 @@ func (TeamDiscussionComment) IsReactable() {}
 
 // Identifies the primary key from the database.
 func (this TeamDiscussionComment) GetDatabaseID() *int { return this.DatabaseID }
+
+// The Node ID of the Reactable object
 
 // A list of reactions grouped by content left on the subject.
 func (this TeamDiscussionComment) GetReactionGroups() []*ReactionGroup {
@@ -25253,7 +25787,8 @@ type TeamRemoveMemberAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the TeamRemoveMemberAuditEntry object
+	ID string `json:"id"`
 	// Whether the team was mapped to an LDAP Group.
 	IsLdapMapped *bool `json:"isLdapMapped,omitempty"`
 	// The corresponding operation type for the action
@@ -25380,7 +25915,8 @@ type TeamRemoveRepositoryAuditEntry struct {
 	ActorURL *string `json:"actorUrl,omitempty"`
 	// The time the action was initiated
 	CreatedAt string `json:"createdAt"`
-	ID        string `json:"id"`
+	// The Node ID of the TeamRemoveRepositoryAuditEntry object
+	ID string `json:"id"`
 	// Whether the team was mapped to an LDAP Group.
 	IsLdapMapped *bool `json:"isLdapMapped,omitempty"`
 	// The corresponding operation type for the action
@@ -25576,6 +26112,7 @@ type TextMatchHighlight struct {
 
 // A topic aggregates entities that are related to a subject.
 type Topic struct {
+	// The Node ID of the Topic object
 	ID string `json:"id"`
 	// The topic's name.
 	Name string `json:"name"`
@@ -25600,6 +26137,8 @@ func (Topic) IsNode() {}
 func (this Topic) GetID() string { return this.ID }
 
 func (Topic) IsStarrable() {}
+
+// The Node ID of the Starrable object
 
 // Returns a count of how many stargazers there are on this object
 func (this Topic) GetStargazerCount() int { return this.StargazerCount }
@@ -25656,7 +26195,8 @@ type TransferredEvent struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// The repository this came from
 	FromRepository *Repository `json:"fromRepository,omitempty"`
-	ID             string      `json:"id"`
+	// The Node ID of the TransferredEvent object
+	ID string `json:"id"`
 	// Identifies the issue associated with the event.
 	Issue Issue `json:"issue"`
 }
@@ -25682,7 +26222,8 @@ type Tree struct {
 	CommitURL string `json:"commitUrl"`
 	// A list of tree entries.
 	Entries []*TreeEntry `json:"entries,omitempty"`
-	ID      string       `json:"id"`
+	// The Node ID of the Tree object
+	ID string `json:"id"`
 	// The Git object ID
 	Oid string `json:"oid"`
 	// The Repository the Git object belongs to
@@ -25699,7 +26240,9 @@ func (this Tree) GetCommitResourcePath() string { return this.CommitResourcePath
 
 // The HTTP URL for this Git object
 func (this Tree) GetCommitURL() string { return this.CommitURL }
-func (this Tree) GetID() string        { return this.ID }
+
+// The Node ID of the GitObject object
+func (this Tree) GetID() string { return this.ID }
 
 // The Git object ID
 func (this Tree) GetOid() string { return this.Oid }
@@ -25789,7 +26332,8 @@ type UnassignedEvent struct {
 	Assignee Assignee `json:"assignee,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the UnassignedEvent object
+	ID string `json:"id"`
 	// Identifies the subject (user) who was unassigned.
 	User *User `json:"user,omitempty"`
 }
@@ -25886,7 +26430,8 @@ type UnlabeledEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the UnlabeledEvent object
+	ID string `json:"id"`
 	// Identifies the label associated with the 'unlabeled' event.
 	Label Label `json:"label"`
 	// Identifies the `Labelable` associated with the event.
@@ -25986,7 +26531,8 @@ type UnlockedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the UnlockedEvent object
+	ID string `json:"id"`
 	// Object that was unlocked.
 	Lockable Lockable `json:"lockable"`
 }
@@ -26082,7 +26628,8 @@ type UnmarkedAsDuplicateEvent struct {
 	CreatedAt time.Time `json:"createdAt"`
 	// The issue or pull request which has been marked as a duplicate of another.
 	Duplicate IssueOrPullRequest `json:"duplicate,omitempty"`
-	ID        string             `json:"id"`
+	// The Node ID of the UnmarkedAsDuplicateEvent object
+	ID string `json:"id"`
 	// Canonical and duplicate belong to different repositories.
 	IsCrossRepository bool `json:"isCrossRepository"`
 }
@@ -26124,6 +26671,8 @@ type UnpinIssueInput struct {
 type UnpinIssuePayload struct {
 	// A unique identifier for the client performing the mutation.
 	ClientMutationID *string `json:"clientMutationId,omitempty"`
+	// The id of the pinned issue that was unpinned
+	ID *string `json:"id,omitempty"`
 	// The issue that was unpinned
 	Issue *Issue `json:"issue,omitempty"`
 }
@@ -26134,7 +26683,8 @@ type UnpinnedEvent struct {
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the UnpinnedEvent object
+	ID string `json:"id"`
 	// Identifies the issue associated with the event.
 	Issue Issue `json:"issue"`
 }
@@ -26164,13 +26714,30 @@ type UnresolveReviewThreadPayload struct {
 	Thread *PullRequestReviewThread `json:"thread,omitempty"`
 }
 
+// Autogenerated input type of UnsubscribeFromNotifications
+type UnsubscribeFromNotificationsInput struct {
+	// The NotificationThread IDs of the objects to unsubscribe from.
+	Ids []string `json:"ids"`
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+}
+
+// Autogenerated return type of UnsubscribeFromNotifications
+type UnsubscribeFromNotificationsPayload struct {
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+	// Did the operation succeed?
+	Success *bool `json:"success,omitempty"`
+}
+
 // Represents an 'unsubscribed' event on a given `Subscribable`.
 type UnsubscribedEvent struct {
 	// Identifies the actor who performed the event.
 	Actor Actor `json:"actor,omitempty"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the UnsubscribedEvent object
+	ID string `json:"id"`
 	// Object referenced by event.
 	Subscribable Subscribable `json:"subscribable"`
 }
@@ -26208,7 +26775,7 @@ type UpdateBranchProtectionRuleInput struct {
 	AllowsForcePushes *bool `json:"allowsForcePushes,omitempty"`
 	// Can this branch be deleted.
 	AllowsDeletions *bool `json:"allowsDeletions,omitempty"`
-	// Can admins overwrite branch protection.
+	// Can admins override branch protection.
 	IsAdminEnforced *bool `json:"isAdminEnforced,omitempty"`
 	// Are status checks required to update matching branches.
 	RequiresStatusChecks *bool `json:"requiresStatusChecks,omitempty"`
@@ -26908,6 +27475,24 @@ type UpdateParametersInput struct {
 	UpdateAllowsFetchAndMerge bool `json:"updateAllowsFetchAndMerge"`
 }
 
+// Autogenerated input type of UpdatePatreonSponsorability
+type UpdatePatreonSponsorabilityInput struct {
+	// The username of the organization with the GitHub Sponsors profile, if any. Defaults to the GitHub Sponsors profile for the authenticated user if omitted.
+	SponsorableLogin *string `json:"sponsorableLogin,omitempty"`
+	// Whether Patreon tiers should be shown on the GitHub Sponsors profile page, allowing potential sponsors to make their payment through Patreon instead of GitHub.
+	EnablePatreonSponsorships bool `json:"enablePatreonSponsorships"`
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+}
+
+// Autogenerated return type of UpdatePatreonSponsorability
+type UpdatePatreonSponsorabilityPayload struct {
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+	// The GitHub Sponsors profile.
+	SponsorsListing *SponsorsListing `json:"sponsorsListing,omitempty"`
+}
+
 // Autogenerated input type of UpdateProjectCard
 type UpdateProjectCardInput struct {
 	// The ProjectCard ID to update.
@@ -27402,6 +27987,52 @@ type UpdateTopicsPayload struct {
 	Repository *Repository `json:"repository,omitempty"`
 }
 
+// Autogenerated input type of UpdateUserList
+type UpdateUserListInput struct {
+	// The ID of the list to update.
+	ListID string `json:"listId"`
+	// The name of the list
+	Name *string `json:"name,omitempty"`
+	// A description of the list
+	Description *string `json:"description,omitempty"`
+	// Whether or not the list is private
+	IsPrivate *bool `json:"isPrivate,omitempty"`
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+}
+
+// Autogenerated return type of UpdateUserList
+type UpdateUserListPayload struct {
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+	// The list that was just updated
+	List *UserList `json:"list,omitempty"`
+}
+
+// Autogenerated input type of UpdateUserListsForItem
+type UpdateUserListsForItemInput struct {
+	// The item to add to the list
+	ItemID string `json:"itemId"`
+	// The lists to which this item should belong
+	ListIds []string `json:"listIds"`
+	// The suggested lists to create and add this item to
+	SuggestedListIds []string `json:"suggestedListIds,omitempty"`
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+}
+
+// Autogenerated return type of UpdateUserListsForItem
+type UpdateUserListsForItemPayload struct {
+	// A unique identifier for the client performing the mutation.
+	ClientMutationID *string `json:"clientMutationId,omitempty"`
+	// The item that was added
+	Item UserListItems `json:"item,omitempty"`
+	// The lists to which this item belongs
+	Lists []*UserList `json:"lists,omitempty"`
+	// The user who owns the lists
+	User *User `json:"user,omitempty"`
+}
+
 // A user is an individual's account on GitHub that owns repositories and can make new content.
 type User struct {
 	// Determine if this repository owner has any items that can be pinned to their profile.
@@ -27446,7 +28077,8 @@ type User struct {
 	HasSponsorsListing bool `json:"hasSponsorsListing"`
 	// The hovercard information for this user in a given context
 	Hovercard Hovercard `json:"hovercard"`
-	ID        string    `json:"id"`
+	// The Node ID of the User object
+	ID string `json:"id"`
 	// The interaction ability settings for this user.
 	InteractionAbility *RepositoryInteractionAbility `json:"interactionAbility,omitempty"`
 	// Whether or not this user is a participant in the GitHub Security Bug Bounty.
@@ -27477,6 +28109,10 @@ type User struct {
 	Issues IssueConnection `json:"issues"`
 	// Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
 	ItemShowcase ProfileItemShowcase `json:"itemShowcase"`
+	// Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
+	LifetimeReceivedSponsorshipValues SponsorAndLifetimeValueConnection `json:"lifetimeReceivedSponsorshipValues"`
+	// A user-curated list of repositories
+	Lists UserListConnection `json:"lists"`
 	// The user's public profile location.
 	Location *string `json:"location,omitempty"`
 	// The username used to login.
@@ -27557,6 +28193,8 @@ type User struct {
 	StarredRepositories StarredRepositoryConnection `json:"starredRepositories"`
 	// The user's description of what they're currently doing.
 	Status *UserStatus `json:"status,omitempty"`
+	// Suggested names for user lists
+	SuggestedListNames []*UserListSuggestion `json:"suggestedListNames"`
 	// Repositories the user has contributed to, ordered by contribution rank, plus repositories the user has created
 	//
 	TopRepositories RepositoryConnection `json:"topRepositories"`
@@ -27621,6 +28259,8 @@ func (User) IsOrganizationOrUser() {}
 
 func (User) IsPackageOwner() {}
 
+// The Node ID of the PackageOwner object
+
 // A list of packages under the owner.
 func (this User) GetPackages() PackageConnection { return this.Packages }
 
@@ -27631,6 +28271,8 @@ func (this User) GetAnyPinnableItems() bool { return this.AnyPinnableItems }
 
 // The public profile email.
 func (this User) GetEmail() *string { return &this.Email }
+
+// The Node ID of the ProfileOwner object
 
 // Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
 func (this User) GetItemShowcase() ProfileItemShowcase { return this.ItemShowcase }
@@ -27660,6 +28302,8 @@ func (this User) GetWebsiteURL() *string { return this.WebsiteURL }
 
 func (User) IsProjectOwner() {}
 
+// The Node ID of the ProjectOwner object
+
 // Find project by number.
 func (this User) GetProject() *Project { return this.Project }
 
@@ -27678,6 +28322,8 @@ func (this User) GetViewerCanCreateProjects() bool { return this.ViewerCanCreate
 func (User) IsProjectV2Actor() {}
 
 func (User) IsProjectV2Owner() {}
+
+// The Node ID of the ProjectV2Owner object
 
 // Find a project by number.
 func (this User) GetProjectV2() *ProjectV2 { return this.ProjectV2 }
@@ -27709,6 +28355,8 @@ func (this User) GetRepositoryDiscussionComments() DiscussionCommentConnection {
 func (User) IsRepositoryOwner() {}
 
 // A URL pointing to the owner's public avatar.
+
+// The Node ID of the RepositoryOwner object
 
 // The username used to login.
 
@@ -27745,6 +28393,11 @@ func (this User) GetIsSponsoredBy() bool { return this.IsSponsoredBy }
 
 // True if the viewer is sponsored by this user/organization.
 func (this User) GetIsSponsoringViewer() bool { return this.IsSponsoringViewer }
+
+// Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
+func (this User) GetLifetimeReceivedSponsorshipValues() SponsorAndLifetimeValueConnection {
+	return this.LifetimeReceivedSponsorshipValues
+}
 
 // The estimated monthly GitHub Sponsors income for this user/organization in cents (USD).
 func (this User) GetMonthlyEstimatedSponsorsIncomeInCents() int {
@@ -27815,7 +28468,8 @@ type UserBlockedEvent struct {
 	BlockDuration UserBlockDuration `json:"blockDuration"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
-	ID        string    `json:"id"`
+	// The Node ID of the UserBlockedEvent object
+	ID string `json:"id"`
 	// The user who was blocked.
 	Subject *User `json:"subject,omitempty"`
 }
@@ -27858,8 +28512,9 @@ type UserContentEdit struct {
 	// When this content was edited
 	EditedAt time.Time `json:"editedAt"`
 	// The actor who edited this content
-	Editor Actor  `json:"editor,omitempty"`
-	ID     string `json:"id"`
+	Editor Actor `json:"editor,omitempty"`
+	// The Node ID of the UserContentEdit object
+	ID string `json:"id"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -27907,6 +28562,83 @@ type UserEmailMetadata struct {
 	Value string `json:"value"`
 }
 
+// A user-curated list of repositories
+type UserList struct {
+	// Identifies the date and time when the object was created.
+	CreatedAt time.Time `json:"createdAt"`
+	// The description of this list
+	Description *string `json:"description,omitempty"`
+	// The Node ID of the UserList object
+	ID string `json:"id"`
+	// Whether or not this list is private
+	IsPrivate bool `json:"isPrivate"`
+	// The items associated with this list
+	Items UserListItemsConnection `json:"items"`
+	// The date and time at which this list was created or last had items added to it
+	LastAddedAt time.Time `json:"lastAddedAt"`
+	// The name of this list
+	Name string `json:"name"`
+	// The slug of this list
+	Slug string `json:"slug"`
+	// Identifies the date and time when the object was last updated.
+	UpdatedAt time.Time `json:"updatedAt"`
+	// The user to which this list belongs
+	User User `json:"user"`
+}
+
+func (UserList) IsNode() {}
+
+// ID of the object.
+func (this UserList) GetID() string { return this.ID }
+
+// The connection type for UserList.
+type UserListConnection struct {
+	// A list of edges.
+	Edges []*UserListEdge `json:"edges,omitempty"`
+	// A list of nodes.
+	Nodes []*UserList `json:"nodes,omitempty"`
+	// Information to aid in pagination.
+	PageInfo PageInfo `json:"pageInfo"`
+	// Identifies the total count of items in the connection.
+	TotalCount int `json:"totalCount"`
+}
+
+// An edge in a connection.
+type UserListEdge struct {
+	// A cursor for use in pagination.
+	Cursor string `json:"cursor"`
+	// The item at the end of the edge.
+	Node *UserList `json:"node,omitempty"`
+}
+
+// The connection type for UserListItems.
+type UserListItemsConnection struct {
+	// A list of edges.
+	Edges []*UserListItemsEdge `json:"edges,omitempty"`
+	// A list of nodes.
+	Nodes []UserListItems `json:"nodes,omitempty"`
+	// Information to aid in pagination.
+	PageInfo PageInfo `json:"pageInfo"`
+	// Identifies the total count of items in the connection.
+	TotalCount int `json:"totalCount"`
+}
+
+// An edge in a connection.
+type UserListItemsEdge struct {
+	// A cursor for use in pagination.
+	Cursor string `json:"cursor"`
+	// The item at the end of the edge.
+	Node UserListItems `json:"node,omitempty"`
+}
+
+// Represents a suggested user list.
+type UserListSuggestion struct {
+	// The ID of the suggested user list
+	ID *string `json:"id,omitempty"`
+	// The name of the suggested user list
+	Name *string `json:"name,omitempty"`
+}
+
 // The user's description of what they're currently doing.
 type UserStatus struct {
 	// Identifies the date and time when the object was created.
@@ -27917,7 +28649,8 @@ type UserStatus struct {
 	EmojiHTML *string `json:"emojiHTML,omitempty"`
 	// If set, the status will not be shown after this date.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
-	ID        string     `json:"id"`
+	// The Node ID of the UserStatus object
+	ID string `json:"id"`
 	// Whether this status indicates the user is not fully available on GitHub.
 	IndicatesLimitedAvailability bool `json:"indicatesLimitedAvailability"`
 	// A brief message describing what the user is doing.
@@ -27976,8 +28709,9 @@ type VerifiableDomain struct {
 	// Whether a TXT record for verification with the expected host name was found.
 	HasFoundHostName bool `json:"hasFoundHostName"`
 	// Whether a TXT record for verification with the expected verification token was found.
-	HasFoundVerificationToken bool   `json:"hasFoundVerificationToken"`
-	ID                        string `json:"id"`
+	HasFoundVerificationToken bool `json:"hasFoundVerificationToken"`
+	// The Node ID of the VerifiableDomain object
+	ID string `json:"id"`
 	// Whether or not the domain is approved.
 	IsApproved bool `json:"isApproved"`
 	// Whether this domain is required to exist for an organization or enterprise policy to be enforced.
@@ -28068,8 +28802,9 @@ type Workflow struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
-	DatabaseID *int   `json:"databaseId,omitempty"`
-	ID         string `json:"id"`
+	DatabaseID *int `json:"databaseId,omitempty"`
+	// The Node ID of the Workflow object
+	ID string `json:"id"`
 	// The name of the workflow.
 	Name string `json:"name"`
 	// The HTTP path for this workflow
@@ -28135,7 +28870,8 @@ type WorkflowRun struct {
 	Event string `json:"event"`
 	// The workflow file
 	File *WorkflowRunFile `json:"file,omitempty"`
-	ID   string           `json:"id"`
+	// The Node ID of the WorkflowRun object
+	ID string `json:"id"`
 	// The pending deployment requests of all check runs in this workflow run
 	PendingDeploymentRequests DeploymentRequestConnection `json:"pendingDeploymentRequests"`
 	// The HTTP path for this workflow run
@@ -28185,6 +28921,7 @@ type WorkflowRunEdge struct {
 
 // An executed workflow file for a workflow run.
 type WorkflowRunFile struct {
+	// The Node ID of the WorkflowRunFile object
 	ID string `json:"id"`
 	// The path of the workflow file relative to its repository.
 	Path string `json:"path"`
@@ -29973,7 +30710,7 @@ func (e EnterpriseMemberOrderField) MarshalGQL(w io.Writer) {
 type EnterpriseMembersCanCreateRepositoriesSettingValue string
 
 const (
-	// Organization administrators choose whether to allow members to create repositories.
+	// Organization owners choose whether to allow members to create repositories.
 	EnterpriseMembersCanCreateRepositoriesSettingValueNoPolicy EnterpriseMembersCanCreateRepositoriesSettingValue = "NO_POLICY"
 	// Members will be able to create public and private repositories.
 	EnterpriseMembersCanCreateRepositoriesSettingValueAll EnterpriseMembersCanCreateRepositoriesSettingValue = "ALL"
@@ -32385,7 +33122,7 @@ const (
 	OrgRemoveMemberAuditEntryMembershipTypeSuspended OrgRemoveMemberAuditEntryMembershipType = "SUSPENDED"
 	// A direct member is a user that is a member of the Organization.
 	OrgRemoveMemberAuditEntryMembershipTypeDirectMember OrgRemoveMemberAuditEntryMembershipType = "DIRECT_MEMBER"
-	// Organization administrators have full access and can change several settings, including the names of repositories that belong to the Organization and Owners team membership. In addition, organization admins can delete the organization and all of its repositories.
+	// Organization owners have full access and can change several settings, including the names of repositories that belong to the Organization and Owners team membership. In addition, organization owners can delete the organization and all of its repositories.
 	OrgRemoveMemberAuditEntryMembershipTypeAdmin OrgRemoveMemberAuditEntryMembershipType = "ADMIN"
 	// A billing manager is a user who manages the billing settings for the Organization, such as updating payment information.
 	OrgRemoveMemberAuditEntryMembershipTypeBillingManager OrgRemoveMemberAuditEntryMembershipType = "BILLING_MANAGER"
@@ -34381,13 +35118,13 @@ func (e ProjectV2ViewOrderField) MarshalGQL(w io.Writer) {
 type ProjectV2WorkflowsOrderField string
 
 const (
-	// The workflows' name
+	// The name of the workflow
 	ProjectV2WorkflowsOrderFieldName ProjectV2WorkflowsOrderField = "NAME"
-	// The workflows' number
+	// The number of the workflow
 	ProjectV2WorkflowsOrderFieldNumber ProjectV2WorkflowsOrderField = "NUMBER"
-	// The workflows' date and time of update
+	// The date and time of the workflow update
 	ProjectV2WorkflowsOrderFieldUpdatedAt ProjectV2WorkflowsOrderField = "UPDATED_AT"
-	// The workflows' date and time of creation
+	// The date and time of the workflow creation
 	ProjectV2WorkflowsOrderFieldCreatedAt ProjectV2WorkflowsOrderField = "CREATED_AT"
 )
 
@@ -36261,6 +36998,53 @@ func (e RepositoryPrivacy) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Properties by which repository rule connections can be ordered.
+type RepositoryRuleOrderField string
+
+const (
+	// Order repository rules by updated time
+	RepositoryRuleOrderFieldUpdatedAt RepositoryRuleOrderField = "UPDATED_AT"
+	// Order repository rules by created time
+	RepositoryRuleOrderFieldCreatedAt RepositoryRuleOrderField = "CREATED_AT"
+	// Order repository rules by type
+	RepositoryRuleOrderFieldType RepositoryRuleOrderField = "TYPE"
+)
+
+var AllRepositoryRuleOrderField = []RepositoryRuleOrderField{
+	RepositoryRuleOrderFieldUpdatedAt,
+	RepositoryRuleOrderFieldCreatedAt,
+	RepositoryRuleOrderFieldType,
+}
+
+func (e RepositoryRuleOrderField) IsValid() bool {
+	switch e {
+	case RepositoryRuleOrderFieldUpdatedAt, RepositoryRuleOrderFieldCreatedAt, RepositoryRuleOrderFieldType:
+		return true
+	}
+	return false
+}
+
+func (e RepositoryRuleOrderField) String() string {
+	return string(e)
+}
+
+func (e *RepositoryRuleOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RepositoryRuleOrderField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RepositoryRuleOrderField", str)
+	}
+	return nil
+}
+
+func (e RepositoryRuleOrderField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // The rule types supported in rulesets
 type RepositoryRuleType string
 
@@ -37309,6 +38093,53 @@ func (e *SocialAccountProvider) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SocialAccountProvider) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Properties by which sponsor and lifetime value connections can be ordered.
+type SponsorAndLifetimeValueOrderField string
+
+const (
+	// Order results by the sponsor's login (username).
+	SponsorAndLifetimeValueOrderFieldSponsorLogin SponsorAndLifetimeValueOrderField = "SPONSOR_LOGIN"
+	// Order results by the sponsor's relevance to the viewer.
+	SponsorAndLifetimeValueOrderFieldSponsorRelevance SponsorAndLifetimeValueOrderField = "SPONSOR_RELEVANCE"
+	// Order results by how much money the sponsor has paid in total.
+	SponsorAndLifetimeValueOrderFieldLifetimeValue SponsorAndLifetimeValueOrderField = "LIFETIME_VALUE"
+)
+
+var AllSponsorAndLifetimeValueOrderField = []SponsorAndLifetimeValueOrderField{
+	SponsorAndLifetimeValueOrderFieldSponsorLogin,
+	SponsorAndLifetimeValueOrderFieldSponsorRelevance,
+	SponsorAndLifetimeValueOrderFieldLifetimeValue,
+}
+
+func (e SponsorAndLifetimeValueOrderField) IsValid() bool {
+	switch e {
+	case SponsorAndLifetimeValueOrderFieldSponsorLogin, SponsorAndLifetimeValueOrderFieldSponsorRelevance, SponsorAndLifetimeValueOrderFieldLifetimeValue:
+		return true
+	}
+	return false
+}
+
+func (e SponsorAndLifetimeValueOrderField) String() string {
+	return string(e)
+}
+
+func (e *SponsorAndLifetimeValueOrderField) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SponsorAndLifetimeValueOrderField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SponsorAndLifetimeValueOrderField", str)
+	}
+	return nil
+}
+
+func (e SponsorAndLifetimeValueOrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -38531,6 +39362,50 @@ func (e *SponsorshipOrderField) UnmarshalGQL(v interface{}) error {
 }
 
 func (e SponsorshipOrderField) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// How payment was made for funding a GitHub Sponsors sponsorship.
+type SponsorshipPaymentSource string
+
+const (
+	// Payment was made through GitHub.
+	SponsorshipPaymentSourceGithub SponsorshipPaymentSource = "GITHUB"
+	// Payment was made through Patreon.
+	SponsorshipPaymentSourcePatreon SponsorshipPaymentSource = "PATREON"
+)
+
+var AllSponsorshipPaymentSource = []SponsorshipPaymentSource{
+	SponsorshipPaymentSourceGithub,
+	SponsorshipPaymentSourcePatreon,
+}
+
+func (e SponsorshipPaymentSource) IsValid() bool {
+	switch e {
+	case SponsorshipPaymentSourceGithub, SponsorshipPaymentSourcePatreon:
+		return true
+	}
+	return false
+}
+
+func (e SponsorshipPaymentSource) String() string {
+	return string(e)
+}
+
+func (e *SponsorshipPaymentSource) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SponsorshipPaymentSource(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SponsorshipPaymentSource", str)
+	}
+	return nil
+}
+
+func (e SponsorshipPaymentSource) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
