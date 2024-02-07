@@ -10394,6 +10394,10 @@ func (this MovedColumnsInProjectEvent) GetID() string { return this.ID }
 
 func (MovedColumnsInProjectEvent) IsPullRequestTimelineItems() {}
 
+// The root query for implementing GraphQL mutations.
+type Mutation struct {
+}
+
 // An OIDC identity provider configured to provision identities for an enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope.
 type OIDCProvider struct {
 	// The enterprise this identity provider belongs to.
@@ -18041,6 +18045,10 @@ type PushAllowanceEdge struct {
 	Cursor string `json:"cursor"`
 	// The item at the end of the edge.
 	Node *PushAllowance `json:"node,omitempty"`
+}
+
+// The query root of GitHub's GraphQL interface.
+type Query struct {
 }
 
 // Represents the client's rate limit.
