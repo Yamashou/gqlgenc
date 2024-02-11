@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"syscall"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/plugin"
@@ -41,13 +42,20 @@ func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.Model
 }
 
 func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) error {
+	_ = syscall.Unlink(cfg.Client.Filename)
+	if cfg.Model.IsDefined() {
+		_ = syscall.Unlink(cfg.Model.Filename)
+	}
+
 	var plugins []plugin.Plugin
 	if cfg.Model.IsDefined() {
-		p := modelgen.Plugin{
+		p := &modelgen.Plugin{
 			MutateHook: mutateHook(cfg),
 		}
-		plugins = append(plugins, &p)
+
+		plugins = append(plugins, p)
 	}
+
 	for _, o := range option {
 		o(cfg.GQLConfig, &plugins)
 	}
