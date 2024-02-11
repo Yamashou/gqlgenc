@@ -8,12 +8,13 @@ import (
 	"time"
 
 	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/Yamashou/gqlgenc/example/github/model"
 )
 
 type GithubGraphQLClient interface {
 	GetUser(ctx context.Context, repositoryFirst int, languageFirst int, interceptors ...clientv2.RequestInterceptor) (*GetUser, error)
 	GetNode(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode, error)
-	AddStar(ctx context.Context, input AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error)
+	AddStar(ctx context.Context, input model.AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error)
 	GetNode2(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode2, error)
 }
 
@@ -413,7 +414,7 @@ const AddStarDocument = `mutation AddStar ($input: AddStarInput!) {
 }
 `
 
-func (c *Client) AddStar(ctx context.Context, input AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error) {
+func (c *Client) AddStar(ctx context.Context, input model.AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error) {
 	vars := map[string]interface{}{
 		"input": input,
 	}

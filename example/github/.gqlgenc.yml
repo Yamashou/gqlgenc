@@ -1,5 +1,7 @@
 model:
-  filename: ./gen/models_gen.go
+  filename: ./model/models_gen.go
+autobind:
+  - github.com/Yamashou/gqlgenc/example/github/model
 client:
   filename: ./gen/client.go
 models:
