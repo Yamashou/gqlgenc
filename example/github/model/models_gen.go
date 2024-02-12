@@ -24,7 +24,7 @@ type AnnouncementBanner interface {
 type Assignable interface {
 	IsAssignable()
 	// A list of Users assigned to this object.
-	GetAssignees() UserConnection
+	GetAssignees() *UserConnection
 }
 
 // Types that can be assigned to issues.
@@ -152,7 +152,7 @@ type Contribution interface {
 	GetURL() string
 	// The user who made this contribution.
 	//
-	GetUser() User
+	GetUser() *User
 }
 
 // Represents either a issue the viewer can access or a restricted contribution.
@@ -212,7 +212,7 @@ type GitObject interface {
 	// The Git object ID
 	GetOid() string
 	// The Repository the Git object belongs to
-	GetRepository() Repository
+	GetRepository() *Repository
 }
 
 // Information about a signature (GPG or S/MIME) on a Commit or Tag.
@@ -283,7 +283,7 @@ type Lockable interface {
 type MemberStatusable interface {
 	IsMemberStatusable()
 	// Get the status messages members of this entity have set that are either public or visible only to the organization.
-	GetMemberStatuses() UserStatusConnection
+	GetMemberStatuses() *UserStatusConnection
 }
 
 // Represents a GitHub Enterprise Importer (GEI) migration.
@@ -302,7 +302,7 @@ type Migration interface {
 	// The URL for the migration log (expires 1 day after migration completes).
 	GetMigrationLogURL() *string
 	// The migration source.
-	GetMigrationSource() MigrationSource
+	GetMigrationSource() *MigrationSource
 	// The target repository name.
 	GetRepositoryName() string
 	// The migration source URL, for example `https://github.com` or `https://monalisa.ghe.com`.
@@ -381,7 +381,7 @@ type PackageOwner interface {
 	// The Node ID of the PackageOwner object
 	GetID() string
 	// A list of packages under the owner.
-	GetPackages() PackageConnection
+	GetPackages() *PackageConnection
 }
 
 // Types that can grant permissions on a repository to a user
@@ -404,7 +404,7 @@ type ProfileOwner interface {
 	// The Node ID of the ProfileOwner object
 	GetID() string
 	// Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
-	GetItemShowcase() ProfileItemShowcase
+	GetItemShowcase() *ProfileItemShowcase
 	// The public profile location.
 	GetLocation() *string
 	// The username used to login.
@@ -412,9 +412,9 @@ type ProfileOwner interface {
 	// The public profile name.
 	GetName() *string
 	// A list of repositories and gists this profile owner can pin to their profile.
-	GetPinnableItems() PinnableItemConnection
+	GetPinnableItems() *PinnableItemConnection
 	// A list of repositories and gists this profile owner has pinned to their profile
-	GetPinnedItems() PinnableItemConnection
+	GetPinnedItems() *PinnableItemConnection
 	// Returns how many more items this profile owner can pin to their profile.
 	GetPinnedItemsRemaining() int
 	// Can the viewer pin repositories and gists to the profile?
@@ -436,7 +436,7 @@ type ProjectOwner interface {
 	// Find project by number.
 	GetProject() *Project
 	// A list of projects under the owner.
-	GetProjects() ProjectConnection
+	GetProjects() *ProjectConnection
 	// The HTTP path listing owners projects
 	GetProjectsResourcePath() string
 	// The HTTP URL listing owners projects
@@ -464,7 +464,7 @@ type ProjectV2FieldCommon interface {
 	// The project field's name.
 	GetName() string
 	// The project that contains this field.
-	GetProject() ProjectV2
+	GetProject() *ProjectV2
 	// Identifies the date and time when the object was last updated.
 	GetUpdatedAt() time.Time
 }
@@ -498,7 +498,7 @@ type ProjectV2ItemFieldValueCommon interface {
 	// The Node ID of the ProjectV2ItemFieldValueCommon object
 	GetID() string
 	// The project item that contains this value.
-	GetItem() ProjectV2Item
+	GetItem() *ProjectV2Item
 	// Identifies the date and time when the object was last updated.
 	GetUpdatedAt() time.Time
 }
@@ -511,14 +511,14 @@ type ProjectV2Owner interface {
 	// Find a project by number.
 	GetProjectV2() *ProjectV2
 	// A list of projects under the owner.
-	GetProjectsV2() ProjectV2Connection
+	GetProjectsV2() *ProjectV2Connection
 }
 
 // Recent projects for the owner.
 type ProjectV2Recent interface {
 	IsProjectV2Recent()
 	// Recent projects that this user has modified in the context of the owner.
-	GetRecentProjects() ProjectV2Connection
+	GetRecentProjects() *ProjectV2Connection
 }
 
 // An item in a pull request timeline
@@ -546,7 +546,7 @@ type Reactable interface {
 	// A list of reactions grouped by content left on the subject.
 	GetReactionGroups() []*ReactionGroup
 	// A list of Reactions left on the Issue.
-	GetReactions() ReactionConnection
+	GetReactions() *ReactionConnection
 	// Can user react to this subject
 	GetViewerCanReact() bool
 }
@@ -583,14 +583,14 @@ type RepositoryAuditEntryData interface {
 type RepositoryDiscussionAuthor interface {
 	IsRepositoryDiscussionAuthor()
 	// Discussions this user has started.
-	GetRepositoryDiscussions() DiscussionConnection
+	GetRepositoryDiscussions() *DiscussionConnection
 }
 
 // Represents an author of discussion comments in repositories.
 type RepositoryDiscussionCommentAuthor interface {
 	IsRepositoryDiscussionCommentAuthor()
 	// Discussion comments this user has authored.
-	GetRepositoryDiscussionComments() DiscussionCommentConnection
+	GetRepositoryDiscussionComments() *DiscussionCommentConnection
 }
 
 // A subset of repository info.
@@ -666,7 +666,7 @@ type RepositoryInfo interface {
 type RepositoryNode interface {
 	IsRepositoryNode()
 	// The repository associated with this node.
-	GetRepository() Repository
+	GetRepository() *Repository
 }
 
 // Represents an owner of a Repository.
@@ -679,7 +679,7 @@ type RepositoryOwner interface {
 	// The username used to login.
 	GetLogin() string
 	// A list of repositories that the user owns.
-	GetRepositories() RepositoryConnection
+	GetRepositories() *RepositoryConnection
 	// Find Repository.
 	GetRepository() *Repository
 	// The HTTP URL for the owner.
@@ -737,15 +737,15 @@ type Sponsorable interface {
 	// True if the viewer is sponsored by this user/organization.
 	GetIsSponsoringViewer() bool
 	// Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
-	GetLifetimeReceivedSponsorshipValues() SponsorAndLifetimeValueConnection
+	GetLifetimeReceivedSponsorshipValues() *SponsorAndLifetimeValueConnection
 	// The estimated monthly GitHub Sponsors income for this user/organization in cents (USD).
 	GetMonthlyEstimatedSponsorsIncomeInCents() int
 	// List of users and organizations this entity is sponsoring.
-	GetSponsoring() SponsorConnection
+	GetSponsoring() *SponsorConnection
 	// List of sponsors for this user or organization.
-	GetSponsors() SponsorConnection
+	GetSponsors() *SponsorConnection
 	// Events involving this sponsorable, such as new sponsorships.
-	GetSponsorsActivities() SponsorsActivityConnection
+	GetSponsorsActivities() *SponsorsActivityConnection
 	// The GitHub Sponsors listing for this user or organization.
 	GetSponsorsListing() *SponsorsListing
 	// The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor.
@@ -753,11 +753,11 @@ type Sponsorable interface {
 	// The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving.
 	GetSponsorshipForViewerAsSponsorable() *Sponsorship
 	// List of sponsorship updates sent from this sponsorable to sponsors.
-	GetSponsorshipNewsletters() SponsorshipNewsletterConnection
+	GetSponsorshipNewsletters() *SponsorshipNewsletterConnection
 	// The sponsorships where this user or organization is the maintainer receiving the funds.
-	GetSponsorshipsAsMaintainer() SponsorshipConnection
+	GetSponsorshipsAsMaintainer() *SponsorshipConnection
 	// The sponsorships where this user or organization is the funder.
-	GetSponsorshipsAsSponsor() SponsorshipConnection
+	GetSponsorshipsAsSponsor() *SponsorshipConnection
 	// The amount in United States cents (e.g., 500 = $5.00 USD) that this entity has spent on GitHub to fund sponsorships. Only returns a value when viewed by the user themselves or by a user who can manage sponsorships for the requested organization.
 	GetTotalSponsorshipAmountAsSponsorInCents() *int
 	// Whether or not the viewer is able to sponsor this user/organization.
@@ -785,7 +785,7 @@ type Starrable interface {
 	//
 	GetStargazerCount() int
 	// A list of users who have starred this starrable.
-	GetStargazers() StargazerConnection
+	GetStargazers() *StargazerConnection
 	// Returns a boolean indicating whether the viewing user has starred this starrable.
 	GetViewerHasStarred() bool
 }
@@ -1468,7 +1468,7 @@ type App struct {
 	// The Node ID of the App object
 	ID string `json:"id"`
 	// The IP addresses of the app.
-	IPAllowListEntries IPAllowListEntryConnection `json:"ipAllowListEntries"`
+	IPAllowListEntries *IPAllowListEntryConnection `json:"ipAllowListEntries"`
 	// The hex color code, without the leading '#', for the logo background.
 	LogoBackgroundColor string `json:"logoBackgroundColor"`
 	// A URL pointing to the app's logo.
@@ -1668,7 +1668,7 @@ type AutoMergeRequest struct {
 	// The merge method of the auto-merge request. If a merge queue is required by the base branch, this value will be set by the merge queue when merging.
 	MergeMethod PullRequestMergeMethod `json:"mergeMethod"`
 	// The pull request that this auto-merge request is set against.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 }
 
 // Represents a 'auto_rebase_enabled' event on a given pull request.
@@ -1726,7 +1726,7 @@ type AutomaticBaseChangeFailedEvent struct {
 	// The old base for this PR
 	OldBase string `json:"oldBase"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 }
 
 func (AutomaticBaseChangeFailedEvent) IsNode() {}
@@ -1749,7 +1749,7 @@ type AutomaticBaseChangeSucceededEvent struct {
 	// The old base for this PR
 	OldBase string `json:"oldBase"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 }
 
 func (AutomaticBaseChangeSucceededEvent) IsNode() {}
@@ -1774,7 +1774,7 @@ type BaseRefChangedEvent struct {
 	// Identifies the name of the base ref for the pull request before it was changed.
 	PreviousRefName string `json:"previousRefName"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 }
 
 func (BaseRefChangedEvent) IsNode() {}
@@ -1820,7 +1820,7 @@ type BaseRefForcePushedEvent struct {
 	// The Node ID of the BaseRefForcePushedEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// Identifies the fully qualified ref name for the 'base_ref_force_pushed' event.
 	Ref *Ref `json:"ref,omitempty"`
 }
@@ -1845,7 +1845,7 @@ type BlameRange struct {
 	// Identifies the recency of the change, from 1 (new) to 10 (old). This is calculated as a 2-quantile and determines the length of distance between the median age of all the changes in the file and the recency of the current range's change.
 	Age int `json:"age"`
 	// Identifies the line author
-	Commit Commit `json:"commit"`
+	Commit *Commit `json:"commit"`
 	// The ending line for the range
 	EndingLine int `json:"endingLine"`
 	// The starting line for the range
@@ -1871,7 +1871,7 @@ type Blob struct {
 	// The Git object ID
 	Oid string `json:"oid"`
 	// The Repository the Git object belongs to
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// UTF8 text data or null if the Blob is binary
 	Text *string `json:"text,omitempty"`
 }
@@ -1894,7 +1894,7 @@ func (this Blob) GetID() string { return this.ID }
 func (this Blob) GetOid() string { return this.Oid }
 
 // The Repository the Git object belongs to
-func (this Blob) GetRepository() Repository { return this.Repository }
+func (this Blob) GetRepository() *Repository { return this.Repository }
 
 func (Blob) IsNode() {}
 
@@ -1978,11 +1978,11 @@ type BranchProtectionRule struct {
 	// Is branch creation a protected operation.
 	BlocksCreations bool `json:"blocksCreations"`
 	// A list of conflicts matching branches protection rule and other branch protection rules
-	BranchProtectionRuleConflicts BranchProtectionRuleConflictConnection `json:"branchProtectionRuleConflicts"`
+	BranchProtectionRuleConflicts *BranchProtectionRuleConflictConnection `json:"branchProtectionRuleConflicts"`
 	// A list of actors able to force push for this branch protection rule.
-	BypassForcePushAllowances BypassForcePushAllowanceConnection `json:"bypassForcePushAllowances"`
+	BypassForcePushAllowances *BypassForcePushAllowanceConnection `json:"bypassForcePushAllowances"`
 	// A list of actors able to bypass PRs for this branch protection rule.
-	BypassPullRequestAllowances BypassPullRequestAllowanceConnection `json:"bypassPullRequestAllowances"`
+	BypassPullRequestAllowances *BypassPullRequestAllowanceConnection `json:"bypassPullRequestAllowances"`
 	// The actor who created this branch protection rule.
 	Creator Actor `json:"creator,omitempty"`
 	// Identifies the primary key from the database.
@@ -1998,11 +1998,11 @@ type BranchProtectionRule struct {
 	// Whether to set the branch as read-only. If this is true, users will not be able to push to the branch.
 	LockBranch bool `json:"lockBranch"`
 	// Repository refs that are protected by this rule
-	MatchingRefs RefConnection `json:"matchingRefs"`
+	MatchingRefs *RefConnection `json:"matchingRefs"`
 	// Identifies the protection rule pattern.
 	Pattern string `json:"pattern"`
 	// A list push allowances for this branch protection rule.
-	PushAllowances PushAllowanceConnection `json:"pushAllowances"`
+	PushAllowances *PushAllowanceConnection `json:"pushAllowances"`
 	// The repository associated with this branch protection rule.
 	Repository *Repository `json:"repository,omitempty"`
 	// Whether the most recent push must be approved by someone other than the person who pushed it
@@ -2036,7 +2036,7 @@ type BranchProtectionRule struct {
 	// Is dismissal of pull request reviews restricted.
 	RestrictsReviewDismissals bool `json:"restrictsReviewDismissals"`
 	// A list review dismissal allowances for this branch protection rule.
-	ReviewDismissalAllowances ReviewDismissalAllowanceConnection `json:"reviewDismissalAllowances"`
+	ReviewDismissalAllowances *ReviewDismissalAllowanceConnection `json:"reviewDismissalAllowances"`
 }
 
 func (BranchProtectionRule) IsNode() {}
@@ -2061,7 +2061,7 @@ type BranchProtectionRuleConflictConnection struct {
 	// A list of nodes.
 	Nodes []*BranchProtectionRuleConflict `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2081,7 +2081,7 @@ type BranchProtectionRuleConnection struct {
 	// A list of nodes.
 	Nodes []*BranchProtectionRule `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2126,7 +2126,7 @@ type BypassForcePushAllowanceConnection struct {
 	// A list of nodes.
 	Nodes []*BypassForcePushAllowance `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2161,7 +2161,7 @@ type BypassPullRequestAllowanceConnection struct {
 	// A list of nodes.
 	Nodes []*BypassPullRequestAllowance `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2206,7 +2206,7 @@ type CWEConnection struct {
 	// A list of nodes.
 	Nodes []*Cwe `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2292,7 +2292,7 @@ type CheckAnnotation struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The position of this annotation.
-	Location CheckAnnotationSpan `json:"location"`
+	Location *CheckAnnotationSpan `json:"location"`
 	// The annotation's message.
 	Message string `json:"message"`
 	// The path that this annotation was made on.
@@ -2310,7 +2310,7 @@ type CheckAnnotationConnection struct {
 	// A list of nodes.
 	Nodes []*CheckAnnotation `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2320,7 +2320,7 @@ type CheckAnnotationData struct {
 	// The path of the file to add an annotation to.
 	Path string `json:"path"`
 	// The location of the annotation
-	Location CheckAnnotationRange `json:"location"`
+	Location *CheckAnnotationRange `json:"location"`
 	// Represents an annotation's information level
 	AnnotationLevel CheckAnnotationLevel `json:"annotationLevel"`
 	// A short description of the feedback for these lines of code.
@@ -2362,9 +2362,9 @@ type CheckAnnotationRange struct {
 // An inclusive pair of positions for a check annotation.
 type CheckAnnotationSpan struct {
 	// End position (inclusive).
-	End CheckAnnotationPosition `json:"end"`
+	End *CheckAnnotationPosition `json:"end"`
 	// Start position (inclusive).
-	Start CheckAnnotationPosition `json:"start"`
+	Start *CheckAnnotationPosition `json:"start"`
 }
 
 // A check run.
@@ -2372,7 +2372,7 @@ type CheckRun struct {
 	// The check run's annotations
 	Annotations *CheckAnnotationConnection `json:"annotations,omitempty"`
 	// The check suite that this run is a part of.
-	CheckSuite CheckSuite `json:"checkSuite"`
+	CheckSuite *CheckSuite `json:"checkSuite"`
 	// Identifies the date and time when the check run was completed.
 	CompletedAt *time.Time `json:"completedAt,omitempty"`
 	// The conclusion of the check run.
@@ -2396,7 +2396,7 @@ type CheckRun struct {
 	// The permalink to the check run summary.
 	Permalink string `json:"permalink"`
 	// The repository associated with this check run.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this check run.
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the date and time when the check run was started.
@@ -2452,7 +2452,7 @@ type CheckRunConnection struct {
 	// A list of nodes.
 	Nodes []*CheckRun `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2540,7 +2540,7 @@ type CheckStepConnection struct {
 	// A list of nodes.
 	Nodes []*CheckStep `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2562,7 +2562,7 @@ type CheckSuite struct {
 	// The check runs associated with a check suite.
 	CheckRuns *CheckRunConnection `json:"checkRuns,omitempty"`
 	// The commit for this check suite
-	Commit Commit `json:"commit"`
+	Commit *Commit `json:"commit"`
 	// The conclusion of this check suite.
 	Conclusion *CheckConclusionState `json:"conclusion,omitempty"`
 	// Identifies the date and time when the object was created.
@@ -2578,7 +2578,7 @@ type CheckSuite struct {
 	// The push that triggered this check suite.
 	Push *Push `json:"push,omitempty"`
 	// The repository associated with this check suite.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this check suite
 	ResourcePath string `json:"resourcePath"`
 	// The status of this check suite.
@@ -2611,7 +2611,7 @@ type CheckSuiteConnection struct {
 	// A list of nodes.
 	Nodes []*CheckSuite `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -2876,9 +2876,9 @@ type Commit struct {
 	// The list of authors for this commit based on the git author and the Co-authored-by
 	// message trailer. The git author will always be first.
 	//
-	Authors GitActorConnection `json:"authors"`
+	Authors *GitActorConnection `json:"authors"`
 	// Fetches `git blame` information.
-	Blame Blame `json:"blame"`
+	Blame *Blame `json:"blame"`
 	// We recommend using the `changedFilesIfAvailable` field instead of `changedFiles`, as `changedFiles` will cause your request to return an error if GitHub is unable to calculate the number of changed files.
 	ChangedFiles int `json:"changedFiles"`
 	// The number of changed files in this commit. If GitHub is unable to calculate the number of changed files (for example due to a timeout), this will return `null`. We recommend using this field instead of `changedFiles`.
@@ -2886,7 +2886,7 @@ type Commit struct {
 	// The check suites associated with a commit.
 	CheckSuites *CheckSuiteConnection `json:"checkSuites,omitempty"`
 	// Comments made on the commit.
-	Comments CommitCommentConnection `json:"comments"`
+	Comments *CommitCommentConnection `json:"comments"`
 	// The HTTP path for this Git object
 	CommitResourcePath string `json:"commitResourcePath"`
 	// The HTTP URL for this Git object
@@ -2904,7 +2904,7 @@ type Commit struct {
 	// The tree entry representing the file located at the given path.
 	File *TreeEntry `json:"file,omitempty"`
 	// The linear commit history starting from (and including) this commit, in the same order as `git log`.
-	History CommitHistoryConnection `json:"history"`
+	History *CommitHistoryConnection `json:"history"`
 	// The Node ID of the Commit object
 	ID string `json:"id"`
 	// The Git commit message
@@ -2922,11 +2922,11 @@ type Commit struct {
 	// The organization this commit was made on behalf of.
 	OnBehalfOf *Organization `json:"onBehalfOf,omitempty"`
 	// The parents of a commit.
-	Parents CommitConnection `json:"parents"`
+	Parents *CommitConnection `json:"parents"`
 	// The datetime when this commit was pushed.
 	PushedDate *time.Time `json:"pushedDate,omitempty"`
 	// The Repository this commit belongs to
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this commit
 	ResourcePath string `json:"resourcePath"`
 	// Commit signing information, if present.
@@ -2936,12 +2936,12 @@ type Commit struct {
 	// Check and Status rollup information for this commit.
 	StatusCheckRollup *StatusCheckRollup `json:"statusCheckRollup,omitempty"`
 	// Returns a list of all submodules in this repository as of this Commit parsed from the .gitmodules file.
-	Submodules SubmoduleConnection `json:"submodules"`
+	Submodules *SubmoduleConnection `json:"submodules"`
 	// Returns a URL to download a tarball archive for a repository.
 	// Note: For private repositories, these links are temporary and expire after five minutes.
 	TarballURL string `json:"tarballUrl"`
 	// Commit's root Tree
-	Tree Tree `json:"tree"`
+	Tree *Tree `json:"tree"`
 	// The HTTP path for the tree of this commit
 	TreeResourcePath string `json:"treeResourcePath"`
 	// The HTTP URL for the tree of this commit
@@ -2977,7 +2977,7 @@ func (this Commit) GetID() string { return this.ID }
 func (this Commit) GetOid() string { return this.Oid }
 
 // The Repository the Git object belongs to
-func (this Commit) GetRepository() Repository { return this.Repository }
+func (this Commit) GetRepository() *Repository { return this.Repository }
 
 func (Commit) IsIssueTimelineItem() {}
 
@@ -3080,9 +3080,9 @@ type CommitComment struct {
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path permalink for this commit comment.
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the date and time when the object was last updated.
@@ -3196,7 +3196,7 @@ func (this CommitComment) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this CommitComment) GetReactions() ReactionConnection { return this.Reactions }
+func (this CommitComment) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this CommitComment) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -3204,7 +3204,7 @@ func (this CommitComment) GetViewerCanReact() bool { return this.ViewerCanReact 
 func (CommitComment) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this CommitComment) GetRepository() Repository { return this.Repository }
+func (this CommitComment) GetRepository() *Repository { return this.Repository }
 
 func (CommitComment) IsUpdatable() {}
 
@@ -3232,7 +3232,7 @@ type CommitCommentConnection struct {
 	// A list of nodes.
 	Nodes []*CommitComment `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -3248,7 +3248,7 @@ type CommitCommentEdge struct {
 // A thread of comments on a commit.
 type CommitCommentThread struct {
 	// The comments that exist in this thread.
-	Comments CommitCommentConnection `json:"comments"`
+	Comments *CommitCommentConnection `json:"comments"`
 	// The commit the comments were made on.
 	Commit *Commit `json:"commit,omitempty"`
 	// The Node ID of the CommitCommentThread object
@@ -3258,7 +3258,7 @@ type CommitCommentThread struct {
 	// The position in the diff for the commit that the comment was made on.
 	Position *int `json:"position,omitempty"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 func (CommitCommentThread) IsNode() {}
@@ -3271,7 +3271,7 @@ func (CommitCommentThread) IsPullRequestTimelineItem() {}
 func (CommitCommentThread) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this CommitCommentThread) GetRepository() Repository { return this.Repository }
+func (this CommitCommentThread) GetRepository() *Repository { return this.Repository }
 
 // The connection type for Commit.
 type CommitConnection struct {
@@ -3280,7 +3280,7 @@ type CommitConnection struct {
 	// A list of nodes.
 	Nodes []*Commit `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -3296,9 +3296,9 @@ type CommitContributionOrder struct {
 // This aggregates commits made by a user within one repository.
 type CommitContributionsByRepository struct {
 	// The commit contributions, each representing a day.
-	Contributions CreatedCommitContributionConnection `json:"contributions"`
+	Contributions *CreatedCommitContributionConnection `json:"contributions"`
 	// The repository in which the commits were made.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for the user's commits to the repository in this time range.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for the user's commits to the repository in this time range.
@@ -3320,7 +3320,7 @@ type CommitHistoryConnection struct {
 	// A list of nodes.
 	Nodes []*Commit `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -3424,7 +3424,7 @@ type Comparison struct {
 	// The number of commits behind the base branch.
 	BehindBy int `json:"behindBy"`
 	// The commits which compose this comparison.
-	Commits ComparisonCommitConnection `json:"commits"`
+	Commits *ComparisonCommitConnection `json:"commits"`
 	// The head revision of this comparison.
 	HeadTarget GitObject `json:"headTarget"`
 	// The Node ID of the Comparison object
@@ -3447,7 +3447,7 @@ type ComparisonCommitConnection struct {
 	// A list of nodes.
 	Nodes []*Commit `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -3546,7 +3546,7 @@ type ContributionsCollection struct {
 	// Commit contributions made by the user, grouped by repository.
 	CommitContributionsByRepository []*CommitContributionsByRepository `json:"commitContributionsByRepository"`
 	// A calendar of this user's contributions on GitHub.
-	ContributionCalendar ContributionCalendar `json:"contributionCalendar"`
+	ContributionCalendar *ContributionCalendar `json:"contributionCalendar"`
 	// The years the user has been making contributions with the most recent year first.
 	ContributionYears []int `json:"contributionYears"`
 	// Determine if this collection's time span ends in the current month.
@@ -3571,7 +3571,7 @@ type ContributionsCollection struct {
 	// Whether or not the collector's time span is all within the same day.
 	IsSingleDay bool `json:"isSingleDay"`
 	// A list of issues the user opened.
-	IssueContributions CreatedIssueContributionConnection `json:"issueContributions"`
+	IssueContributions *CreatedIssueContributionConnection `json:"issueContributions"`
 	// Issue contributions made by the user, grouped by repository.
 	IssueContributionsByRepository []*IssueContributionsByRepository `json:"issueContributionsByRepository"`
 	// When the user signed up for GitHub. This will be null if that sign up date falls outside the collection's time range and ignoreTimeRange is false.
@@ -3595,17 +3595,17 @@ type ContributionsCollection struct {
 	//
 	PopularPullRequestContribution *CreatedPullRequestContribution `json:"popularPullRequestContribution,omitempty"`
 	// Pull request contributions made by the user.
-	PullRequestContributions CreatedPullRequestContributionConnection `json:"pullRequestContributions"`
+	PullRequestContributions *CreatedPullRequestContributionConnection `json:"pullRequestContributions"`
 	// Pull request contributions made by the user, grouped by repository.
 	PullRequestContributionsByRepository []*PullRequestContributionsByRepository `json:"pullRequestContributionsByRepository"`
 	// Pull request review contributions made by the user. Returns the most recently
 	// submitted review for each PR reviewed by the user.
 	//
-	PullRequestReviewContributions CreatedPullRequestReviewContributionConnection `json:"pullRequestReviewContributions"`
+	PullRequestReviewContributions *CreatedPullRequestReviewContributionConnection `json:"pullRequestReviewContributions"`
 	// Pull request review contributions made by the user, grouped by repository.
 	PullRequestReviewContributionsByRepository []*PullRequestReviewContributionsByRepository `json:"pullRequestReviewContributionsByRepository"`
 	// A list of repositories owned by the user that the user created in this time range.
-	RepositoryContributions CreatedRepositoryContributionConnection `json:"repositoryContributions"`
+	RepositoryContributions *CreatedRepositoryContributionConnection `json:"repositoryContributions"`
 	// A count of contributions made by the user that the viewer cannot access. Only non-zero when the user has chosen to share their private contribution counts.
 	RestrictedContributionsCount int `json:"restrictedContributionsCount"`
 	// The beginning date and time of this collection.
@@ -3679,7 +3679,7 @@ type ConvertToDraftEvent struct {
 	// The Node ID of the ConvertToDraftEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The HTTP path for this convert to draft event.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for this convert to draft event.
@@ -3916,11 +3916,11 @@ type CreateCheckSuitePayload struct {
 // Autogenerated input type of CreateCommitOnBranch
 type CreateCommitOnBranchInput struct {
 	// The Ref to be updated.  Must be a branch.
-	Branch CommittableBranch `json:"branch"`
+	Branch *CommittableBranch `json:"branch"`
 	// A description of changes to files in this commit.
 	FileChanges *FileChanges `json:"fileChanges,omitempty"`
 	// The commit message the be included with the commit.
-	Message CommitMessage `json:"message"`
+	Message *CommitMessage `json:"message"`
 	// The git commit oid expected at the head of the branch prior to the commit
 	ExpectedHeadOid string `json:"expectedHeadOid"`
 	// A unique identifier for the client performing the mutation.
@@ -4271,7 +4271,7 @@ type CreateRepositoryRulesetInput struct {
 	// The list of rules for this ruleset
 	Rules []*RepositoryRuleInput `json:"rules,omitempty"`
 	// The set of conditions for this ruleset
-	Conditions RepositoryRuleConditionsInput `json:"conditions"`
+	Conditions *RepositoryRuleConditionsInput `json:"conditions"`
 	// The enforcement level for this ruleset
 	Enforcement RuleEnforcement `json:"enforcement"`
 	// A list of actors that are allowed to bypass rules in this ruleset.
@@ -4508,14 +4508,14 @@ type CreatedCommitContribution struct {
 	// When this contribution was made.
 	OccurredAt time.Time `json:"occurredAt"`
 	// The repository the user made a commit in.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this contribution.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for this contribution.
 	URL string `json:"url"`
 	// The user who made this contribution.
 	//
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (CreatedCommitContribution) IsContribution() {}
@@ -4535,7 +4535,7 @@ func (this CreatedCommitContribution) GetResourcePath() string { return this.Res
 func (this CreatedCommitContribution) GetURL() string { return this.URL }
 
 // The user who made this contribution.
-func (this CreatedCommitContribution) GetUser() User { return this.User }
+func (this CreatedCommitContribution) GetUser() *User { return this.User }
 
 // The connection type for CreatedCommitContribution.
 type CreatedCommitContributionConnection struct {
@@ -4544,7 +4544,7 @@ type CreatedCommitContributionConnection struct {
 	// A list of nodes.
 	Nodes []*CreatedCommitContribution `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of commits across days and repositories in the connection.
 	//
 	TotalCount int `json:"totalCount"`
@@ -4566,7 +4566,7 @@ type CreatedIssueContribution struct {
 	//
 	IsRestricted bool `json:"isRestricted"`
 	// The issue that was opened.
-	Issue Issue `json:"issue"`
+	Issue *Issue `json:"issue"`
 	// When this contribution was made.
 	OccurredAt time.Time `json:"occurredAt"`
 	// The HTTP path for this contribution.
@@ -4575,7 +4575,7 @@ type CreatedIssueContribution struct {
 	URL string `json:"url"`
 	// The user who made this contribution.
 	//
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (CreatedIssueContribution) IsContribution() {}
@@ -4595,7 +4595,7 @@ func (this CreatedIssueContribution) GetResourcePath() string { return this.Reso
 func (this CreatedIssueContribution) GetURL() string { return this.URL }
 
 // The user who made this contribution.
-func (this CreatedIssueContribution) GetUser() User { return this.User }
+func (this CreatedIssueContribution) GetUser() *User { return this.User }
 
 func (CreatedIssueContribution) IsCreatedIssueOrRestrictedContribution() {}
 
@@ -4606,7 +4606,7 @@ type CreatedIssueContributionConnection struct {
 	// A list of nodes.
 	Nodes []*CreatedIssueContribution `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -4629,14 +4629,14 @@ type CreatedPullRequestContribution struct {
 	// When this contribution was made.
 	OccurredAt time.Time `json:"occurredAt"`
 	// The pull request that was opened.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The HTTP path for this contribution.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for this contribution.
 	URL string `json:"url"`
 	// The user who made this contribution.
 	//
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (CreatedPullRequestContribution) IsContribution() {}
@@ -4656,7 +4656,7 @@ func (this CreatedPullRequestContribution) GetResourcePath() string { return thi
 func (this CreatedPullRequestContribution) GetURL() string { return this.URL }
 
 // The user who made this contribution.
-func (this CreatedPullRequestContribution) GetUser() User { return this.User }
+func (this CreatedPullRequestContribution) GetUser() *User { return this.User }
 
 func (CreatedPullRequestContribution) IsCreatedPullRequestOrRestrictedContribution() {}
 
@@ -4667,7 +4667,7 @@ type CreatedPullRequestContributionConnection struct {
 	// A list of nodes.
 	Nodes []*CreatedPullRequestContribution `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -4690,18 +4690,18 @@ type CreatedPullRequestReviewContribution struct {
 	// When this contribution was made.
 	OccurredAt time.Time `json:"occurredAt"`
 	// The pull request the user reviewed.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The review the user left on the pull request.
-	PullRequestReview PullRequestReview `json:"pullRequestReview"`
+	PullRequestReview *PullRequestReview `json:"pullRequestReview"`
 	// The repository containing the pull request that the user reviewed.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this contribution.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for this contribution.
 	URL string `json:"url"`
 	// The user who made this contribution.
 	//
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (CreatedPullRequestReviewContribution) IsContribution() {}
@@ -4721,7 +4721,7 @@ func (this CreatedPullRequestReviewContribution) GetResourcePath() string { retu
 func (this CreatedPullRequestReviewContribution) GetURL() string { return this.URL }
 
 // The user who made this contribution.
-func (this CreatedPullRequestReviewContribution) GetUser() User { return this.User }
+func (this CreatedPullRequestReviewContribution) GetUser() *User { return this.User }
 
 // The connection type for CreatedPullRequestReviewContribution.
 type CreatedPullRequestReviewContributionConnection struct {
@@ -4730,7 +4730,7 @@ type CreatedPullRequestReviewContributionConnection struct {
 	// A list of nodes.
 	Nodes []*CreatedPullRequestReviewContribution `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -4753,14 +4753,14 @@ type CreatedRepositoryContribution struct {
 	// When this contribution was made.
 	OccurredAt time.Time `json:"occurredAt"`
 	// The repository that was created.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this contribution.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for this contribution.
 	URL string `json:"url"`
 	// The user who made this contribution.
 	//
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (CreatedRepositoryContribution) IsContribution() {}
@@ -4780,7 +4780,7 @@ func (this CreatedRepositoryContribution) GetResourcePath() string { return this
 func (this CreatedRepositoryContribution) GetURL() string { return this.URL }
 
 // The user who made this contribution.
-func (this CreatedRepositoryContribution) GetUser() User { return this.User }
+func (this CreatedRepositoryContribution) GetUser() *User { return this.User }
 
 func (CreatedRepositoryContribution) IsCreatedRepositoryOrRestrictedContribution() {}
 
@@ -4791,7 +4791,7 @@ type CreatedRepositoryContributionConnection struct {
 	// A list of nodes.
 	Nodes []*CreatedRepositoryContribution `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -5296,13 +5296,13 @@ type DependabotUpdate struct {
 	// The associated pull request
 	PullRequest *PullRequest `json:"pullRequest,omitempty"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 func (DependabotUpdate) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this DependabotUpdate) GetRepository() Repository { return this.Repository }
+func (this DependabotUpdate) GetRepository() *Repository { return this.Repository }
 
 // An error produced from a Dependabot Update
 type DependabotUpdateError struct {
@@ -5342,7 +5342,7 @@ type DeployKeyConnection struct {
 	// A list of nodes.
 	Nodes []*DeployKey `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -5364,11 +5364,11 @@ type DeployedEvent struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The deployment associated with the 'deployed' event.
-	Deployment Deployment `json:"deployment"`
+	Deployment *Deployment `json:"deployment"`
 	// The Node ID of the DeployedEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The ref associated with the 'deployed' event.
 	Ref *Ref `json:"ref,omitempty"`
 }
@@ -5411,7 +5411,7 @@ type Deployment struct {
 	// Identifies the Ref of the deployment, if the deployment was created by ref.
 	Ref *Ref `json:"ref,omitempty"`
 	// Identifies the repository associated with the deployment.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The current state of the deployment.
 	State *DeploymentState `json:"state,omitempty"`
 	// A list of statuses associated with the deployment.
@@ -5434,7 +5434,7 @@ type DeploymentConnection struct {
 	// A list of nodes.
 	Nodes []*Deployment `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -5454,11 +5454,11 @@ type DeploymentEnvironmentChangedEvent struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The deployment status that updated the deployment environment.
-	DeploymentStatus DeploymentStatus `json:"deploymentStatus"`
+	DeploymentStatus *DeploymentStatus `json:"deploymentStatus"`
 	// The Node ID of the DeploymentEnvironmentChangedEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 }
 
 func (DeploymentEnvironmentChangedEvent) IsNode() {}
@@ -5485,7 +5485,7 @@ type DeploymentProtectionRule struct {
 	// Whether deployments to this environment can be approved by the user who created the deployment.
 	PreventSelfReview *bool `json:"preventSelfReview,omitempty"`
 	// The teams or users that can review the deployment
-	Reviewers DeploymentReviewerConnection `json:"reviewers"`
+	Reviewers *DeploymentReviewerConnection `json:"reviewers"`
 	// The timeout in minutes for this protection rule.
 	Timeout int `json:"timeout"`
 	// The type of protection rule.
@@ -5499,7 +5499,7 @@ type DeploymentProtectionRuleConnection struct {
 	// A list of nodes.
 	Nodes []*DeploymentProtectionRule `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -5517,9 +5517,9 @@ type DeploymentRequest struct {
 	// Whether or not the current user can approve the deployment
 	CurrentUserCanApprove bool `json:"currentUserCanApprove"`
 	// The target environment of the deployment
-	Environment Environment `json:"environment"`
+	Environment *Environment `json:"environment"`
 	// The teams or users that can review the deployment
-	Reviewers DeploymentReviewerConnection `json:"reviewers"`
+	Reviewers *DeploymentReviewerConnection `json:"reviewers"`
 	// The wait timer in minutes configured in the environment
 	WaitTimer int `json:"waitTimer"`
 	// The wait timer in minutes configured in the environment
@@ -5533,7 +5533,7 @@ type DeploymentRequestConnection struct {
 	// A list of nodes.
 	Nodes []*DeploymentRequest `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -5553,13 +5553,13 @@ type DeploymentReview struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The environments approved or rejected
-	Environments EnvironmentConnection `json:"environments"`
+	Environments *EnvironmentConnection `json:"environments"`
 	// The Node ID of the DeploymentReview object
 	ID string `json:"id"`
 	// The decision of the user.
 	State DeploymentReviewState `json:"state"`
 	// The user that reviewed the deployment.
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (DeploymentReview) IsNode() {}
@@ -5574,7 +5574,7 @@ type DeploymentReviewConnection struct {
 	// A list of nodes.
 	Nodes []*DeploymentReview `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -5594,7 +5594,7 @@ type DeploymentReviewerConnection struct {
 	// A list of nodes.
 	Nodes []DeploymentReviewer `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -5614,7 +5614,7 @@ type DeploymentStatus struct {
 	// Identifies the actor who triggered the deployment.
 	Creator Actor `json:"creator"`
 	// Identifies the deployment associated with status.
-	Deployment Deployment `json:"deployment"`
+	Deployment *Deployment `json:"deployment"`
 	// Identifies the description of the deployment.
 	Description *string `json:"description,omitempty"`
 	// Identifies the environment URL of the deployment.
@@ -5641,7 +5641,7 @@ type DeploymentStatusConnection struct {
 	// A list of nodes.
 	Nodes []*DeploymentStatus `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -5734,13 +5734,13 @@ type Discussion struct {
 	// The body rendered to text.
 	BodyText string `json:"bodyText"`
 	// The category for this discussion.
-	Category DiscussionCategory `json:"category"`
+	Category *DiscussionCategory `json:"category"`
 	// Indicates if the object is closed (definition of closed may depend on type)
 	Closed bool `json:"closed"`
 	// Identifies the date and time when the object was closed.
 	ClosedAt *time.Time `json:"closedAt,omitempty"`
 	// The replies to the discussion.
-	Comments DiscussionCommentConnection `json:"comments"`
+	Comments *DiscussionCommentConnection `json:"comments"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Check if this comment was created via an email reply.
@@ -5770,9 +5770,9 @@ type Discussion struct {
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The path for this discussion.
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the reason for the discussion's state.
@@ -5912,7 +5912,7 @@ func (this Discussion) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this Discussion) GetReactions() ReactionConnection { return this.Reactions }
+func (this Discussion) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this Discussion) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -5920,7 +5920,7 @@ func (this Discussion) GetViewerCanReact() bool { return this.ViewerCanReact }
 func (Discussion) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this Discussion) GetRepository() Repository { return this.Repository }
+func (this Discussion) GetRepository() *Repository { return this.Repository }
 
 func (Discussion) IsSearchResultItem() {}
 
@@ -5967,7 +5967,7 @@ type DiscussionCategory struct {
 	// The name of this category.
 	Name string `json:"name"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The slug of this category.
 	Slug string `json:"slug"`
 	// Identifies the date and time when the object was last updated.
@@ -5982,7 +5982,7 @@ func (this DiscussionCategory) GetID() string { return this.ID }
 func (DiscussionCategory) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this DiscussionCategory) GetRepository() Repository { return this.Repository }
+func (this DiscussionCategory) GetRepository() *Repository { return this.Repository }
 
 // The connection type for DiscussionCategory.
 type DiscussionCategoryConnection struct {
@@ -5991,7 +5991,7 @@ type DiscussionCategoryConnection struct {
 	// A list of nodes.
 	Nodes []*DiscussionCategory `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6045,9 +6045,9 @@ type DiscussionComment struct {
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The threaded replies to this comment.
-	Replies DiscussionCommentConnection `json:"replies"`
+	Replies *DiscussionCommentConnection `json:"replies"`
 	// The discussion comment this comment is a reply to
 	ReplyTo *DiscussionComment `json:"replyTo,omitempty"`
 	// The path for this discussion comment.
@@ -6173,7 +6173,7 @@ func (this DiscussionComment) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this DiscussionComment) GetReactions() ReactionConnection { return this.Reactions }
+func (this DiscussionComment) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this DiscussionComment) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -6215,7 +6215,7 @@ type DiscussionCommentConnection struct {
 	// A list of nodes.
 	Nodes []*DiscussionComment `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6235,7 +6235,7 @@ type DiscussionConnection struct {
 	// A list of nodes.
 	Nodes []*Discussion `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6305,7 +6305,7 @@ type DiscussionPollOptionConnection struct {
 	// A list of nodes.
 	Nodes []*DiscussionPollOption `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6365,7 +6365,7 @@ type DismissRepositoryVulnerabilityAlertPayload struct {
 // A draft issue within a project.
 type DraftIssue struct {
 	// A list of users to assigned to this draft issue.
-	Assignees UserConnection `json:"assignees"`
+	Assignees *UserConnection `json:"assignees"`
 	// The body of the draft issue.
 	Body string `json:"body"`
 	// The body of the draft issue rendered to HTML.
@@ -6379,9 +6379,9 @@ type DraftIssue struct {
 	// The Node ID of the DraftIssue object
 	ID string `json:"id"`
 	// List of items linked with the draft issue (currently draft issue can be linked to only one item).
-	ProjectV2Items ProjectV2ItemConnection `json:"projectV2Items"`
+	ProjectV2Items *ProjectV2ItemConnection `json:"projectV2Items"`
 	// Projects that link to this draft issue (currently draft issue can be linked to only one project).
-	ProjectsV2 ProjectV2Connection `json:"projectsV2"`
+	ProjectsV2 *ProjectV2Connection `json:"projectsV2"`
 	// The title of the draft issue
 	Title string `json:"title"`
 	// Identifies the date and time when the object was last updated.
@@ -6496,11 +6496,11 @@ type Enterprise struct {
 	// The location of the enterprise.
 	Location *string `json:"location,omitempty"`
 	// A list of users who are members of this enterprise.
-	Members EnterpriseMemberConnection `json:"members"`
+	Members *EnterpriseMemberConnection `json:"members"`
 	// The name of the enterprise.
 	Name string `json:"name"`
 	// A list of organizations that belong to this enterprise.
-	Organizations OrganizationConnection `json:"organizations"`
+	Organizations *OrganizationConnection `json:"organizations"`
 	// Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope.
 	OwnerInfo *EnterpriseOwnerInfo `json:"ownerInfo,omitempty"`
 	// The HTTP path for this enterprise.
@@ -6544,7 +6544,7 @@ type EnterpriseAdministratorConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6566,7 +6566,7 @@ type EnterpriseAdministratorInvitation struct {
 	// The email of the person who was invited to the enterprise.
 	Email *string `json:"email,omitempty"`
 	// The enterprise the invitation is for.
-	Enterprise Enterprise `json:"enterprise"`
+	Enterprise *Enterprise `json:"enterprise"`
 	// The Node ID of the EnterpriseAdministratorInvitation object
 	ID string `json:"id"`
 	// The user who was invited to the enterprise.
@@ -6589,7 +6589,7 @@ type EnterpriseAdministratorInvitationConnection struct {
 	// A list of nodes.
 	Nodes []*EnterpriseAdministratorInvitation `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6641,7 +6641,7 @@ type EnterpriseConnection struct {
 	// A list of nodes.
 	Nodes []*Enterprise `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6661,7 +6661,7 @@ type EnterpriseFailedInvitationConnection struct {
 	// A list of nodes.
 	Nodes []*OrganizationInvitation `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 	// Identifies the total count of unique users in the connection.
@@ -6683,7 +6683,7 @@ type EnterpriseIdentityProvider struct {
 	// The enterprise this identity provider belongs to.
 	Enterprise *Enterprise `json:"enterprise,omitempty"`
 	// ExternalIdentities provisioned by this identity provider.
-	ExternalIdentities ExternalIdentityConnection `json:"externalIdentities"`
+	ExternalIdentities *ExternalIdentityConnection `json:"externalIdentities"`
 	// The Node ID of the EnterpriseIdentityProvider object
 	ID string `json:"id"`
 	// The x509 certificate used by the identity provider to sign assertions and responses.
@@ -6710,7 +6710,7 @@ type EnterpriseMemberConnection struct {
 	// A list of nodes.
 	Nodes []EnterpriseMember `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6746,7 +6746,7 @@ type EnterpriseOrganizationMembershipConnection struct {
 	// A list of nodes.
 	Nodes []*Organization `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6768,7 +6768,7 @@ type EnterpriseOutsideCollaboratorConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6780,37 +6780,37 @@ type EnterpriseOutsideCollaboratorEdge struct {
 	// The item at the end of the edge.
 	Node *User `json:"node,omitempty"`
 	// The enterprise organization repositories this user is a member of.
-	Repositories EnterpriseRepositoryInfoConnection `json:"repositories"`
+	Repositories *EnterpriseRepositoryInfoConnection `json:"repositories"`
 }
 
 // Enterprise information visible to enterprise owners or enterprise owners' personal access tokens (classic) with read:enterprise or admin:enterprise scope.
 type EnterpriseOwnerInfo struct {
 	// A list of all of the administrators for this enterprise.
-	Admins EnterpriseAdministratorConnection `json:"admins"`
+	Admins *EnterpriseAdministratorConnection `json:"admins"`
 	// A list of users in the enterprise who currently have two-factor authentication disabled.
-	AffiliatedUsersWithTwoFactorDisabled UserConnection `json:"affiliatedUsersWithTwoFactorDisabled"`
+	AffiliatedUsersWithTwoFactorDisabled *UserConnection `json:"affiliatedUsersWithTwoFactorDisabled"`
 	// Whether or not affiliated users with two-factor authentication disabled exist in the enterprise.
 	AffiliatedUsersWithTwoFactorDisabledExist bool `json:"affiliatedUsersWithTwoFactorDisabledExist"`
 	// The setting value for whether private repository forking is enabled for repositories in organizations in this enterprise.
 	AllowPrivateRepositoryForkingSetting EnterpriseEnabledDisabledSettingValue `json:"allowPrivateRepositoryForkingSetting"`
 	// A list of enterprise organizations configured with the provided private repository forking setting value.
-	AllowPrivateRepositoryForkingSettingOrganizations OrganizationConnection `json:"allowPrivateRepositoryForkingSettingOrganizations"`
+	AllowPrivateRepositoryForkingSettingOrganizations *OrganizationConnection `json:"allowPrivateRepositoryForkingSettingOrganizations"`
 	// The value for the allow private repository forking policy on the enterprise.
 	AllowPrivateRepositoryForkingSettingPolicyValue *EnterpriseAllowPrivateRepositoryForkingPolicyValue `json:"allowPrivateRepositoryForkingSettingPolicyValue,omitempty"`
 	// The setting value for base repository permissions for organizations in this enterprise.
 	DefaultRepositoryPermissionSetting EnterpriseDefaultRepositoryPermissionSettingValue `json:"defaultRepositoryPermissionSetting"`
 	// A list of enterprise organizations configured with the provided base repository permission.
-	DefaultRepositoryPermissionSettingOrganizations OrganizationConnection `json:"defaultRepositoryPermissionSettingOrganizations"`
+	DefaultRepositoryPermissionSettingOrganizations *OrganizationConnection `json:"defaultRepositoryPermissionSettingOrganizations"`
 	// A list of domains owned by the enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with admin:enterprise scope.
-	Domains VerifiableDomainConnection `json:"domains"`
+	Domains *VerifiableDomainConnection `json:"domains"`
 	// Enterprise Server installations owned by the enterprise.
-	EnterpriseServerInstallations EnterpriseServerInstallationConnection `json:"enterpriseServerInstallations"`
+	EnterpriseServerInstallations *EnterpriseServerInstallationConnection `json:"enterpriseServerInstallations"`
 	// A list of failed invitations in the enterprise.
-	FailedInvitations EnterpriseFailedInvitationConnection `json:"failedInvitations"`
+	FailedInvitations *EnterpriseFailedInvitationConnection `json:"failedInvitations"`
 	// The setting value for whether the enterprise has an IP allow list enabled.
 	IPAllowListEnabledSetting IPAllowListEnabledSettingValue `json:"ipAllowListEnabledSetting"`
 	// The IP addresses that are allowed to access resources owned by the enterprise. Visible to enterprise owners or enterprise owners' personal access tokens (classic) with admin:enterprise scope.
-	IPAllowListEntries IPAllowListEntryConnection `json:"ipAllowListEntries"`
+	IPAllowListEntries *IPAllowListEntryConnection `json:"ipAllowListEntries"`
 	// The setting value for whether the enterprise has IP allow list configuration for installed GitHub Apps enabled.
 	IPAllowListForInstalledAppsEnabledSetting IPAllowListForInstalledAppsEnabledSettingValue `json:"ipAllowListForInstalledAppsEnabledSetting"`
 	// Whether or not the base repository permission is currently being updated.
@@ -6820,7 +6820,7 @@ type EnterpriseOwnerInfo struct {
 	// The setting value for whether organization members with admin permissions on a repository can change repository visibility.
 	MembersCanChangeRepositoryVisibilitySetting EnterpriseEnabledDisabledSettingValue `json:"membersCanChangeRepositoryVisibilitySetting"`
 	// A list of enterprise organizations configured with the provided can change repository visibility setting value.
-	MembersCanChangeRepositoryVisibilitySettingOrganizations OrganizationConnection `json:"membersCanChangeRepositoryVisibilitySettingOrganizations"`
+	MembersCanChangeRepositoryVisibilitySettingOrganizations *OrganizationConnection `json:"membersCanChangeRepositoryVisibilitySettingOrganizations"`
 	// The setting value for whether members of organizations in the enterprise can create internal repositories.
 	MembersCanCreateInternalRepositoriesSetting *bool `json:"membersCanCreateInternalRepositoriesSetting,omitempty"`
 	// The setting value for whether members of organizations in the enterprise can create private repositories.
@@ -6830,29 +6830,29 @@ type EnterpriseOwnerInfo struct {
 	// The setting value for whether members of organizations in the enterprise can create repositories.
 	MembersCanCreateRepositoriesSetting *EnterpriseMembersCanCreateRepositoriesSettingValue `json:"membersCanCreateRepositoriesSetting,omitempty"`
 	// A list of enterprise organizations configured with the provided repository creation setting value.
-	MembersCanCreateRepositoriesSettingOrganizations OrganizationConnection `json:"membersCanCreateRepositoriesSettingOrganizations"`
+	MembersCanCreateRepositoriesSettingOrganizations *OrganizationConnection `json:"membersCanCreateRepositoriesSettingOrganizations"`
 	// The setting value for whether members with admin permissions for repositories can delete issues.
 	MembersCanDeleteIssuesSetting EnterpriseEnabledDisabledSettingValue `json:"membersCanDeleteIssuesSetting"`
 	// A list of enterprise organizations configured with the provided members can delete issues setting value.
-	MembersCanDeleteIssuesSettingOrganizations OrganizationConnection `json:"membersCanDeleteIssuesSettingOrganizations"`
+	MembersCanDeleteIssuesSettingOrganizations *OrganizationConnection `json:"membersCanDeleteIssuesSettingOrganizations"`
 	// The setting value for whether members with admin permissions for repositories can delete or transfer repositories.
 	MembersCanDeleteRepositoriesSetting EnterpriseEnabledDisabledSettingValue `json:"membersCanDeleteRepositoriesSetting"`
 	// A list of enterprise organizations configured with the provided members can delete repositories setting value.
-	MembersCanDeleteRepositoriesSettingOrganizations OrganizationConnection `json:"membersCanDeleteRepositoriesSettingOrganizations"`
+	MembersCanDeleteRepositoriesSettingOrganizations *OrganizationConnection `json:"membersCanDeleteRepositoriesSettingOrganizations"`
 	// The setting value for whether members of organizations in the enterprise can invite outside collaborators.
 	MembersCanInviteCollaboratorsSetting EnterpriseEnabledDisabledSettingValue `json:"membersCanInviteCollaboratorsSetting"`
 	// A list of enterprise organizations configured with the provided members can invite collaborators setting value.
-	MembersCanInviteCollaboratorsSettingOrganizations OrganizationConnection `json:"membersCanInviteCollaboratorsSettingOrganizations"`
+	MembersCanInviteCollaboratorsSettingOrganizations *OrganizationConnection `json:"membersCanInviteCollaboratorsSettingOrganizations"`
 	// Indicates whether members of this enterprise's organizations can purchase additional services for those organizations.
 	MembersCanMakePurchasesSetting EnterpriseMembersCanMakePurchasesSettingValue `json:"membersCanMakePurchasesSetting"`
 	// The setting value for whether members with admin permissions for repositories can update protected branches.
 	MembersCanUpdateProtectedBranchesSetting EnterpriseEnabledDisabledSettingValue `json:"membersCanUpdateProtectedBranchesSetting"`
 	// A list of enterprise organizations configured with the provided members can update protected branches setting value.
-	MembersCanUpdateProtectedBranchesSettingOrganizations OrganizationConnection `json:"membersCanUpdateProtectedBranchesSettingOrganizations"`
+	MembersCanUpdateProtectedBranchesSettingOrganizations *OrganizationConnection `json:"membersCanUpdateProtectedBranchesSettingOrganizations"`
 	// The setting value for whether members can view dependency insights.
 	MembersCanViewDependencyInsightsSetting EnterpriseEnabledDisabledSettingValue `json:"membersCanViewDependencyInsightsSetting"`
 	// A list of enterprise organizations configured with the provided members can view dependency insights setting value.
-	MembersCanViewDependencyInsightsSettingOrganizations OrganizationConnection `json:"membersCanViewDependencyInsightsSettingOrganizations"`
+	MembersCanViewDependencyInsightsSettingOrganizations *OrganizationConnection `json:"membersCanViewDependencyInsightsSettingOrganizations"`
 	// Indicates if email notification delivery for this enterprise is restricted to verified or approved domains.
 	NotificationDeliveryRestrictionEnabledSetting NotificationRestrictionSettingValue `json:"notificationDeliveryRestrictionEnabledSetting"`
 	// The OIDC Identity Provider for the enterprise.
@@ -6860,33 +6860,33 @@ type EnterpriseOwnerInfo struct {
 	// The setting value for whether organization projects are enabled for organizations in this enterprise.
 	OrganizationProjectsSetting EnterpriseEnabledDisabledSettingValue `json:"organizationProjectsSetting"`
 	// A list of enterprise organizations configured with the provided organization projects setting value.
-	OrganizationProjectsSettingOrganizations OrganizationConnection `json:"organizationProjectsSettingOrganizations"`
+	OrganizationProjectsSettingOrganizations *OrganizationConnection `json:"organizationProjectsSettingOrganizations"`
 	// A list of outside collaborators across the repositories in the enterprise.
-	OutsideCollaborators EnterpriseOutsideCollaboratorConnection `json:"outsideCollaborators"`
+	OutsideCollaborators *EnterpriseOutsideCollaboratorConnection `json:"outsideCollaborators"`
 	// A list of pending administrator invitations for the enterprise.
-	PendingAdminInvitations EnterpriseAdministratorInvitationConnection `json:"pendingAdminInvitations"`
+	PendingAdminInvitations *EnterpriseAdministratorInvitationConnection `json:"pendingAdminInvitations"`
 	// A list of pending collaborator invitations across the repositories in the enterprise.
-	PendingCollaboratorInvitations RepositoryInvitationConnection `json:"pendingCollaboratorInvitations"`
+	PendingCollaboratorInvitations *RepositoryInvitationConnection `json:"pendingCollaboratorInvitations"`
 	// A list of pending member invitations for organizations in the enterprise.
-	PendingMemberInvitations EnterprisePendingMemberInvitationConnection `json:"pendingMemberInvitations"`
+	PendingMemberInvitations *EnterprisePendingMemberInvitationConnection `json:"pendingMemberInvitations"`
 	// The setting value for whether repository projects are enabled in this enterprise.
 	RepositoryProjectsSetting EnterpriseEnabledDisabledSettingValue `json:"repositoryProjectsSetting"`
 	// A list of enterprise organizations configured with the provided repository projects setting value.
-	RepositoryProjectsSettingOrganizations OrganizationConnection `json:"repositoryProjectsSettingOrganizations"`
+	RepositoryProjectsSettingOrganizations *OrganizationConnection `json:"repositoryProjectsSettingOrganizations"`
 	// The SAML Identity Provider for the enterprise.
 	SamlIdentityProvider *EnterpriseIdentityProvider `json:"samlIdentityProvider,omitempty"`
 	// A list of enterprise organizations configured with the SAML single sign-on setting value.
-	SamlIdentityProviderSettingOrganizations OrganizationConnection `json:"samlIdentityProviderSettingOrganizations"`
+	SamlIdentityProviderSettingOrganizations *OrganizationConnection `json:"samlIdentityProviderSettingOrganizations"`
 	// A list of members with a support entitlement.
-	SupportEntitlements EnterpriseMemberConnection `json:"supportEntitlements"`
+	SupportEntitlements *EnterpriseMemberConnection `json:"supportEntitlements"`
 	// The setting value for whether team discussions are enabled for organizations in this enterprise.
 	TeamDiscussionsSetting EnterpriseEnabledDisabledSettingValue `json:"teamDiscussionsSetting"`
 	// A list of enterprise organizations configured with the provided team discussions setting value.
-	TeamDiscussionsSettingOrganizations OrganizationConnection `json:"teamDiscussionsSettingOrganizations"`
+	TeamDiscussionsSettingOrganizations *OrganizationConnection `json:"teamDiscussionsSettingOrganizations"`
 	// The setting value for whether the enterprise requires two-factor authentication for its organizations and users.
 	TwoFactorRequiredSetting EnterpriseEnabledSettingValue `json:"twoFactorRequiredSetting"`
 	// A list of enterprise organizations configured with the two-factor authentication setting value.
-	TwoFactorRequiredSettingOrganizations OrganizationConnection `json:"twoFactorRequiredSettingOrganizations"`
+	TwoFactorRequiredSettingOrganizations *OrganizationConnection `json:"twoFactorRequiredSettingOrganizations"`
 }
 
 // The connection type for OrganizationInvitation.
@@ -6896,7 +6896,7 @@ type EnterprisePendingMemberInvitationConnection struct {
 	// A list of nodes.
 	Nodes []*OrganizationInvitation `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 	// Identifies the total count of unique users in the connection.
@@ -6935,7 +6935,7 @@ type EnterpriseRepositoryInfoConnection struct {
 	// A list of nodes.
 	Nodes []*EnterpriseRepositoryInfo `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -6963,9 +6963,9 @@ type EnterpriseServerInstallation struct {
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 	// User accounts on this Enterprise Server installation.
-	UserAccounts EnterpriseServerUserAccountConnection `json:"userAccounts"`
+	UserAccounts *EnterpriseServerUserAccountConnection `json:"userAccounts"`
 	// User accounts uploads for the Enterprise Server installation.
-	UserAccountsUploads EnterpriseServerUserAccountsUploadConnection `json:"userAccountsUploads"`
+	UserAccountsUploads *EnterpriseServerUserAccountsUploadConnection `json:"userAccountsUploads"`
 }
 
 func (EnterpriseServerInstallation) IsNode() {}
@@ -6980,7 +6980,7 @@ type EnterpriseServerInstallationConnection struct {
 	// A list of nodes.
 	Nodes []*EnterpriseServerInstallation `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7000,7 +7000,7 @@ type EnterpriseServerInstallationMembershipConnection struct {
 	// A list of nodes.
 	Nodes []*EnterpriseServerInstallation `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7028,9 +7028,9 @@ type EnterpriseServerUserAccount struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// User emails belonging to this user account.
-	Emails EnterpriseServerUserAccountEmailConnection `json:"emails"`
+	Emails *EnterpriseServerUserAccountEmailConnection `json:"emails"`
 	// The Enterprise Server installation on which this user account exists.
-	EnterpriseServerInstallation EnterpriseServerInstallation `json:"enterpriseServerInstallation"`
+	EnterpriseServerInstallation *EnterpriseServerInstallation `json:"enterpriseServerInstallation"`
 	// The Node ID of the EnterpriseServerUserAccount object
 	ID string `json:"id"`
 	// Whether the user account is a site administrator on the Enterprise Server installation.
@@ -7059,7 +7059,7 @@ type EnterpriseServerUserAccountConnection struct {
 	// A list of nodes.
 	Nodes []*EnterpriseServerUserAccount `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7085,7 +7085,7 @@ type EnterpriseServerUserAccountEmail struct {
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 	// The user account to which the email belongs.
-	UserAccount EnterpriseServerUserAccount `json:"userAccount"`
+	UserAccount *EnterpriseServerUserAccount `json:"userAccount"`
 }
 
 func (EnterpriseServerUserAccountEmail) IsNode() {}
@@ -7100,7 +7100,7 @@ type EnterpriseServerUserAccountEmailConnection struct {
 	// A list of nodes.
 	Nodes []*EnterpriseServerUserAccountEmail `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7134,9 +7134,9 @@ type EnterpriseServerUserAccountsUpload struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The enterprise to which this upload belongs.
-	Enterprise Enterprise `json:"enterprise"`
+	Enterprise *Enterprise `json:"enterprise"`
 	// The Enterprise Server installation for which this upload was generated.
-	EnterpriseServerInstallation EnterpriseServerInstallation `json:"enterpriseServerInstallation"`
+	EnterpriseServerInstallation *EnterpriseServerInstallation `json:"enterpriseServerInstallation"`
 	// The Node ID of the EnterpriseServerUserAccountsUpload object
 	ID string `json:"id"`
 	// The name of the file uploaded.
@@ -7159,7 +7159,7 @@ type EnterpriseServerUserAccountsUploadConnection struct {
 	// A list of nodes.
 	Nodes []*EnterpriseServerUserAccountsUpload `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7187,9 +7187,9 @@ type EnterpriseUserAccount struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The enterprise in which this user account exists.
-	Enterprise Enterprise `json:"enterprise"`
+	Enterprise *Enterprise `json:"enterprise"`
 	// A list of Enterprise Server installations this user is a member of.
-	EnterpriseInstallations EnterpriseServerInstallationMembershipConnection `json:"enterpriseInstallations"`
+	EnterpriseInstallations *EnterpriseServerInstallationMembershipConnection `json:"enterpriseInstallations"`
 	// The Node ID of the EnterpriseUserAccount object
 	ID string `json:"id"`
 	// An identifier for the enterprise user account, a login or email address
@@ -7197,7 +7197,7 @@ type EnterpriseUserAccount struct {
 	// The name of the enterprise user account
 	Name *string `json:"name,omitempty"`
 	// A list of enterprise organizations this user is a member of.
-	Organizations EnterpriseOrganizationMembershipConnection `json:"organizations"`
+	Organizations *EnterpriseOrganizationMembershipConnection `json:"organizations"`
 	// The HTTP path for this user.
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the date and time when the object was last updated.
@@ -7226,7 +7226,7 @@ type Environment struct {
 	// The name of the environment
 	Name string `json:"name"`
 	// The protection rules defined for this environment
-	ProtectionRules DeploymentProtectionRuleConnection `json:"protectionRules"`
+	ProtectionRules *DeploymentProtectionRuleConnection `json:"protectionRules"`
 }
 
 func (Environment) IsNode() {}
@@ -7241,7 +7241,7 @@ type EnvironmentConnection struct {
 	// A list of nodes.
 	Nodes []*Environment `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7300,7 +7300,7 @@ type ExternalIdentityConnection struct {
 	// A list of nodes.
 	Nodes []*ExternalIdentity `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7516,7 +7516,7 @@ type FollowerConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7528,7 +7528,7 @@ type FollowingConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7560,7 +7560,7 @@ func (this GenericHovercardContext) GetOcticon() string { return this.Octicon }
 // A Gist.
 type Gist struct {
 	// A list of comments associated with the gist
-	Comments GistCommentConnection `json:"comments"`
+	Comments *GistCommentConnection `json:"comments"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The gist description.
@@ -7568,7 +7568,7 @@ type Gist struct {
 	// The files in this gist.
 	Files []*GistFile `json:"files,omitempty"`
 	// A list of forks associated with the gist
-	Forks GistConnection `json:"forks"`
+	Forks *GistConnection `json:"forks"`
 	// The Node ID of the Gist object
 	ID string `json:"id"`
 	// Identifies if the gist is a fork.
@@ -7587,7 +7587,7 @@ type Gist struct {
 	//
 	StargazerCount int `json:"stargazerCount"`
 	// A list of users who have starred this starrable.
-	Stargazers StargazerConnection `json:"stargazers"`
+	Stargazers *StargazerConnection `json:"stargazers"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 	// The HTTP URL for this Gist.
@@ -7611,7 +7611,7 @@ func (Gist) IsStarrable() {}
 func (this Gist) GetStargazerCount() int { return this.StargazerCount }
 
 // A list of users who have starred this starrable.
-func (this Gist) GetStargazers() StargazerConnection { return this.Stargazers }
+func (this Gist) GetStargazers() *StargazerConnection { return this.Stargazers }
 
 // Returns a boolean indicating whether the viewing user has starred this starrable.
 func (this Gist) GetViewerHasStarred() bool { return this.ViewerHasStarred }
@@ -7645,7 +7645,7 @@ type GistComment struct {
 	// The actor who edited the comment.
 	Editor Actor `json:"editor,omitempty"`
 	// The associated gist.
-	Gist Gist `json:"gist"`
+	Gist *Gist `json:"gist"`
 	// The Node ID of the GistComment object
 	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
@@ -7771,7 +7771,7 @@ type GistCommentConnection struct {
 	// A list of nodes.
 	Nodes []*GistComment `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7791,7 +7791,7 @@ type GistConnection struct {
 	// A list of nodes.
 	Nodes []*Gist `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7855,7 +7855,7 @@ type GitActorConnection struct {
 	// A list of nodes.
 	Nodes []*GitActor `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -7980,7 +7980,7 @@ type HeadRefDeletedEvent struct {
 	// The Node ID of the HeadRefDeletedEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 }
 
 func (HeadRefDeletedEvent) IsNode() {}
@@ -8005,7 +8005,7 @@ type HeadRefForcePushedEvent struct {
 	// The Node ID of the HeadRefForcePushedEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// Identifies the fully qualified ref name for the 'head_ref_force_pushed' event.
 	Ref *Ref `json:"ref,omitempty"`
 }
@@ -8028,7 +8028,7 @@ type HeadRefRestoredEvent struct {
 	// The Node ID of the HeadRefRestoredEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 }
 
 func (HeadRefRestoredEvent) IsNode() {}
@@ -8098,7 +8098,7 @@ type IPAllowListEntryConnection struct {
 	// A list of nodes.
 	Nodes []*IPAllowListEntry `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -8124,7 +8124,7 @@ type Issue struct {
 	// Reason that the conversation was locked.
 	ActiveLockReason *LockReason `json:"activeLockReason,omitempty"`
 	// A list of Users assigned to this object.
-	Assignees UserConnection `json:"assignees"`
+	Assignees *UserConnection `json:"assignees"`
 	// The actor who authored the comment.
 	Author Actor `json:"author,omitempty"`
 	// Author's association with the subject of the comment.
@@ -8144,7 +8144,7 @@ type Issue struct {
 	// Identifies the date and time when the object was closed.
 	ClosedAt *time.Time `json:"closedAt,omitempty"`
 	// A list of comments associated with the Issue.
-	Comments IssueCommentConnection `json:"comments"`
+	Comments *IssueCommentConnection `json:"comments"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Check if this comment was created via an email reply.
@@ -8156,7 +8156,7 @@ type Issue struct {
 	// Identifies the primary key from the database as a BigInt.
 	FullDatabaseID *string `json:"fullDatabaseId,omitempty"`
 	// The hovercard information for this issue
-	Hovercard Hovercard `json:"hovercard"`
+	Hovercard *Hovercard `json:"hovercard"`
 	// The Node ID of the Issue object
 	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
@@ -8170,7 +8170,7 @@ type Issue struct {
 	// The moment the editor made the last edit
 	LastEditedAt *time.Time `json:"lastEditedAt,omitempty"`
 	// Branches linked to this issue.
-	LinkedBranches LinkedBranchConnection `json:"linkedBranches"`
+	LinkedBranches *LinkedBranchConnection `json:"linkedBranches"`
 	// `true` if the object is locked
 	Locked bool `json:"locked"`
 	// Identifies the milestone associated with the issue.
@@ -8178,23 +8178,23 @@ type Issue struct {
 	// Identifies the issue number.
 	Number int `json:"number"`
 	// A list of Users that are participating in the Issue conversation.
-	Participants UserConnection `json:"participants"`
+	Participants *UserConnection `json:"participants"`
 	// List of project cards associated with this issue.
-	ProjectCards ProjectCardConnection `json:"projectCards"`
+	ProjectCards *ProjectCardConnection `json:"projectCards"`
 	// List of project items associated with this issue.
-	ProjectItems ProjectV2ItemConnection `json:"projectItems"`
+	ProjectItems *ProjectV2ItemConnection `json:"projectItems"`
 	// Find a project by number.
 	ProjectV2 *ProjectV2 `json:"projectV2,omitempty"`
 	// A list of projects under the owner.
-	ProjectsV2 ProjectV2Connection `json:"projectsV2"`
+	ProjectsV2 *ProjectV2Connection `json:"projectsV2"`
 	// Identifies when the comment was published at.
 	PublishedAt *time.Time `json:"publishedAt,omitempty"`
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this issue
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the state of the issue.
@@ -8202,17 +8202,17 @@ type Issue struct {
 	// Identifies the reason for the issue state.
 	StateReason *IssueStateReason `json:"stateReason,omitempty"`
 	// A list of events, comments, commits, etc. associated with the issue.
-	Timeline IssueTimelineConnection `json:"timeline"`
+	Timeline *IssueTimelineConnection `json:"timeline"`
 	// A list of events, comments, commits, etc. associated with the issue.
-	TimelineItems IssueTimelineItemsConnection `json:"timelineItems"`
+	TimelineItems *IssueTimelineItemsConnection `json:"timelineItems"`
 	// Identifies the issue title.
 	Title string `json:"title"`
 	// Identifies the issue title rendered to HTML.
 	TitleHTML string `json:"titleHTML"`
 	// A list of issues that track this issue
-	TrackedInIssues IssueConnection `json:"trackedInIssues"`
+	TrackedInIssues *IssueConnection `json:"trackedInIssues"`
 	// A list of issues tracked inside the current issue
-	TrackedIssues IssueConnection `json:"trackedIssues"`
+	TrackedIssues *IssueConnection `json:"trackedIssues"`
 	// The number of tracked issues for this issue
 	TrackedIssuesCount int `json:"trackedIssuesCount"`
 	// Identifies the date and time when the object was last updated.
@@ -8248,7 +8248,7 @@ type Issue struct {
 func (Issue) IsAssignable() {}
 
 // A list of Users assigned to this object.
-func (this Issue) GetAssignees() UserConnection { return this.Assignees }
+func (this Issue) GetAssignees() *UserConnection { return this.Assignees }
 
 func (Issue) IsClosable() {}
 
@@ -8349,7 +8349,7 @@ func (Issue) IsProjectV2Owner() {}
 func (this Issue) GetProjectV2() *ProjectV2 { return this.ProjectV2 }
 
 // A list of projects under the owner.
-func (this Issue) GetProjectsV2() ProjectV2Connection { return this.ProjectsV2 }
+func (this Issue) GetProjectsV2() *ProjectV2Connection { return this.ProjectsV2 }
 
 func (Issue) IsReactable() {}
 
@@ -8371,7 +8371,7 @@ func (this Issue) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this Issue) GetReactions() ReactionConnection { return this.Reactions }
+func (this Issue) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this Issue) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -8383,7 +8383,7 @@ func (Issue) IsRenamedTitleSubject() {}
 func (Issue) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this Issue) GetRepository() Repository { return this.Repository }
+func (this Issue) GetRepository() *Repository { return this.Repository }
 
 func (Issue) IsSearchResultItem() {}
 
@@ -8467,7 +8467,7 @@ type IssueComment struct {
 	// Returns whether or not a comment has been minimized.
 	IsMinimized bool `json:"isMinimized"`
 	// Identifies the issue associated with the comment.
-	Issue Issue `json:"issue"`
+	Issue *Issue `json:"issue"`
 	// The moment the editor made the last edit
 	LastEditedAt *time.Time `json:"lastEditedAt,omitempty"`
 	// Returns why the comment was minimized. One of `abuse`, `off-topic`, `outdated`, `resolved`, `duplicate` and `spam`. Note that the case and formatting of these values differs from the inputs to the `MinimizeComment` mutation.
@@ -8481,9 +8481,9 @@ type IssueComment struct {
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this issue comment
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the date and time when the object was last updated.
@@ -8605,7 +8605,7 @@ func (this IssueComment) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this IssueComment) GetReactions() ReactionConnection { return this.Reactions }
+func (this IssueComment) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this IssueComment) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -8613,7 +8613,7 @@ func (this IssueComment) GetViewerCanReact() bool { return this.ViewerCanReact }
 func (IssueComment) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this IssueComment) GetRepository() Repository { return this.Repository }
+func (this IssueComment) GetRepository() *Repository { return this.Repository }
 
 func (IssueComment) IsUpdatable() {}
 
@@ -8641,7 +8641,7 @@ type IssueCommentConnection struct {
 	// A list of nodes.
 	Nodes []*IssueComment `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -8669,7 +8669,7 @@ type IssueConnection struct {
 	// A list of nodes.
 	Nodes []*Issue `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -8677,9 +8677,9 @@ type IssueConnection struct {
 // This aggregates issues opened by a user within one repository.
 type IssueContributionsByRepository struct {
 	// The issue contributions.
-	Contributions CreatedIssueContributionConnection `json:"contributions"`
+	Contributions *CreatedIssueContributionConnection `json:"contributions"`
 	// The repository in which the issues were opened.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 // An edge in a connection.
@@ -8725,7 +8725,7 @@ type IssueTemplate struct {
 	// The template purpose.
 	About *string `json:"about,omitempty"`
 	// The suggested assignees.
-	Assignees UserConnection `json:"assignees"`
+	Assignees *UserConnection `json:"assignees"`
 	// The suggested issue body.
 	Body *string `json:"body,omitempty"`
 	// The template filename.
@@ -8745,7 +8745,7 @@ type IssueTimelineConnection struct {
 	// A list of nodes.
 	Nodes []IssueTimelineItem `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -8769,7 +8769,7 @@ type IssueTimelineItemsConnection struct {
 	// Identifies the count of items after applying `before`/`after` filters and `first`/`last`/`skip` slicing.
 	PageCount int `json:"pageCount"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 	// Identifies the date and time when the timeline was last updated.
@@ -8799,7 +8799,7 @@ type JoinedGitHubContribution struct {
 	URL string `json:"url"`
 	// The user who made this contribution.
 	//
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (JoinedGitHubContribution) IsContribution() {}
@@ -8819,7 +8819,7 @@ func (this JoinedGitHubContribution) GetResourcePath() string { return this.Reso
 func (this JoinedGitHubContribution) GetURL() string { return this.URL }
 
 // The user who made this contribution.
-func (this JoinedGitHubContribution) GetUser() User { return this.User }
+func (this JoinedGitHubContribution) GetUser() *User { return this.User }
 
 // A label for categorizing Issues, Pull Requests, Milestones, or Discussions with a given Repository.
 type Label struct {
@@ -8834,13 +8834,13 @@ type Label struct {
 	// Indicates whether or not this is a default label.
 	IsDefault bool `json:"isDefault"`
 	// A list of issues associated with this label.
-	Issues IssueConnection `json:"issues"`
+	Issues *IssueConnection `json:"issues"`
 	// Identifies the label name.
 	Name string `json:"name"`
 	// A list of pull requests associated with this label.
-	PullRequests PullRequestConnection `json:"pullRequests"`
+	PullRequests *PullRequestConnection `json:"pullRequests"`
 	// The repository associated with this label.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this label.
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the date and time when the label was last updated.
@@ -8861,7 +8861,7 @@ type LabelConnection struct {
 	// A list of nodes.
 	Nodes []*Label `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -8891,7 +8891,7 @@ type LabeledEvent struct {
 	// The Node ID of the LabeledEvent object
 	ID string `json:"id"`
 	// Identifies the label associated with the 'labeled' event.
-	Label Label `json:"label"`
+	Label *Label `json:"label"`
 	// Identifies the `Labelable` associated with the event.
 	Labelable Labelable `json:"labelable"`
 }
@@ -8931,7 +8931,7 @@ type LanguageConnection struct {
 	// A list of nodes.
 	Nodes []*Language `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 	// The total size in bytes of files written in that language.
@@ -8940,8 +8940,8 @@ type LanguageConnection struct {
 
 // Represents the language of a repository.
 type LanguageEdge struct {
-	Cursor string   `json:"cursor"`
-	Node   Language `json:"node"`
+	Cursor string    `json:"cursor"`
+	Node   *Language `json:"node"`
 	// The number of bytes of code written in the language.
 	Size int `json:"size"`
 }
@@ -9079,7 +9079,7 @@ type LinkedBranchConnection struct {
 	// A list of nodes.
 	Nodes []*LinkedBranch `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -9193,7 +9193,7 @@ type MannequinConnection struct {
 	// A list of nodes.
 	Nodes []*Mannequin `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -9399,7 +9399,7 @@ type MarketplaceListing struct {
 	// URL to the listing's detailed pricing.
 	PricingURL *string `json:"pricingUrl,omitempty"`
 	// The category that best describes the listing.
-	PrimaryCategory MarketplaceCategory `json:"primaryCategory"`
+	PrimaryCategory *MarketplaceCategory `json:"primaryCategory"`
 	// URL to the listing's privacy policy, may return an empty string for listings that do not require a privacy policy URL.
 	PrivacyPolicyURL string `json:"privacyPolicyUrl"`
 	// The HTTP path for the Marketplace listing.
@@ -9474,7 +9474,7 @@ type MarketplaceListingConnection struct {
 	// A list of nodes.
 	Nodes []*MarketplaceListing `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -10081,7 +10081,7 @@ type MergeQueueEntryConnection struct {
 	// A list of nodes.
 	Nodes []*MergeQueueEntry `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -10109,7 +10109,7 @@ type MergedEvent struct {
 	// Identifies the name of the Ref associated with the `merge` event.
 	MergeRefName string `json:"mergeRefName"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The HTTP path for this merged event.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for this merged event.
@@ -10167,15 +10167,15 @@ type Milestone struct {
 	// The Node ID of the Milestone object
 	ID string `json:"id"`
 	// A list of issues associated with the milestone.
-	Issues IssueConnection `json:"issues"`
+	Issues *IssueConnection `json:"issues"`
 	// Identifies the number of the milestone.
 	Number int `json:"number"`
 	// Identifies the percentage complete for the milestone
 	ProgressPercentage float64 `json:"progressPercentage"`
 	// A list of pull requests associated with the milestone.
-	PullRequests PullRequestConnection `json:"pullRequests"`
+	PullRequests *PullRequestConnection `json:"pullRequests"`
 	// The repository associated with this milestone.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this milestone
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the state of the milestone.
@@ -10226,7 +10226,7 @@ type MilestoneConnection struct {
 	// A list of nodes.
 	Nodes []*Milestone `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -10360,7 +10360,7 @@ type OIDCProvider struct {
 	// The enterprise this identity provider belongs to.
 	Enterprise *Enterprise `json:"enterprise,omitempty"`
 	// ExternalIdentities provisioned by this identity provider.
-	ExternalIdentities ExternalIdentityConnection `json:"externalIdentities"`
+	ExternalIdentities *ExternalIdentityConnection `json:"externalIdentities"`
 	// The Node ID of the OIDCProvider object
 	ID string `json:"id"`
 	// The OIDC identity provider type
@@ -14059,7 +14059,7 @@ type Organization struct {
 	// Identifies the date and time when the organization was archived.
 	ArchivedAt *time.Time `json:"archivedAt,omitempty"`
 	// Audit log entries of the organization
-	AuditLog OrganizationAuditEntryConnection `json:"auditLog"`
+	AuditLog *OrganizationAuditEntryConnection `json:"auditLog"`
 	// A URL pointing to the organization's public avatar.
 	AvatarURL string `json:"avatarUrl"`
 	// Identifies the date and time when the object was created.
@@ -14075,7 +14075,7 @@ type Organization struct {
 	// The organization's public email.
 	Email *string `json:"email,omitempty"`
 	// A list of owners of the organization's enterprise account.
-	EnterpriseOwners OrganizationEnterpriseOwnerConnection `json:"enterpriseOwners"`
+	EnterpriseOwners *OrganizationEnterpriseOwnerConnection `json:"enterpriseOwners"`
 	// The estimated next GitHub Sponsors payout for this user/organization in cents (USD).
 	EstimatedNextSponsorsPayoutInCents int `json:"estimatedNextSponsorsPayoutInCents"`
 	// True if this user/organization has a GitHub Sponsors listing.
@@ -14087,7 +14087,7 @@ type Organization struct {
 	// The setting value for whether the organization has an IP allow list enabled.
 	IPAllowListEnabledSetting IPAllowListEnabledSettingValue `json:"ipAllowListEnabledSetting"`
 	// The IP addresses that are allowed to access resources owned by the organization.
-	IPAllowListEntries IPAllowListEntryConnection `json:"ipAllowListEntries"`
+	IPAllowListEntries *IPAllowListEntryConnection `json:"ipAllowListEntries"`
 	// The setting value for whether the organization has IP allow list configuration for installed GitHub Apps enabled.
 	IPAllowListForInstalledAppsEnabledSetting IPAllowListForInstalledAppsEnabledSettingValue `json:"ipAllowListForInstalledAppsEnabledSetting"`
 	// Whether the given account is sponsoring this user/organization.
@@ -14097,21 +14097,21 @@ type Organization struct {
 	// Whether the organization has verified its profile email and website.
 	IsVerified bool `json:"isVerified"`
 	// Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
-	ItemShowcase ProfileItemShowcase `json:"itemShowcase"`
+	ItemShowcase *ProfileItemShowcase `json:"itemShowcase"`
 	// Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
-	LifetimeReceivedSponsorshipValues SponsorAndLifetimeValueConnection `json:"lifetimeReceivedSponsorshipValues"`
+	LifetimeReceivedSponsorshipValues *SponsorAndLifetimeValueConnection `json:"lifetimeReceivedSponsorshipValues"`
 	// The organization's public profile location.
 	Location *string `json:"location,omitempty"`
 	// The organization's login name.
 	Login string `json:"login"`
 	// A list of all mannequins for this organization.
-	Mannequins MannequinConnection `json:"mannequins"`
+	Mannequins *MannequinConnection `json:"mannequins"`
 	// Get the status messages members of this entity have set that are either public or visible only to the organization.
-	MemberStatuses UserStatusConnection `json:"memberStatuses"`
+	MemberStatuses *UserStatusConnection `json:"memberStatuses"`
 	// Members can fork private repositories in this organization
 	MembersCanForkPrivateRepositories bool `json:"membersCanForkPrivateRepositories"`
 	// A list of users who are members of this organization.
-	MembersWithRole OrganizationMemberConnection `json:"membersWithRole"`
+	MembersWithRole *OrganizationMemberConnection `json:"membersWithRole"`
 	// The estimated monthly GitHub Sponsors income for this user/organization in cents (USD).
 	MonthlyEstimatedSponsorsIncomeInCents int `json:"monthlyEstimatedSponsorsIncomeInCents"`
 	// The organization's public profile name.
@@ -14125,13 +14125,13 @@ type Organization struct {
 	// The billing email for the organization.
 	OrganizationBillingEmail *string `json:"organizationBillingEmail,omitempty"`
 	// A list of packages under the owner.
-	Packages PackageConnection `json:"packages"`
+	Packages *PackageConnection `json:"packages"`
 	// A list of users who have been invited to join this organization.
-	PendingMembers UserConnection `json:"pendingMembers"`
+	PendingMembers *UserConnection `json:"pendingMembers"`
 	// A list of repositories and gists this profile owner can pin to their profile.
-	PinnableItems PinnableItemConnection `json:"pinnableItems"`
+	PinnableItems *PinnableItemConnection `json:"pinnableItems"`
 	// A list of repositories and gists this profile owner has pinned to their profile
-	PinnedItems PinnableItemConnection `json:"pinnedItems"`
+	PinnedItems *PinnableItemConnection `json:"pinnedItems"`
 	// Returns how many more items this profile owner can pin to their profile.
 	PinnedItemsRemaining int `json:"pinnedItemsRemaining"`
 	// Find project by number.
@@ -14139,25 +14139,25 @@ type Organization struct {
 	// Find a project by number.
 	ProjectV2 *ProjectV2 `json:"projectV2,omitempty"`
 	// A list of projects under the owner.
-	Projects ProjectConnection `json:"projects"`
+	Projects *ProjectConnection `json:"projects"`
 	// The HTTP path listing organization's projects
 	ProjectsResourcePath string `json:"projectsResourcePath"`
 	// The HTTP URL listing organization's projects
 	ProjectsURL string `json:"projectsUrl"`
 	// A list of projects under the owner.
-	ProjectsV2 ProjectV2Connection `json:"projectsV2"`
+	ProjectsV2 *ProjectV2Connection `json:"projectsV2"`
 	// Recent projects that this user has modified in the context of the owner.
-	RecentProjects ProjectV2Connection `json:"recentProjects"`
+	RecentProjects *ProjectV2Connection `json:"recentProjects"`
 	// A list of repositories that the user owns.
-	Repositories RepositoryConnection `json:"repositories"`
+	Repositories *RepositoryConnection `json:"repositories"`
 	// Find Repository.
 	Repository *Repository `json:"repository,omitempty"`
 	// Discussion comments this user has authored.
-	RepositoryDiscussionComments DiscussionCommentConnection `json:"repositoryDiscussionComments"`
+	RepositoryDiscussionComments *DiscussionCommentConnection `json:"repositoryDiscussionComments"`
 	// Discussions this user has started.
-	RepositoryDiscussions DiscussionConnection `json:"repositoryDiscussions"`
+	RepositoryDiscussions *DiscussionConnection `json:"repositoryDiscussions"`
 	// A list of all repository migrations for this organization.
-	RepositoryMigrations RepositoryMigrationConnection `json:"repositoryMigrations"`
+	RepositoryMigrations *RepositoryMigrationConnection `json:"repositoryMigrations"`
 	// When true the organization requires all members, billing managers, and outside collaborators to enable two-factor authentication.
 	RequiresTwoFactorAuthentication *bool `json:"requiresTwoFactorAuthentication,omitempty"`
 	// The HTTP path for this organization.
@@ -14169,11 +14169,11 @@ type Organization struct {
 	// The Organization's SAML identity provider. Visible to (1) organization owners, (2) organization owners' personal access tokens (classic) with read:org or admin:org scope, (3) GitHub App with an installation token with read or write access to members.
 	SamlIdentityProvider *OrganizationIdentityProvider `json:"samlIdentityProvider,omitempty"`
 	// List of users and organizations this entity is sponsoring.
-	Sponsoring SponsorConnection `json:"sponsoring"`
+	Sponsoring *SponsorConnection `json:"sponsoring"`
 	// List of sponsors for this user or organization.
-	Sponsors SponsorConnection `json:"sponsors"`
+	Sponsors *SponsorConnection `json:"sponsors"`
 	// Events involving this sponsorable, such as new sponsorships.
-	SponsorsActivities SponsorsActivityConnection `json:"sponsorsActivities"`
+	SponsorsActivities *SponsorsActivityConnection `json:"sponsorsActivities"`
 	// The GitHub Sponsors listing for this user or organization.
 	SponsorsListing *SponsorsListing `json:"sponsorsListing,omitempty"`
 	// The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor.
@@ -14181,15 +14181,15 @@ type Organization struct {
 	// The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving.
 	SponsorshipForViewerAsSponsorable *Sponsorship `json:"sponsorshipForViewerAsSponsorable,omitempty"`
 	// List of sponsorship updates sent from this sponsorable to sponsors.
-	SponsorshipNewsletters SponsorshipNewsletterConnection `json:"sponsorshipNewsletters"`
+	SponsorshipNewsletters *SponsorshipNewsletterConnection `json:"sponsorshipNewsletters"`
 	// The sponsorships where this user or organization is the maintainer receiving the funds.
-	SponsorshipsAsMaintainer SponsorshipConnection `json:"sponsorshipsAsMaintainer"`
+	SponsorshipsAsMaintainer *SponsorshipConnection `json:"sponsorshipsAsMaintainer"`
 	// The sponsorships where this user or organization is the funder.
-	SponsorshipsAsSponsor SponsorshipConnection `json:"sponsorshipsAsSponsor"`
+	SponsorshipsAsSponsor *SponsorshipConnection `json:"sponsorshipsAsSponsor"`
 	// Find an organization's team by its slug.
 	Team *Team `json:"team,omitempty"`
 	// A list of teams in this organization.
-	Teams TeamConnection `json:"teams"`
+	Teams *TeamConnection `json:"teams"`
 	// The HTTP path listing organization's teams
 	TeamsResourcePath string `json:"teamsResourcePath"`
 	// The HTTP URL listing organization's teams
@@ -14250,7 +14250,7 @@ func (Organization) IsIPAllowListOwner() {}
 func (Organization) IsMemberStatusable() {}
 
 // Get the status messages members of this entity have set that are either public or visible only to the organization.
-func (this Organization) GetMemberStatuses() UserStatusConnection { return this.MemberStatuses }
+func (this Organization) GetMemberStatuses() *UserStatusConnection { return this.MemberStatuses }
 
 func (Organization) IsNode() {}
 
@@ -14264,7 +14264,7 @@ func (Organization) IsPackageOwner() {}
 // The Node ID of the PackageOwner object
 
 // A list of packages under the owner.
-func (this Organization) GetPackages() PackageConnection { return this.Packages }
+func (this Organization) GetPackages() *PackageConnection { return this.Packages }
 
 func (Organization) IsPermissionGranter() {}
 
@@ -14279,7 +14279,7 @@ func (this Organization) GetEmail() *string { return this.Email }
 // The Node ID of the ProfileOwner object
 
 // Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
-func (this Organization) GetItemShowcase() ProfileItemShowcase { return this.ItemShowcase }
+func (this Organization) GetItemShowcase() *ProfileItemShowcase { return this.ItemShowcase }
 
 // The public profile location.
 func (this Organization) GetLocation() *string { return this.Location }
@@ -14291,10 +14291,10 @@ func (this Organization) GetLogin() string { return this.Login }
 func (this Organization) GetName() *string { return this.Name }
 
 // A list of repositories and gists this profile owner can pin to their profile.
-func (this Organization) GetPinnableItems() PinnableItemConnection { return this.PinnableItems }
+func (this Organization) GetPinnableItems() *PinnableItemConnection { return this.PinnableItems }
 
 // A list of repositories and gists this profile owner has pinned to their profile
-func (this Organization) GetPinnedItems() PinnableItemConnection { return this.PinnedItems }
+func (this Organization) GetPinnedItems() *PinnableItemConnection { return this.PinnedItems }
 
 // Returns how many more items this profile owner can pin to their profile.
 func (this Organization) GetPinnedItemsRemaining() int { return this.PinnedItemsRemaining }
@@ -14313,7 +14313,7 @@ func (Organization) IsProjectOwner() {}
 func (this Organization) GetProject() *Project { return this.Project }
 
 // A list of projects under the owner.
-func (this Organization) GetProjects() ProjectConnection { return this.Projects }
+func (this Organization) GetProjects() *ProjectConnection { return this.Projects }
 
 // The HTTP path listing owners projects
 func (this Organization) GetProjectsResourcePath() string { return this.ProjectsResourcePath }
@@ -14332,26 +14332,26 @@ func (Organization) IsProjectV2Owner() {}
 func (this Organization) GetProjectV2() *ProjectV2 { return this.ProjectV2 }
 
 // A list of projects under the owner.
-func (this Organization) GetProjectsV2() ProjectV2Connection { return this.ProjectsV2 }
+func (this Organization) GetProjectsV2() *ProjectV2Connection { return this.ProjectsV2 }
 
 func (Organization) IsProjectV2Recent() {}
 
 // Recent projects that this user has modified in the context of the owner.
-func (this Organization) GetRecentProjects() ProjectV2Connection { return this.RecentProjects }
+func (this Organization) GetRecentProjects() *ProjectV2Connection { return this.RecentProjects }
 
 func (Organization) IsReactor() {}
 
 func (Organization) IsRepositoryDiscussionAuthor() {}
 
 // Discussions this user has started.
-func (this Organization) GetRepositoryDiscussions() DiscussionConnection {
+func (this Organization) GetRepositoryDiscussions() *DiscussionConnection {
 	return this.RepositoryDiscussions
 }
 
 func (Organization) IsRepositoryDiscussionCommentAuthor() {}
 
 // Discussion comments this user has authored.
-func (this Organization) GetRepositoryDiscussionComments() DiscussionCommentConnection {
+func (this Organization) GetRepositoryDiscussionComments() *DiscussionCommentConnection {
 	return this.RepositoryDiscussionComments
 }
 
@@ -14365,7 +14365,7 @@ func (this Organization) GetAvatarURL() string { return this.AvatarURL }
 // The username used to login.
 
 // A list of repositories that the user owns.
-func (this Organization) GetRepositories() RepositoryConnection { return this.Repositories }
+func (this Organization) GetRepositories() *RepositoryConnection { return this.Repositories }
 
 // Find Repository.
 func (this Organization) GetRepository() *Repository { return this.Repository }
@@ -14399,7 +14399,7 @@ func (this Organization) GetIsSponsoredBy() bool { return this.IsSponsoredBy }
 func (this Organization) GetIsSponsoringViewer() bool { return this.IsSponsoringViewer }
 
 // Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
-func (this Organization) GetLifetimeReceivedSponsorshipValues() SponsorAndLifetimeValueConnection {
+func (this Organization) GetLifetimeReceivedSponsorshipValues() *SponsorAndLifetimeValueConnection {
 	return this.LifetimeReceivedSponsorshipValues
 }
 
@@ -14409,13 +14409,13 @@ func (this Organization) GetMonthlyEstimatedSponsorsIncomeInCents() int {
 }
 
 // List of users and organizations this entity is sponsoring.
-func (this Organization) GetSponsoring() SponsorConnection { return this.Sponsoring }
+func (this Organization) GetSponsoring() *SponsorConnection { return this.Sponsoring }
 
 // List of sponsors for this user or organization.
-func (this Organization) GetSponsors() SponsorConnection { return this.Sponsors }
+func (this Organization) GetSponsors() *SponsorConnection { return this.Sponsors }
 
 // Events involving this sponsorable, such as new sponsorships.
-func (this Organization) GetSponsorsActivities() SponsorsActivityConnection {
+func (this Organization) GetSponsorsActivities() *SponsorsActivityConnection {
 	return this.SponsorsActivities
 }
 
@@ -14433,17 +14433,17 @@ func (this Organization) GetSponsorshipForViewerAsSponsorable() *Sponsorship {
 }
 
 // List of sponsorship updates sent from this sponsorable to sponsors.
-func (this Organization) GetSponsorshipNewsletters() SponsorshipNewsletterConnection {
+func (this Organization) GetSponsorshipNewsletters() *SponsorshipNewsletterConnection {
 	return this.SponsorshipNewsletters
 }
 
 // The sponsorships where this user or organization is the maintainer receiving the funds.
-func (this Organization) GetSponsorshipsAsMaintainer() SponsorshipConnection {
+func (this Organization) GetSponsorshipsAsMaintainer() *SponsorshipConnection {
 	return this.SponsorshipsAsMaintainer
 }
 
 // The sponsorships where this user or organization is the funder.
-func (this Organization) GetSponsorshipsAsSponsor() SponsorshipConnection {
+func (this Organization) GetSponsorshipsAsSponsor() *SponsorshipConnection {
 	return this.SponsorshipsAsSponsor
 }
 
@@ -14475,7 +14475,7 @@ type OrganizationAuditEntryConnection struct {
 	// A list of nodes.
 	Nodes []OrganizationAuditEntry `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14495,7 +14495,7 @@ type OrganizationConnection struct {
 	// A list of nodes.
 	Nodes []*Organization `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14515,7 +14515,7 @@ type OrganizationEnterpriseOwnerConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14535,7 +14535,7 @@ type OrganizationIdentityProvider struct {
 	// The digest algorithm used to sign SAML requests for the Identity Provider.
 	DigestMethod *string `json:"digestMethod,omitempty"`
 	// External Identities provisioned by this Identity Provider
-	ExternalIdentities ExternalIdentityConnection `json:"externalIdentities"`
+	ExternalIdentities *ExternalIdentityConnection `json:"externalIdentities"`
 	// The Node ID of the OrganizationIdentityProvider object
 	ID string `json:"id"`
 	// The x509 certificate used by the Identity Provider to sign assertions and responses.
@@ -14570,11 +14570,11 @@ type OrganizationInvitation struct {
 	// The user who was invited to the organization.
 	Invitee *User `json:"invitee,omitempty"`
 	// The user who created the invitation.
-	Inviter User `json:"inviter"`
+	Inviter *User `json:"inviter"`
 	// The user who created the invitation.
 	InviterActor *User `json:"inviterActor,omitempty"`
 	// The organization the invite is for
-	Organization Organization `json:"organization"`
+	Organization *Organization `json:"organization"`
 	// The user's pending role in the organization (e.g. member, owner).
 	Role OrganizationInvitationRole `json:"role"`
 }
@@ -14591,7 +14591,7 @@ type OrganizationInvitationConnection struct {
 	// A list of nodes.
 	Nodes []*OrganizationInvitation `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14611,7 +14611,7 @@ type OrganizationMemberConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14672,7 +14672,7 @@ type OrganizationTeamsHovercardContext struct {
 	// An octicon to accompany this context
 	Octicon string `json:"octicon"`
 	// Teams in this organization the user is a member of that are relevant
-	RelevantTeams TeamConnection `json:"relevantTeams"`
+	RelevantTeams *TeamConnection `json:"relevantTeams"`
 	// The path for the full team list for this user
 	TeamsResourcePath string `json:"teamsResourcePath"`
 	// The URL for the full team list for this user
@@ -14696,7 +14696,7 @@ type OrganizationsHovercardContext struct {
 	// An octicon to accompany this context
 	Octicon string `json:"octicon"`
 	// Organizations this user is a member of that are relevant
-	RelevantOrganizations OrganizationConnection `json:"relevantOrganizations"`
+	RelevantOrganizations *OrganizationConnection `json:"relevantOrganizations"`
 	// The total number of organizations this user is in
 	TotalOrganizationCount int `json:"totalOrganizationCount"`
 }
@@ -14726,7 +14726,7 @@ type Package struct {
 	// Find package version by version string.
 	Version *PackageVersion `json:"version,omitempty"`
 	// list of versions for this package
-	Versions PackageVersionConnection `json:"versions"`
+	Versions *PackageVersionConnection `json:"versions"`
 }
 
 func (Package) IsNode() {}
@@ -14741,7 +14741,7 @@ type PackageConnection struct {
 	// A list of nodes.
 	Nodes []*Package `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14788,7 +14788,7 @@ type PackageFileConnection struct {
 	// A list of nodes.
 	Nodes []*PackageFile `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14841,7 +14841,7 @@ func (this PackageTag) GetID() string { return this.ID }
 // Information about a specific package version.
 type PackageVersion struct {
 	// List of files associated with this package version
-	Files PackageFileConnection `json:"files"`
+	Files *PackageFileConnection `json:"files"`
 	// The Node ID of the PackageVersion object
 	ID string `json:"id"`
 	// The package associated with this version.
@@ -14874,7 +14874,7 @@ type PackageVersionConnection struct {
 	// A list of nodes.
 	Nodes []*PackageVersion `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14916,7 +14916,7 @@ type PageInfo struct {
 // A level of permission and source for a user's access to a repository.
 type PermissionSource struct {
 	// The organization the repository belongs to.
-	Organization Organization `json:"organization"`
+	Organization *Organization `json:"organization"`
 	// The level of access this source has granted to the user.
 	Permission DefaultRepositoryPermissionField `json:"permission"`
 	// The name of the role this source has granted to the user.
@@ -14948,7 +14948,7 @@ type PinnableItemConnection struct {
 	// A list of nodes.
 	Nodes []PinnableItem `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -14968,7 +14968,7 @@ type PinnedDiscussion struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The discussion that was pinned.
-	Discussion Discussion `json:"discussion"`
+	Discussion *Discussion `json:"discussion"`
 	// Color stops of the chosen gradient
 	GradientStopColors []string `json:"gradientStopColors"`
 	// The Node ID of the PinnedDiscussion object
@@ -14980,7 +14980,7 @@ type PinnedDiscussion struct {
 	// Preconfigured background gradient option
 	PreconfiguredGradient *PinnedDiscussionGradient `json:"preconfiguredGradient,omitempty"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -14993,7 +14993,7 @@ func (this PinnedDiscussion) GetID() string { return this.ID }
 func (PinnedDiscussion) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this PinnedDiscussion) GetRepository() Repository { return this.Repository }
+func (this PinnedDiscussion) GetRepository() *Repository { return this.Repository }
 
 // The connection type for PinnedDiscussion.
 type PinnedDiscussionConnection struct {
@@ -15002,7 +15002,7 @@ type PinnedDiscussionConnection struct {
 	// A list of nodes.
 	Nodes []*PinnedDiscussion `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15024,7 +15024,7 @@ type PinnedEvent struct {
 	// The Node ID of the PinnedEvent object
 	ID string `json:"id"`
 	// Identifies the issue associated with the event.
-	Issue Issue `json:"issue"`
+	Issue *Issue `json:"issue"`
 }
 
 func (PinnedEvent) IsIssueTimelineItems() {}
@@ -15045,11 +15045,11 @@ type PinnedIssue struct {
 	// The Node ID of the PinnedIssue object
 	ID string `json:"id"`
 	// The issue that was pinned.
-	Issue Issue `json:"issue"`
+	Issue *Issue `json:"issue"`
 	// The actor that pinned this issue.
 	PinnedBy Actor `json:"pinnedBy"`
 	// The repository that this issue was pinned to.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 func (PinnedIssue) IsNode() {}
@@ -15064,7 +15064,7 @@ type PinnedIssueConnection struct {
 	// A list of nodes.
 	Nodes []*PinnedIssue `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15424,7 +15424,7 @@ type ProfileItemShowcase struct {
 	// Whether or not the owner has pinned any repositories or gists.
 	HasPinnedItems bool `json:"hasPinnedItems"`
 	// The repositories and gists in the showcase. If the profile owner has any pinned items, those will be returned. Otherwise, the profile owner's popular repositories will be returned.
-	Items PinnableItemConnection `json:"items"`
+	Items *PinnableItemConnection `json:"items"`
 }
 
 // Projects manage issues, pull requests and notes within a project owner.
@@ -15438,7 +15438,7 @@ type Project struct {
 	// Identifies the date and time when the object was closed.
 	ClosedAt *time.Time `json:"closedAt,omitempty"`
 	// List of columns in the project
-	Columns ProjectColumnConnection `json:"columns"`
+	Columns *ProjectColumnConnection `json:"columns"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The actor who originally created the project.
@@ -15454,9 +15454,9 @@ type Project struct {
 	// The project's owner. Currently limited to repositories, organizations, and users.
 	Owner ProjectOwner `json:"owner"`
 	// List of pending cards in this project
-	PendingCards ProjectCardConnection `json:"pendingCards"`
+	PendingCards *ProjectCardConnection `json:"pendingCards"`
 	// Project progress details.
-	Progress ProjectProgress `json:"progress"`
+	Progress *ProjectProgress `json:"progress"`
 	// The HTTP path for this project
 	ResourcePath string `json:"resourcePath"`
 	// Whether the project is open or closed.
@@ -15520,7 +15520,7 @@ type ProjectCard struct {
 	// The card note
 	Note *string `json:"note,omitempty"`
 	// The project that contains this card.
-	Project Project `json:"project"`
+	Project *Project `json:"project"`
 	// The HTTP path for this card
 	ResourcePath string `json:"resourcePath"`
 	// The state of ProjectCard
@@ -15543,7 +15543,7 @@ type ProjectCardConnection struct {
 	// A list of nodes.
 	Nodes []*ProjectCard `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15559,7 +15559,7 @@ type ProjectCardEdge struct {
 // A column inside a project.
 type ProjectColumn struct {
 	// List of cards in the column
-	Cards ProjectCardConnection `json:"cards"`
+	Cards *ProjectCardConnection `json:"cards"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
@@ -15569,7 +15569,7 @@ type ProjectColumn struct {
 	// The project column's name.
 	Name string `json:"name"`
 	// The project that contains this column.
-	Project Project `json:"project"`
+	Project *Project `json:"project"`
 	// The semantic purpose of the column
 	Purpose *ProjectColumnPurpose `json:"purpose,omitempty"`
 	// The HTTP path for this project column
@@ -15592,7 +15592,7 @@ type ProjectColumnConnection struct {
 	// A list of nodes.
 	Nodes []*ProjectColumn `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15612,7 +15612,7 @@ type ProjectConnection struct {
 	// A list of nodes.
 	Nodes []*Project `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15666,11 +15666,11 @@ type ProjectV2 struct {
 	// A field of the project
 	Field ProjectV2FieldConfiguration `json:"field,omitempty"`
 	// List of fields and their constraints in the project
-	Fields ProjectV2FieldConfigurationConnection `json:"fields"`
+	Fields *ProjectV2FieldConfigurationConnection `json:"fields"`
 	// The Node ID of the ProjectV2 object
 	ID string `json:"id"`
 	// List of items in the project
-	Items ProjectV2ItemConnection `json:"items"`
+	Items *ProjectV2ItemConnection `json:"items"`
 	// The project's number.
 	Number int `json:"number"`
 	// The project's owner. Currently limited to organizations and users.
@@ -15680,13 +15680,13 @@ type ProjectV2 struct {
 	// The project's readme.
 	Readme *string `json:"readme,omitempty"`
 	// The repositories the project is linked to.
-	Repositories RepositoryConnection `json:"repositories"`
+	Repositories *RepositoryConnection `json:"repositories"`
 	// The HTTP path for this project
 	ResourcePath string `json:"resourcePath"`
 	// The project's short description.
 	ShortDescription *string `json:"shortDescription,omitempty"`
 	// The teams the project is linked to.
-	Teams TeamConnection `json:"teams"`
+	Teams *TeamConnection `json:"teams"`
 	// Returns true if this project is a template.
 	Template bool `json:"template"`
 	// The project's name.
@@ -15704,11 +15704,11 @@ type ProjectV2 struct {
 	// Check if the current viewer can update this object.
 	ViewerCanUpdate bool `json:"viewerCanUpdate"`
 	// List of views in the project
-	Views ProjectV2ViewConnection `json:"views"`
+	Views *ProjectV2ViewConnection `json:"views"`
 	// A workflow of the project
 	Workflow *ProjectV2Workflow `json:"workflow,omitempty"`
 	// List of the workflows in the project
-	Workflows ProjectV2WorkflowConnection `json:"workflows"`
+	Workflows *ProjectV2WorkflowConnection `json:"workflows"`
 }
 
 func (ProjectV2) IsClosable() {}
@@ -15742,7 +15742,7 @@ type ProjectV2ActorConnection struct {
 	// A list of nodes.
 	Nodes []ProjectV2Actor `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15772,7 +15772,7 @@ type ProjectV2Connection struct {
 	// A list of nodes.
 	Nodes []*ProjectV2 `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15798,7 +15798,7 @@ type ProjectV2Field struct {
 	// The project field's name.
 	Name string `json:"name"`
 	// The project that contains this field.
-	Project ProjectV2 `json:"project"`
+	Project *ProjectV2 `json:"project"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -15825,7 +15825,7 @@ func (this ProjectV2Field) GetDatabaseID() *int { return this.DatabaseID }
 func (this ProjectV2Field) GetName() string { return this.Name }
 
 // The project that contains this field.
-func (this ProjectV2Field) GetProject() ProjectV2 { return this.Project }
+func (this ProjectV2Field) GetProject() *ProjectV2 { return this.Project }
 
 // Identifies the date and time when the object was last updated.
 func (this ProjectV2Field) GetUpdatedAt() time.Time { return this.UpdatedAt }
@@ -15839,7 +15839,7 @@ type ProjectV2FieldConfigurationConnection struct {
 	// A list of nodes.
 	Nodes []ProjectV2FieldConfiguration `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15859,7 +15859,7 @@ type ProjectV2FieldConnection struct {
 	// A list of nodes.
 	Nodes []*ProjectV2Field `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15913,13 +15913,13 @@ type ProjectV2Item struct {
 	// The field value of the first project field which matches the 'name' argument that is set on the item.
 	FieldValueByName ProjectV2ItemFieldValue `json:"fieldValueByName,omitempty"`
 	// The field values that are set on the item.
-	FieldValues ProjectV2ItemFieldValueConnection `json:"fieldValues"`
+	FieldValues *ProjectV2ItemFieldValueConnection `json:"fieldValues"`
 	// The Node ID of the ProjectV2Item object
 	ID string `json:"id"`
 	// Whether the item is archived.
 	IsArchived bool `json:"isArchived"`
 	// The project that contains this item.
-	Project ProjectV2 `json:"project"`
+	Project *ProjectV2 `json:"project"`
 	// The type of the item.
 	Type ProjectV2ItemType `json:"type"`
 	// Identifies the date and time when the object was last updated.
@@ -15938,7 +15938,7 @@ type ProjectV2ItemConnection struct {
 	// A list of nodes.
 	Nodes []*ProjectV2Item `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -15966,7 +15966,7 @@ type ProjectV2ItemFieldDateValue struct {
 	// The Node ID of the ProjectV2ItemFieldDateValue object
 	ID string `json:"id"`
 	// The project item that contains this value.
-	Item ProjectV2Item `json:"item"`
+	Item *ProjectV2Item `json:"item"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -15995,7 +15995,7 @@ func (this ProjectV2ItemFieldDateValue) GetField() ProjectV2FieldConfiguration {
 // The Node ID of the ProjectV2ItemFieldValueCommon object
 
 // The project item that contains this value.
-func (this ProjectV2ItemFieldDateValue) GetItem() ProjectV2Item { return this.Item }
+func (this ProjectV2ItemFieldDateValue) GetItem() *ProjectV2Item { return this.Item }
 
 // Identifies the date and time when the object was last updated.
 func (this ProjectV2ItemFieldDateValue) GetUpdatedAt() time.Time { return this.UpdatedAt }
@@ -16015,7 +16015,7 @@ type ProjectV2ItemFieldIterationValue struct {
 	// The Node ID of the ProjectV2ItemFieldIterationValue object
 	ID string `json:"id"`
 	// The project item that contains this value.
-	Item ProjectV2Item `json:"item"`
+	Item *ProjectV2Item `json:"item"`
 	// The ID of the iteration.
 	IterationID string `json:"iterationId"`
 	// The start date of the iteration.
@@ -16054,7 +16054,7 @@ func (this ProjectV2ItemFieldIterationValue) GetField() ProjectV2FieldConfigurat
 // The Node ID of the ProjectV2ItemFieldValueCommon object
 
 // The project item that contains this value.
-func (this ProjectV2ItemFieldIterationValue) GetItem() ProjectV2Item { return this.Item }
+func (this ProjectV2ItemFieldIterationValue) GetItem() *ProjectV2Item { return this.Item }
 
 // Identifies the date and time when the object was last updated.
 func (this ProjectV2ItemFieldIterationValue) GetUpdatedAt() time.Time { return this.UpdatedAt }
@@ -16092,7 +16092,7 @@ type ProjectV2ItemFieldNumberValue struct {
 	// The Node ID of the ProjectV2ItemFieldNumberValue object
 	ID string `json:"id"`
 	// The project item that contains this value.
-	Item ProjectV2Item `json:"item"`
+	Item *ProjectV2Item `json:"item"`
 	// Number as a float(8)
 	Number *float64 `json:"number,omitempty"`
 	// Identifies the date and time when the object was last updated.
@@ -16123,7 +16123,7 @@ func (this ProjectV2ItemFieldNumberValue) GetField() ProjectV2FieldConfiguration
 // The Node ID of the ProjectV2ItemFieldValueCommon object
 
 // The project item that contains this value.
-func (this ProjectV2ItemFieldNumberValue) GetItem() ProjectV2Item { return this.Item }
+func (this ProjectV2ItemFieldNumberValue) GetItem() *ProjectV2Item { return this.Item }
 
 // Identifies the date and time when the object was last updated.
 func (this ProjectV2ItemFieldNumberValue) GetUpdatedAt() time.Time { return this.UpdatedAt }
@@ -16177,7 +16177,7 @@ type ProjectV2ItemFieldSingleSelectValue struct {
 	// The Node ID of the ProjectV2ItemFieldSingleSelectValue object
 	ID string `json:"id"`
 	// The project item that contains this value.
-	Item ProjectV2Item `json:"item"`
+	Item *ProjectV2Item `json:"item"`
 	// The name of the selected single select option.
 	Name *string `json:"name,omitempty"`
 	// The html name of the selected single select option.
@@ -16214,7 +16214,7 @@ func (this ProjectV2ItemFieldSingleSelectValue) GetField() ProjectV2FieldConfigu
 // The Node ID of the ProjectV2ItemFieldValueCommon object
 
 // The project item that contains this value.
-func (this ProjectV2ItemFieldSingleSelectValue) GetItem() ProjectV2Item { return this.Item }
+func (this ProjectV2ItemFieldSingleSelectValue) GetItem() *ProjectV2Item { return this.Item }
 
 // Identifies the date and time when the object was last updated.
 func (this ProjectV2ItemFieldSingleSelectValue) GetUpdatedAt() time.Time { return this.UpdatedAt }
@@ -16232,7 +16232,7 @@ type ProjectV2ItemFieldTextValue struct {
 	// The Node ID of the ProjectV2ItemFieldTextValue object
 	ID string `json:"id"`
 	// The project item that contains this value.
-	Item ProjectV2Item `json:"item"`
+	Item *ProjectV2Item `json:"item"`
 	// Text value of a field
 	Text *string `json:"text,omitempty"`
 	// Identifies the date and time when the object was last updated.
@@ -16263,7 +16263,7 @@ func (this ProjectV2ItemFieldTextValue) GetField() ProjectV2FieldConfiguration {
 // The Node ID of the ProjectV2ItemFieldValueCommon object
 
 // The project item that contains this value.
-func (this ProjectV2ItemFieldTextValue) GetItem() ProjectV2Item { return this.Item }
+func (this ProjectV2ItemFieldTextValue) GetItem() *ProjectV2Item { return this.Item }
 
 // Identifies the date and time when the object was last updated.
 func (this ProjectV2ItemFieldTextValue) GetUpdatedAt() time.Time { return this.UpdatedAt }
@@ -16285,7 +16285,7 @@ type ProjectV2ItemFieldValueConnection struct {
 	// A list of nodes.
 	Nodes []ProjectV2ItemFieldValue `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -16317,7 +16317,7 @@ type ProjectV2ItemOrder struct {
 // An iteration field inside a project.
 type ProjectV2IterationField struct {
 	// Iteration configuration settings
-	Configuration ProjectV2IterationFieldConfiguration `json:"configuration"`
+	Configuration *ProjectV2IterationFieldConfiguration `json:"configuration"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The field's type.
@@ -16329,7 +16329,7 @@ type ProjectV2IterationField struct {
 	// The project field's name.
 	Name string `json:"name"`
 	// The project that contains this field.
-	Project ProjectV2 `json:"project"`
+	Project *ProjectV2 `json:"project"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -16356,7 +16356,7 @@ func (this ProjectV2IterationField) GetDatabaseID() *int { return this.DatabaseI
 func (this ProjectV2IterationField) GetName() string { return this.Name }
 
 // The project that contains this field.
-func (this ProjectV2IterationField) GetProject() ProjectV2 { return this.Project }
+func (this ProjectV2IterationField) GetProject() *ProjectV2 { return this.Project }
 
 // Identifies the date and time when the object was last updated.
 func (this ProjectV2IterationField) GetUpdatedAt() time.Time { return this.UpdatedAt }
@@ -16412,7 +16412,7 @@ type ProjectV2SingleSelectField struct {
 	// Options for the single select field
 	Options []*ProjectV2SingleSelectFieldOption `json:"options"`
 	// The project that contains this field.
-	Project ProjectV2 `json:"project"`
+	Project *ProjectV2 `json:"project"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -16439,7 +16439,7 @@ func (this ProjectV2SingleSelectField) GetDatabaseID() *int { return this.Databa
 func (this ProjectV2SingleSelectField) GetName() string { return this.Name }
 
 // The project that contains this field.
-func (this ProjectV2SingleSelectField) GetProject() ProjectV2 { return this.Project }
+func (this ProjectV2SingleSelectField) GetProject() *ProjectV2 { return this.Project }
 
 // Identifies the date and time when the object was last updated.
 func (this ProjectV2SingleSelectField) GetUpdatedAt() time.Time { return this.UpdatedAt }
@@ -16477,7 +16477,7 @@ type ProjectV2SortBy struct {
 	// The direction of the sorting. Possible values are ASC and DESC.
 	Direction OrderDirection `json:"direction"`
 	// The field by which items are sorted.
-	Field ProjectV2Field `json:"field"`
+	Field *ProjectV2Field `json:"field"`
 }
 
 // The connection type for ProjectV2SortBy.
@@ -16487,7 +16487,7 @@ type ProjectV2SortByConnection struct {
 	// A list of nodes.
 	Nodes []*ProjectV2SortBy `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -16515,7 +16515,7 @@ type ProjectV2SortByFieldConnection struct {
 	// A list of nodes.
 	Nodes []*ProjectV2SortByField `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -16551,7 +16551,7 @@ type ProjectV2View struct {
 	// The project view's number.
 	Number int `json:"number"`
 	// The project that contains this view.
-	Project ProjectV2 `json:"project"`
+	Project *ProjectV2 `json:"project"`
 	// The view's sort-by config.
 	SortBy *ProjectV2SortByConnection `json:"sortBy,omitempty"`
 	// The view's sort-by config.
@@ -16578,7 +16578,7 @@ type ProjectV2ViewConnection struct {
 	// A list of nodes.
 	Nodes []*ProjectV2View `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -16614,7 +16614,7 @@ type ProjectV2Workflow struct {
 	// The number of the workflow.
 	Number int `json:"number"`
 	// The project that contains this workflow.
-	Project ProjectV2 `json:"project"`
+	Project *ProjectV2 `json:"project"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -16631,7 +16631,7 @@ type ProjectV2WorkflowConnection struct {
 	// A list of nodes.
 	Nodes []*ProjectV2Workflow `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -16698,7 +16698,7 @@ type PublicKeyConnection struct {
 	// A list of nodes.
 	Nodes []*PublicKey `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -16734,7 +16734,7 @@ type PullRequest struct {
 	// The number of additions in this pull request.
 	Additions int `json:"additions"`
 	// A list of Users assigned to this object.
-	Assignees UserConnection `json:"assignees"`
+	Assignees *UserConnection `json:"assignees"`
 	// The actor who authored the comment.
 	Author Actor `json:"author,omitempty"`
 	// Author's association with the subject of the comment.
@@ -16768,9 +16768,9 @@ type PullRequest struct {
 	// List of issues that were may be closed by this pull request
 	ClosingIssuesReferences *IssueConnection `json:"closingIssuesReferences,omitempty"`
 	// A list of comments associated with the pull request.
-	Comments IssueCommentConnection `json:"comments"`
+	Comments *IssueCommentConnection `json:"comments"`
 	// A list of commits present in this pull request's head branch not present in the base branch.
-	Commits PullRequestCommitConnection `json:"commits"`
+	Commits *PullRequestCommitConnection `json:"commits"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Check if this comment was created via an email reply.
@@ -16796,7 +16796,7 @@ type PullRequest struct {
 	// The owner of the repository associated with this pull request's head Ref.
 	HeadRepositoryOwner RepositoryOwner `json:"headRepositoryOwner,omitempty"`
 	// The hovercard information for this issue
-	Hovercard Hovercard `json:"hovercard"`
+	Hovercard *Hovercard `json:"hovercard"`
 	// The Node ID of the PullRequest object
 	ID string `json:"id"`
 	// Check if this comment was edited and includes an edit with the creation data
@@ -16842,27 +16842,27 @@ type PullRequest struct {
 	// Identifies the pull request number.
 	Number int `json:"number"`
 	// A list of Users that are participating in the Pull Request conversation.
-	Participants UserConnection `json:"participants"`
+	Participants *UserConnection `json:"participants"`
 	// The permalink to the pull request.
 	Permalink string `json:"permalink"`
 	// The commit that GitHub automatically generated to test if this pull request could be merged. This field will not return a value if the pull request is merged, or if the test merge commit is still being generated. See the `mergeable` field for more details on the mergeability of the pull request.
 	PotentialMergeCommit *Commit `json:"potentialMergeCommit,omitempty"`
 	// List of project cards associated with this pull request.
-	ProjectCards ProjectCardConnection `json:"projectCards"`
+	ProjectCards *ProjectCardConnection `json:"projectCards"`
 	// List of project items associated with this pull request.
-	ProjectItems ProjectV2ItemConnection `json:"projectItems"`
+	ProjectItems *ProjectV2ItemConnection `json:"projectItems"`
 	// Find a project by number.
 	ProjectV2 *ProjectV2 `json:"projectV2,omitempty"`
 	// A list of projects under the owner.
-	ProjectsV2 ProjectV2Connection `json:"projectsV2"`
+	ProjectsV2 *ProjectV2Connection `json:"projectsV2"`
 	// Identifies when the comment was published at.
 	PublishedAt *time.Time `json:"publishedAt,omitempty"`
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this pull request.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP path for reverting this pull request.
@@ -16874,7 +16874,7 @@ type PullRequest struct {
 	// A list of review requests associated with the pull request.
 	ReviewRequests *ReviewRequestConnection `json:"reviewRequests,omitempty"`
 	// The list of all review threads for this pull request.
-	ReviewThreads PullRequestReviewThreadConnection `json:"reviewThreads"`
+	ReviewThreads *PullRequestReviewThreadConnection `json:"reviewThreads"`
 	// A list of reviews associated with the pull request.
 	Reviews *PullRequestReviewConnection `json:"reviews,omitempty"`
 	// Identifies the state of the pull request.
@@ -16882,9 +16882,9 @@ type PullRequest struct {
 	// A list of reviewer suggestions based on commit history and past review comments.
 	SuggestedReviewers []*SuggestedReviewer `json:"suggestedReviewers"`
 	// A list of events, comments, commits, etc. associated with the pull request.
-	Timeline PullRequestTimelineConnection `json:"timeline"`
+	Timeline *PullRequestTimelineConnection `json:"timeline"`
 	// A list of events, comments, commits, etc. associated with the pull request.
-	TimelineItems PullRequestTimelineItemsConnection `json:"timelineItems"`
+	TimelineItems *PullRequestTimelineItemsConnection `json:"timelineItems"`
 	// Identifies the pull request title.
 	Title string `json:"title"`
 	// Identifies the pull request title rendered to HTML.
@@ -16942,7 +16942,7 @@ type PullRequest struct {
 func (PullRequest) IsAssignable() {}
 
 // A list of Users assigned to this object.
-func (this PullRequest) GetAssignees() UserConnection { return this.Assignees }
+func (this PullRequest) GetAssignees() *UserConnection { return this.Assignees }
 
 func (PullRequest) IsClosable() {}
 
@@ -17044,7 +17044,7 @@ func (PullRequest) IsProjectV2Owner() {}
 func (this PullRequest) GetProjectV2() *ProjectV2 { return this.ProjectV2 }
 
 // A list of projects under the owner.
-func (this PullRequest) GetProjectsV2() ProjectV2Connection { return this.ProjectsV2 }
+func (this PullRequest) GetProjectsV2() *ProjectV2Connection { return this.ProjectsV2 }
 
 func (PullRequest) IsReactable() {}
 
@@ -17066,7 +17066,7 @@ func (this PullRequest) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this PullRequest) GetReactions() ReactionConnection { return this.Reactions }
+func (this PullRequest) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this PullRequest) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -17078,7 +17078,7 @@ func (PullRequest) IsRenamedTitleSubject() {}
 func (PullRequest) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this PullRequest) GetRepository() Repository { return this.Repository }
+func (this PullRequest) GetRepository() *Repository { return this.Repository }
 
 func (PullRequest) IsSearchResultItem() {}
 
@@ -17140,7 +17140,7 @@ type PullRequestChangedFileConnection struct {
 	// A list of nodes.
 	Nodes []*PullRequestChangedFile `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -17156,11 +17156,11 @@ type PullRequestChangedFileEdge struct {
 // Represents a Git commit part of a pull request.
 type PullRequestCommit struct {
 	// The Git commit object
-	Commit Commit `json:"commit"`
+	Commit *Commit `json:"commit"`
 	// The Node ID of the PullRequestCommit object
 	ID string `json:"id"`
 	// The pull request this commit belongs to
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The HTTP path for this pull request commit
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for this pull request commit
@@ -17185,9 +17185,9 @@ func (this PullRequestCommit) GetURL() string { return this.URL }
 // Represents a commit comment thread part of a pull request.
 type PullRequestCommitCommentThread struct {
 	// The comments that exist in this thread.
-	Comments CommitCommentConnection `json:"comments"`
+	Comments *CommitCommentConnection `json:"comments"`
 	// The commit the comments were made on.
-	Commit Commit `json:"commit"`
+	Commit *Commit `json:"commit"`
 	// The Node ID of the PullRequestCommitCommentThread object
 	ID string `json:"id"`
 	// The file the comments were made on.
@@ -17195,9 +17195,9 @@ type PullRequestCommitCommentThread struct {
 	// The position in the diff for the commit that the comment was made on.
 	Position *int `json:"position,omitempty"`
 	// The pull request this commit comment thread belongs to
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 func (PullRequestCommitCommentThread) IsNode() {}
@@ -17210,7 +17210,7 @@ func (PullRequestCommitCommentThread) IsPullRequestTimelineItems() {}
 func (PullRequestCommitCommentThread) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this PullRequestCommitCommentThread) GetRepository() Repository { return this.Repository }
+func (this PullRequestCommitCommentThread) GetRepository() *Repository { return this.Repository }
 
 // The connection type for PullRequestCommit.
 type PullRequestCommitConnection struct {
@@ -17219,7 +17219,7 @@ type PullRequestCommitConnection struct {
 	// A list of nodes.
 	Nodes []*PullRequestCommit `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -17239,7 +17239,7 @@ type PullRequestConnection struct {
 	// A list of nodes.
 	Nodes []*PullRequest `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -17247,9 +17247,9 @@ type PullRequestConnection struct {
 // This aggregates pull requests opened by a user within one repository.
 type PullRequestContributionsByRepository struct {
 	// The pull request contributions.
-	Contributions CreatedPullRequestContributionConnection `json:"contributions"`
+	Contributions *CreatedPullRequestContributionConnection `json:"contributions"`
 	// The repository in which the pull requests were opened.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 // An edge in a connection.
@@ -17313,7 +17313,7 @@ type PullRequestReview struct {
 	// The body of this review rendered as plain text.
 	BodyText string `json:"bodyText"`
 	// A list of review comments for the current pull request review.
-	Comments PullRequestReviewCommentConnection `json:"comments"`
+	Comments *PullRequestReviewCommentConnection `json:"comments"`
 	// Identifies the commit associated with this pull request review.
 	Commit *Commit `json:"commit,omitempty"`
 	// Identifies the date and time when the object was created.
@@ -17337,17 +17337,17 @@ type PullRequestReview struct {
 	// Returns why the comment was minimized. One of `abuse`, `off-topic`, `outdated`, `resolved`, `duplicate` and `spam`. Note that the case and formatting of these values differs from the inputs to the `MinimizeComment` mutation.
 	MinimizedReason *string `json:"minimizedReason,omitempty"`
 	// A list of teams that this review was made on behalf of.
-	OnBehalfOf TeamConnection `json:"onBehalfOf"`
+	OnBehalfOf *TeamConnection `json:"onBehalfOf"`
 	// Identifies when the comment was published at.
 	PublishedAt *time.Time `json:"publishedAt,omitempty"`
 	// Identifies the pull request associated with this pull request review.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path permalink for this PullRequestReview.
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the current state of the pull request review.
@@ -17469,7 +17469,7 @@ func (this PullRequestReview) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this PullRequestReview) GetReactions() ReactionConnection { return this.Reactions }
+func (this PullRequestReview) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this PullRequestReview) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -17477,7 +17477,7 @@ func (this PullRequestReview) GetViewerCanReact() bool { return this.ViewerCanRe
 func (PullRequestReview) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this PullRequestReview) GetRepository() Repository { return this.Repository }
+func (this PullRequestReview) GetRepository() *Repository { return this.Repository }
 
 func (PullRequestReview) IsUpdatable() {}
 
@@ -17555,17 +17555,17 @@ type PullRequestReviewComment struct {
 	// Identifies when the comment was published at.
 	PublishedAt *time.Time `json:"publishedAt,omitempty"`
 	// The pull request associated with this review comment.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The pull request review associated with this review comment.
 	PullRequestReview *PullRequestReview `json:"pullRequestReview,omitempty"`
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The comment this is a reply to.
 	ReplyTo *PullRequestReviewComment `json:"replyTo,omitempty"`
 	// The repository associated with this node.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path permalink for this review comment.
 	ResourcePath string `json:"resourcePath"`
 	// The start line number on the file to which the comment applies
@@ -17687,7 +17687,7 @@ func (this PullRequestReviewComment) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this PullRequestReviewComment) GetReactions() ReactionConnection { return this.Reactions }
+func (this PullRequestReviewComment) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this PullRequestReviewComment) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -17695,7 +17695,7 @@ func (this PullRequestReviewComment) GetViewerCanReact() bool { return this.View
 func (PullRequestReviewComment) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this PullRequestReviewComment) GetRepository() Repository { return this.Repository }
+func (this PullRequestReviewComment) GetRepository() *Repository { return this.Repository }
 
 func (PullRequestReviewComment) IsUpdatable() {}
 
@@ -17723,7 +17723,7 @@ type PullRequestReviewCommentConnection struct {
 	// A list of nodes.
 	Nodes []*PullRequestReviewComment `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -17743,7 +17743,7 @@ type PullRequestReviewConnection struct {
 	// A list of nodes.
 	Nodes []*PullRequestReview `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -17751,9 +17751,9 @@ type PullRequestReviewConnection struct {
 // This aggregates pull request reviews made by a user within one repository.
 type PullRequestReviewContributionsByRepository struct {
 	// The pull request review contributions.
-	Contributions CreatedPullRequestReviewContributionConnection `json:"contributions"`
+	Contributions *CreatedPullRequestReviewContributionConnection `json:"contributions"`
 	// The repository in which the pull request reviews were made.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 // An edge in a connection.
@@ -17767,7 +17767,7 @@ type PullRequestReviewEdge struct {
 // A threaded list of comments for a given pull request.
 type PullRequestReviewThread struct {
 	// A list of pull request comments associated with the thread.
-	Comments PullRequestReviewCommentConnection `json:"comments"`
+	Comments *PullRequestReviewCommentConnection `json:"comments"`
 	// The side of the diff on which this thread was placed.
 	DiffSide DiffSide `json:"diffSide"`
 	// The Node ID of the PullRequestReviewThread object
@@ -17787,9 +17787,9 @@ type PullRequestReviewThread struct {
 	// Identifies the file path of this thread.
 	Path string `json:"path"`
 	// Identifies the pull request associated with this thread.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// Identifies the repository associated with this thread.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The user who resolved this thread
 	ResolvedBy *User `json:"resolvedBy,omitempty"`
 	// The side of the diff that the first line of the thread starts on (multi-line only)
@@ -17822,7 +17822,7 @@ type PullRequestReviewThreadConnection struct {
 	// A list of nodes.
 	Nodes []*PullRequestReviewThread `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -17840,9 +17840,9 @@ type PullRequestRevisionMarker struct {
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The last commit the viewer has seen.
-	LastSeenCommit Commit `json:"lastSeenCommit"`
+	LastSeenCommit *Commit `json:"lastSeenCommit"`
 	// The pull request to which the marker belongs.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 }
 
 func (PullRequestRevisionMarker) IsPullRequestTimelineItems() {}
@@ -17854,13 +17854,13 @@ type PullRequestTemplate struct {
 	// The filename of the template
 	Filename *string `json:"filename,omitempty"`
 	// The repository the template belongs to
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 // A threaded list of comments for a given pull request.
 type PullRequestThread struct {
 	// A list of pull request comments associated with the thread.
-	Comments PullRequestReviewCommentConnection `json:"comments"`
+	Comments *PullRequestReviewCommentConnection `json:"comments"`
 	// The side of the diff on which this thread was placed.
 	DiffSide DiffSide `json:"diffSide"`
 	// The Node ID of the PullRequestThread object
@@ -17876,9 +17876,9 @@ type PullRequestThread struct {
 	// Identifies the file path of this thread.
 	Path string `json:"path"`
 	// Identifies the pull request associated with this thread.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// Identifies the repository associated with this thread.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The user who resolved this thread
 	ResolvedBy *User `json:"resolvedBy,omitempty"`
 	// The side of the diff that the first line of the thread starts on (multi-line only)
@@ -17907,7 +17907,7 @@ type PullRequestTimelineConnection struct {
 	// A list of nodes.
 	Nodes []PullRequestTimelineItem `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -17931,7 +17931,7 @@ type PullRequestTimelineItemsConnection struct {
 	// Identifies the count of items after applying `before`/`after` filters and `first`/`last`/`skip` slicing.
 	PageCount int `json:"pageCount"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 	// Identifies the date and time when the timeline was last updated.
@@ -17959,7 +17959,7 @@ type Push struct {
 	// The actor who pushed
 	Pusher Actor `json:"pusher"`
 	// The repository that was pushed to
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 func (Push) IsNode() {}
@@ -17989,7 +17989,7 @@ type PushAllowanceConnection struct {
 	// A list of nodes.
 	Nodes []*PushAllowance `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -18029,7 +18029,7 @@ type ReactingUserConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -18038,7 +18038,7 @@ type ReactingUserConnection struct {
 type ReactingUserEdge struct {
 	// A cursor for use in pagination.
 	Cursor string `json:"cursor"`
-	Node   User   `json:"node"`
+	Node   *User  `json:"node"`
 	// The moment when the user made the reaction.
 	ReactedAt time.Time `json:"reactedAt"`
 }
@@ -18071,7 +18071,7 @@ type ReactionConnection struct {
 	// A list of nodes.
 	Nodes []*Reaction `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 	// Whether or not the authenticated user has left a reaction on the subject.
@@ -18093,11 +18093,11 @@ type ReactionGroup struct {
 	// Identifies when the reaction was created.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	// Reactors to the reaction subject with the emotion represented by this reaction group.
-	Reactors ReactorConnection `json:"reactors"`
+	Reactors *ReactorConnection `json:"reactors"`
 	// The subject that was reacted to.
 	Subject Reactable `json:"subject"`
 	// Users who have reacted to the reaction subject with the emotion represented by this reaction group
-	Users ReactingUserConnection `json:"users"`
+	Users *ReactingUserConnection `json:"users"`
 	// Whether or not the authenticated user has left a reaction on the subject.
 	ViewerHasReacted bool `json:"viewerHasReacted"`
 }
@@ -18117,7 +18117,7 @@ type ReactorConnection struct {
 	// A list of nodes.
 	Nodes []Reactor `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -18141,7 +18141,7 @@ type ReadyForReviewEvent struct {
 	// The Node ID of the ReadyForReviewEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The HTTP path for this ready for review event.
 	ResourcePath string `json:"resourcePath"`
 	// The HTTP URL for this ready for review event.
@@ -18166,7 +18166,7 @@ func (this ReadyForReviewEvent) GetURL() string { return this.URL }
 // Represents a Git reference.
 type Ref struct {
 	// A list of pull requests with this ref as the head ref.
-	AssociatedPullRequests PullRequestConnection `json:"associatedPullRequests"`
+	AssociatedPullRequests *PullRequestConnection `json:"associatedPullRequests"`
 	// Branch protection rules for this ref
 	BranchProtectionRule *BranchProtectionRule `json:"branchProtectionRule,omitempty"`
 	// Compares the current ref as a base ref to another head ref, if the comparison can be made.
@@ -18180,7 +18180,7 @@ type Ref struct {
 	// Branch protection rules that are viewable by non-admins
 	RefUpdateRule *RefUpdateRule `json:"refUpdateRule,omitempty"`
 	// The repository the ref belongs to.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// A list of rules from active Repository and Organization rulesets that apply to this ref.
 	Rules *RepositoryRuleConnection `json:"rules,omitempty"`
 	// The object the ref points to. Returns null when object does not exist.
@@ -18199,7 +18199,7 @@ type RefConnection struct {
 	// A list of nodes.
 	Nodes []*Ref `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -18271,7 +18271,7 @@ type ReferencedEvent struct {
 	// Identifies the commit associated with the 'referenced' event.
 	Commit *Commit `json:"commit,omitempty"`
 	// Identifies the repository associated with the 'referenced' event.
-	CommitRepository Repository `json:"commitRepository"`
+	CommitRepository *Repository `json:"commitRepository"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// The Node ID of the ReferencedEvent object
@@ -18378,11 +18378,11 @@ type Release struct {
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// List of releases assets which are dependent on this release.
-	ReleaseAssets ReleaseAssetConnection `json:"releaseAssets"`
+	ReleaseAssets *ReleaseAssetConnection `json:"releaseAssets"`
 	// The repository that the release belongs to.
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The HTTP path for this issue
 	ResourcePath string `json:"resourcePath"`
 	// A description of the release, rendered to HTML without any links in it.
@@ -18426,7 +18426,7 @@ func (this Release) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this Release) GetReactions() ReactionConnection { return this.Reactions }
+func (this Release) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this Release) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -18460,7 +18460,7 @@ type ReleaseAsset struct {
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 	// The user that performed the upload
-	UploadedBy User `json:"uploadedBy"`
+	UploadedBy *User `json:"uploadedBy"`
 	// Identifies the URL of the release asset.
 	URL string `json:"url"`
 }
@@ -18477,7 +18477,7 @@ type ReleaseAssetConnection struct {
 	// A list of nodes.
 	Nodes []*ReleaseAsset `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -18497,7 +18497,7 @@ type ReleaseConnection struct {
 	// A list of nodes.
 	Nodes []*Release `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -21631,11 +21631,11 @@ type Repository struct {
 	// Identifies the date and time when the repository was archived.
 	ArchivedAt *time.Time `json:"archivedAt,omitempty"`
 	// A list of users that can be assigned to issues in this repository.
-	AssignableUsers UserConnection `json:"assignableUsers"`
+	AssignableUsers *UserConnection `json:"assignableUsers"`
 	// Whether or not Auto-merge can be enabled on pull requests in this repository.
 	AutoMergeAllowed bool `json:"autoMergeAllowed"`
 	// A list of branch protection rules for this repository.
-	BranchProtectionRules BranchProtectionRuleConnection `json:"branchProtectionRules"`
+	BranchProtectionRules *BranchProtectionRuleConnection `json:"branchProtectionRules"`
 	// Returns the code of conduct for this repository
 	CodeOfConduct *CodeOfConduct `json:"codeOfConduct,omitempty"`
 	// Information extracted from the repository's `CODEOWNERS` file.
@@ -21643,7 +21643,7 @@ type Repository struct {
 	// A list of collaborators associated with the repository.
 	Collaborators *RepositoryCollaboratorConnection `json:"collaborators,omitempty"`
 	// A list of commit comments associated with the repository.
-	CommitComments CommitCommentConnection `json:"commitComments"`
+	CommitComments *CommitCommentConnection `json:"commitComments"`
 	// Returns a list of contact links associated to the repository
 	ContactLinks []*RepositoryContactLink `json:"contactLinks,omitempty"`
 	// Returns the contributing guidelines for this repository.
@@ -21657,9 +21657,9 @@ type Repository struct {
 	// Whether or not branches are automatically deleted when merged in this repository.
 	DeleteBranchOnMerge bool `json:"deleteBranchOnMerge"`
 	// A list of deploy keys that are on this repository.
-	DeployKeys DeployKeyConnection `json:"deployKeys"`
+	DeployKeys *DeployKeyConnection `json:"deployKeys"`
 	// Deployments associated with the repository
-	Deployments DeploymentConnection `json:"deployments"`
+	Deployments *DeploymentConnection `json:"deployments"`
 	// The description of the repository.
 	Description *string `json:"description,omitempty"`
 	// The description of the repository rendered to HTML.
@@ -21667,23 +21667,23 @@ type Repository struct {
 	// Returns a single discussion from the current repository by number.
 	Discussion *Discussion `json:"discussion,omitempty"`
 	// A list of discussion categories that are available in the repository.
-	DiscussionCategories DiscussionCategoryConnection `json:"discussionCategories"`
+	DiscussionCategories *DiscussionCategoryConnection `json:"discussionCategories"`
 	// A discussion category by slug.
 	DiscussionCategory *DiscussionCategory `json:"discussionCategory,omitempty"`
 	// A list of discussions that have been opened in the repository.
-	Discussions DiscussionConnection `json:"discussions"`
+	Discussions *DiscussionConnection `json:"discussions"`
 	// The number of kilobytes this repository occupies on disk.
 	DiskUsage *int `json:"diskUsage,omitempty"`
 	// Returns a single active environment from the current repository by name.
 	Environment *Environment `json:"environment,omitempty"`
 	// A list of environments that are in this repository.
-	Environments EnvironmentConnection `json:"environments"`
+	Environments *EnvironmentConnection `json:"environments"`
 	// Returns how many forks there are of this repository in the whole network.
 	ForkCount int `json:"forkCount"`
 	// Whether this repository allows forks.
 	ForkingAllowed bool `json:"forkingAllowed"`
 	// A list of direct forked repositories.
-	Forks RepositoryConnection `json:"forks"`
+	Forks *RepositoryConnection `json:"forks"`
 	// The funding links for this repository
 	FundingLinks []*FundingLink `json:"fundingLinks"`
 	// Indicates if the repository has the Discussions feature enabled.
@@ -21735,7 +21735,7 @@ type Repository struct {
 	// Returns a list of issue templates associated to the repository
 	IssueTemplates []*IssueTemplate `json:"issueTemplates,omitempty"`
 	// A list of issues that have been opened in the repository.
-	Issues IssueConnection `json:"issues"`
+	Issues *IssueConnection `json:"issues"`
 	// Returns a single label by name
 	Label *Label `json:"label,omitempty"`
 	// A list of labels associated with the repository.
@@ -21749,7 +21749,7 @@ type Repository struct {
 	// The reason the repository has been locked.
 	LockReason *RepositoryLockReason `json:"lockReason,omitempty"`
 	// A list of Users that can be mentioned in the context of the repository.
-	MentionableUsers UserConnection `json:"mentionableUsers"`
+	MentionableUsers *UserConnection `json:"mentionableUsers"`
 	// Whether or not PRs are merged with a merge commit on this repository.
 	MergeCommitAllowed bool `json:"mergeCommitAllowed"`
 	// How the default commit message will be generated when merging a pull request.
@@ -21775,11 +21775,11 @@ type Repository struct {
 	// The User owner of the repository.
 	Owner RepositoryOwner `json:"owner"`
 	// A list of packages under the owner.
-	Packages PackageConnection `json:"packages"`
+	Packages *PackageConnection `json:"packages"`
 	// The repository parent, if this is a fork.
 	Parent *Repository `json:"parent,omitempty"`
 	// A list of discussions that have been pinned in this repository.
-	PinnedDiscussions PinnedDiscussionConnection `json:"pinnedDiscussions"`
+	PinnedDiscussions *PinnedDiscussionConnection `json:"pinnedDiscussions"`
 	// A list of pinned issues for this repository.
 	PinnedIssues *PinnedIssueConnection `json:"pinnedIssues,omitempty"`
 	// The primary language of the repository's code.
@@ -21789,25 +21789,25 @@ type Repository struct {
 	// Finds and returns the Project according to the provided Project number.
 	ProjectV2 *ProjectV2 `json:"projectV2,omitempty"`
 	// A list of projects under the owner.
-	Projects ProjectConnection `json:"projects"`
+	Projects *ProjectConnection `json:"projects"`
 	// The HTTP path listing the repository's projects
 	ProjectsResourcePath string `json:"projectsResourcePath"`
 	// The HTTP URL listing the repository's projects
 	ProjectsURL string `json:"projectsUrl"`
 	// List of projects linked to this repository.
-	ProjectsV2 ProjectV2Connection `json:"projectsV2"`
+	ProjectsV2 *ProjectV2Connection `json:"projectsV2"`
 	// Returns a single pull request from the current repository by number.
 	PullRequest *PullRequest `json:"pullRequest,omitempty"`
 	// Returns a list of pull request templates associated to the repository
 	PullRequestTemplates []*PullRequestTemplate `json:"pullRequestTemplates,omitempty"`
 	// A list of pull requests that have been opened in the repository.
-	PullRequests PullRequestConnection `json:"pullRequests"`
+	PullRequests *PullRequestConnection `json:"pullRequests"`
 	// Identifies the date and time when the repository was last pushed to.
 	PushedAt *time.Time `json:"pushedAt,omitempty"`
 	// Whether or not rebase-merging is enabled on this repository.
 	RebaseMergeAllowed bool `json:"rebaseMergeAllowed"`
 	// Recent projects that this user has modified in the context of the owner.
-	RecentProjects ProjectV2Connection `json:"recentProjects"`
+	RecentProjects *ProjectV2Connection `json:"recentProjects"`
 	// Fetch a given ref from the repository
 	Ref *Ref `json:"ref,omitempty"`
 	// Fetch a list of refs from the repository
@@ -21815,9 +21815,9 @@ type Repository struct {
 	// Lookup a single release given various criteria.
 	Release *Release `json:"release,omitempty"`
 	// List of releases which are dependent on this repository.
-	Releases ReleaseConnection `json:"releases"`
+	Releases *ReleaseConnection `json:"releases"`
 	// A list of applied repository-topic associations for this repository.
-	RepositoryTopics RepositoryTopicConnection `json:"repositoryTopics"`
+	RepositoryTopics *RepositoryTopicConnection `json:"repositoryTopics"`
 	// The HTTP path for this repository
 	ResourcePath string `json:"resourcePath"`
 	// Returns a single ruleset from the current repository by ID.
@@ -21842,9 +21842,9 @@ type Repository struct {
 	//
 	StargazerCount int `json:"stargazerCount"`
 	// A list of users who have starred this starrable.
-	Stargazers StargazerConnection `json:"stargazers"`
+	Stargazers *StargazerConnection `json:"stargazers"`
 	// Returns a list of all submodules in this repository parsed from the .gitmodules file as of the default branch's HEAD commit.
-	Submodules SubmoduleConnection `json:"submodules"`
+	Submodules *SubmoduleConnection `json:"submodules"`
 	// Temporary authentication token for cloning this repository.
 	TempCloneToken *string `json:"tempCloneToken,omitempty"`
 	// The repository from which this repository was generated, if any.
@@ -21882,7 +21882,7 @@ type Repository struct {
 	// A list of vulnerability alerts that are on this repository.
 	VulnerabilityAlerts *RepositoryVulnerabilityAlertConnection `json:"vulnerabilityAlerts,omitempty"`
 	// A list of users watching the repository.
-	Watchers UserConnection `json:"watchers"`
+	Watchers *UserConnection `json:"watchers"`
 	// Whether contributors are required to sign off on web-based commits in this repository.
 	WebCommitSignoffRequired bool `json:"webCommitSignoffRequired"`
 }
@@ -21897,7 +21897,7 @@ func (Repository) IsPackageOwner() {}
 // The Node ID of the PackageOwner object
 
 // A list of packages under the owner.
-func (this Repository) GetPackages() PackageConnection { return this.Packages }
+func (this Repository) GetPackages() *PackageConnection { return this.Packages }
 
 func (Repository) IsPermissionGranter() {}
 
@@ -21911,7 +21911,7 @@ func (Repository) IsProjectOwner() {}
 func (this Repository) GetProject() *Project { return this.Project }
 
 // A list of projects under the owner.
-func (this Repository) GetProjects() ProjectConnection { return this.Projects }
+func (this Repository) GetProjects() *ProjectConnection { return this.Projects }
 
 // The HTTP path listing owners projects
 func (this Repository) GetProjectsResourcePath() string { return this.ProjectsResourcePath }
@@ -21925,7 +21925,7 @@ func (this Repository) GetViewerCanCreateProjects() bool { return this.ViewerCan
 func (Repository) IsProjectV2Recent() {}
 
 // Recent projects that this user has modified in the context of the owner.
-func (this Repository) GetRecentProjects() ProjectV2Connection { return this.RecentProjects }
+func (this Repository) GetRecentProjects() *ProjectV2Connection { return this.RecentProjects }
 
 func (Repository) IsRepositoryInfo() {}
 
@@ -22039,7 +22039,7 @@ func (Repository) IsStarrable() {}
 func (this Repository) GetStargazerCount() int { return this.StargazerCount }
 
 // A list of users who have starred this starrable.
-func (this Repository) GetStargazers() StargazerConnection { return this.Stargazers }
+func (this Repository) GetStargazers() *StargazerConnection { return this.Stargazers }
 
 // Returns a boolean indicating whether the viewing user has starred this starrable.
 func (this Repository) GetViewerHasStarred() bool { return this.ViewerHasStarred }
@@ -22093,7 +22093,7 @@ type RepositoryCollaboratorConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -22102,7 +22102,7 @@ type RepositoryCollaboratorConnection struct {
 type RepositoryCollaboratorEdge struct {
 	// A cursor for use in pagination.
 	Cursor string `json:"cursor"`
-	Node   User   `json:"node"`
+	Node   *User  `json:"node"`
 	// The permission the user has on the repository.
 	Permission RepositoryPermission `json:"permission"`
 	// A list of sources for the user's access to the repository.
@@ -22116,7 +22116,7 @@ type RepositoryConnection struct {
 	// A list of nodes.
 	Nodes []*Repository `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 	// The total size in kilobytes of all repositories in the connection. Value will never be larger than max 32-bit signed integer.
@@ -22172,7 +22172,7 @@ type RepositoryInvitation struct {
 	// The user who received the invitation.
 	Invitee *User `json:"invitee,omitempty"`
 	// The user who created the invitation.
-	Inviter User `json:"inviter"`
+	Inviter *User `json:"inviter"`
 	// The permalink for this repository invitation.
 	Permalink string `json:"permalink"`
 	// The permission granted on this repository by this invitation.
@@ -22193,7 +22193,7 @@ type RepositoryInvitationConnection struct {
 	// A list of nodes.
 	Nodes []*RepositoryInvitation `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -22229,7 +22229,7 @@ type RepositoryMigration struct {
 	// The URL for the migration log (expires 1 day after migration completes).
 	MigrationLogURL *string `json:"migrationLogUrl,omitempty"`
 	// The migration source.
-	MigrationSource MigrationSource `json:"migrationSource"`
+	MigrationSource *MigrationSource `json:"migrationSource"`
 	// The target repository name.
 	RepositoryName string `json:"repositoryName"`
 	// The migration source URL, for example `https://github.com` or `https://monalisa.ghe.com`.
@@ -22261,7 +22261,7 @@ func (this RepositoryMigration) GetID() string { return this.ID }
 func (this RepositoryMigration) GetMigrationLogURL() *string { return this.MigrationLogURL }
 
 // The migration source.
-func (this RepositoryMigration) GetMigrationSource() MigrationSource { return this.MigrationSource }
+func (this RepositoryMigration) GetMigrationSource() *MigrationSource { return this.MigrationSource }
 
 // The target repository name.
 func (this RepositoryMigration) GetRepositoryName() string { return this.RepositoryName }
@@ -22286,7 +22286,7 @@ type RepositoryMigrationConnection struct {
 	// A list of nodes.
 	Nodes []*RepositoryMigration `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -22399,7 +22399,7 @@ type RepositoryRuleConnection struct {
 	// A list of nodes.
 	Nodes []*RepositoryRule `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -22435,7 +22435,7 @@ type RepositoryRuleset struct {
 	// The actors that can bypass this ruleset
 	BypassActors *RepositoryRulesetBypassActorConnection `json:"bypassActors,omitempty"`
 	// The set of conditions that must evaluate to true for this ruleset to apply
-	Conditions RepositoryRuleConditions `json:"conditions"`
+	Conditions *RepositoryRuleConditions `json:"conditions"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
@@ -22491,7 +22491,7 @@ type RepositoryRulesetBypassActorConnection struct {
 	// A list of nodes.
 	Nodes []*RepositoryRulesetBypassActor `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -22523,7 +22523,7 @@ type RepositoryRulesetConnection struct {
 	// A list of nodes.
 	Nodes []*RepositoryRuleset `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -22543,7 +22543,7 @@ type RepositoryTopic struct {
 	// The HTTP path for this repository-topic.
 	ResourcePath string `json:"resourcePath"`
 	// The topic.
-	Topic Topic `json:"topic"`
+	Topic *Topic `json:"topic"`
 	// The HTTP URL for this repository-topic.
 	URL string `json:"url"`
 }
@@ -22568,7 +22568,7 @@ type RepositoryTopicConnection struct {
 	// A list of nodes.
 	Nodes []*RepositoryTopic `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -22892,7 +22892,7 @@ type RepositoryVulnerabilityAlert struct {
 	// Identifies the alert number.
 	Number int `json:"number"`
 	// The associated repository
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// The associated security advisory
 	SecurityAdvisory *SecurityAdvisory `json:"securityAdvisory,omitempty"`
 	// The associated security vulnerability
@@ -22915,7 +22915,7 @@ func (this RepositoryVulnerabilityAlert) GetID() string { return this.ID }
 func (RepositoryVulnerabilityAlert) IsRepositoryNode() {}
 
 // The repository associated with this node.
-func (this RepositoryVulnerabilityAlert) GetRepository() Repository { return this.Repository }
+func (this RepositoryVulnerabilityAlert) GetRepository() *Repository { return this.Repository }
 
 // The connection type for RepositoryVulnerabilityAlert.
 type RepositoryVulnerabilityAlertConnection struct {
@@ -22924,7 +22924,7 @@ type RepositoryVulnerabilityAlertConnection struct {
 	// A list of nodes.
 	Nodes []*RepositoryVulnerabilityAlert `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -22970,7 +22970,7 @@ type RequestedReviewerConnection struct {
 	// A list of nodes.
 	Nodes []RequestedReviewer `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23080,7 +23080,7 @@ type RestrictedContribution struct {
 	URL string `json:"url"`
 	// The user who made this contribution.
 	//
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (RestrictedContribution) IsContribution() {}
@@ -23100,7 +23100,7 @@ func (this RestrictedContribution) GetResourcePath() string { return this.Resour
 func (this RestrictedContribution) GetURL() string { return this.URL }
 
 // The user who made this contribution.
-func (this RestrictedContribution) GetUser() User { return this.User }
+func (this RestrictedContribution) GetUser() *User { return this.User }
 
 func (RestrictedContribution) IsCreatedIssueOrRestrictedContribution() {}
 
@@ -23170,7 +23170,7 @@ type ReviewDismissalAllowanceConnection struct {
 	// A list of nodes.
 	Nodes []*ReviewDismissalAllowance `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23200,7 +23200,7 @@ type ReviewDismissedEvent struct {
 	// Identifies the previous state of the review with the 'review_dismissed' event.
 	PreviousReviewState PullRequestReviewState `json:"previousReviewState"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// Identifies the commit which caused the review to become stale.
 	PullRequestCommit *PullRequestCommit `json:"pullRequestCommit,omitempty"`
 	// The HTTP path for this review dismissed event.
@@ -23237,7 +23237,7 @@ type ReviewRequest struct {
 	// The Node ID of the ReviewRequest object
 	ID string `json:"id"`
 	// Identifies the pull request associated with this review request.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// The reviewer that is requested.
 	RequestedReviewer RequestedReviewer `json:"requestedReviewer,omitempty"`
 }
@@ -23254,7 +23254,7 @@ type ReviewRequestConnection struct {
 	// A list of nodes.
 	Nodes []*ReviewRequest `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23276,7 +23276,7 @@ type ReviewRequestRemovedEvent struct {
 	// The Node ID of the ReviewRequestRemovedEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// Identifies the reviewer whose review request was removed.
 	RequestedReviewer RequestedReviewer `json:"requestedReviewer,omitempty"`
 }
@@ -23299,7 +23299,7 @@ type ReviewRequestedEvent struct {
 	// The Node ID of the ReviewRequestedEvent object
 	ID string `json:"id"`
 	// PullRequest referenced by event.
-	PullRequest PullRequest `json:"pullRequest"`
+	PullRequest *PullRequest `json:"pullRequest"`
 	// Identifies the reviewer whose review was requested.
 	RequestedReviewer RequestedReviewer `json:"requestedReviewer,omitempty"`
 }
@@ -23422,7 +23422,7 @@ type SavedReplyConnection struct {
 	// A list of nodes.
 	Nodes []*SavedReply `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23456,7 +23456,7 @@ type SearchResultItemConnection struct {
 	// A list of nodes.
 	Nodes []SearchResultItem `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// The total number of repositories that matched the search query. Regardless of the total number of matches, a maximum of 1,000 results will be available across all types.
 	RepositoryCount int `json:"repositoryCount"`
 	// The total number of users that matched the search query. Regardless of the total number of matches, a maximum of 1,000 results will be available across all types.
@@ -23480,9 +23480,9 @@ type SecurityAdvisory struct {
 	// The classification of the advisory
 	Classification SecurityAdvisoryClassification `json:"classification"`
 	// The CVSS associated with this advisory
-	Cvss Cvss `json:"cvss"`
+	Cvss *Cvss `json:"cvss"`
 	// CWEs associated with this Advisory
-	Cwes CWEConnection `json:"cwes"`
+	Cwes *CWEConnection `json:"cwes"`
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// This is a long plaintext description of the advisory
@@ -23510,7 +23510,7 @@ type SecurityAdvisory struct {
 	// When the advisory was last updated
 	UpdatedAt time.Time `json:"updatedAt"`
 	// Vulnerabilities associated with this Advisory
-	Vulnerabilities SecurityVulnerabilityConnection `json:"vulnerabilities"`
+	Vulnerabilities *SecurityVulnerabilityConnection `json:"vulnerabilities"`
 	// When the advisory was withdrawn, if it has been withdrawn
 	WithdrawnAt *time.Time `json:"withdrawnAt,omitempty"`
 }
@@ -23527,7 +23527,7 @@ type SecurityAdvisoryConnection struct {
 	// A list of nodes.
 	Nodes []*SecurityAdvisory `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23587,11 +23587,11 @@ type SecurityAdvisoryReference struct {
 // An individual vulnerability within an Advisory
 type SecurityVulnerability struct {
 	// The Advisory associated with this Vulnerability
-	Advisory SecurityAdvisory `json:"advisory"`
+	Advisory *SecurityAdvisory `json:"advisory"`
 	// The first version containing a fix for the vulnerability
 	FirstPatchedVersion *SecurityAdvisoryPackageVersion `json:"firstPatchedVersion,omitempty"`
 	// A description of the vulnerable package
-	Package SecurityAdvisoryPackage `json:"package"`
+	Package *SecurityAdvisoryPackage `json:"package"`
 	// The severity of the vulnerability within this package
 	Severity SecurityAdvisorySeverity `json:"severity"`
 	// When the vulnerability was last updated
@@ -23614,7 +23614,7 @@ type SecurityVulnerabilityConnection struct {
 	// A list of nodes.
 	Nodes []*SecurityVulnerability `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23779,7 +23779,7 @@ type SocialAccountConnection struct {
 	// A list of nodes.
 	Nodes []*SocialAccount `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23811,7 +23811,7 @@ type SponsorAndLifetimeValueConnection struct {
 	// A list of nodes.
 	Nodes []*SponsorAndLifetimeValue `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23839,7 +23839,7 @@ type SponsorConnection struct {
 	// A list of nodes.
 	Nodes []Sponsor `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23867,7 +23867,7 @@ type SponsorableItemConnection struct {
 	// A list of nodes.
 	Nodes []SponsorableItem `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -23924,7 +23924,7 @@ type SponsorsActivityConnection struct {
 	// A list of nodes.
 	Nodes []*SponsorsActivity `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -24025,7 +24025,7 @@ type SponsorsListingFeaturedItem struct {
 	// The position of this featured item on the GitHub Sponsors profile with a lower position indicating higher precedence. Starts at 1.
 	Position int `json:"position"`
 	// The GitHub Sponsors profile that features this record.
-	SponsorsListing SponsorsListing `json:"sponsorsListing"`
+	SponsorsListing *SponsorsListing `json:"sponsorsListing"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -24060,7 +24060,7 @@ type SponsorsTier struct {
 	// The name of the tier.
 	Name string `json:"name"`
 	// The sponsors listing that this tier belongs to.
-	SponsorsListing SponsorsListing `json:"sponsorsListing"`
+	SponsorsListing *SponsorsListing `json:"sponsorsListing"`
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 }
@@ -24079,7 +24079,7 @@ type SponsorsTierAdminInfo struct {
 	// Indicates whether this tier has been retired from the associated GitHub Sponsors profile. Retired tiers are no longer shown on the GitHub Sponsors profile and cannot be chosen for new sponsorships. Existing sponsorships may still use retired tiers if the sponsor selected the tier before it was retired.
 	IsRetired bool `json:"isRetired"`
 	// The sponsorships using this tier.
-	Sponsorships SponsorshipConnection `json:"sponsorships"`
+	Sponsorships *SponsorshipConnection `json:"sponsorships"`
 }
 
 // The connection type for SponsorsTier.
@@ -24089,7 +24089,7 @@ type SponsorsTierConnection struct {
 	// A list of nodes.
 	Nodes []*SponsorsTier `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -24123,7 +24123,7 @@ type Sponsorship struct {
 	// Whether the sponsor has chosen to receive sponsorship update emails sent from the sponsorable. Only returns a non-null value when the viewer has permission to know this.
 	IsSponsorOptedIntoEmail *bool `json:"isSponsorOptedIntoEmail,omitempty"`
 	// The entity that is being sponsored
-	Maintainer User `json:"maintainer"`
+	Maintainer *User `json:"maintainer"`
 	// The platform that was most recently used to pay for the sponsorship.
 	PaymentSource *SponsorshipPaymentSource `json:"paymentSource,omitempty"`
 	// The privacy level for this sponsorship.
@@ -24152,7 +24152,7 @@ type SponsorshipConnection struct {
 	// A list of nodes.
 	Nodes []*Sponsorship `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 	// The total amount in cents of all recurring sponsorships in the connection whose amount you can view. Does not include one-time sponsorships.
@@ -24201,7 +24201,7 @@ type SponsorshipNewsletterConnection struct {
 	// A list of nodes.
 	Nodes []*SponsorshipNewsletter `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -24288,7 +24288,7 @@ type StargazerConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -24297,7 +24297,7 @@ type StargazerConnection struct {
 type StargazerEdge struct {
 	// A cursor for use in pagination.
 	Cursor string `json:"cursor"`
-	Node   User   `json:"node"`
+	Node   *User  `json:"node"`
 	// Identifies when the item was starred.
 	StarredAt time.Time `json:"starredAt"`
 }
@@ -24311,7 +24311,7 @@ type StarredRepositoryConnection struct {
 	// A list of nodes.
 	Nodes []*Repository `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -24319,8 +24319,8 @@ type StarredRepositoryConnection struct {
 // Represents a starred repository.
 type StarredRepositoryEdge struct {
 	// A cursor for use in pagination.
-	Cursor string     `json:"cursor"`
-	Node   Repository `json:"node"`
+	Cursor string      `json:"cursor"`
+	Node   *Repository `json:"node"`
 	// Identifies when the item was starred.
 	StarredAt time.Time `json:"starredAt"`
 }
@@ -24388,7 +24388,7 @@ type StartRepositoryMigrationPayload struct {
 // Represents a commit status.
 type Status struct {
 	// A list of status contexts and check runs for this commit.
-	CombinedContexts StatusCheckRollupContextConnection `json:"combinedContexts"`
+	CombinedContexts *StatusCheckRollupContextConnection `json:"combinedContexts"`
 	// The commit this status is attached to.
 	Commit *Commit `json:"commit,omitempty"`
 	// Looks up an individual status context by context name.
@@ -24427,7 +24427,7 @@ type StatusCheckRollup struct {
 	// The commit the status and check runs are attached to.
 	Commit *Commit `json:"commit,omitempty"`
 	// A list of status contexts and check runs for this commit.
-	Contexts StatusCheckRollupContextConnection `json:"contexts"`
+	Contexts *StatusCheckRollupContextConnection `json:"contexts"`
 	// The Node ID of the StatusCheckRollup object
 	ID string `json:"id"`
 	// The combined status for the commit.
@@ -24450,7 +24450,7 @@ type StatusCheckRollupContextConnection struct {
 	// A list of nodes.
 	Nodes []StatusCheckRollupContext `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// The number of status contexts in this rollup.
 	StatusContextCount int `json:"statusContextCount"`
 	// Counts of status contexts by state.
@@ -24522,7 +24522,7 @@ type StripeConnectAccount struct {
 	// Whether this Stripe Connect account is currently in use for the associated GitHub Sponsors profile.
 	IsActive bool `json:"isActive"`
 	// The GitHub Sponsors profile associated with this Stripe Connect account.
-	SponsorsListing SponsorsListing `json:"sponsorsListing"`
+	SponsorsListing *SponsorsListing `json:"sponsorsListing"`
 	// The URL to access this Stripe Connect account on Stripe's website.
 	StripeDashboardURL string `json:"stripeDashboardUrl"`
 }
@@ -24574,7 +24574,7 @@ type SubmoduleConnection struct {
 	// A list of nodes.
 	Nodes []*Submodule `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -24619,7 +24619,7 @@ type SuggestedReviewer struct {
 	// Is this suggestion based on past review comments?
 	IsCommenter bool `json:"isCommenter"`
 	// Identifies the user suggested to review the pull request.
-	Reviewer User `json:"reviewer"`
+	Reviewer *User `json:"reviewer"`
 }
 
 // Represents a Git tag.
@@ -24639,7 +24639,7 @@ type Tag struct {
 	// The Git object ID
 	Oid string `json:"oid"`
 	// The Repository the Git object belongs to
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// Details about the tag author.
 	Tagger *GitActor `json:"tagger,omitempty"`
 	// The Git object the tag points to.
@@ -24664,7 +24664,7 @@ func (this Tag) GetID() string { return this.ID }
 func (this Tag) GetOid() string { return this.Oid }
 
 // The Repository the Git object belongs to
-func (this Tag) GetRepository() Repository { return this.Repository }
+func (this Tag) GetRepository() *Repository { return this.Repository }
 
 func (Tag) IsNode() {}
 
@@ -24699,11 +24699,11 @@ type TagNamePatternParametersInput struct {
 // A team of users in an organization.
 type Team struct {
 	// A list of teams that are ancestors of this team.
-	Ancestors TeamConnection `json:"ancestors"`
+	Ancestors *TeamConnection `json:"ancestors"`
 	// A URL pointing to the team's avatar.
 	AvatarURL *string `json:"avatarUrl,omitempty"`
 	// List of child teams belonging to this team
-	ChildTeams TeamConnection `json:"childTeams"`
+	ChildTeams *TeamConnection `json:"childTeams"`
 	// The slug corresponding to the organization and team.
 	CombinedSlug string `json:"combinedSlug"`
 	// Identifies the date and time when the object was created.
@@ -24715,7 +24715,7 @@ type Team struct {
 	// Find a team discussion by its number.
 	Discussion *TeamDiscussion `json:"discussion,omitempty"`
 	// A list of team discussions.
-	Discussions TeamDiscussionConnection `json:"discussions"`
+	Discussions *TeamDiscussionConnection `json:"discussions"`
 	// The HTTP path for team discussions
 	DiscussionsResourcePath string `json:"discussionsResourcePath"`
 	// The HTTP URL for team discussions
@@ -24729,9 +24729,9 @@ type Team struct {
 	// A list of pending invitations for users to this team
 	Invitations *OrganizationInvitationConnection `json:"invitations,omitempty"`
 	// Get the status messages members of this entity have set that are either public or visible only to the organization.
-	MemberStatuses UserStatusConnection `json:"memberStatuses"`
+	MemberStatuses *UserStatusConnection `json:"memberStatuses"`
 	// A list of users who are members of this team.
-	Members TeamMemberConnection `json:"members"`
+	Members *TeamMemberConnection `json:"members"`
 	// The HTTP path for the team' members
 	MembersResourcePath string `json:"membersResourcePath"`
 	// The HTTP URL for the team' members
@@ -24745,7 +24745,7 @@ type Team struct {
 	// The notification setting that the team has set.
 	NotificationSetting TeamNotificationSetting `json:"notificationSetting"`
 	// The organization that owns this team.
-	Organization Organization `json:"organization"`
+	Organization *Organization `json:"organization"`
 	// The parent team of the team.
 	ParentTeam *Team `json:"parentTeam,omitempty"`
 	// The level of privacy the team has.
@@ -24753,9 +24753,9 @@ type Team struct {
 	// Finds and returns the project according to the provided project number.
 	ProjectV2 *ProjectV2 `json:"projectV2,omitempty"`
 	// List of projects this team has collaborator access to.
-	ProjectsV2 ProjectV2Connection `json:"projectsV2"`
+	ProjectsV2 *ProjectV2Connection `json:"projectsV2"`
 	// A list of repositories this team has access to.
-	Repositories TeamRepositoryConnection `json:"repositories"`
+	Repositories *TeamRepositoryConnection `json:"repositories"`
 	// The HTTP path for this team's repositories
 	RepositoriesResourcePath string `json:"repositoriesResourcePath"`
 	// The HTTP URL for this team's repositories
@@ -24789,7 +24789,7 @@ func (Team) IsDeploymentReviewer() {}
 func (Team) IsMemberStatusable() {}
 
 // Get the status messages members of this entity have set that are either public or visible only to the organization.
-func (this Team) GetMemberStatuses() UserStatusConnection { return this.MemberStatuses }
+func (this Team) GetMemberStatuses() *UserStatusConnection { return this.MemberStatuses }
 
 func (Team) IsNode() {}
 
@@ -25259,7 +25259,7 @@ type TeamConnection struct {
 	// A list of nodes.
 	Nodes []*Team `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -25279,7 +25279,7 @@ type TeamDiscussion struct {
 	// Identifies the discussion body hash.
 	BodyVersion string `json:"bodyVersion"`
 	// A list of comments on this discussion.
-	Comments TeamDiscussionCommentConnection `json:"comments"`
+	Comments *TeamDiscussionCommentConnection `json:"comments"`
 	// The HTTP path for discussion comments
 	CommentsResourcePath string `json:"commentsResourcePath"`
 	// The HTTP URL for discussion comments
@@ -25309,11 +25309,11 @@ type TeamDiscussion struct {
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The HTTP path for this discussion
 	ResourcePath string `json:"resourcePath"`
 	// The team that defines the context of this discussion.
-	Team Team `json:"team"`
+	Team *Team `json:"team"`
 	// The title of the discussion
 	Title string `json:"title"`
 	// Identifies the date and time when the object was last updated.
@@ -25420,7 +25420,7 @@ func (this TeamDiscussion) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this TeamDiscussion) GetReactions() ReactionConnection { return this.Reactions }
+func (this TeamDiscussion) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this TeamDiscussion) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -25483,7 +25483,7 @@ type TeamDiscussionComment struct {
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The discussion this comment is about.
-	Discussion TeamDiscussion `json:"discussion"`
+	Discussion *TeamDiscussion `json:"discussion"`
 	// The actor who edited the comment.
 	Editor Actor `json:"editor,omitempty"`
 	// The Node ID of the TeamDiscussionComment object
@@ -25499,7 +25499,7 @@ type TeamDiscussionComment struct {
 	// A list of reactions grouped by content left on the subject.
 	ReactionGroups []*ReactionGroup `json:"reactionGroups,omitempty"`
 	// A list of Reactions left on the Issue.
-	Reactions ReactionConnection `json:"reactions"`
+	Reactions *ReactionConnection `json:"reactions"`
 	// The HTTP path for this comment
 	ResourcePath string `json:"resourcePath"`
 	// Identifies the date and time when the object was last updated.
@@ -25600,7 +25600,7 @@ func (this TeamDiscussionComment) GetReactionGroups() []*ReactionGroup {
 }
 
 // A list of Reactions left on the Issue.
-func (this TeamDiscussionComment) GetReactions() ReactionConnection { return this.Reactions }
+func (this TeamDiscussionComment) GetReactions() *ReactionConnection { return this.Reactions }
 
 // Can user react to this subject
 func (this TeamDiscussionComment) GetViewerCanReact() bool { return this.ViewerCanReact }
@@ -25639,7 +25639,7 @@ type TeamDiscussionCommentConnection struct {
 	// A list of nodes.
 	Nodes []*TeamDiscussionComment `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -25667,7 +25667,7 @@ type TeamDiscussionConnection struct {
 	// A list of nodes.
 	Nodes []*TeamDiscussion `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -25703,7 +25703,7 @@ type TeamMemberConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -25716,7 +25716,7 @@ type TeamMemberEdge struct {
 	MemberAccessResourcePath string `json:"memberAccessResourcePath"`
 	// The HTTP URL to the organization's member access page.
 	MemberAccessURL string `json:"memberAccessUrl"`
-	Node            User   `json:"node"`
+	Node            *User  `json:"node"`
 	// The role the member has on the team.
 	Role TeamMemberRole `json:"role"`
 }
@@ -26036,7 +26036,7 @@ type TeamRepositoryConnection struct {
 	// A list of nodes.
 	Nodes []*Repository `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -26044,8 +26044,8 @@ type TeamRepositoryConnection struct {
 // Represents a team repository.
 type TeamRepositoryEdge struct {
 	// A cursor for use in pagination.
-	Cursor string     `json:"cursor"`
-	Node   Repository `json:"node"`
+	Cursor string      `json:"cursor"`
+	Node   *Repository `json:"node"`
 	// The permission level the team has on the repository
 	Permission RepositoryPermission `json:"permission"`
 }
@@ -26089,12 +26089,12 @@ type Topic struct {
 	//
 	RelatedTopics []*Topic `json:"relatedTopics"`
 	// A list of repositories.
-	Repositories RepositoryConnection `json:"repositories"`
+	Repositories *RepositoryConnection `json:"repositories"`
 	// Returns a count of how many stargazers there are on this object
 	//
 	StargazerCount int `json:"stargazerCount"`
 	// A list of users who have starred this starrable.
-	Stargazers StargazerConnection `json:"stargazers"`
+	Stargazers *StargazerConnection `json:"stargazers"`
 	// Returns a boolean indicating whether the viewing user has starred this starrable.
 	ViewerHasStarred bool `json:"viewerHasStarred"`
 }
@@ -26112,7 +26112,7 @@ func (Topic) IsStarrable() {}
 func (this Topic) GetStargazerCount() int { return this.StargazerCount }
 
 // A list of users who have starred this starrable.
-func (this Topic) GetStargazers() StargazerConnection { return this.Stargazers }
+func (this Topic) GetStargazers() *StargazerConnection { return this.Stargazers }
 
 // Returns a boolean indicating whether the viewing user has starred this starrable.
 func (this Topic) GetViewerHasStarred() bool { return this.ViewerHasStarred }
@@ -26166,7 +26166,7 @@ type TransferredEvent struct {
 	// The Node ID of the TransferredEvent object
 	ID string `json:"id"`
 	// Identifies the issue associated with the event.
-	Issue Issue `json:"issue"`
+	Issue *Issue `json:"issue"`
 }
 
 func (TransferredEvent) IsIssueTimelineItem() {}
@@ -26195,7 +26195,7 @@ type Tree struct {
 	// The Git object ID
 	Oid string `json:"oid"`
 	// The Repository the Git object belongs to
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 }
 
 func (Tree) IsGitObject() {}
@@ -26216,7 +26216,7 @@ func (this Tree) GetID() string { return this.ID }
 func (this Tree) GetOid() string { return this.Oid }
 
 // The Repository the Git object belongs to
-func (this Tree) GetRepository() Repository { return this.Repository }
+func (this Tree) GetRepository() *Repository { return this.Repository }
 
 func (Tree) IsNode() {}
 
@@ -26247,7 +26247,7 @@ type TreeEntry struct {
 	// The full path of the file. (Base64-encoded)
 	PathRaw *string `json:"pathRaw,omitempty"`
 	// The Repository the tree entry belongs to
-	Repository Repository `json:"repository"`
+	Repository *Repository `json:"repository"`
 	// Entry byte size
 	Size int `json:"size"`
 	// If the TreeEntry is for a directory occupied by a submodule project, this returns the corresponding submodule
@@ -26401,7 +26401,7 @@ type UnlabeledEvent struct {
 	// The Node ID of the UnlabeledEvent object
 	ID string `json:"id"`
 	// Identifies the label associated with the 'unlabeled' event.
-	Label Label `json:"label"`
+	Label *Label `json:"label"`
 	// Identifies the `Labelable` associated with the event.
 	Labelable Labelable `json:"labelable"`
 }
@@ -26654,7 +26654,7 @@ type UnpinnedEvent struct {
 	// The Node ID of the UnpinnedEvent object
 	ID string `json:"id"`
 	// Identifies the issue associated with the event.
-	Issue Issue `json:"issue"`
+	Issue *Issue `json:"issue"`
 }
 
 func (UnpinnedEvent) IsIssueTimelineItems() {}
@@ -27590,7 +27590,7 @@ type UpdateProjectV2ItemFieldValueInput struct {
 	// The ID of the field to be updated.
 	FieldID string `json:"fieldId"`
 	// The value which will be set on the field.
-	Value ProjectV2FieldValue `json:"value"`
+	Value *ProjectV2FieldValue `json:"value"`
 	// A unique identifier for the client performing the mutation.
 	ClientMutationID *string `json:"clientMutationId,omitempty"`
 }
@@ -28016,7 +28016,7 @@ type User struct {
 	// Could this user receive email notifications, if the organization had notification restrictions enabled?
 	CanReceiveOrganizationEmailsWhenNotificationsRestricted bool `json:"canReceiveOrganizationEmailsWhenNotificationsRestricted"`
 	// A list of commit comments made by this user.
-	CommitComments CommitCommentConnection `json:"commitComments"`
+	CommitComments *CommitCommentConnection `json:"commitComments"`
 	// The user's public profile company.
 	Company *string `json:"company,omitempty"`
 	// The user's public profile company as HTML.
@@ -28034,19 +28034,19 @@ type User struct {
 	// The estimated next GitHub Sponsors payout for this user/organization in cents (USD).
 	EstimatedNextSponsorsPayoutInCents int `json:"estimatedNextSponsorsPayoutInCents"`
 	// A list of users the given user is followed by.
-	Followers FollowerConnection `json:"followers"`
+	Followers *FollowerConnection `json:"followers"`
 	// A list of users the given user is following.
-	Following FollowingConnection `json:"following"`
+	Following *FollowingConnection `json:"following"`
 	// Find gist by repo name.
 	Gist *Gist `json:"gist,omitempty"`
 	// A list of gist comments made by this user.
-	GistComments GistCommentConnection `json:"gistComments"`
+	GistComments *GistCommentConnection `json:"gistComments"`
 	// A list of the Gists the user has created.
-	Gists GistConnection `json:"gists"`
+	Gists *GistConnection `json:"gists"`
 	// True if this user/organization has a GitHub Sponsors listing.
 	HasSponsorsListing bool `json:"hasSponsorsListing"`
 	// The hovercard information for this user in a given context
-	Hovercard Hovercard `json:"hovercard"`
+	Hovercard *Hovercard `json:"hovercard"`
 	// The Node ID of the User object
 	ID string `json:"id"`
 	// The interaction ability settings for this user.
@@ -28074,15 +28074,15 @@ type User struct {
 	// Whether or not this user is the viewing user.
 	IsViewer bool `json:"isViewer"`
 	// A list of issue comments made by this user.
-	IssueComments IssueCommentConnection `json:"issueComments"`
+	IssueComments *IssueCommentConnection `json:"issueComments"`
 	// A list of issues associated with this user.
-	Issues IssueConnection `json:"issues"`
+	Issues *IssueConnection `json:"issues"`
 	// Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
-	ItemShowcase ProfileItemShowcase `json:"itemShowcase"`
+	ItemShowcase *ProfileItemShowcase `json:"itemShowcase"`
 	// Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
-	LifetimeReceivedSponsorshipValues SponsorAndLifetimeValueConnection `json:"lifetimeReceivedSponsorshipValues"`
+	LifetimeReceivedSponsorshipValues *SponsorAndLifetimeValueConnection `json:"lifetimeReceivedSponsorshipValues"`
 	// A user-curated list of repositories
-	Lists UserListConnection `json:"lists"`
+	Lists *UserListConnection `json:"lists"`
 	// The user's public profile location.
 	Location *string `json:"location,omitempty"`
 	// The username used to login.
@@ -28096,13 +28096,13 @@ type User struct {
 	// Verified email addresses that match verified domains for a specified organization the user is a member of.
 	OrganizationVerifiedDomainEmails []string `json:"organizationVerifiedDomainEmails"`
 	// A list of organizations the user belongs to.
-	Organizations OrganizationConnection `json:"organizations"`
+	Organizations *OrganizationConnection `json:"organizations"`
 	// A list of packages under the owner.
-	Packages PackageConnection `json:"packages"`
+	Packages *PackageConnection `json:"packages"`
 	// A list of repositories and gists this profile owner can pin to their profile.
-	PinnableItems PinnableItemConnection `json:"pinnableItems"`
+	PinnableItems *PinnableItemConnection `json:"pinnableItems"`
 	// A list of repositories and gists this profile owner has pinned to their profile
-	PinnedItems PinnableItemConnection `json:"pinnedItems"`
+	PinnedItems *PinnableItemConnection `json:"pinnedItems"`
 	// Returns how many more items this profile owner can pin to their profile.
 	PinnedItemsRemaining int `json:"pinnedItemsRemaining"`
 	// Find project by number.
@@ -28110,43 +28110,43 @@ type User struct {
 	// Find a project by number.
 	ProjectV2 *ProjectV2 `json:"projectV2,omitempty"`
 	// A list of projects under the owner.
-	Projects ProjectConnection `json:"projects"`
+	Projects *ProjectConnection `json:"projects"`
 	// The HTTP path listing user's projects
 	ProjectsResourcePath string `json:"projectsResourcePath"`
 	// The HTTP URL listing user's projects
 	ProjectsURL string `json:"projectsUrl"`
 	// A list of projects under the owner.
-	ProjectsV2 ProjectV2Connection `json:"projectsV2"`
+	ProjectsV2 *ProjectV2Connection `json:"projectsV2"`
 	// The user's profile pronouns
 	Pronouns *string `json:"pronouns,omitempty"`
 	// A list of public keys associated with this user.
-	PublicKeys PublicKeyConnection `json:"publicKeys"`
+	PublicKeys *PublicKeyConnection `json:"publicKeys"`
 	// A list of pull requests associated with this user.
-	PullRequests PullRequestConnection `json:"pullRequests"`
+	PullRequests *PullRequestConnection `json:"pullRequests"`
 	// Recent projects that this user has modified in the context of the owner.
-	RecentProjects ProjectV2Connection `json:"recentProjects"`
+	RecentProjects *ProjectV2Connection `json:"recentProjects"`
 	// A list of repositories that the user owns.
-	Repositories RepositoryConnection `json:"repositories"`
+	Repositories *RepositoryConnection `json:"repositories"`
 	// A list of repositories that the user recently contributed to.
-	RepositoriesContributedTo RepositoryConnection `json:"repositoriesContributedTo"`
+	RepositoriesContributedTo *RepositoryConnection `json:"repositoriesContributedTo"`
 	// Find Repository.
 	Repository *Repository `json:"repository,omitempty"`
 	// Discussion comments this user has authored.
-	RepositoryDiscussionComments DiscussionCommentConnection `json:"repositoryDiscussionComments"`
+	RepositoryDiscussionComments *DiscussionCommentConnection `json:"repositoryDiscussionComments"`
 	// Discussions this user has started.
-	RepositoryDiscussions DiscussionConnection `json:"repositoryDiscussions"`
+	RepositoryDiscussions *DiscussionConnection `json:"repositoryDiscussions"`
 	// The HTTP path for this user
 	ResourcePath string `json:"resourcePath"`
 	// Replies this user has saved
 	SavedReplies *SavedReplyConnection `json:"savedReplies,omitempty"`
 	// The user's social media accounts, ordered as they appear on the user's profile.
-	SocialAccounts SocialAccountConnection `json:"socialAccounts"`
+	SocialAccounts *SocialAccountConnection `json:"socialAccounts"`
 	// List of users and organizations this entity is sponsoring.
-	Sponsoring SponsorConnection `json:"sponsoring"`
+	Sponsoring *SponsorConnection `json:"sponsoring"`
 	// List of sponsors for this user or organization.
-	Sponsors SponsorConnection `json:"sponsors"`
+	Sponsors *SponsorConnection `json:"sponsors"`
 	// Events involving this sponsorable, such as new sponsorships.
-	SponsorsActivities SponsorsActivityConnection `json:"sponsorsActivities"`
+	SponsorsActivities *SponsorsActivityConnection `json:"sponsorsActivities"`
 	// The GitHub Sponsors listing for this user or organization.
 	SponsorsListing *SponsorsListing `json:"sponsorsListing,omitempty"`
 	// The sponsorship from the viewer to this user/organization; that is, the sponsorship where you're the sponsor.
@@ -28154,20 +28154,20 @@ type User struct {
 	// The sponsorship from this user/organization to the viewer; that is, the sponsorship you're receiving.
 	SponsorshipForViewerAsSponsorable *Sponsorship `json:"sponsorshipForViewerAsSponsorable,omitempty"`
 	// List of sponsorship updates sent from this sponsorable to sponsors.
-	SponsorshipNewsletters SponsorshipNewsletterConnection `json:"sponsorshipNewsletters"`
+	SponsorshipNewsletters *SponsorshipNewsletterConnection `json:"sponsorshipNewsletters"`
 	// The sponsorships where this user or organization is the maintainer receiving the funds.
-	SponsorshipsAsMaintainer SponsorshipConnection `json:"sponsorshipsAsMaintainer"`
+	SponsorshipsAsMaintainer *SponsorshipConnection `json:"sponsorshipsAsMaintainer"`
 	// The sponsorships where this user or organization is the funder.
-	SponsorshipsAsSponsor SponsorshipConnection `json:"sponsorshipsAsSponsor"`
+	SponsorshipsAsSponsor *SponsorshipConnection `json:"sponsorshipsAsSponsor"`
 	// Repositories the user has starred.
-	StarredRepositories StarredRepositoryConnection `json:"starredRepositories"`
+	StarredRepositories *StarredRepositoryConnection `json:"starredRepositories"`
 	// The user's description of what they're currently doing.
 	Status *UserStatus `json:"status,omitempty"`
 	// Suggested names for user lists
 	SuggestedListNames []*UserListSuggestion `json:"suggestedListNames"`
 	// Repositories the user has contributed to, ordered by contribution rank, plus repositories the user has created
 	//
-	TopRepositories RepositoryConnection `json:"topRepositories"`
+	TopRepositories *RepositoryConnection `json:"topRepositories"`
 	// The amount in United States cents (e.g., 500 = $5.00 USD) that this entity has spent on GitHub to fund sponsorships. Only returns a value when viewed by the user themselves or by a user who can manage sponsorships for the requested organization.
 	TotalSponsorshipAmountAsSponsorInCents *int `json:"totalSponsorshipAmountAsSponsorInCents,omitempty"`
 	// The user's Twitter username.
@@ -28189,7 +28189,7 @@ type User struct {
 	// True if the viewer is sponsoring this user/organization.
 	ViewerIsSponsoring bool `json:"viewerIsSponsoring"`
 	// A list of repositories the given user is watching.
-	Watching RepositoryConnection `json:"watching"`
+	Watching *RepositoryConnection `json:"watching"`
 	// A URL pointing to the user's public website/blog.
 	WebsiteURL *string `json:"websiteUrl,omitempty"`
 }
@@ -28220,7 +28220,7 @@ func (User) IsPackageOwner() {}
 // The Node ID of the PackageOwner object
 
 // A list of packages under the owner.
-func (this User) GetPackages() PackageConnection { return this.Packages }
+func (this User) GetPackages() *PackageConnection { return this.Packages }
 
 func (User) IsProfileOwner() {}
 
@@ -28233,7 +28233,7 @@ func (this User) GetEmail() *string { return &this.Email }
 // The Node ID of the ProfileOwner object
 
 // Showcases a selection of repositories and gists that the profile owner has either curated or that have been selected automatically based on popularity.
-func (this User) GetItemShowcase() ProfileItemShowcase { return this.ItemShowcase }
+func (this User) GetItemShowcase() *ProfileItemShowcase { return this.ItemShowcase }
 
 // The public profile location.
 func (this User) GetLocation() *string { return this.Location }
@@ -28245,10 +28245,10 @@ func (this User) GetLogin() string { return this.Login }
 func (this User) GetName() *string { return this.Name }
 
 // A list of repositories and gists this profile owner can pin to their profile.
-func (this User) GetPinnableItems() PinnableItemConnection { return this.PinnableItems }
+func (this User) GetPinnableItems() *PinnableItemConnection { return this.PinnableItems }
 
 // A list of repositories and gists this profile owner has pinned to their profile
-func (this User) GetPinnedItems() PinnableItemConnection { return this.PinnedItems }
+func (this User) GetPinnedItems() *PinnableItemConnection { return this.PinnedItems }
 
 // Returns how many more items this profile owner can pin to their profile.
 func (this User) GetPinnedItemsRemaining() int { return this.PinnedItemsRemaining }
@@ -28267,7 +28267,7 @@ func (User) IsProjectOwner() {}
 func (this User) GetProject() *Project { return this.Project }
 
 // A list of projects under the owner.
-func (this User) GetProjects() ProjectConnection { return this.Projects }
+func (this User) GetProjects() *ProjectConnection { return this.Projects }
 
 // The HTTP path listing owners projects
 func (this User) GetProjectsResourcePath() string { return this.ProjectsResourcePath }
@@ -28288,12 +28288,12 @@ func (User) IsProjectV2Owner() {}
 func (this User) GetProjectV2() *ProjectV2 { return this.ProjectV2 }
 
 // A list of projects under the owner.
-func (this User) GetProjectsV2() ProjectV2Connection { return this.ProjectsV2 }
+func (this User) GetProjectsV2() *ProjectV2Connection { return this.ProjectsV2 }
 
 func (User) IsProjectV2Recent() {}
 
 // Recent projects that this user has modified in the context of the owner.
-func (this User) GetRecentProjects() ProjectV2Connection { return this.RecentProjects }
+func (this User) GetRecentProjects() *ProjectV2Connection { return this.RecentProjects }
 
 func (User) IsPushAllowanceActor() {}
 
@@ -28302,12 +28302,12 @@ func (User) IsReactor() {}
 func (User) IsRepositoryDiscussionAuthor() {}
 
 // Discussions this user has started.
-func (this User) GetRepositoryDiscussions() DiscussionConnection { return this.RepositoryDiscussions }
+func (this User) GetRepositoryDiscussions() *DiscussionConnection { return this.RepositoryDiscussions }
 
 func (User) IsRepositoryDiscussionCommentAuthor() {}
 
 // Discussion comments this user has authored.
-func (this User) GetRepositoryDiscussionComments() DiscussionCommentConnection {
+func (this User) GetRepositoryDiscussionComments() *DiscussionCommentConnection {
 	return this.RepositoryDiscussionComments
 }
 
@@ -28321,7 +28321,7 @@ func (this User) GetAvatarURL() string { return this.AvatarURL }
 // The username used to login.
 
 // A list of repositories that the user owns.
-func (this User) GetRepositories() RepositoryConnection { return this.Repositories }
+func (this User) GetRepositories() *RepositoryConnection { return this.Repositories }
 
 // Find Repository.
 func (this User) GetRepository() *Repository { return this.Repository }
@@ -28357,7 +28357,7 @@ func (this User) GetIsSponsoredBy() bool { return this.IsSponsoredBy }
 func (this User) GetIsSponsoringViewer() bool { return this.IsSponsoringViewer }
 
 // Calculate how much each sponsor has ever paid total to this maintainer via GitHub Sponsors. Does not include sponsorships paid via Patreon.
-func (this User) GetLifetimeReceivedSponsorshipValues() SponsorAndLifetimeValueConnection {
+func (this User) GetLifetimeReceivedSponsorshipValues() *SponsorAndLifetimeValueConnection {
 	return this.LifetimeReceivedSponsorshipValues
 }
 
@@ -28367,13 +28367,13 @@ func (this User) GetMonthlyEstimatedSponsorsIncomeInCents() int {
 }
 
 // List of users and organizations this entity is sponsoring.
-func (this User) GetSponsoring() SponsorConnection { return this.Sponsoring }
+func (this User) GetSponsoring() *SponsorConnection { return this.Sponsoring }
 
 // List of sponsors for this user or organization.
-func (this User) GetSponsors() SponsorConnection { return this.Sponsors }
+func (this User) GetSponsors() *SponsorConnection { return this.Sponsors }
 
 // Events involving this sponsorable, such as new sponsorships.
-func (this User) GetSponsorsActivities() SponsorsActivityConnection { return this.SponsorsActivities }
+func (this User) GetSponsorsActivities() *SponsorsActivityConnection { return this.SponsorsActivities }
 
 // The GitHub Sponsors listing for this user or organization.
 func (this User) GetSponsorsListing() *SponsorsListing { return this.SponsorsListing }
@@ -28389,17 +28389,17 @@ func (this User) GetSponsorshipForViewerAsSponsorable() *Sponsorship {
 }
 
 // List of sponsorship updates sent from this sponsorable to sponsors.
-func (this User) GetSponsorshipNewsletters() SponsorshipNewsletterConnection {
+func (this User) GetSponsorshipNewsletters() *SponsorshipNewsletterConnection {
 	return this.SponsorshipNewsletters
 }
 
 // The sponsorships where this user or organization is the maintainer receiving the funds.
-func (this User) GetSponsorshipsAsMaintainer() SponsorshipConnection {
+func (this User) GetSponsorshipsAsMaintainer() *SponsorshipConnection {
 	return this.SponsorshipsAsMaintainer
 }
 
 // The sponsorships where this user or organization is the funder.
-func (this User) GetSponsorshipsAsSponsor() SponsorshipConnection { return this.SponsorshipsAsSponsor }
+func (this User) GetSponsorshipsAsSponsor() *SponsorshipConnection { return this.SponsorshipsAsSponsor }
 
 // The amount in United States cents (e.g., 500 = $5.00 USD) that this entity has spent on GitHub to fund sponsorships. Only returns a value when viewed by the user themselves or by a user who can manage sponsorships for the requested organization.
 func (this User) GetTotalSponsorshipAmountAsSponsorInCents() *int {
@@ -28456,7 +28456,7 @@ type UserConnection struct {
 	// A list of nodes.
 	Nodes []*User `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -28493,7 +28493,7 @@ type UserContentEditConnection struct {
 	// A list of nodes.
 	Nodes []*UserContentEdit `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -28535,7 +28535,7 @@ type UserList struct {
 	// Whether or not this list is private
 	IsPrivate bool `json:"isPrivate"`
 	// The items associated with this list
-	Items UserListItemsConnection `json:"items"`
+	Items *UserListItemsConnection `json:"items"`
 	// The date and time at which this list was created or last had items added to it
 	LastAddedAt time.Time `json:"lastAddedAt"`
 	// The name of this list
@@ -28545,7 +28545,7 @@ type UserList struct {
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 	// The user to which this list belongs
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (UserList) IsNode() {}
@@ -28560,7 +28560,7 @@ type UserListConnection struct {
 	// A list of nodes.
 	Nodes []*UserList `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -28580,7 +28580,7 @@ type UserListItemsConnection struct {
 	// A list of nodes.
 	Nodes []UserListItems `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -28622,7 +28622,7 @@ type UserStatus struct {
 	// Identifies the date and time when the object was last updated.
 	UpdatedAt time.Time `json:"updatedAt"`
 	// The user who has this status.
-	User User `json:"user"`
+	User *User `json:"user"`
 }
 
 func (UserStatus) IsNode() {}
@@ -28637,7 +28637,7 @@ type UserStatusConnection struct {
 	// A list of nodes.
 	Nodes []*UserStatus `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -28704,7 +28704,7 @@ type VerifiableDomainConnection struct {
 	// A list of nodes.
 	Nodes []*VerifiableDomain `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -28748,7 +28748,7 @@ type ViewerHovercardContext struct {
 	// An octicon to accompany this context
 	Octicon string `json:"octicon"`
 	// Identifies the user who is related to this context.
-	Viewer User `json:"viewer"`
+	Viewer *User `json:"viewer"`
 }
 
 func (ViewerHovercardContext) IsHovercardContext() {}
@@ -28772,7 +28772,7 @@ type Workflow struct {
 	// The HTTP path for this workflow
 	ResourcePath string `json:"resourcePath"`
 	// The runs of the workflow.
-	Runs WorkflowRunConnection `json:"runs"`
+	Runs *WorkflowRunConnection `json:"runs"`
 	// The state of the workflow.
 	State WorkflowState `json:"state"`
 	// Identifies the date and time when the object was last updated.
@@ -28821,13 +28821,13 @@ type WorkflowFileReferenceInput struct {
 // A workflow run.
 type WorkflowRun struct {
 	// The check suite this workflow run belongs to.
-	CheckSuite CheckSuite `json:"checkSuite"`
+	CheckSuite *CheckSuite `json:"checkSuite"`
 	// Identifies the date and time when the object was created.
 	CreatedAt time.Time `json:"createdAt"`
 	// Identifies the primary key from the database.
 	DatabaseID *int `json:"databaseId,omitempty"`
 	// The log of deployment reviews
-	DeploymentReviews DeploymentReviewConnection `json:"deploymentReviews"`
+	DeploymentReviews *DeploymentReviewConnection `json:"deploymentReviews"`
 	// The event that triggered the workflow run
 	Event string `json:"event"`
 	// The workflow file
@@ -28835,7 +28835,7 @@ type WorkflowRun struct {
 	// The Node ID of the WorkflowRun object
 	ID string `json:"id"`
 	// The pending deployment requests of all check runs in this workflow run
-	PendingDeploymentRequests DeploymentRequestConnection `json:"pendingDeploymentRequests"`
+	PendingDeploymentRequests *DeploymentRequestConnection `json:"pendingDeploymentRequests"`
 	// The HTTP path for this workflow run
 	ResourcePath string `json:"resourcePath"`
 	// A number that uniquely identifies this workflow run in its parent workflow.
@@ -28845,7 +28845,7 @@ type WorkflowRun struct {
 	// The HTTP URL for this workflow run
 	URL string `json:"url"`
 	// The workflow executed in this workflow run.
-	Workflow Workflow `json:"workflow"`
+	Workflow *Workflow `json:"workflow"`
 }
 
 func (WorkflowRun) IsNode() {}
@@ -28868,7 +28868,7 @@ type WorkflowRunConnection struct {
 	// A list of nodes.
 	Nodes []*WorkflowRun `json:"nodes,omitempty"`
 	// Information to aid in pagination.
-	PageInfo PageInfo `json:"pageInfo"`
+	PageInfo *PageInfo `json:"pageInfo"`
 	// Identifies the total count of items in the connection.
 	TotalCount int `json:"totalCount"`
 }
@@ -28894,7 +28894,7 @@ type WorkflowRunFile struct {
 	// The HTTP path for this workflow run file
 	ResourcePath string `json:"resourcePath"`
 	// The parent workflow run execution for this file.
-	Run WorkflowRun `json:"run"`
+	Run *WorkflowRun `json:"run"`
 	// The HTTP URL for this workflow run file
 	URL string `json:"url"`
 	// If the viewer has permissions to push to the repository which stores the workflow.

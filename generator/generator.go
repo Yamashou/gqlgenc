@@ -51,6 +51,7 @@ func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) err
 	if cfg.Model.IsDefined() {
 		p := &modelgen.Plugin{
 			MutateHook: mutateHook(cfg),
+			FieldHook:  modelgen.DefaultFieldMutateHook,
 		}
 
 		plugins = append(plugins, p)
