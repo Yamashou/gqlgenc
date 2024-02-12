@@ -206,9 +206,13 @@ func LoadConfig(filename string) (*Config, error) {
 		Models:   models,
 		AutoBind: cfg.AutoBind,
 		// TODO: gqlgen must be set exec but client not used
-		Exec:       config.ExecConfig{Filename: "generated.go"},
-		Directives: map[string]config.DirectiveConfig{},
-		Sources:    sources,
+		Exec:                          config.ExecConfig{Filename: "generated.go"},
+		Directives:                    map[string]config.DirectiveConfig{},
+		Sources:                       sources,
+		StructFieldsAlwaysPointers:    true,
+		ReturnPointersInUmarshalInput: false,
+		ResolversAlwaysReturnPointers: true,
+		NullableInputOmittable:        false,
 	}
 
 	if err := cfg.Client.Check(); err != nil {
@@ -221,7 +225,6 @@ func LoadConfig(filename string) (*Config, error) {
 // LoadSchema load and parses the schema from a local file or a remote server
 func (c *Config) LoadSchema(ctx context.Context) error {
 	var schema *ast.Schema
-
 	if c.SchemaFilename != nil {
 		s, err := c.loadLocalSchema()
 		if err != nil {
