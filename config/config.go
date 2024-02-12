@@ -224,10 +224,6 @@ func LoadConfig(filename string) (*Config, error) {
 
 // LoadSchema load and parses the schema from a local file or a remote server
 func (c *Config) LoadSchema(ctx context.Context) error {
-	if err := c.GQLConfig.LoadSchema(); err != nil {
-		return fmt.Errorf("failed to load schema: %w", err)
-	}
-
 	var schema *ast.Schema
 	if c.SchemaFilename != nil {
 		s, err := c.loadLocalSchema()
