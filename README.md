@@ -53,6 +53,8 @@ query:
 generate:
   clientV2: true # Generate a Client that provides a new signature
   clientInterfaceName: "GithubGraphQLClient" # Determine the name of the generated client interface
+  query: true # Generate a Query type
+  mutation: true # Generate a Mutation type
 ```
 
 Load a schema from a local file:
@@ -78,6 +80,8 @@ query:
 generate:
   clientV2: true # Generate a Client that provides a new signature
   clientInterfaceName: "GithubGraphQLClient" # Determine the name of the generated client interface
+  query: true # Generate a Query type
+  mutation: true # Generate a Mutation type
 ```
 
 Execute the following command on same directory for .gqlgenc.yml
