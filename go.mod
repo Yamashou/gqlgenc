@@ -3,7 +3,7 @@ module github.com/Yamashou/gqlgenc
 go 1.21
 
 require (
-	github.com/99designs/gqlgen v0.17.43
+	github.com/99designs/gqlgen v0.17.44
 	github.com/google/go-cmp v0.6.0
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.27.1
