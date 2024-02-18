@@ -7,15 +7,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Yamashou/gqlgenc/client"
+	"github.com/Yamashou/gqlgenc/clientv2"
 )
 
 type Client struct {
-	Client *client.Client
+	Client *clientv2.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options ...client.HTTPRequestOption) *Client {
-	return &Client{Client: client.NewClient(cli, baseURL, options...)}
+func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) *Client {
+	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type Query struct {
@@ -185,13 +185,13 @@ const CreateRecordMutationQuery = `mutation CreateRecordMutation ($episodeId: ID
 }
 `
 
-func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, httpRequestOptions ...client.HTTPRequestOption) (*HogeCreateRecordMutationPayload, error) {
+func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, interceptors ...clientv2.RequestInterceptor) (*HogeCreateRecordMutationPayload, error) {
 	vars := map[string]interface{}{
 		"episodeId": episodeID,
 	}
 
 	var res HogeCreateRecordMutationPayload
-	if err := c.Client.Post(ctx, "CreateRecordMutation", CreateRecordMutationQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "CreateRecordMutation", CreateRecordMutationQuery, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 
@@ -205,14 +205,14 @@ const UpdateStatusMutationQuery = `mutation UpdateStatusMutation ($state: Status
 }
 `
 
-func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, workID string, httpRequestOptions ...client.HTTPRequestOption) (*HogeUpdateStatusMutationPayload, error) {
+func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, workID string, interceptors ...clientv2.RequestInterceptor) (*HogeUpdateStatusMutationPayload, error) {
 	vars := map[string]interface{}{
 		"state":  state,
 		"workId": workID,
 	}
 
 	var res HogeUpdateStatusMutationPayload
-	if err := c.Client.Post(ctx, "UpdateStatusMutation", UpdateStatusMutationQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "UpdateStatusMutation", UpdateStatusMutationQuery, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 
@@ -226,13 +226,13 @@ const UpdateWorkStatusQuery = `mutation UpdateWorkStatus ($workId: ID!) {
 }
 `
 
-func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, httpRequestOptions ...client.HTTPRequestOption) (*HogeUpdateWorkStatusPayload, error) {
+func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, interceptors ...clientv2.RequestInterceptor) (*HogeUpdateWorkStatusPayload, error) {
 	vars := map[string]interface{}{
 		"workId": workID,
 	}
 
 	var res HogeUpdateWorkStatusPayload
-	if err := c.Client.Post(ctx, "UpdateWorkStatus", UpdateWorkStatusQuery, &res, vars, httpRequestOptions...); err != nil {
+	if err := c.Client.Post(ctx, "UpdateWorkStatus", UpdateWorkStatusQuery, &res, vars, interceptors...); err != nil {
 		return nil, err
 	}
 
@@ -253,12 +253,12 @@ fragment ViewerFragment on User {
 }
 `
 
-func (c *Client) GetProfile(ctx context.Context, httpRequestOptions ...client.HTTPRequestOption) (*GetProfile, error) {
+func (c *Client) GetProfile(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetProfile, error) {
 	vars := map[string]interface{}{}
 
 	var res GetProfile
-	if err := c.Client.Post(ctx, "GetProfile", GetProfileQuery, &res, vars, httpRequestOptions...); err != nil {
-		return nil, err
+	if err := c.Client.Post(ctx, "GetProfile", GetProfileQuery, &res, vars, interceptors...); err != nil {
+		return &res, err
 	}
 
 	return &res, nil
@@ -297,7 +297,7 @@ fragment WorkFragment on Work {
 }
 `
 
-func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *string, n int64, httpRequestOptions ...client.HTTPRequestOption) (*ListWorks, error) {
+func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *string, n int64, interceptors ...clientv2.RequestInterceptor) (*ListWorks, error) {
 	vars := map[string]interface{}{
 		"state": state,
 		"after": after,
@@ -305,8 +305,8 @@ func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *strin
 	}
 
 	var res ListWorks
-	if err := c.Client.Post(ctx, "ListWorks", ListWorksQuery, &res, vars, httpRequestOptions...); err != nil {
-		return nil, err
+	if err := c.Client.Post(ctx, "ListWorks", ListWorksQuery, &res, vars, interceptors...); err != nil {
+		return &res, err
 	}
 
 	return &res, nil
@@ -350,12 +350,12 @@ fragment WorkFragment on Work {
 }
 `
 
-func (c *Client) ListRecords(ctx context.Context, httpRequestOptions ...client.HTTPRequestOption) (*ListRecords, error) {
+func (c *Client) ListRecords(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListRecords, error) {
 	vars := map[string]interface{}{}
 
 	var res ListRecords
-	if err := c.Client.Post(ctx, "ListRecords", ListRecordsQuery, &res, vars, httpRequestOptions...); err != nil {
-		return nil, err
+	if err := c.Client.Post(ctx, "ListRecords", ListRecordsQuery, &res, vars, interceptors...); err != nil {
+		return &res, err
 	}
 
 	return &res, nil
@@ -388,12 +388,12 @@ const ListNextEpisodesQuery = `query ListNextEpisodes {
 }
 `
 
-func (c *Client) ListNextEpisodes(ctx context.Context, httpRequestOptions ...client.HTTPRequestOption) (*ListNextEpisodes, error) {
+func (c *Client) ListNextEpisodes(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListNextEpisodes, error) {
 	vars := map[string]interface{}{}
 
 	var res ListNextEpisodes
-	if err := c.Client.Post(ctx, "ListNextEpisodes", ListNextEpisodesQuery, &res, vars, httpRequestOptions...); err != nil {
-		return nil, err
+	if err := c.Client.Post(ctx, "ListNextEpisodes", ListNextEpisodesQuery, &res, vars, interceptors...); err != nil {
+		return &res, err
 	}
 
 	return &res, nil
@@ -427,14 +427,14 @@ fragment WorkFragment on Work {
 }
 `
 
-func (c *Client) GetWork(ctx context.Context, ids []int64, httpRequestOptions ...client.HTTPRequestOption) (*GetWork, error) {
+func (c *Client) GetWork(ctx context.Context, ids []int64, interceptors ...clientv2.RequestInterceptor) (*GetWork, error) {
 	vars := map[string]interface{}{
 		"ids": ids,
 	}
 
 	var res GetWork
-	if err := c.Client.Post(ctx, "GetWork", GetWorkQuery, &res, vars, httpRequestOptions...); err != nil {
-		return nil, err
+	if err := c.Client.Post(ctx, "GetWork", GetWorkQuery, &res, vars, interceptors...); err != nil {
+		return &res, err
 	}
 
 	return &res, nil
@@ -473,14 +473,14 @@ fragment WorkFragment on Work {
 }
 `
 
-func (c *Client) SearchWorks(ctx context.Context, seasons []string, httpRequestOptions ...client.HTTPRequestOption) (*SearchWorks, error) {
+func (c *Client) SearchWorks(ctx context.Context, seasons []string, interceptors ...clientv2.RequestInterceptor) (*SearchWorks, error) {
 	vars := map[string]interface{}{
 		"seasons": seasons,
 	}
 
 	var res SearchWorks
-	if err := c.Client.Post(ctx, "SearchWorks", SearchWorksQuery, &res, vars, httpRequestOptions...); err != nil {
-		return nil, err
+	if err := c.Client.Post(ctx, "SearchWorks", SearchWorksQuery, &res, vars, interceptors...); err != nil {
+		return &res, err
 	}
 
 	return &res, nil

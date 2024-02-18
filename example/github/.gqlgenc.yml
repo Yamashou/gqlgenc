@@ -14,7 +14,6 @@ endpoint:
 query:
   - "./query/*.graphql"
 generate:
-  clientV2: true
   clientInterfaceName: "GithubGraphQLClient"
   query: false
   mutation: false
