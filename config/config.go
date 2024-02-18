@@ -3,6 +3,7 @@ package config
 import (
 	"context"
 	"fmt"
+	"github.com/Yamashou/gqlgenc/clientv2"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -10,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/Yamashou/gqlgenc/client"
 	"github.com/Yamashou/gqlgenc/introspection"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -255,12 +255,13 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 }
 
 func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
-	addHeader := func(req *http.Request) {
+	gqlclient := clientv2.NewClient(http.DefaultClient, c.Endpoint.URL, nil, func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res interface{}, next clientv2.RequestInterceptorFunc) error {
 		for key, value := range c.Endpoint.Headers {
 			req.Header.Set(key, value)
 		}
-	}
-	gqlclient := client.NewClient(http.DefaultClient, c.Endpoint.URL, addHeader)
+
+		return next(ctx, req, gqlInfo, res)
+	})
 
 	var res introspection.Query
 	if err := gqlclient.Post(ctx, "Query", introspection.Introspection, &res, nil); err != nil {
