@@ -31279,6 +31279,8 @@ const (
 	FundingPlatformOtechie FundingPlatform = "OTECHIE"
 	// LFX Crowdfunding funding platform.
 	FundingPlatformLfxCrowdfunding FundingPlatform = "LFX_CROWDFUNDING"
+	// Polar funding platform.
+	FundingPlatformPolar FundingPlatform = "POLAR"
 	// Custom funding platform.
 	FundingPlatformCustom FundingPlatform = "CUSTOM"
 )
@@ -31294,12 +31296,13 @@ var AllFundingPlatform = []FundingPlatform{
 	FundingPlatformIssuehunt,
 	FundingPlatformOtechie,
 	FundingPlatformLfxCrowdfunding,
+	FundingPlatformPolar,
 	FundingPlatformCustom,
 }
 
 func (e FundingPlatform) IsValid() bool {
 	switch e {
-	case FundingPlatformGithub, FundingPlatformPatreon, FundingPlatformOpenCollective, FundingPlatformKoFi, FundingPlatformTidelift, FundingPlatformCommunityBridge, FundingPlatformLiberapay, FundingPlatformIssuehunt, FundingPlatformOtechie, FundingPlatformLfxCrowdfunding, FundingPlatformCustom:
+	case FundingPlatformGithub, FundingPlatformPatreon, FundingPlatformOpenCollective, FundingPlatformKoFi, FundingPlatformTidelift, FundingPlatformCommunityBridge, FundingPlatformLiberapay, FundingPlatformIssuehunt, FundingPlatformOtechie, FundingPlatformLfxCrowdfunding, FundingPlatformPolar, FundingPlatformCustom:
 		return true
 	}
 	return false
