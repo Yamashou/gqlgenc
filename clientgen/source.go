@@ -162,61 +162,6 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 	return operationResponse, nil
 }
 
-type Query struct {
-	Name string
-	Type types.Type
-}
-
-func (s *Source) Query() (*Query, error) {
-	if !s.generateConfig.ShouldGenerateQuery() {
-		return nil, nil
-	}
-
-	fields, err := s.sourceGenerator.NewResponseFieldsByDefinition(s.schema.Query)
-	if err != nil {
-		return nil, fmt.Errorf("generate failed for query struct type : %w", err)
-	}
-
-	s.sourceGenerator.cfg.Models.Add(
-		s.schema.Query.Name,
-		fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(s.schema.Query.Name)),
-	)
-
-	return &Query{
-		Name: s.schema.Query.Name,
-		Type: fields.StructType(),
-	}, nil
-}
-
-type Mutation struct {
-	Name string
-	Type types.Type
-}
-
-func (s *Source) Mutation() (*Mutation, error) {
-	if !s.generateConfig.ShouldGenerateMutation() {
-		return nil, nil
-	}
-	if s.schema.Mutation == nil {
-		return nil, nil
-	}
-
-	fields, err := s.sourceGenerator.NewResponseFieldsByDefinition(s.schema.Mutation)
-	if err != nil {
-		return nil, fmt.Errorf("generate failed for mutation struct type : %w", err)
-	}
-
-	s.sourceGenerator.cfg.Models.Add(
-		s.schema.Mutation.Name,
-		fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(s.schema.Mutation.Name)),
-	)
-
-	return &Mutation{
-		Name: s.schema.Mutation.Name,
-		Type: fields.StructType(),
-	}, nil
-}
-
 func getResponseStructName(operation *ast.OperationDefinition, generateConfig *config.GenerateConfig) string {
 	name := operation.Name
 	if generateConfig != nil {

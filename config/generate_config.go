@@ -13,30 +13,6 @@ type GenerateConfig struct {
 	ClientV2 bool `yaml:"clientV2,omitempty"`
 }
 
-func (c *GenerateConfig) ShouldGenerateQuery() bool {
-	if c == nil {
-		return true
-	}
-
-	if c.Query != nil && !*c.Query {
-		return false
-	}
-
-	return true
-}
-
-func (c *GenerateConfig) ShouldGenerateMutation() bool {
-	if c == nil {
-		return true
-	}
-
-	if c.Mutation != nil && !*c.Mutation {
-		return false
-	}
-
-	return true
-}
-
 func (c *GenerateConfig) ShouldGenerateClient() bool {
 	if c == nil {
 		return true
