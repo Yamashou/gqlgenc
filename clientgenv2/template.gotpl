@@ -32,14 +32,6 @@
 
 {{- end }}
 
-{{ if .Query }}
-    type {{ .Query.Name | go }} {{ .Query.Type | ref }}
-{{ end }}
-
-{{- if .Mutation }}
-	type {{ .Mutation.Name | go }} {{ .Mutation.Type | ref }}
-{{- end }}
-
 {{- range $name, $element := .Fragment }}
 	type  {{ .Name | go  }} {{ .Type | ref }}
 

@@ -16,5 +16,3 @@ query:
 generate:
   clientV2: true
   clientInterfaceName: "GithubGraphQLClient"
-  query: false
-  mutation: false

@@ -13,7 +13,7 @@ import (
 //go:embed template.gotpl
 var template string
 
-func RenderTemplate(cfg *config.Config, query *Query, mutation *Mutation, fragments []*Fragment, operations []*Operation, operationResponses []*OperationResponse, generateCfg *gqlgencConfig.GenerateConfig, client config.PackageConfig) error {
+func RenderTemplate(cfg *config.Config, fragments []*Fragment, operations []*Operation, operationResponses []*OperationResponse, generateCfg *gqlgencConfig.GenerateConfig, client config.PackageConfig) error {
 	// sort to ensure a deterministic output
 	sort.Slice(fragments, func(i, j int) bool { return fragments[i].Name < fragments[j].Name })
 	sort.Slice(operations, func(i, j int) bool { return operations[i].Name < operations[j].Name })
@@ -24,8 +24,6 @@ func RenderTemplate(cfg *config.Config, query *Query, mutation *Mutation, fragme
 		Filename:    client.Filename,
 		Template:    template,
 		Data: map[string]interface{}{
-			"Query":               query,
-			"Mutation":            mutation,
 			"Fragment":            fragments,
 			"Operation":           operations,
 			"OperationResponse":   operationResponses,

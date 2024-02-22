@@ -15,7 +15,7 @@ import (
 //go:embed template.gotpl
 var template string
 
-func RenderTemplate(cfg *config.Config, query *Query, mutation *Mutation, fragments []*Fragment, operations []*Operation, operationResponses []*OperationResponse, structSources []*StructSource, generateCfg *gqlgencConfig.GenerateConfig, client config.PackageConfig) error {
+func RenderTemplate(cfg *config.Config, fragments []*Fragment, operations []*Operation, operationResponses []*OperationResponse, structSources []*StructSource, generateCfg *gqlgencConfig.GenerateConfig, client config.PackageConfig) error {
 	genGettersGenerator := &GenGettersGenerator{
 		ClientPackageName: client.Package,
 	}
@@ -24,8 +24,6 @@ func RenderTemplate(cfg *config.Config, query *Query, mutation *Mutation, fragme
 		Filename:    client.Filename,
 		Template:    template,
 		Data: map[string]interface{}{
-			"Query":               query,
-			"Mutation":            mutation,
 			"Fragment":            fragments,
 			"Operation":           operations,
 			"OperationResponse":   operationResponses,
