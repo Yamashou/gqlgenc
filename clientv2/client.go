@@ -10,9 +10,9 @@ import (
 	"mime/multipart"
 	"net/http"
 	"strconv"
+	"sync"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/Yamashou/gqlgenc/graphqljson"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -55,6 +55,8 @@ type Client struct {
 	BaseURL             string
 	RequestInterceptor  RequestInterceptor
 	ParseDataWhenErrors bool
+
+	pool sync.Pool
 }
 
 // Request represents an outgoing GraphQL request
@@ -72,6 +74,11 @@ func NewClient(client *http.Client, baseURL string, options *Options, intercepto
 		RequestInterceptor: ChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
 			return next(ctx, requestSet, gqlInfo, res)
 		}}, interceptors...)...),
+		pool: sync.Pool{
+			New: func() interface{} {
+				return bytes.NewBuffer(make([]byte, 4096))
+			},
+		},
 	}
 
 	if options != nil {
@@ -299,6 +306,15 @@ func prepareMultipartFormBody(
 }
 
 func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res interface{}) error {
+	buffer := c.pool.Get().(*bytes.Buffer)
+	buffer.Reset()
+	defer func() {
+		if buffer != nil {
+			c.pool.Put(buffer)
+			buffer = nil
+		}
+	}()
+
 	resp, err := c.Client.Do(req)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
@@ -312,10 +328,14 @@ func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res
 		}
 	}
 
-	body, err := io.ReadAll(resp.Body)
+	_, err = io.Copy(buffer, resp.Body)
 	if err != nil {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
+
+	body := buffer.Bytes()
+	c.pool.Put(buffer)
+	buffer = nil
 
 	return c.parseResponse(body, resp.StatusCode, res)
 }
@@ -372,14 +392,16 @@ func (c *Client) unmarshal(data []byte, res interface{}) error {
 		}
 	}
 
-	if errData := graphqljson.UnmarshalData(resp.Data, res); errData != nil {
-		// if ParseDataWhenErrors is true, and we failed to unmarshal data, return the actual error
-		if c.ParseDataWhenErrors {
-			return err
-		}
-
-		return fmt.Errorf("failed to decode data into response %s: %w", string(data), errData)
-	}
+	// TODO: support graphqljson.UnmarshalData when needed to support custom scalar.
+	// Currently, we don't support custom scalar, and the graphqljson.UnmarshalData performance is not good
+	//if errData := graphqljson.UnmarshalData(resp.Data, res); errData != nil {
+	//	// if ParseDataWhenErrors is true, and we failed to unmarshal data, return the actual error
+	//	if c.ParseDataWhenErrors {
+	//		return err
+	//	}
+	//
+	//	return fmt.Errorf("failed to decode data into response %s: %w", string(data), errData)
+	//}
 
 	return err
 }
