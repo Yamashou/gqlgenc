@@ -393,7 +393,7 @@ func (c *Client) unmarshal(data []byte, res interface{}) error {
 	}
 
 	if errData := json.Unmarshal(resp.Data, res); errData != nil {
-		return fmt.Errorf("failed to unmarshal data into response %s: %w", string(data), errData)
+		return fmt.Errorf("failed to json unmarshal data into response %s: %w", string(data), errData)
 	}
 
 	// TODO: support graphqljson.UnmarshalData when needed to support custom scalar.
