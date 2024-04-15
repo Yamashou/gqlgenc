@@ -346,7 +346,7 @@ fragment LanguageFragment on Language {
 `
 
 func (c *Client) GetUser(ctx context.Context, repositoryFirst int, languageFirst int, interceptors ...clientv2.RequestInterceptor) (*GetUser, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"repositoryFirst": repositoryFirst,
 		"languageFirst":   languageFirst,
 	}
@@ -384,7 +384,7 @@ fragment RepositoryFragment on Repository {
 `
 
 func (c *Client) GetNode(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"id": id,
 	}
 
@@ -415,7 +415,7 @@ const AddStarDocument = `mutation AddStar ($input: AddStarInput!) {
 `
 
 func (c *Client) AddStar(ctx context.Context, input model.AddStarInput, interceptors ...clientv2.RequestInterceptor) (*AddStar, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"input": input,
 	}
 
@@ -445,7 +445,7 @@ const GetNode2Document = `query GetNode2 ($id: ID!) {
 `
 
 func (c *Client) GetNode2(ctx context.Context, id string, interceptors ...clientv2.RequestInterceptor) (*GetNode2, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"id": id,
 	}
 
