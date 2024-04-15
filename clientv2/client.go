@@ -428,6 +428,8 @@ func getTypeEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 		return newFloatEncoder()
 	case reflect.Interface:
 		return newInterfaceEncoder()
+	case reflect.Invalid, reflect.Complex64, reflect.Complex128, reflect.Chan, reflect.Func, reflect.UnsafePointer:
+		panic(fmt.Sprintf("unsupported type: %s", t))
 	default:
 		panic(fmt.Sprintf("unsupported type: %s", t))
 	}
@@ -435,16 +437,26 @@ func getTypeEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 
 func gqlMarshalerEncoder(v interface{}) ([]byte, error) {
 	var buf bytes.Buffer
-	v.(graphql.Marshaler).MarshalGQL(&buf)
+	if val, ok := v.(graphql.Marshaler); ok {
+		val.MarshalGQL(&buf)
+	} else {
+		return nil, fmt.Errorf("failed to encode graphql.Marshaler: %v", v)
+	}
+
 	return buf.Bytes(), nil
 }
 
 func newBoolEncoder() func(interface{}) ([]byte, error) {
 	return func(v interface{}) ([]byte, error) {
-		if v.(bool) {
-			return []byte("true"), nil
+		if v, ok := v.(bool); ok {
+			boolValue, err := json.Marshal(v)
+			if err != nil {
+				return nil, fmt.Errorf("failed to encode bool: %v", v)
+			}
+			return boolValue, nil
+		} else {
+			return nil, fmt.Errorf("failed to encode bool: %v", v)
 		}
-		return []byte("false"), nil
 	}
 }
 
@@ -468,7 +480,12 @@ func newFloatEncoder() func(interface{}) ([]byte, error) {
 
 func newStringEncoder() func(interface{}) ([]byte, error) {
 	return func(v interface{}) ([]byte, error) {
-		return json.Marshal(v)
+		stringValue, err := json.Marshal(v)
+		if err != nil {
+			return nil, fmt.Errorf("failed to encode string: %v", v)
+		}
+
+		return stringValue, nil
 	}
 }
 
@@ -501,6 +518,7 @@ func prepareFields(t reflect.Type) []fieldInfo {
 			typ:      f.Type,
 		})
 	}
+
 	return fields
 }
 
@@ -521,6 +539,7 @@ func newStructEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 			}
 			result[field.jsonName] = encodedValue
 		}
+
 		return json.Marshal(result)
 	}
 }
@@ -529,6 +548,7 @@ func trimQuotes(s string) string {
 	if len(s) > 1 && s[0] == '"' && s[len(s)-1] == '"' {
 		return s[1 : len(s)-1]
 	}
+
 	return s
 }
 
@@ -554,6 +574,7 @@ func newMapEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 			}
 			result[keyStr] = json.RawMessage(encodedValue) // Use json.RawMessage to avoid double encoding
 		}
+
 		return json.Marshal(result)
 	}
 }
@@ -570,6 +591,7 @@ func newSliceEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 			}
 			result[i] = encodedValue
 		}
+
 		return json.Marshal(result)
 	}
 }
@@ -586,13 +608,14 @@ func newArrayEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 			}
 			result[i] = encodedValue
 		}
+
 		return json.Marshal(result)
 	}
 }
 
 func newPtrEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 	if t.Elem().Kind() == reflect.Ptr {
-		return newPtrEncoder(t.Elem()) // Handle multi-level pointers
+		return newPtrEncoder(t.Elem())
 	}
 	elemEncoder := getTypeEncoder(t.Elem())
 	return func(v interface{}) ([]byte, error) {
@@ -600,6 +623,7 @@ func newPtrEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 		if val.IsNil() {
 			return []byte("null"), nil
 		}
+
 		return elemEncoder(val.Elem().Interface())
 	}
 }
@@ -617,8 +641,10 @@ func newInterfaceEncoder() func(interface{}) ([]byte, error) {
 		if actualValue.IsValid() {
 			actualType := actualValue.Type()
 			encoder := getTypeEncoder(actualType)
+
 			return encoder(actualValue.Interface())
 		}
+
 		return []byte("null"), nil
 	}
 }

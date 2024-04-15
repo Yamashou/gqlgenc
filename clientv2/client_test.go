@@ -6,13 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/go-cmp/cmp"
 	"io"
 	"net/http"
 	"strconv"
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -466,8 +466,10 @@ func (n *Number) UnmarshalGQL(v interface{}) error {
 	case "TWO":
 		*n = NumberTwo
 	default:
+
 		return fmt.Errorf("Number not found Type: %d", n)
 	}
+
 	return nil
 }
 
@@ -506,6 +508,13 @@ func TestMarshalJSON(t *testing.T) {
 				v: NumberOne,
 			},
 			want: []byte(`"ONE"`),
+		},
+		{
+			name: "marshal bool",
+			args: args{
+				v: true,
+			},
+			want: []byte("true"),
 		},
 		{
 			name: "marshal normal struct",
@@ -557,6 +566,7 @@ func TestMarshalJSON(t *testing.T) {
 			got, err := MarshalJSON(tt.args.v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("MarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 			if diff := cmp.Diff(tt.want, got); diff != "" {

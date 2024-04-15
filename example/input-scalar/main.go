@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/Yamashou/gqlgenc/example/input-scalar/gen"
 	"io"
 	"net/http"
+
+	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/Yamashou/gqlgenc/example/input-scalar/gen"
 )
 
 func main() {
@@ -22,7 +23,6 @@ func main() {
 			}
 			// ex: {"operationName":"GetNumber","query":"query GetNumber ($number: Number!) {\n\tenumToNum(number: $number)\n}\n","variables":{"number":"ONE"}}
 			fmt.Println(string(r))
-			res = `{}`
 
 			return nil
 		},
@@ -35,6 +35,7 @@ func main() {
 	_, err := client.GetNumber(context.Background(), 1)
 	if err != nil {
 		fmt.Println(err)
+
 		return
 	}
 }
