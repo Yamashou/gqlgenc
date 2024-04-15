@@ -12,6 +12,17 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+const version = "0.20.2"
+
+var versionCmd = &cli.Command{
+	Name:  "version",
+	Usage: "print the version",
+	Action: func(ctx *cli.Context) error {
+		fmt.Println(version)
+		return nil
+	},
+}
+
 var generateCmd = &cli.Command{
 	Name:  "generate",
 	Usage: "generate a graphql client based on schema",
@@ -49,6 +60,7 @@ func main() {
 	app.Usage = generateCmd.Usage
 	app.DefaultCommand = "generate"
 	app.Commands = []*cli.Command{
+		versionCmd,
 		generateCmd,
 	}
 
