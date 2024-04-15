@@ -24,9 +24,9 @@ type Client struct {
 
 // Request represents an outgoing GraphQL request
 type Request struct {
-	Query         string                 `json:"query"`
-	Variables     map[string]interface{} `json:"variables,omitempty"`
-	OperationName string                 `json:"operationName,omitempty"`
+	Query         string         `json:"query"`
+	Variables     map[string]any `json:"variables,omitempty"`
+	OperationName string         `json:"operationName,omitempty"`
 }
 
 // NewClient creates a new http client wrapper
@@ -38,7 +38,7 @@ func NewClient(client *http.Client, baseURL string, options ...HTTPRequestOption
 	}
 }
 
-func (c *Client) newRequest(ctx context.Context, operationName, query string, vars map[string]interface{}, httpRequestOptions []HTTPRequestOption) (*http.Request, error) {
+func (c *Client) newRequest(ctx context.Context, operationName, query string, vars map[string]any, httpRequestOptions []HTTPRequestOption) (*http.Request, error) {
 	r := &Request{
 		Query:         query,
 		Variables:     vars,

@@ -15,6 +15,8 @@ import (
 
 const FilesDir = "./example/files-info/files/"
 
+const imageFile = "mario-strikers_1600w_original.jpg"
+
 func newof[T any](val T) *T {
 	return &val
 }
@@ -46,7 +48,7 @@ func main() {
 	ctx := context.Background()
 	files := []string{
 		FilesDir + "color-bars-600.png",
-		FilesDir + "mario-strikers_1600w_original.jpg",
+		FilesDir + imageFile,
 	}
 
 	fmt.Println("Queries list")
@@ -83,7 +85,7 @@ func main() {
 
 	fmt.Println("Request: UploadFile")
 
-	uFile, err = NewUploadFile(FilesDir + "mario-strikers_1600w_original.jpg")
+	uFile, err = NewUploadFile(FilesDir + imageFile)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -115,7 +117,7 @@ func main() {
 
 	fmt.Println("Request: AllFilesInfo")
 
-	uFile, err = NewUploadFile(FilesDir + "mario-strikers_1600w_original.jpg")
+	uFile, err = NewUploadFile(FilesDir + imageFile)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -137,7 +139,7 @@ func main() {
 
 	fmt.Println("Request: AllFilesInfoWithListItems")
 
-	uFile, err = NewUploadFile(FilesDir + "mario-strikers_1600w_original.jpg")
+	uFile, err = NewUploadFile(FilesDir + imageFile)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)
@@ -166,7 +168,7 @@ func main() {
 
 	fmt.Println("Request: AllFilesInfo")
 
-	uFile, err = NewUploadFile(FilesDir + "mario-strikers_1600w_original.jpg")
+	uFile, err = NewUploadFile(FilesDir + imageFile)
 	if err != nil {
 		fmt.Println(err.Error())
 		os.Exit(1)

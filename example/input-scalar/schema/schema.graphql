@@ -1,0 +1,9 @@
+type Query {
+    enumToNum(number: Number!): Int!
+}
+
+enum Number {
+    ONE
+    TWO
+}
+

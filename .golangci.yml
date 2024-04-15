@@ -1,20 +1,14 @@
 # See https://github.com/golangci/golangci-lint/blob/master/.golangci.example.yml
-run:
 linters-settings:
   govet:
     enable-all: true
     disable:
       - shadow
-  unused:
-    check-exported: true
   unparam:
     check-exported: true
-  varcheck:
-    exported-fields: true
-  structcheck:
-    exported-fields: true
   nakedret:
     max-func-lines: 1
+
 
 linters:
   enable-all: true
@@ -55,11 +49,18 @@ linters:
     - depguard
     - musttag
     - paralleltest
-  fast: false
+    - nlreturn
+  fast: true
 
 issues:
+  fix: true
+  exclude-files:
+    - _test\.go
+    - examples/**/*\.go
   max-issues-per-linter: 0
   max-same-issues: 0
+  exclude-dirs:
+    - examples
   exclude-rules:
     # Test
     - path: _test\.go

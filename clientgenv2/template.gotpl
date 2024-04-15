@@ -55,7 +55,7 @@
 
 	{{- if $.GenerateClient }}
 		func (c *Client) {{ $model.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, interceptors ...clientv2.RequestInterceptor) (*{{ $model.ResponseStructName | go }}, error) {
-			vars := map[string]interface{}{
+			vars := map[string]any{
 			{{- range $args := .VariableDefinitions}}
 				"{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
 			{{- end }}

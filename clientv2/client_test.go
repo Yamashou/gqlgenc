@@ -6,10 +6,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 	"testing"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -442,4 +445,236 @@ func Test_parseMultipartFiles(t *testing.T) {
 		require.Equal(t, len(multipartFilesGroups[0].Files), 2)
 		require.ElementsMatch(t, fieldFiles, make([]struct{}, 2))
 	})
+}
+
+type Number int64
+
+const (
+	NumberOne Number = 1
+	NumberTwo Number = 2
+)
+
+func (n *Number) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	switch str {
+	case "ONE":
+		*n = NumberOne
+	case "TWO":
+		*n = NumberTwo
+	default:
+
+		return fmt.Errorf("Number not found Type: %d", n)
+	}
+
+	return nil
+}
+
+func (n Number) MarshalGQL(w io.Writer) {
+	var str string
+	switch n {
+	case NumberOne:
+		str = "ONE"
+	case NumberTwo:
+		str = "TWO"
+	}
+	fmt.Fprint(w, strconv.Quote(str))
+}
+
+func TestMarshalJSON(t *testing.T) {
+	type Example1 struct {
+		Name string `json:"name"`
+		Age  int    `json:"age"`
+	}
+	type Example2 struct {
+		Name   string `json:"name"`
+		Number Number `json:"number"`
+	}
+	type args struct {
+		v interface{}
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "marshal NumberOne",
+			args: args{
+				v: NumberOne,
+			},
+			want: []byte(`"ONE"`),
+		},
+		{
+			name: "marshal bool",
+			args: args{
+				v: true,
+			},
+			want: []byte("true"),
+		},
+		{
+			name: "marshal int",
+			args: args{
+				v: 1,
+			},
+			want: []byte("1"),
+		},
+		{
+			name: "marshal string",
+			args: args{
+				v: "string",
+			},
+			want: []byte(`"string"`),
+		},
+		{
+			name: "marshal nil",
+			args: args{
+				v: nil,
+			},
+			want: []byte("null"),
+		},
+		{
+			name: "marshal map",
+			args: args{
+				v: map[Number]string{
+					NumberOne: "ONE",
+				},
+			},
+			want: []byte(`{"1":"ONE"}`),
+		},
+		{
+			name: "marshal slice",
+			args: args{
+				v: []Number{NumberOne, NumberTwo},
+			},
+			want: []byte(`["ONE","TWO"]`),
+		},
+		{
+			name: "marshal normal struct",
+			args: args{
+				v: Example1{
+					Name: "John",
+					Age:  20,
+				},
+			},
+			want: []byte(`{"age":20,"name":"John"}`),
+		},
+		{
+			name: "marshal pointer struct",
+			args: args{
+				v: &Example1{
+					Name: "John",
+					Age:  20,
+				},
+			},
+			want: []byte(`{"age":20,"name":"John"}`),
+		},
+		{
+			name: "marshal nested struct",
+			args: args{
+				v: struct {
+					Outer struct {
+						Inner Example1 `json:"inner"`
+					} `json:"outer"`
+				}{
+					Outer: struct {
+						Inner Example1 `json:"inner"`
+					}{
+						Inner: Example1{
+							Name: "John",
+							Age:  22,
+						},
+					},
+				},
+			},
+			want: []byte(`{"outer":{"inner":{"age":22,"name":"John"}}}`),
+		},
+		{
+			name: "marshal nested map",
+			args: args{
+				v: map[string]any{
+					"outer": map[string]any{
+						"inner": map[string]int{"value": 5},
+					},
+				},
+			},
+			want: []byte(`{"outer":{"inner":{"value":5}}}`),
+		},
+		{
+			name: "marshal slice of slices",
+			args: args{
+				v: [][]int{{1, 2}, {3, 4}},
+			},
+			want: []byte(`[[1,2],[3,4]]`),
+		},
+		{
+			name: "error handling on custom marshaler",
+			args: args{
+				v: struct{ Test Number }{Test: Number(999)}, // Assuming 999 is not handled by Number's MarshalGQL
+			},
+			wantErr: true,
+		},
+		{
+			name: "marshal array",
+			args: args{
+				v: [2]Number{NumberOne, NumberTwo},
+			},
+			want: []byte(`["ONE","TWO"]`),
+		},
+		{
+			name: "marshal pointer array",
+			args: args{
+				v: &[2]Number{NumberOne, NumberTwo},
+			},
+			want: []byte(`["ONE","TWO"]`),
+		},
+		{
+			name: "marshal nil pointer",
+			args: args{
+				v: (*Example1)(nil),
+			},
+			want: []byte("null"),
+		},
+		{
+			name: "marshal a struct with custom marshaler",
+			args: args{
+				v: Example2{
+					Name:   "John",
+					Number: NumberOne,
+				},
+			},
+			want: []byte(`{"name":"John","number":"ONE"}`),
+		},
+		{
+			name: "marshal map with custom marshaler",
+			args: args{
+				v: map[string]any{
+					"number": NumberOne,
+					"example2": &Example2{
+						Name:   "John",
+						Number: NumberOne,
+					},
+				},
+			},
+			want: []byte(`{"example2":{"name":"John","number":"ONE"},"number":"ONE"}`),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+			got, err := MarshalJSON(tt.args.v)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("MarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+
+				return
+			}
+			if diff := cmp.Diff(tt.want, got); diff != "" {
+				t.Errorf("MarshalJSON() mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
 }
