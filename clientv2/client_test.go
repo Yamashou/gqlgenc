@@ -517,6 +517,43 @@ func TestMarshalJSON(t *testing.T) {
 			want: []byte("true"),
 		},
 		{
+			name: "marshal int",
+			args: args{
+				v: 1,
+			},
+			want: []byte("1"),
+		},
+		{
+			name: "marshal string",
+			args: args{
+				v: "string",
+			},
+			want: []byte(`"string"`),
+		},
+		{
+			name: "marshal nil",
+			args: args{
+				v: nil,
+			},
+			want: []byte("null"),
+		},
+		{
+			name: "marshal map",
+			args: args{
+				v: map[Number]string{
+					NumberOne: "ONE",
+				},
+			},
+			want: []byte(`{"1":"ONE"}`),
+		},
+		{
+			name: "marshal slice",
+			args: args{
+				v: []Number{NumberOne, NumberTwo},
+			},
+			want: []byte(`["ONE","TWO"]`),
+		},
+		{
 			name: "marshal normal struct",
 			args: args{
 				v: Example1{
@@ -535,6 +572,72 @@ func TestMarshalJSON(t *testing.T) {
 				},
 			},
 			want: []byte(`{"age":20,"name":"John"}`),
+		},
+		{
+			name: "marshal nested struct",
+			args: args{
+				v: struct {
+					Outer struct {
+						Inner Example1 `json:"inner"`
+					} `json:"outer"`
+				}{
+					Outer: struct {
+						Inner Example1 `json:"inner"`
+					}{
+						Inner: Example1{
+							Name: "John",
+							Age:  22,
+						},
+					},
+				},
+			},
+			want: []byte(`{"outer":{"inner":{"age":22,"name":"John"}}}`),
+		},
+		{
+			name: "marshal nested map",
+			args: args{
+				v: map[string]any{
+					"outer": map[string]any{
+						"inner": map[string]int{"value": 5},
+					},
+				},
+			},
+			want: []byte(`{"outer":{"inner":{"value":5}}}`),
+		},
+		{
+			name: "marshal slice of slices",
+			args: args{
+				v: [][]int{{1, 2}, {3, 4}},
+			},
+			want: []byte(`[[1,2],[3,4]]`),
+		},
+		{
+			name: "error handling on custom marshaler",
+			args: args{
+				v: struct{ Test Number }{Test: Number(999)}, // Assuming 999 is not handled by Number's MarshalGQL
+			},
+			wantErr: true,
+		},
+		{
+			name: "marshal array",
+			args: args{
+				v: [2]Number{NumberOne, NumberTwo},
+			},
+			want: []byte(`["ONE","TWO"]`),
+		},
+		{
+			name: "marshal pointer array",
+			args: args{
+				v: &[2]Number{NumberOne, NumberTwo},
+			},
+			want: []byte(`["ONE","TWO"]`),
+		},
+		{
+			name: "marshal nil pointer",
+			args: args{
+				v: (*Example1)(nil),
+			},
+			want: []byte("null"),
 		},
 		{
 			name: "marshal a struct with custom marshaler",
