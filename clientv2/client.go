@@ -522,15 +522,35 @@ func prepareFields(t reflect.Type) []fieldInfo {
 	return fields
 }
 
+func checkMarshalerFields(t reflect.Type) bool {
+	for i := 0; i < t.NumField(); i++ {
+		f := t.Field(i)
+		if f.Type.Implements(reflect.TypeOf((*graphql.Marshaler)(nil)).Elem()) {
+			return true
+		}
+		if reflect.PtrTo(f.Type).Implements(reflect.TypeOf((*graphql.Marshaler)(nil)).Elem()) {
+			return true
+		}
+	}
+	return false
+}
+
 func newStructEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
-	fields := prepareFields(t) // Prepare and cache fields information
+	fields := prepareFields(t)
+	marshalerFieldExists := checkMarshalerFields(t)
+
 	return func(v interface{}) ([]byte, error) {
+		// If no field implements the MarshalerGQL interface, use standard JSON marshaling
+		if !marshalerFieldExists {
+			return json.Marshal(v)
+		}
+
 		val := reflect.ValueOf(v)
 		result := make(map[string]json.RawMessage)
 		for _, field := range fields {
 			fieldValue := val.FieldByName(field.name)
-			if !fieldValue.IsValid() {
-				continue
+			if !fieldValue.IsValid() || (fieldValue.Kind() == reflect.Ptr && fieldValue.IsNil()) {
+				continue // Skip invalid or nil pointers to avoid panics
 			}
 			encoder := getTypeEncoder(field.typ)
 			encodedValue, err := encoder(fieldValue.Interface())
@@ -539,7 +559,6 @@ func newStructEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 			}
 			result[field.jsonName] = encodedValue
 		}
-
 		return json.Marshal(result)
 	}
 }

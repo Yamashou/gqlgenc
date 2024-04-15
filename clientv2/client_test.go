@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/go-cmp/cmp"
@@ -493,6 +494,7 @@ func TestMarshalJSON(t *testing.T) {
 		Name   string `json:"name"`
 		Number Number `json:"number"`
 	}
+	testDate := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	type args struct {
 		v interface{}
 	}
@@ -661,6 +663,17 @@ func TestMarshalJSON(t *testing.T) {
 				},
 			},
 			want: []byte(`{"example2":{"name":"John","number":"ONE"},"number":"ONE"}`),
+		},
+		{
+			name: "marshal time.Time",
+			args: args{
+				v: struct {
+					Time *time.Time `json:"time"`
+				}{
+					Time: &testDate,
+				},
+			},
+			want: []byte(`{"time":"2021-01-01T00:00:00Z"}`),
 		},
 	}
 	for _, tt := range tests {
