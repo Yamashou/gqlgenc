@@ -224,9 +224,14 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			nil,
 		)
 
+		var typ types.Type = baseType
+		if r.cfg.StructFieldsAlwaysPointers {
+			typ = types.NewPointer(baseType)
+		}
+
 		return &ResponseField{
 			Name:             selection.Name,
-			Type:             types.NewPointer(baseType),
+			Type:             typ,
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
 		}
