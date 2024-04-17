@@ -41,7 +41,7 @@ func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.Model
 	}
 }
 
-func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) error {
+func Generate(ctx context.Context, cfg *config.Config, options ...api.Option) error {
 	_ = syscall.Unlink(cfg.Client.Filename)
 	if cfg.Model.IsDefined() {
 		_ = syscall.Unlink(cfg.Model.Filename)
@@ -57,7 +57,7 @@ func Generate(ctx context.Context, cfg *config.Config, option ...api.Option) err
 		plugins = append(plugins, p)
 	}
 
-	for _, o := range option {
+	for _, o := range options {
 		o(cfg.GQLConfig, &plugins)
 	}
 
