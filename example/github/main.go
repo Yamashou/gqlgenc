@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Yamashou/gqlgenc/client"
 	"github.com/Yamashou/gqlgenc/clientv2"
 	"github.com/Yamashou/gqlgenc/example/github/gen"
 )
@@ -26,7 +25,7 @@ func main() {
 	}
 	getUser, err := githubClient.GetUser(ctx, 10, 10)
 	if err != nil {
-		if handledError, ok := err.(*client.ErrorResponse); ok {
+		if handledError, ok := err.(*clientv2.ErrorResponse); ok {
 			fmt.Fprintf(os.Stderr, "handled error: %s\n", handledError.Error())
 		} else {
 			fmt.Fprintf(os.Stderr, "unhandled error: %s\n", err.Error())
@@ -43,7 +42,7 @@ func main() {
 
 		res, err := githubClient.GetNode(ctx, repository.ID)
 		if err != nil {
-			if handledError, ok := err.(*client.ErrorResponse); ok {
+			if handledError, ok := err.(*clientv2.ErrorResponse); ok {
 				fmt.Fprintf(os.Stderr, "handled error: %s\n", handledError.Error())
 			} else {
 				fmt.Fprintf(os.Stderr, "unhandled error: %s\n", err.Error())
