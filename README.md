@@ -51,7 +51,6 @@ endpoint:
 query:
   - "./query/*.graphql" # Where are all the query files located?
 generate:
-  clientV2: true # Generate a Client that provides a new signature
   clientInterfaceName: "GithubGraphQLClient" # Determine the name of the generated client interface
 ```
 
@@ -76,7 +75,6 @@ schema:
 query:
   - "./query/*.graphql" # Where are all the query files located?
 generate:
-  clientV2: true # Generate a Client that provides a new signature
   clientInterfaceName: "GithubGraphQLClient" # Determine the name of the generated client interface
 ```
 
@@ -107,7 +105,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Yamashou/gqlgenc/clientgen"
+	"github.com/Yamashou/gqlgenc/clientgenv2"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -125,7 +123,7 @@ func main() {
 		Package:  "gen",
 	}
 
-	clientPlugin := clientgen.New(queries, clientPackage)
+	clientPlugin := clientgenv2.New(queries, clientPackage, nil)
 	err = api.Generate(cfg,
 		api.AddPlugin(clientPlugin),
 	)
@@ -153,4 +151,4 @@ This client does not support subscription. If you need a subscription, please cr
 
 ### Pre-conditions
 
-[clientgen](https://github.com/Yamashou/gqlgenc/tree/master/clientgen) is created based on [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen). So if you don't have a modelgen, it may be a mysterious move.
+[clientgenv2](https://github.com/Yamashou/gqlgenc/tree/master/clientgenv2) is created based on [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen). So if you don't have a modelgen, it may be a mysterious move.
