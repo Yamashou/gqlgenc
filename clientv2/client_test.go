@@ -590,6 +590,26 @@ func TestMarshalJSON(t *testing.T) {
 		wantErr bool
 	}{
 		{
+			name: "marshal NumberOne",
+			args: args{
+				v: map[string]interface{}{"input": NumberOne},
+			},
+			want: []byte(`{"input":"ONE"}`),
+		},
+		{
+			name: "marshal NumberTwo",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": NumberTwo,
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"input":"TWO"}}`),
+		},
+		{
 			name: "marshal a struct with custom marshaler",
 			args: args{
 				v: Example{
