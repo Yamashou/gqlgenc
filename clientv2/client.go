@@ -409,8 +409,8 @@ func MarshalJSON(v interface{}) ([]byte, error) {
 }
 
 // getTypeEncoder returns an appropriate encoder function for the provided type.
-func getTypeEncoder(t reflect.Type) func(a any) ([]byte, error) {
-	if t.Implements(reflect.TypeOf((*graphql.Marshaler)(nil)).Elem()) {
+func getTypeEncoder(t reflect.Type) func(any2 any) ([]byte, error) {
+	if t.Implements(reflect.TypeOf((*graphql.Marshaler)(nil)).Elem()) || (t.Kind() == reflect.Ptr && reflect.PtrTo(t).Implements(reflect.TypeOf((*graphql.Marshaler)(nil)).Elem())) {
 		return gqlMarshalerEncoder
 	}
 
@@ -444,7 +444,7 @@ func getTypeEncoder(t reflect.Type) func(a any) ([]byte, error) {
 	}
 }
 
-func gqlMarshalerEncoder(v interface{}) ([]byte, error) {
+func gqlMarshalerEncoder(v any) ([]byte, error) {
 	var buf bytes.Buffer
 	if val, ok := v.(graphql.Marshaler); ok {
 		val.MarshalGQL(&buf)
@@ -546,18 +546,33 @@ func checkMarshalerFields(t reflect.Type) bool {
 			if checkMarshalerFields(f.Type) {
 				return true
 			}
+
+			// If the value type is interface{}, we need to handle it at runtime
+			if f.Type.Kind() == reflect.Interface {
+				return true // Assume it could implement Marshaler at runtime
+			}
 		}
 
 	case reflect.Map:
-		// Check both key and value types for Marshaler implementation; usually, value type is what matters
-		keyType, valueType := t.Key(), t.Elem()
-		if isMarshalerType(valueType) || isMarshalerType(keyType) {
+		// Check key type for Marshaler implementation (usually not needed unless custom types used as keys)
+		keyType := t.Key()
+		if isMarshalerType(keyType) {
 			return true
 		}
+
+		// Check value type for Marshaler implementation
+		valueType := t.Elem()
+		if isMarshalerType(valueType) {
+			return true
+		}
+
+		// If the value type is interface{}, we need to handle it at runtime
+		if valueType.Kind() == reflect.Interface {
+			return true // Assume it could implement Marshaler at runtime
+		}
+
 		// Recursively check the map value type
-		if checkMarshalerFields(valueType) {
-			return true
-		}
+		return checkMarshalerFields(valueType)
 
 	case reflect.Slice, reflect.Array:
 		// Recursively check the element type
@@ -581,7 +596,7 @@ func isMarshalerType(t reflect.Type) bool {
 	return false
 }
 
-func newStructEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
+func newStructEncoder(t reflect.Type) func(any2 any) ([]byte, error) {
 	fields := prepareFields(t)
 	marshalerFieldExists := checkMarshalerFields(t)
 
@@ -619,7 +634,6 @@ func trimQuotes(s string) string {
 
 func newMapEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 	keyEncoder := getTypeEncoder(t.Key())
-	valueEncoder := getTypeEncoder(t.Elem())
 
 	return func(v interface{}) ([]byte, error) {
 		val := reflect.ValueOf(v)
@@ -633,6 +647,7 @@ func newMapEncoder(t reflect.Type) func(interface{}) ([]byte, error) {
 			keyStr = trimQuotes(keyStr)
 
 			value := val.MapIndex(key)
+			valueEncoder := getTypeEncoder(value.Type())
 			encodedValue, err := valueEncoder(value.Interface())
 			if err != nil {
 				return nil, err
