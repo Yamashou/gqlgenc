@@ -504,9 +504,10 @@ func encodeString(v reflect.Value) ([]byte, error) {
 }
 
 type fieldInfo struct {
-	name     string
-	jsonName string
-	typ      reflect.Type
+	name      string
+	jsonName  string
+	omitempty bool
+	typ       reflect.Type
 }
 
 func prepareFields(t reflect.Type) []fieldInfo {
@@ -521,16 +522,24 @@ func prepareFields(t reflect.Type) []fieldInfo {
 		if jsonTag == "-" {
 			continue // Skip fields explicitly marked to be ignored
 		}
+
 		jsonName := f.Name
 		if jsonTag != "" {
 			parts := strings.Split(jsonTag, ",")
 			jsonName = parts[0] // Use the name specified in the JSON tag
 		}
-		fields = append(fields, fieldInfo{
+
+		fi := fieldInfo{
 			name:     f.Name,
 			jsonName: jsonName,
 			typ:      f.Type,
-		})
+		}
+
+		if strings.Contains(jsonTag, "omitempty") {
+			fi.omitempty = true
+		}
+
+		fields = append(fields, fi)
 	}
 
 	return fields
@@ -543,6 +552,10 @@ func encodeStruct(v reflect.Value) ([]byte, error) {
 		fieldValue := v.FieldByName(field.name)
 		if !fieldValue.IsValid() || (fieldValue.Kind() == reflect.Ptr && fieldValue.IsNil()) {
 			continue // Skip invalid or nil pointers to avoid panics
+		}
+
+		if field.omitempty && fieldValue.IsZero() {
+			continue // Skip nil fields marked with omitempty
 		}
 
 		encodedValue, err := encode(fieldValue)
