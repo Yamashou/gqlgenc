@@ -14,7 +14,7 @@ type GenerateConfig struct {
 	// Deprecated: not working because v1 is deleted. Must use ClientV2
 	// if true, used client v2 in generate code
 	ClientV2                   bool  `yaml:"clientV2,omitempty"`
-	StructFieldsAlwaysPointers *bool `yaml:"struct_fields_always_pointers,omitempty"`
+	StructFieldsAlwaysPointers *bool `yaml:"structFieldsAlwaysPointers,omitempty"`
 }
 
 func (c *GenerateConfig) ShouldGenerateClient() bool {
