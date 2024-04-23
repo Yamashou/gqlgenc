@@ -2,6 +2,7 @@ package graphqljson_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -584,6 +585,52 @@ func TestUnmarshalGraphQL_map(t *testing.T) {
 			"vpc":             "1",
 			"worker_role_arn": "2",
 		},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+type Number int64
+
+const (
+	NumberOne Number = 1
+	NumberTwo Number = 2
+)
+
+func (n *Number) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	switch str {
+	case "ONE":
+		*n = NumberOne
+	case "TWO":
+		*n = NumberTwo
+	default:
+
+		return fmt.Errorf("Number not found Type: %d", n)
+	}
+
+	return nil
+}
+
+func TestUnmarshalGQL(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		Enum Number
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"enum": "ONE"
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := query{
+		Enum: NumberOne,
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)

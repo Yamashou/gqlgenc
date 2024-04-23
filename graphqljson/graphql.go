@@ -31,6 +31,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/99designs/gqlgen/graphql"
 	"io"
 	"reflect"
 	"strings"
@@ -195,9 +196,18 @@ func (d *Decoder) decode() error {
 				if !v.IsValid() {
 					continue
 				}
-				err := unmarshalValue(tok, v)
-				if err != nil {
-					return fmt.Errorf(": %w", err)
+
+				// Check if the type of v implements Unmarshaler
+				if unmarshaler, ok := v.Addr().Interface().(graphql.Unmarshaler); ok {
+					// If it does, use UnmarshalGQL to unmarshal the value
+					if err := unmarshaler.UnmarshalGQL(tok); err != nil {
+						return fmt.Errorf("unmarshal gql error: %w", err)
+					}
+				} else {
+					// Use the standard unmarshal method
+					if err := unmarshalValue(tok, v); err != nil {
+						return fmt.Errorf(": %w", err)
+					}
 				}
 			}
 			d.popAllVs()
