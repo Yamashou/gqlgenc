@@ -568,7 +568,6 @@ func TestMarshalJSONValueType(t *testing.T) {
 			if !cmp.Equal(tt.want, got) {
 				t.Errorf("MarshalJSON() = %v, want %v", got, tt.want)
 			}
-
 		})
 	}
 }
