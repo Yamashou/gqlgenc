@@ -31,10 +31,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql"
 	"io"
 	"reflect"
 	"strings"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // Reference: https://blog.gopheracademy.com/advent-2017/custom-json-unmarshaler-for-graphql-client/
