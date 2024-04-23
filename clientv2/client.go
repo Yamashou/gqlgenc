@@ -7,15 +7,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/Yamashou/gqlgenc/graphqljson"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/Yamashou/gqlgenc/graphqljson"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type GQLRequestInfo struct {
