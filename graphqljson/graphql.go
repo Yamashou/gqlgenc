@@ -106,7 +106,7 @@ func (d *Decoder) Decode(v interface{}) error {
 }
 
 // decode decodes a single JSON value from d.tokenizer into d.vs.
-func (d *Decoder) decode() error {
+func (d *Decoder) decode() error { //nolint:maintidx
 	// The loop invariant is that the top of each d.vs stack
 	// is where we try to unmarshal the next JSON value we see.
 	for len(d.vs) > 0 {
