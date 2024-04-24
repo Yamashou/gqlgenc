@@ -587,6 +587,12 @@ func TestMarshalJSON(t *testing.T) {
 
 	testID := "1"
 
+	// example with omitted fields
+	type Input struct {
+		ID   string   `json:"id"`
+		Tags []string `json:"tags,omitempty"`
+	}
+
 	testDate := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 	type args struct {
 		v any
@@ -667,6 +673,37 @@ func TestMarshalJSON(t *testing.T) {
 				},
 			},
 			want: []byte(`{"time":"2021-01-01T00:00:00Z"}`),
+		},
+		{
+			name: "marshal omitted fields",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": Input{
+							ID: "1",
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"input":{"id":"1"}}}`),
+		},
+		{
+			name: "marshal fields",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": Input{
+							ID:   "1",
+							Tags: []string{"tag1", "tag2"},
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"input":{"id":"1", "tags":["tag1","tag2"]}}}`),
 		},
 		{
 			name: "marshal time.Time",
