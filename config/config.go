@@ -201,6 +201,11 @@ func LoadConfig(filename string) (*Config, error) {
 		sources = append(sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
 
+	structFieldsAlwaysPointers := true
+	if cfg.Generate != nil && cfg.Generate.StructFieldsAlwaysPointers != nil {
+		structFieldsAlwaysPointers = *cfg.Generate.StructFieldsAlwaysPointers
+	}
+
 	cfg.GQLConfig = &config.Config{
 		Model:    cfg.Model,
 		Models:   models,
@@ -209,7 +214,7 @@ func LoadConfig(filename string) (*Config, error) {
 		Exec:                          config.ExecConfig{Filename: "generated.go"},
 		Directives:                    map[string]config.DirectiveConfig{},
 		Sources:                       sources,
-		StructFieldsAlwaysPointers:    true,
+		StructFieldsAlwaysPointers:    structFieldsAlwaysPointers,
 		ReturnPointersInUmarshalInput: false,
 		ResolversAlwaysReturnPointers: true,
 		NullableInputOmittable:        false,
