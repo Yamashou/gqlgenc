@@ -636,3 +636,45 @@ func TestUnmarshalGQL(t *testing.T) {
 		t.Error(diff)
 	}
 }
+
+func TestUnmarshalGQL_array(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		Enums []Number
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"enums": ["ONE", "TWO"]
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := query{
+		Enums: []Number{NumberOne, NumberTwo},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestUnmarshalGQL_pointer(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		Enum *Number
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"enum": "ONE"
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := NumberOne
+	want := query{
+		Enum: &v,
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}

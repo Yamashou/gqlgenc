@@ -189,24 +189,53 @@ func (d *Decoder) decode() error { //nolint:maintidx
 		}
 
 		switch tok := tok.(type) {
-		case string, json.Number, bool, nil, json.RawMessage, map[string]interface{}:
-			// Value.
-
+		case nil: // Handle null values correctly.
+			for i := range d.vs {
+				v := d.vs[i][len(d.vs[i])-1]
+				if v.Kind() == reflect.Ptr || v.Kind() == reflect.Slice {
+					// Set the pointer or slice to nil.
+					v.Set(reflect.Zero(v.Type()))
+				} else {
+					// For other types that cannot directly handle nil, continue to use default zero values.
+					v.Set(reflect.Zero(v.Type()))
+				}
+			}
+			d.popAllVs()
+			continue
+		case string, json.Number, bool, json.RawMessage, map[string]interface{}:
 			for i := range d.vs {
 				v := d.vs[i][len(d.vs[i])-1]
 				if !v.IsValid() {
 					continue
 				}
 
-				// Check if the type of v implements Unmarshaler
-				if unmarshaler, ok := v.Addr().Interface().(graphql.Unmarshaler); ok {
-					// If it does, use UnmarshalGQL to unmarshal the value
+				// Initialize the pointer if it is nil
+				if v.Kind() == reflect.Ptr && v.IsNil() {
+					v.Set(reflect.New(v.Type().Elem()))
+				}
+
+				// Handle both pointer and non-pointer types
+				target := v
+				if v.Kind() == reflect.Ptr {
+					target = v.Elem()
+				}
+
+				// Check if the type of target (or its address) implements graphql.Unmarshaler
+				var unmarshaler graphql.Unmarshaler
+				var ok bool
+				if target.CanAddr() {
+					unmarshaler, ok = target.Addr().Interface().(graphql.Unmarshaler)
+				} else if target.CanInterface() {
+					unmarshaler, ok = target.Interface().(graphql.Unmarshaler)
+				}
+
+				if ok {
 					if err := unmarshaler.UnmarshalGQL(tok); err != nil {
 						return fmt.Errorf("unmarshal gql error: %w", err)
 					}
 				} else {
-					// Use the standard unmarshal method
-					if err := unmarshalValue(tok, v); err != nil {
+					// Use the standard unmarshal method for non-custom types
+					if err := unmarshalValue(tok, target); err != nil {
 						return fmt.Errorf(": %w", err)
 					}
 				}
