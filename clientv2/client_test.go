@@ -579,6 +579,14 @@ func TestMarshalJSON(t *testing.T) {
 		Number Number `json:"number"`
 	}
 
+	// example nested struct
+	type WhereInput struct {
+		Not *WhereInput `json:"not,omitempty"`
+		ID  *string     `json:"id,omitempty"`
+	}
+
+	testID := "1"
+
 	// example with omitted fields
 	type Input struct {
 		ID   string   `json:"id"`
@@ -614,6 +622,23 @@ func TestMarshalJSON(t *testing.T) {
 				},
 			},
 			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"input":"TWO"}}`),
+		},
+		{
+			name: "marshal nested",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"where": WhereInput{
+							Not: &WhereInput{
+								ID: &testID,
+							},
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"where":{"not":{"id":"1"}}}}`),
 		},
 		{
 			name: "marshal a struct with custom marshaler",
