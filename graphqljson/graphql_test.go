@@ -2,6 +2,7 @@ package graphqljson_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -585,6 +586,130 @@ func TestUnmarshalGraphQL_map(t *testing.T) {
 			"worker_role_arn": "2",
 		},
 	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+type Number int64
+
+const (
+	NumberOne Number = 1
+	NumberTwo Number = 2
+)
+
+func (n *Number) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	switch str {
+	case "ONE":
+		*n = NumberOne
+	case "TWO":
+		*n = NumberTwo
+	default:
+
+		return fmt.Errorf("Number not found Type: %d", n)
+	}
+
+	return nil
+}
+
+func TestUnmarshalGQL(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		Enum Number
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"enum": "ONE"
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := query{
+		Enum: NumberOne,
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestUnmarshalGQL_array(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		Enums []Number
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"enums": ["ONE", "TWO"]
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := query{
+		Enums: []Number{NumberOne, NumberTwo},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestUnmarshalGQL_pointer(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		Enum *Number
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"enum": "ONE"
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	v := NumberOne
+	want := query{
+		Enum: &v,
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestUnmarshalGQL_pointerArray(t *testing.T) {
+	t.Parallel()
+	type query struct {
+		Enums []*Number
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{
+		"enums": ["ONE", "TWO"]
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	one := NumberOne
+	two := NumberTwo
+	want := query{
+		Enums: []*Number{&one, &two},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
+func TestUnmarshalGQL_pointerArrayReset(t *testing.T) {
+	t.Parallel()
+	got := []*Number{new(Number)}
+	err := graphqljson.UnmarshalData([]byte(`["TWO"]`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []*Number{new(Number)}
+	*want[0] = NumberTwo
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}
