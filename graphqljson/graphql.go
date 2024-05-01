@@ -192,6 +192,10 @@ func (d *Decoder) decode() error { //nolint:maintidx
 		case nil: // Handle null values correctly.
 			for i := range d.vs {
 				v := d.vs[i][len(d.vs[i])-1]
+				if !v.CanSet() {
+					// vがセット不可能な場合、パニックを防ぐために処理をスキップ
+					continue
+				}
 				if v.Kind() == reflect.Ptr || v.Kind() == reflect.Slice {
 					// Set the pointer or slice to nil.
 					v.Set(reflect.Zero(v.Type()))
