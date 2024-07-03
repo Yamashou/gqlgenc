@@ -417,10 +417,6 @@ func checkImplements[I any](v reflect.Value) bool {
 
 // encode returns an appropriate encoder function for the provided value.
 func encode(v reflect.Value) ([]byte, error) {
-	if v.IsNil() {
-		return []byte("null"), nil
-	}
-
 	if checkImplements[graphql.Marshaler](v) {
 		return encodeGQLMarshaler(v.Interface())
 	}
@@ -461,6 +457,10 @@ func encode(v reflect.Value) ([]byte, error) {
 }
 
 func encodeGQLMarshaler(v any) ([]byte, error) {
+	if v == nil {
+		return []byte("null"), nil
+	}
+
 	var buf bytes.Buffer
 	if val, ok := v.(graphql.Marshaler); ok {
 		val.MarshalGQL(&buf)
