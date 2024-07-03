@@ -457,10 +457,6 @@ func encode(v reflect.Value) ([]byte, error) {
 }
 
 func encodeGQLMarshaler(v any) ([]byte, error) {
-	if v == nil {
-		return []byte("null"), nil
-	}
-
 	var buf bytes.Buffer
 	if val, ok := v.(graphql.Marshaler); ok {
 		val.MarshalGQL(&buf)
