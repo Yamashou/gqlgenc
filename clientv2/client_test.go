@@ -579,6 +579,8 @@ func TestMarshalJSON(t *testing.T) {
 		Number Number `json:"number"`
 	}
 
+	var b *Number
+
 	// example nested struct
 	type WhereInput struct {
 		Not *WhereInput `json:"not,omitempty"`
@@ -639,6 +641,18 @@ func TestMarshalJSON(t *testing.T) {
 				},
 			},
 			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"where":{"not":{"id":"1"}}}}`),
+		},
+		{
+			name: "marshal nil",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Variables: map[string]any{
+						"v": b,
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query", "query":"","variables":{"v":null}}`),
 		},
 		{
 			name: "marshal a struct with custom marshaler",
@@ -738,7 +752,7 @@ func TestMarshalJSON(t *testing.T) {
 				return
 			}
 			if err := json.Unmarshal(tt.want, &wantMap); err != nil {
-				t.Errorf("Failed to unmarshal 'want': %s", tt.want)
+				t.Errorf("Failed to unmarshal err: %s", err)
 				return
 			}
 
