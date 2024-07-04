@@ -579,10 +579,6 @@ func TestMarshalJSON(t *testing.T) {
 		Number Number `json:"number"`
 	}
 
-	type Example2 struct {
-		Name   string  `json:"name"`
-		Number *Number `json:"number,omitempty"`
-	}
 	var b *Number
 
 	// example nested struct
