@@ -14,6 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -735,6 +736,23 @@ func TestMarshalJSON(t *testing.T) {
 				},
 			},
 			want: []byte(`{"T":{"time":"2021-01-01T00:00:00Z"}}`),
+		},
+		{
+			name: "marshal uuid",
+			args: args{
+				v: struct {
+					T struct {
+						UUID uuid.UUID `json:"uuid"`
+					}
+				}{
+					T: struct {
+						UUID uuid.UUID `json:"uuid"`
+					}{
+						UUID: uuid.MustParse("0bd42821-463a-4224-a41b-c5861fc91268"),
+					},
+				},
+			},
+			want: []byte(`{"T":{"uuid":"0bd42821-463a-4224-a41b-c5861fc91268"}}`),
 		},
 	}
 	for _, tt := range tests {
