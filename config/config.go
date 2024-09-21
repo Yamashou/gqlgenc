@@ -211,13 +211,13 @@ func LoadConfig(filename string) (*Config, error) {
 		Models:   models,
 		AutoBind: cfg.AutoBind,
 		// TODO: gqlgen must be set exec but client not used
-		Exec:                          config.ExecConfig{Filename: "generated.go"},
-		Directives:                    map[string]config.DirectiveConfig{},
-		Sources:                       sources,
-		StructFieldsAlwaysPointers:    structFieldsAlwaysPointers,
-		ReturnPointersInUmarshalInput: false,
-		ResolversAlwaysReturnPointers: true,
-		NullableInputOmittable:        false,
+		Exec:                           config.ExecConfig{Filename: "generated.go"},
+		Directives:                     map[string]config.DirectiveConfig{},
+		Sources:                        sources,
+		StructFieldsAlwaysPointers:     structFieldsAlwaysPointers,
+		ReturnPointersInUnmarshalInput: false,
+		ResolversAlwaysReturnPointers:  true,
+		NullableInputOmittable:         false,
 	}
 
 	if err := cfg.Client.Check(); err != nil {
