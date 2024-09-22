@@ -21,7 +21,7 @@ jobs:
         go-version-file: go.mod
 
     - name: Install Lint
-      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.54.2
+      run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0
 
     - name: Lint
       run: make lint
