@@ -62,7 +62,17 @@ func Generate(ctx context.Context, cfg *config.Config, options ...api.Option) er
 	}
 
 	if cfg.Federation.Version != 0 {
-		if fed, ok := federation.New(cfg.Federation.Version).(plugin.EarlySourceInjector); ok {
+		var (
+			fedPlugin plugin.Plugin
+			err       error
+		)
+
+		fedPlugin, err = federation.New(cfg.Federation.Version, cfg.GQLConfig)
+		if err != nil {
+			return fmt.Errorf("failed to create federation plugin: %w", err)
+		}
+
+		if fed, ok := fedPlugin.(plugin.EarlySourceInjector); ok {
 			if source := fed.InjectSourceEarly(); source != nil {
 				cfg.GQLConfig.Sources = append(cfg.GQLConfig.Sources, source)
 			}
@@ -81,7 +91,6 @@ func Generate(ctx context.Context, cfg *config.Config, options ...api.Option) er
 
 	// sort Implements to ensure a deterministic output
 	for _, v := range cfg.GQLConfig.Schema.Implements {
-		v := v
 		sort.Slice(v, func(i, j int) bool { return v[i].Name < v[j].Name })
 	}
 
