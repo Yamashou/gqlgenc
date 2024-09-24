@@ -46,7 +46,7 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 			if !ok {
 				continue
 			}
-			for j := 0; j < typ.NumFields(); j++ {
+			for j := range typ.NumFields() {
 				vars = append(vars, typ.Field(j))
 				structTags = append(structTags, typ.Tag(j))
 			}

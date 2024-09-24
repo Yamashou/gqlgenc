@@ -23,13 +23,10 @@ linters:
     - gochecknoinits
     - gochecknoglobals
     - godox
-    - maligned
     - gocognit
     - gocyclo
-    - interfacer
     - gomnd
-    - goerr113
-    - exhaustivestruct
+    - err113
     - errorlint # TODO able this lint
     - forbidigo
     - cyclop
@@ -37,30 +34,24 @@ linters:
     - errname
     - varnamelen
     - nilnil
-    - structcheck
     - exhaustruct
     - nonamedreturns
-    - golint
-    - ifshort
-    - nosnakecase
-    - deadcode
-    - scopelint
-    - varcheck
     - depguard
     - musttag
     - paralleltest
     - nlreturn
+    - mnd
   fast: true
 
 issues:
   fix: true
   exclude-files:
     - _test\.go
-    - examples/**/*\.go
+    - example/*/*.go
   max-issues-per-linter: 0
   max-same-issues: 0
   exclude-dirs:
-    - examples
+    - example
   exclude-rules:
     # Test
     - path: _test\.go
@@ -83,10 +74,6 @@ issues:
       text: "`Extensions` is unused" # used in line 48
       linters:
         - structcheck
-    - path: introspection/query.go
-      text: "`Introspection` is unused" # used in config/config.go
-      linters:
-        - varcheck
     - path: config/config.go
       text: "`ClientV2` is unused" # used in config/config.go
       linters:

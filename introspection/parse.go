@@ -109,7 +109,6 @@ func (p parser) parseDirectiveDefinition(directiveValue *DirectiveType) *ast.Dir
 func (p parser) parseObjectFields(typeVale *FullType) ast.FieldList {
 	fieldList := make(ast.FieldList, 0, len(typeVale.Fields))
 	for _, field := range typeVale.Fields {
-		field := field
 		typ := p.getType(&field.Type)
 		args := make(ast.ArgumentDefinitionList, 0, len(field.Args))
 		for _, arg := range field.Args {
@@ -134,7 +133,6 @@ func (p parser) parseObjectFields(typeVale *FullType) ast.FieldList {
 func (p parser) parseInputObjectFields(typeVale *FullType) ast.FieldList {
 	fieldList := make(ast.FieldList, 0, len(typeVale.InputFields))
 	for _, field := range typeVale.InputFields {
-		field := field
 		typ := p.getType(&field.Type)
 		fieldDefinition := &ast.FieldDefinition{
 			Description: pointerString(field.Description),

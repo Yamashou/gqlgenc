@@ -90,7 +90,7 @@ func (g *GenGettersGenerator) GenFunc() func(name string, p types.Type) string {
 		}
 		var buf bytes.Buffer
 
-		for i := 0; i < it.NumFields(); i++ {
+		for i := range it.NumFields() {
 			field := it.Field(i)
 
 			returns := g.returnTypeName(field.Type(), false)
