@@ -241,6 +241,26 @@ func parseMultipartFiles(
 			})
 
 			i++
+		case *graphql.Upload:
+			// continue if it is empty
+			if item == nil {
+				continue
+			}
+
+			iStr := strconv.Itoa(i)
+			vars[k] = nil
+			mapping[iStr] = []string{fmt.Sprintf("variables.%s", k)}
+
+			multipartFilesGroups = append(multipartFilesGroups, MultipartFilesGroup{
+				Files: []MultipartFile{
+					{
+						Index: i,
+						File:  *item,
+					},
+				},
+			})
+
+			i++
 		case []*graphql.Upload:
 			vars[k] = make([]struct{}, len(item))
 			var groupFiles []MultipartFile

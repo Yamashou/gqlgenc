@@ -382,8 +382,8 @@ func Test_parseMultipartFiles(t *testing.T) {
 
 		require.Contains(t, varsMutated, "field")
 		require.Contains(t, varsMutated, "field2")
-		require.Equal(t, len(mapping), 0)
-		require.Equal(t, len(multipartFilesGroups), 0)
+		require.Len(t, mapping, 0)
+		require.Len(t, multipartFilesGroups, 0)
 	})
 
 	t.Run("has file in vars", func(t *testing.T) {
@@ -407,10 +407,61 @@ func Test_parseMultipartFiles(t *testing.T) {
 			t.Fatal("fieldFile must present!")
 		}
 
-		require.Equal(t, len(mapping), 1)
-		require.Equal(t, len(multipartFilesGroups), 1)
+		require.Len(t, mapping, 1)
+		require.Len(t, multipartFilesGroups, 1)
 		require.Equal(t, multipartFilesGroups[0].IsMultiple, false)
-		require.Equal(t, len(multipartFilesGroups[0].Files), 1)
+		require.Len(t, multipartFilesGroups[0].Files, 1)
+		require.Nil(t, fieldFile)
+	})
+
+	t.Run("has optional file in vars", func(t *testing.T) {
+		t.Parallel()
+
+		vars := map[string]any{
+			"field": "val",
+			"fieldFile": &graphql.Upload{
+				Filename: "file.txt",
+				File:     bytes.NewReader([]byte("content")),
+			},
+		}
+
+		multipartFilesGroups, mapping, varsMutated := parseMultipartFiles(vars)
+
+		require.Contains(t, varsMutated, "field")
+		require.Contains(t, varsMutated, "fieldFile")
+
+		fieldFile, ok := varsMutated["fieldFile"]
+		if !ok {
+			t.Fatal("fieldFile must present!")
+		}
+
+		require.Len(t, mapping, 1)
+		require.Len(t, multipartFilesGroups, 1)
+		require.Equal(t, multipartFilesGroups[0].IsMultiple, false)
+		require.Len(t, multipartFilesGroups[0].Files, 1)
+		require.Nil(t, fieldFile)
+	})
+
+	t.Run("has no optional file in vars", func(t *testing.T) {
+		t.Parallel()
+
+		vars := map[string]any{
+			"field":     "val",
+			"fieldFile": nil,
+		}
+
+		multipartFilesGroups, mapping, varsMutated := parseMultipartFiles(vars)
+
+		require.Contains(t, varsMutated, "field")
+		require.Contains(t, varsMutated, "fieldFile")
+
+		fieldFile, ok := varsMutated["fieldFile"]
+		if !ok {
+			t.Fatal("fieldFile must present!")
+		}
+
+		require.Len(t, mapping, 0)
+		require.Len(t, multipartFilesGroups, 0)
 		require.Nil(t, fieldFile)
 	})
 
@@ -441,10 +492,10 @@ func Test_parseMultipartFiles(t *testing.T) {
 			t.Fatal("fieldFile must present!")
 		}
 
-		require.Equal(t, len(mapping), 2)
-		require.Equal(t, len(multipartFilesGroups), 1)
+		require.Len(t, mapping, 2)
+		require.Len(t, multipartFilesGroups, 1)
 		require.Equal(t, multipartFilesGroups[0].IsMultiple, true)
-		require.Equal(t, len(multipartFilesGroups[0].Files), 2)
+		require.Len(t, multipartFilesGroups[0].Files, 2)
 		require.ElementsMatch(t, fieldFiles, make([]struct{}, 2))
 	})
 }
