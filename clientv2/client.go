@@ -20,6 +20,11 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+type HttpClient interface {
+	Do(req *http.Request) (*http.Response, error)
+	Post(url, contentType string, body io.Reader) (*http.Response, error)
+}
+
 type GQLRequestInfo struct {
 	Request *Request
 }
@@ -55,7 +60,7 @@ func ChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
 
 // Client is the http client wrapper
 type Client struct {
-	Client              *http.Client
+	Client              HttpClient
 	BaseURL             string
 	RequestInterceptor  RequestInterceptor
 	CustomDo            RequestInterceptorFunc
@@ -70,7 +75,7 @@ type Request struct {
 }
 
 // NewClient creates a new http client wrapper
-func NewClient(client *http.Client, baseURL string, options *Options, interceptors ...RequestInterceptor) *Client {
+func NewClient(client HttpClient, baseURL string, options *Options, interceptors ...RequestInterceptor) *Client {
 	c := &Client{
 		Client:  client,
 		BaseURL: baseURL,
