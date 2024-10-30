@@ -72,7 +72,13 @@ func Generate(ctx context.Context, cfg *config.Config, options ...api.Option) er
 			return fmt.Errorf("failed to create federation plugin: %w", err)
 		}
 
-		if fed, ok := fedPlugin.(plugin.EarlySourceInjector); ok {
+		if fed, ok := fedPlugin.(plugin.EarlySourcesInjector); ok {
+			if sources, err := fed.InjectSourcesEarly(); err == nil {
+				cfg.GQLConfig.Sources = append(cfg.GQLConfig.Sources, sources...)
+			} else {
+				return fmt.Errorf("failed to inject federation directives: %w", err)
+			}
+		} else if fed, ok := fedPlugin.(plugin.EarlySourceInjector); ok {
 			if source := fed.InjectSourceEarly(); source != nil {
 				cfg.GQLConfig.Sources = append(cfg.GQLConfig.Sources, source)
 			}
