@@ -35,16 +35,16 @@ func NewGQLRequestInfo(r *Request) *GQLRequestInfo {
 	}
 }
 
-type RequestInterceptorFunc func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}) error
+type RequestInterceptorFunc func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any) error
 
-type RequestInterceptor func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error
+type RequestInterceptor func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error
 
 func ChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
 	n := len(interceptors)
 
-	return func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
+	return func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
 		chainer := func(currentInter RequestInterceptor, currentFunc RequestInterceptorFunc) RequestInterceptorFunc {
-			return func(currentCtx context.Context, currentReq *http.Request, currentGqlInfo *GQLRequestInfo, currentRes interface{}) error {
+			return func(currentCtx context.Context, currentReq *http.Request, currentGqlInfo *GQLRequestInfo, currentRes any) error {
 				return currentInter(currentCtx, currentReq, currentGqlInfo, currentRes, currentFunc)
 			}
 		}
@@ -69,9 +69,9 @@ type Client struct {
 
 // Request represents an outgoing GraphQL request
 type Request struct {
-	Query         string                 `json:"query"`
-	Variables     map[string]interface{} `json:"variables,omitempty"`
-	OperationName string                 `json:"operationName,omitempty"`
+	Query         string         `json:"query"`
+	Variables     map[string]any `json:"variables,omitempty"`
+	OperationName string         `json:"operationName,omitempty"`
 }
 
 // NewClient creates a new http client wrapper
@@ -79,7 +79,7 @@ func NewClient(client HttpClient, baseURL string, options *Options, interceptors
 	c := &Client{
 		Client:  client,
 		BaseURL: baseURL,
-		RequestInterceptor: ChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *http.Request, gqlInfo *GQLRequestInfo, res interface{}, next RequestInterceptorFunc) error {
+		RequestInterceptor: ChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
 			return next(ctx, requestSet, gqlInfo, res)
 		}}, interceptors...)...),
 	}
@@ -147,7 +147,7 @@ type MultipartFilesGroup struct {
 
 type FormField struct {
 	Name  string
-	Value interface{}
+	Value any
 }
 
 type header struct {
@@ -155,7 +155,7 @@ type header struct {
 }
 
 // Post support send multipart form with files https://gqlgen.com/reference/file-upload/ https://github.com/jaydenseric/graphql-multipart-request-spec
-func (c *Client) Post(ctx context.Context, operationName, query string, respData interface{}, vars map[string]interface{}, interceptors ...RequestInterceptor) error {
+func (c *Client) Post(ctx context.Context, operationName, query string, respData any, vars map[string]any, interceptors ...RequestInterceptor) error {
 	multipartFilesGroups, mapping, vars := parseMultipartFiles(vars)
 
 	r := &Request{
@@ -221,8 +221,8 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 }
 
 func parseMultipartFiles(
-	vars map[string]interface{},
-) ([]MultipartFilesGroup, map[string][]string, map[string]interface{}) {
+	vars map[string]any,
+) ([]MultipartFilesGroup, map[string][]string, map[string]any) {
 	var (
 		multipartFilesGroups []MultipartFilesGroup
 		mapping              = map[string][]string{}
@@ -333,7 +333,7 @@ func prepareMultipartFormBody(
 	return writer.FormDataContentType(), nil
 }
 
-func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res interface{}) error {
+func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res any) error {
 	resp, err := c.Client.Do(req)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
@@ -355,7 +355,7 @@ func (c *Client) do(_ context.Context, req *http.Request, _ *GQLRequestInfo, res
 	return c.parseResponse(body, resp.StatusCode, res)
 }
 
-func (c *Client) parseResponse(body []byte, httpCode int, result interface{}) error {
+func (c *Client) parseResponse(body []byte, httpCode int, result any) error {
 	errResponse := &ErrorResponse{}
 	isOKCode := httpCode < 200 || 299 < httpCode
 	if isOKCode {
@@ -388,7 +388,7 @@ type response struct {
 	Errors json.RawMessage `json:"errors"`
 }
 
-func (c *Client) unmarshal(data []byte, res interface{}) error {
+func (c *Client) unmarshal(data []byte, res any) error {
 	resp := response{}
 	if err := json.Unmarshal(data, &resp); err != nil {
 		return fmt.Errorf("failed to decode data %s: %w", string(data), err)
@@ -420,7 +420,7 @@ func (c *Client) unmarshal(data []byte, res interface{}) error {
 	return err
 }
 
-func MarshalJSON(v interface{}) ([]byte, error) {
+func MarshalJSON(v any) ([]byte, error) {
 	if v == nil {
 		return []byte("null"), nil
 	}
