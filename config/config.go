@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"net/http"
@@ -15,7 +16,7 @@ import (
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/validator"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 // Config extends the gqlgen basic config
@@ -125,7 +126,11 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 
 	confContent := []byte(os.ExpandEnv(string(b)))
-	if err := yaml.UnmarshalStrict(confContent, &cfg); err != nil {
+
+	decoder := yaml.NewDecoder(bytes.NewReader(confContent))
+	decoder.KnownFields(true)
+
+	if err := decoder.Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
 
