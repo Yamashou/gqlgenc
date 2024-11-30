@@ -295,7 +295,6 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 func (r *SourceGenerator) Type(typeName string) types.Type {
 	goType, err := r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
 	if err != nil {
-		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
 		panic(fmt.Sprintf("%+v", err))
 	}
 
