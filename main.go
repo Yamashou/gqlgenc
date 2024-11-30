@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/99designs/gqlgen/api"
-	"github.com/Yamashou/gqlgenc/clientgenv2"
 	"github.com/Yamashou/gqlgenc/config"
 	"github.com/Yamashou/gqlgenc/generator"
 	"github.com/urfave/cli/v2"
@@ -36,12 +34,7 @@ var generateCmd = &cli.Command{
 			os.Exit(2)
 		}
 
-		var clientGen api.Option
-		if cfg.Generate != nil {
-			clientGen = api.AddPlugin(clientgenv2.New(cfg.Query, cfg.Client, cfg.Generate))
-		}
-
-		if err := generator.Generate(ctx.Context, cfg, clientGen); err != nil {
+		if err := generator.Generate(ctx.Context, cfg); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
 			os.Exit(4)
 		}
