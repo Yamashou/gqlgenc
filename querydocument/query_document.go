@@ -70,18 +70,36 @@ func fragmentsInOperationWalker(selectionSet ast.SelectionSet) ast.FragmentDefin
 }
 
 // CollectTypesFromQueryDocuments returns a map of type names used in query document arguments
-func CollectTypesFromQueryDocuments(queryDocuments []*ast.QueryDocument) map[string]bool {
+func CollectTypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.QueryDocument) map[string]bool {
 	usedTypes := make(map[string]bool)
 
 	for _, doc := range queryDocuments {
 		for _, op := range doc.Operations {
+			// Collect types from variable definitions
 			for _, v := range op.VariableDefinitions {
 				collectTypeFromTypeReference(v.Type, usedTypes)
+				// Recursively collect input object fields
+				if def, ok := schema.Types[v.Type.Name()]; ok && def.IsInputType() {
+					collectInputObjectFields(def, schema, usedTypes)
+				}
 			}
 		}
 	}
 
 	return usedTypes
+}
+
+// collectInputObjectFields recursively collects types from input object fields
+func collectInputObjectFields(def *ast.Definition, schema *ast.Schema, usedTypes map[string]bool) {
+	for _, field := range def.Fields {
+		typeName := field.Type.Name()
+		usedTypes[typeName] = true
+
+		// If the field is an input object type, recursively collect
+		if fieldDef, ok := schema.Types[typeName]; ok && fieldDef.IsInputType() {
+			collectInputObjectFields(fieldDef, schema, usedTypes)
+		}
+	}
 }
 
 // collectTypeFromTypeReference is a helper function to collect type names from type references

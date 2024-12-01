@@ -116,7 +116,7 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 		return fmt.Errorf(": %w", err)
 	}
 
-	usedTypes := querydocument.CollectTypesFromQueryDocuments(operationQueryDocuments)
+	usedTypes := querydocument.CollectTypesFromQueryDocuments(cfg.GQLConfig.Schema, operationQueryDocuments)
 
 	var clientGen api.Option
 	if cfg.Generate != nil {
