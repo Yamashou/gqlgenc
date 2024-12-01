@@ -12,11 +12,11 @@ import (
 var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
-	queryFilePaths []string
-	queryDocument  *ast.QueryDocument
+	queryFilePaths          []string
+	queryDocument           *ast.QueryDocument
 	operationQueryDocuments []*ast.QueryDocument
-	Client         config.PackageConfig
-	GenerateConfig *gqlgencConfig.GenerateConfig
+	Client                  config.PackageConfig
+	GenerateConfig          *gqlgencConfig.GenerateConfig
 }
 
 func New(queryFilePaths []string, queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *Plugin {
@@ -24,8 +24,8 @@ func New(queryFilePaths []string, queryDocument *ast.QueryDocument, operationQue
 		queryFilePaths:          queryFilePaths,
 		queryDocument:           queryDocument,
 		operationQueryDocuments: operationQueryDocuments,
-		Client:                    client,
-		GenerateConfig:            generateConfig,
+		Client:                  client,
+		GenerateConfig:          generateConfig,
 	}
 }
 

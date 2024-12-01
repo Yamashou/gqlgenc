@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/urfave/cli/v2"
-
 	"github.com/Yamashou/gqlgenc/config"
 	"github.com/Yamashou/gqlgenc/generator"
+	"github.com/urfave/cli/v2"
 )
 
 const version = "0.26.0"
