@@ -105,58 +105,6 @@ func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, typeN
 	return responseFields
 }
 
-func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definition) (ResponseFieldList, error) {
-	fields := make(ResponseFieldList, 0, len(definition.Fields))
-	for _, field := range definition.Fields {
-		if field.Type.Name() == "__Schema" || field.Type.Name() == "__Type" {
-			continue
-		}
-
-		var typ types.Type
-		if field.Type.Name() == "Query" || field.Type.Name() == "Mutation" {
-			var baseType types.Type
-			baseType, err := r.binder.FindType(r.client.Pkg().Path(), field.Type.Name())
-			if err != nil {
-				if !strings.Contains(err.Error(), "unable to find type") {
-					return nil, fmt.Errorf("not found type: %w", err)
-				}
-
-				// create new type
-				baseType = types.NewPointer(types.NewNamed(
-					types.NewTypeName(0, r.client.Pkg(), templates.ToGo(field.Type.Name()), nil),
-					nil,
-					nil,
-				))
-			}
-
-			// for recursive struct field in go
-			typ = types.NewPointer(baseType)
-		} else {
-			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
-			if err != nil {
-				return nil, fmt.Errorf("not found type: %w", err)
-			}
-
-			typ = r.binder.CopyModifiersFromAst(field.Type, baseType)
-		}
-
-		var tags []string
-		if !field.Type.NonNull {
-			tags = append(tags, fmt.Sprintf(`json:"%s,omitempty"`, field.Name), fmt.Sprintf(`graphql:"%s"`, field.Name))
-		} else {
-			tags = append(tags, fmt.Sprintf(`json:"%s"`, field.Name), fmt.Sprintf(`graphql:"%s"`, field.Name))
-		}
-
-		fields = append(fields, &ResponseField{
-			Name: field.Name,
-			Type: typ,
-			Tags: tags,
-		})
-	}
-
-	return fields, nil
-}
-
 func NewLayerTypeName(base, thisField string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
 }

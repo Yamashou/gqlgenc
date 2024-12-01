@@ -1,35 +1,11 @@
-package clientgenv2
+package querydocument
 
 import (
 	"fmt"
 
 	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/vektah/gqlparser/v2/parser"
 	"github.com/vektah/gqlparser/v2/validator"
 )
-
-func ParseQueryDocuments(schema *ast.Schema, querySources []*ast.Source) (*ast.QueryDocument, error) {
-	var queryDocument ast.QueryDocument
-	for _, querySource := range querySources {
-		query, gqlerr := parser.ParseQuery(querySource)
-		if gqlerr != nil {
-			return nil, fmt.Errorf(": %w", gqlerr)
-		}
-
-		mergeQueryDocument(&queryDocument, query)
-	}
-
-	if errs := validator.Validate(schema, &queryDocument); errs != nil {
-		return nil, fmt.Errorf(": %w", errs)
-	}
-
-	return &queryDocument, nil
-}
-
-func mergeQueryDocument(q, other *ast.QueryDocument) {
-	q.Operations = append(q.Operations, other.Operations...)
-	q.Fragments = append(q.Fragments, other.Fragments...)
-}
 
 func QueryDocumentsByOperations(schema *ast.Schema, operations ast.OperationList) ([]*ast.QueryDocument, error) {
 	queryDocuments := make([]*ast.QueryDocument, 0, len(operations))
@@ -91,4 +67,32 @@ func fragmentsInOperationWalker(selectionSet ast.SelectionSet) ast.FragmentDefin
 	}
 
 	return fragments
+}
+
+// CollectTypesFromQueryDocuments returns a map of type names used in query document arguments
+func CollectTypesFromQueryDocuments(queryDocuments []*ast.QueryDocument) map[string]bool {
+	usedTypes := make(map[string]bool)
+
+	for _, doc := range queryDocuments {
+		for _, op := range doc.Operations {
+			for _, v := range op.VariableDefinitions {
+				collectTypeFromTypeReference(v.Type, usedTypes)
+			}
+		}
+	}
+
+	return usedTypes
+}
+
+// collectTypeFromTypeReference is a helper function to collect type names from type references
+func collectTypeFromTypeReference(t *ast.Type, usedTypes map[string]bool) {
+	if t == nil {
+		return
+	}
+
+	if t.NamedType != "" {
+		usedTypes[t.NamedType] = true
+	}
+
+	collectTypeFromTypeReference(t.Elem, usedTypes)
 }
