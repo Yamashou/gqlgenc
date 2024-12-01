@@ -8,7 +8,6 @@ import (
 	"github.com/vektah/gqlparser/v2/validator"
 )
 
-
 func ParseQueryDocuments(schema *ast.Schema, querySources []*ast.Source) (*ast.QueryDocument, error) {
 	var queryDocument ast.QueryDocument
 	for _, querySource := range querySources {

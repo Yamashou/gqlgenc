@@ -17,10 +17,22 @@ import (
 	"github.com/Yamashou/gqlgenc/querydocument"
 )
 
-// mutateHook adds the "omitempty" option to optional field from input type model as defined in graphql schema
-// For more info see https://github.com/99designs/gqlgen/blob/master/docs/content/recipes/modelgen-hook.md
-func mutateHook(cfg *config.Config) func(b *modelgen.ModelBuild) *modelgen.ModelBuild {
+func mutateHook(cfg *config.Config, usedTypes map[string]bool) func(b *modelgen.ModelBuild) *modelgen.ModelBuild {
 	return func(build *modelgen.ModelBuild) *modelgen.ModelBuild {
+		// only generate used models
+		if cfg.Generate.OnlyUsedModels != nil && *cfg.Generate.OnlyUsedModels {
+			var newModels []*modelgen.Object
+			for _, model := range build.Models {
+				if usedTypes[model.Name] {
+					newModels = append(newModels, model)
+				}
+			}
+			build.Models = newModels
+			build.Interfaces = nil
+		}
+
+		// adds the "omitempty" option to optional field from input type model as defined in graphql schema
+		// For more info see https://github.com/99designs/gqlgen/blob/master/docs/content/recipes/modelgen-hook.md
 		for _, model := range build.Models {
 			// only handle input type model
 			if schemaModel, ok := cfg.GQLConfig.Schema.Types[model.Name]; ok && (schemaModel.IsInputType() || cfg.Generate.ShouldOmitEmptyTypes()) {
@@ -84,7 +96,12 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 		return fmt.Errorf("generating core failed: %w", err)
 	}
 
-	querySources, err := clientgenv2.LoadQuerySources(cfg.Query)
+	// sort Implements to ensure a deterministic output
+	for _, v := range cfg.GQLConfig.Schema.Implements {
+		sort.Slice(v, func(i, j int) bool { return v[i].Name < v[j].Name })
+	}
+
+	querySources, err := parsequery.LoadQuerySources(cfg.Query)
 	if err != nil {
 		return fmt.Errorf("load query sources failed: %w", err)
 	}
@@ -94,25 +111,22 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 		return fmt.Errorf(": %w", err)
 	}
 
-	queryDocuments, err := querydocument.QueryDocumentsByOperations(cfg.GQLConfig.Schema, queryDocument.Operations)
+	operationQueryDocuments, err := querydocument.QueryDocumentsByOperations(cfg.GQLConfig.Schema, queryDocument.Operations)
 	if err != nil {
 		return fmt.Errorf(": %w", err)
 	}
 
+	usedTypes := querydocument.CollectTypesFromQueryDocuments(operationQueryDocuments)
+
 	var clientGen api.Option
 	if cfg.Generate != nil {
-		clientGen = api.AddPlugin(clientgenv2.New(cfg.Query, queryDocument, queryDocuments, cfg.Client, cfg.Generate))
-	}
-
-	// sort Implements to ensure a deterministic output
-	for _, v := range cfg.GQLConfig.Schema.Implements {
-		sort.Slice(v, func(i, j int) bool { return v[i].Name < v[j].Name })
+		clientGen = api.AddPlugin(clientgenv2.New(cfg.Query, queryDocument, operationQueryDocuments, cfg.Client, cfg.Generate))
 	}
 
 	var plugins []plugin.Plugin
 	if cfg.Model.IsDefined() {
 		p := &modelgen.Plugin{
-			MutateHook: mutateHook(cfg),
+			MutateHook: mutateHook(cfg, usedTypes),
 			FieldHook:  modelgen.DefaultFieldMutateHook,
 		}
 

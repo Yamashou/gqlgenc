@@ -7,7 +7,6 @@ import (
 	"github.com/vektah/gqlparser/v2/validator"
 )
 
-
 func QueryDocumentsByOperations(schema *ast.Schema, operations ast.OperationList) ([]*ast.QueryDocument, error) {
 	queryDocuments := make([]*ast.QueryDocument, 0, len(operations))
 	for _, operation := range operations {
@@ -68,4 +67,32 @@ func fragmentsInOperationWalker(selectionSet ast.SelectionSet) ast.FragmentDefin
 	}
 
 	return fragments
+}
+
+// CollectTypesFromQueryDocuments returns a map of type names used in query document arguments
+func CollectTypesFromQueryDocuments(queryDocuments []*ast.QueryDocument) map[string]bool {
+	usedTypes := make(map[string]bool)
+
+	for _, doc := range queryDocuments {
+		for _, op := range doc.Operations {
+			for _, v := range op.VariableDefinitions {
+				collectTypeFromTypeReference(v.Type, usedTypes)
+			}
+		}
+	}
+
+	return usedTypes
+}
+
+// collectTypeFromTypeReference is a helper function to collect type names from type references
+func collectTypeFromTypeReference(t *ast.Type, usedTypes map[string]bool) {
+	if t == nil {
+		return
+	}
+
+	if t.NamedType != "" {
+		usedTypes[t.NamedType] = true
+	}
+
+	collectTypeFromTypeReference(t.Elem, usedTypes)
 }
