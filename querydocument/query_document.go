@@ -91,13 +91,28 @@ func CollectTypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.Qu
 
 // collectInputObjectFields recursively collects types from input object fields
 func collectInputObjectFields(def *ast.Definition, schema *ast.Schema, usedTypes map[string]bool) {
-	for _, field := range def.Fields {
-		typeName := field.Type.Name()
-		usedTypes[typeName] = true
+	// Skip if type has already been processed
+	if _, ok := usedTypes[def.Name]; ok {
+		return
+	}
+	usedTypes[def.Name] = true
 
-		// If the field is an input object type, recursively collect
-		if fieldDef, ok := schema.Types[typeName]; ok && fieldDef.IsInputType() {
-			collectInputObjectFields(fieldDef, schema, usedTypes)
+	for _, field := range def.Fields {
+		// Get the actual type name
+		typeName := field.Type.NamedType
+		if typeName == "" {
+			// For list types, get the element type name
+			if field.Type.Elem != nil {
+				typeName = field.Type.Elem.NamedType
+			}
+		}
+
+		if typeName != "" {
+			usedTypes[typeName] = true
+			// If field is an input object type, collect recursively
+			if fieldDef, ok := schema.Types[typeName]; ok && fieldDef.IsInputType() {
+				collectInputObjectFields(fieldDef, schema, usedTypes)
+			}
 		}
 	}
 }
