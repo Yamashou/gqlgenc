@@ -72,6 +72,7 @@ func fragmentsInOperationWalker(selectionSet ast.SelectionSet) ast.FragmentDefin
 // CollectTypesFromQueryDocuments returns a map of type names used in query document arguments
 func CollectTypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.QueryDocument) map[string]bool {
 	usedTypes := make(map[string]bool)
+	processedTypes := make(map[string]bool) // 完全に処理済みの型を追跡
 
 	for _, doc := range queryDocuments {
 		for _, op := range doc.Operations {
@@ -79,8 +80,10 @@ func CollectTypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.Qu
 			for _, v := range op.VariableDefinitions {
 				collectTypeFromTypeReference(v.Type, usedTypes)
 				// Recursively collect input object fields
-				if def, ok := schema.Types[v.Type.Name()]; ok && def.IsInputType() {
-					collectInputObjectFields(def, schema, usedTypes)
+				if typeName := v.Type.Name(); typeName != "" {
+					if def, ok := schema.Types[typeName]; ok && def.IsInputType() {
+						collectInputObjectFieldsWithCycle(def, schema, usedTypes, processedTypes)
+					}
 				}
 			}
 		}
@@ -89,32 +92,31 @@ func CollectTypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.Qu
 	return usedTypes
 }
 
-// collectInputObjectFields recursively collects types from input object fields
-func collectInputObjectFields(def *ast.Definition, schema *ast.Schema, usedTypes map[string]bool) {
-	// Skip if type has already been processed
-	if _, ok := usedTypes[def.Name]; ok {
-		return
+func collectInputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, usedTypes map[string]bool, processedTypes map[string]bool) {
+	if processedTypes[def.Name] {
+		return // この型は既に完全に処理済み
 	}
-	usedTypes[def.Name] = true
+
+	usedTypes[def.Name] = true // この型を使用済みとしてマーク
 
 	for _, field := range def.Fields {
-		// Get the actual type name
-		typeName := field.Type.NamedType
-		if typeName == "" {
-			// For list types, get the element type name
-			if field.Type.Elem != nil {
-				typeName = field.Type.Elem.NamedType
-			}
+		var typeName string
+		// リスト型の要素型まで辿る
+		for field.Type != nil && field.Type.NamedType != "" {
+			typeName = field.Type.NamedType
+			break
 		}
 
 		if typeName != "" {
 			usedTypes[typeName] = true
-			// If field is an input object type, collect recursively
+			// 入力型のフィールドを再帰的に収集
 			if fieldDef, ok := schema.Types[typeName]; ok && fieldDef.IsInputType() {
-				collectInputObjectFields(fieldDef, schema, usedTypes)
+				collectInputObjectFieldsWithCycle(fieldDef, schema, usedTypes, processedTypes)
 			}
 		}
 	}
+
+	processedTypes[def.Name] = true // この型の処理が完了したことをマーク
 }
 
 // collectTypeFromTypeReference is a helper function to collect type names from type references
