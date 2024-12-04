@@ -58,6 +58,27 @@ func ChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
 	}
 }
 
+func UnsafeChainInterceptor(interceptors ...RequestInterceptor) RequestInterceptor {
+	n := len(interceptors)
+
+	return func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
+		chainer := func(currentInter RequestInterceptor, currentFunc RequestInterceptorFunc) RequestInterceptorFunc {
+			return func(currentCtx context.Context, currentReq *http.Request, currentGqlInfo *GQLRequestInfo, currentRes any) error {
+				return currentInter(currentCtx, currentReq, currentGqlInfo, currentRes, func(nextCtx context.Context, nextReq *http.Request, nextGqlInfo *GQLRequestInfo, nextRes any) error {
+					return currentFunc(nextCtx, nextReq, nextGqlInfo, nextRes)
+				})
+			}
+		}
+
+		chainedHandler := next
+		for i := n - 1; i >= 0; i-- {
+			chainedHandler = chainer(interceptors[i], chainedHandler)
+		}
+
+		return chainedHandler(ctx, req, gqlInfo, res)
+	}
+}
+
 // Client is the http client wrapper
 type Client struct {
 	Client              HttpClient
@@ -65,6 +86,7 @@ type Client struct {
 	RequestInterceptor  RequestInterceptor
 	CustomDo            RequestInterceptorFunc
 	ParseDataWhenErrors bool
+	IsUnsafeRequestInterceptor bool
 }
 
 // Request represents an outgoing GraphQL request
@@ -82,6 +104,23 @@ func NewClient(client HttpClient, baseURL string, options *Options, interceptors
 		RequestInterceptor: ChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
 			return next(ctx, requestSet, gqlInfo, res)
 		}}, interceptors...)...),
+	}
+
+	if options != nil {
+		c.ParseDataWhenErrors = options.ParseDataAlongWithErrors
+	}
+
+	return c
+}
+
+func NewClientWithUnsafeRequestInterceptor(client HttpClient, baseURL string, options *Options, interceptors ...RequestInterceptor) *Client {
+	c := &Client{
+		Client:  client,
+		BaseURL: baseURL,
+		RequestInterceptor: UnsafeChainInterceptor(append([]RequestInterceptor{func(ctx context.Context, requestSet *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
+			return next(ctx, requestSet, gqlInfo, res)
+		}}, interceptors...)...),
+		IsUnsafeRequestInterceptor: true,
 	}
 
 	if options != nil {
@@ -211,6 +250,9 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 	}
 
 	f := ChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
+	if c.IsUnsafeRequestInterceptor {
+		f = UnsafeChainInterceptor(append([]RequestInterceptor{c.RequestInterceptor}, interceptors...)...)
+	}
 
 	// if custom do is set, use it instead of the default one
 	if c.CustomDo != nil {
@@ -437,8 +479,7 @@ func checkImplements[I any](v reflect.Value) bool {
 	t := v.Type()
 	interfaceType := reflect.TypeOf((*I)(nil)).Elem()
 
-	// Check if the type implements the interface directly or as a pointer.
-	return t.Implements(interfaceType) || (t.Kind() == reflect.Ptr && reflect.PtrTo(t).Implements(interfaceType))
+	return t.Implements(interfaceType) || (t.Kind() == reflect.Ptr && reflect.PointerTo(t).Implements(interfaceType))
 }
 
 // encode returns an appropriate encoder function for the provided value.
