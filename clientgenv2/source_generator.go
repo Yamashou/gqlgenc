@@ -39,10 +39,10 @@ func (rs ResponseFieldList) IsFragmentSpread() bool {
 func (rs ResponseFieldList) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
-	for _, filed := range rs {
+	for _, field := range rs {
 		//  クエリーのフィールドの子階層がFragmentの場合、このフィールドにそのFragmentの型を追加する
-		if filed.IsFragmentSpread {
-			typ, ok := filed.ResponseFields.StructType().Underlying().(*types.Struct)
+		if field.IsFragmentSpread {
+			typ, ok := field.ResponseFields.StructType().Underlying().(*types.Struct)
 			if !ok {
 				continue
 			}
@@ -51,8 +51,8 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 				structTags = append(structTags, typ.Tag(j))
 			}
 		} else {
-			vars = append(vars, types.NewVar(0, nil, templates.ToGo(filed.Name), filed.Type))
-			structTags = append(structTags, strings.Join(filed.Tags, " "))
+			vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
+			structTags = append(structTags, strings.Join(field.Tags, " "))
 		}
 	}
 
