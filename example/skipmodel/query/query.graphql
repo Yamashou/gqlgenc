@@ -1,5 +1,10 @@
 mutation A($input: UserInput!) {
-    user(input: $input) {
-        id
-    }
+  user(input: $input) {
+    id
+    ...UserFragment
+  }
+}
+
+fragment UserFragment on User {
+  id
 }
