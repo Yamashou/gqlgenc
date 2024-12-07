@@ -17,6 +17,17 @@ func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Option
 	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
+type UserFragment struct {
+	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *UserFragment) GetID() string {
+	if t == nil {
+		t = &UserFragment{}
+	}
+	return t.ID
+}
+
 type A_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -42,7 +53,11 @@ func (t *A) GetUser() *A_User {
 const ADocument = `mutation A ($input: UserInput!) {
 	user(input: $input) {
 		id
+		... UserFragment
 	}
+}
+fragment UserFragment on User {
+	id
 }
 `
 

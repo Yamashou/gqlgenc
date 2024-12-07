@@ -38,20 +38,38 @@ func (rs ResponseFieldList) IsFragmentSpread() bool {
 
 func (rs ResponseFieldList) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
+	varFieldMap := make(map[string]*types.Var)
 	structTags := make([]string, 0)
+
 	for _, filed := range rs {
+		// If the child hierarchy of the query field is a Fragment, add the Fragment type to this field
 		//  クエリーのフィールドの子階層がFragmentの場合、このフィールドにそのFragmentの型を追加する
 		if filed.IsFragmentSpread {
 			typ, ok := filed.ResponseFields.StructType().Underlying().(*types.Struct)
 			if !ok {
 				continue
 			}
+
 			for j := range typ.NumFields() {
+				// If the field name is duplicated, skip adding it
+				// フィールド名が重複している場合は追加しない
+				if _, ok := varFieldMap[typ.Field(j).Name()]; ok {
+					continue
+				}
+
 				vars = append(vars, typ.Field(j))
 				structTags = append(structTags, typ.Tag(j))
 			}
 		} else {
-			vars = append(vars, types.NewVar(0, nil, templates.ToGo(filed.Name), filed.Type))
+			// If the field name is duplicated, skip adding it
+			// フィールド名が重複している場合は追加しない
+			fieldName := templates.ToGo(filed.Name)
+			if _, ok := varFieldMap[fieldName]; ok {
+				continue
+			}
+
+			varFieldMap[fieldName] = types.NewVar(0, nil, fieldName, filed.Type)
+			vars = append(vars, varFieldMap[fieldName])
 			structTags = append(structTags, strings.Join(filed.Tags, " "))
 		}
 	}
