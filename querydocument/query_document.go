@@ -97,7 +97,8 @@ func collectInputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, 
 		return // この型は既に完全に処理済み
 	}
 
-	usedTypes[def.Name] = true // この型を使用済みとしてマーク
+	processedTypes[def.Name] = true // この型の処理が完了したことをマーク
+	usedTypes[def.Name] = true      // この型を使用済みとしてマーク
 
 	for _, field := range def.Fields {
 		var typeName string
@@ -115,8 +116,6 @@ func collectInputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, 
 			}
 		}
 	}
-
-	processedTypes[def.Name] = true // この型の処理が完了したことをマーク
 }
 
 // collectTypeFromTypeReference is a helper function to collect type names from type references
