@@ -2,12 +2,12 @@ package clientgenv2
 
 import (
 	"fmt"
-	gqlgencConfiga "github.com/Yamashou/gqlgenc/config"
 	"go/types"
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -85,16 +85,16 @@ type SourceGenerator struct {
 	cfg            *config.Config
 	binder         *config.Binder
 	client         config.PackageConfig
-	generateConfig *gqlgencConfiga.GenerateConfig
+	GenerateConfig *gqlgencConfig.GenerateConfig
 	StructSources  []*StructSource
 }
 
-func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfiga.GenerateConfig) *SourceGenerator {
+func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *SourceGenerator {
 	return &SourceGenerator{
 		cfg:            cfg,
 		binder:         cfg.NewBinder(),
 		client:         client,
-		generateConfig: generateConfig,
+		GenerateConfig: generateConfig,
 		StructSources:  []*StructSource{},
 	}
 }
@@ -151,7 +151,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
 		jsonTag := fmt.Sprintf(`json:"%s"`, selection.Alias)
-		if r.generateConfig.IsEnableClientJsonOmitemptyTag() && isOptional {
+		if r.GenerateConfig.IsEnableClientJsonOmitemptyTag() && isOptional {
 			jsonTag = fmt.Sprintf(`json:"%s,omitempty"`, selection.Alias)
 		}
 		tags := []string{
