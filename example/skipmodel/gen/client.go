@@ -17,8 +17,20 @@ func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Option
 	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
 }
 
-type A_User struct {
+type A_User_Profile struct {
 	ID string "json:\"id\" graphql:\"id\""
+}
+
+func (t *A_User_Profile) GetID() string {
+	if t == nil {
+		t = &A_User_Profile{}
+	}
+	return t.ID
+}
+
+type A_User struct {
+	ID      string          "json:\"id\" graphql:\"id\""
+	Profile *A_User_Profile "json:\"profile\" graphql:\"profile\""
 }
 
 func (t *A_User) GetID() string {
@@ -26,6 +38,12 @@ func (t *A_User) GetID() string {
 		t = &A_User{}
 	}
 	return t.ID
+}
+func (t *A_User) GetProfile() *A_User_Profile {
+	if t == nil {
+		t = &A_User{}
+	}
+	return t.Profile
 }
 
 type A struct {
@@ -42,6 +60,9 @@ func (t *A) GetUser() *A_User {
 const ADocument = `mutation A ($input: UserInput!) {
 	user(input: $input) {
 		id
+		profile {
+			id
+		}
 	}
 }
 `

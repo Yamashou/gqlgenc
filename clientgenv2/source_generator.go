@@ -7,6 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -106,14 +107,16 @@ type SourceGenerator struct {
 	cfg           *config.Config
 	binder        *config.Binder
 	client        config.PackageConfig
+	genCfg        *gqlgencConfig.GenerateConfig
 	StructSources []*StructSource
 }
 
-func NewSourceGenerator(cfg *config.Config, client config.PackageConfig) *SourceGenerator {
+func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *SourceGenerator {
 	return &SourceGenerator{
 		cfg:           cfg,
 		binder:        cfg.NewBinder(),
 		client:        client,
+		genCfg:        generateConfig,
 		StructSources: []*StructSource{},
 	}
 }
@@ -132,13 +135,13 @@ func NewLayerTypeName(base, thisField string) string {
 }
 
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
-	var nonNull bool
+	var isOptional bool
 	switch selection := selection.(type) {
 	case *ast.Field:
 		typeName = NewLayerTypeName(typeName, templates.ToGo(selection.Alias))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
 
-		nonNull = selection.Definition.Type.NonNull
+		isOptional = !selection.Definition.Type.NonNull
 
 		var baseType types.Type
 		switch {
@@ -187,9 +190,9 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
-		jsonTag := fmt.Sprintf(`json:"%s,omitempty"`, selection.Alias)
-		if nonNull {
-			jsonTag = fmt.Sprintf(`json:"%s"`, selection.Alias)
+		jsonTag := fmt.Sprintf(`json:"%s"`, selection.Alias)
+		if r.genCfg.IsEnableClientJsonOmitemptyTag() && isOptional {
+			jsonTag = fmt.Sprintf(`json:"%s,omitempty"`, selection.Alias)
 		}
 		tags := []string{
 			jsonTag,
@@ -283,7 +286,6 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 func (r *SourceGenerator) Type(typeName string) types.Type {
 	goType, err := r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
 	if err != nil {
-		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
 		panic(fmt.Sprintf("%+v", err))
 	}
 

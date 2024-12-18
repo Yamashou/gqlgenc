@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strconv"
 	"testing"
 	"time"
@@ -830,4 +831,130 @@ func TestMarshalJSON(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestUnsafeChainInterceptor(t *testing.T) {
+	t.Run("should modify values through interceptors", func(t *testing.T) {
+		// Prepare test values
+		originalCtx := context.Background()
+		originalReq, _ := http.NewRequest("POST", "http://example.com", nil)
+		originalGqlInfo := &GQLRequestInfo{
+			Request: &Request{Query: "original"},
+		}
+		originalRes := "original"
+
+		// First interceptor: Add value to context
+		interceptor1 := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
+			ctx = context.WithValue(ctx, "key1", "value1")
+			return next(ctx, req, gqlInfo, res)
+		}
+
+		// Second interceptor: Modify request header
+		interceptor2 := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
+			req.Header.Set("X-Test", "test-value")
+			return next(ctx, req, gqlInfo, res)
+		}
+
+		// Third interceptor: Modify GQLInfo and response
+		interceptor3 := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
+			gqlInfo.Request.Query = "modified"
+			return next(ctx, req, gqlInfo, "modified")
+		}
+
+		// Final handler: Verify modified values
+		finalHandler := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any) error {
+			// Verify context
+			if v := ctx.Value("key1"); v != "value1" {
+				t.Errorf("context value not propagated, got %v", v)
+			}
+
+			// Verify request header
+			if v := req.Header.Get("X-Test"); v != "test-value" {
+				t.Errorf("request header not modified, got %v", v)
+			}
+
+			// Verify GQLInfo
+			if gqlInfo.Request.Query != "modified" {
+				t.Errorf("GQLInfo not modified, got %v", gqlInfo.Request.Query)
+			}
+
+			// Verify response
+			if res != "modified" {
+				t.Errorf("response not modified, got %v", res)
+			}
+
+			return nil
+		}
+
+		// Create interceptor chain
+		chain := UnsafeChainInterceptor(interceptor1, interceptor2, interceptor3)
+
+		// Execute chain
+		err := chain(originalCtx, originalReq, originalGqlInfo, originalRes, finalHandler)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+
+	t.Run("should properly propagate errors", func(t *testing.T) {
+		expectedError := errors.New("test error")
+		
+		// Interceptor that returns an error
+		errorInterceptor := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
+			return expectedError
+		}
+
+		// Create chain
+		chain := UnsafeChainInterceptor(errorInterceptor)
+
+		// Execute chain
+		err := chain(
+			context.Background(),
+			&http.Request{},
+			&GQLRequestInfo{},
+			nil,
+			func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any) error {
+				return nil
+			},
+		)
+
+		if err != expectedError {
+			t.Errorf("expected error %v, got %v", expectedError, err)
+		}
+	})
+
+	t.Run("should execute interceptors in correct order", func(t *testing.T) {
+		var order []int
+		
+		// Create interceptors that record execution order
+		makeInterceptor := func(id int) RequestInterceptor {
+			return func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
+				order = append(order, id)
+				err := next(ctx, req, gqlInfo, res)
+				order = append(order, -id) // Record return order as well
+				return err
+			}
+		}
+
+		// Create chain
+		chain := UnsafeChainInterceptor(makeInterceptor(1), makeInterceptor(2), makeInterceptor(3))
+
+		// Execute chain
+		_ = chain(
+			context.Background(),
+			&http.Request{},
+			&GQLRequestInfo{},
+			nil,
+			func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any) error {
+				order = append(order, 0) // Record execution of final handler
+				return nil
+			},
+		)
+
+		// Expected execution order: 1 -> 2 -> 3 -> 0 -> -3 -> -2 -> -1
+		expected := []int{1, 2, 3, 0, -3, -2, -1}
+		if !reflect.DeepEqual(order, expected) {
+			t.Errorf("unexpected execution order\nexpected: %v\ngot: %v", expected, order)
+		}
+	})
 }

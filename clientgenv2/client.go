@@ -36,7 +36,7 @@ func (p *Plugin) Name() string {
 func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	// テンプレートと情報ソースを元にコード生成
 	// Generate code from template and document source
-	sourceGenerator := NewSourceGenerator(cfg, p.Client)
+	sourceGenerator := NewSourceGenerator(cfg, p.Client, p.GenerateConfig)
 	source := NewSource(cfg.Schema, p.queryDocument, sourceGenerator, p.GenerateConfig)
 
 	fragments, err := source.Fragments()
