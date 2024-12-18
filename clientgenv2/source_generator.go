@@ -2,7 +2,7 @@ package clientgenv2
 
 import (
 	"fmt"
-	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
+	gqlgencConfiga "github.com/Yamashou/gqlgenc/config"
 	"go/types"
 	"strings"
 
@@ -85,11 +85,11 @@ type SourceGenerator struct {
 	cfg            *config.Config
 	binder         *config.Binder
 	client         config.PackageConfig
-	generateConfig *gqlgencConfig.GenerateConfig
+	generateConfig *gqlgencConfiga.GenerateConfig
 	StructSources  []*StructSource
 }
 
-func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *SourceGenerator {
+func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfiga.GenerateConfig) *SourceGenerator {
 	return &SourceGenerator{
 		cfg:            cfg,
 		binder:         cfg.NewBinder(),
