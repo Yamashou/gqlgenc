@@ -94,8 +94,8 @@ func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generat
 		cfg:            cfg,
 		binder:         cfg.NewBinder(),
 		client:         client,
-		StructSources:  []*StructSource{},
 		generateConfig: generateConfig,
+		StructSources:  []*StructSource{},
 	}
 }
 
