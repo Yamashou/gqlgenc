@@ -26,6 +26,12 @@ type ResponseField struct {
 	ResponseFields   ResponseFieldList
 }
 
+func (r ResponseField) FieldTypeString() string {
+	fullFieldType := r.Type.String()
+	parts := strings.Split(fullFieldType, ".")
+	return parts[len(parts)-1]
+}
+
 type ResponseFieldList []*ResponseField
 
 func (rs ResponseFieldList) IsFragmentSpread() bool {
@@ -40,23 +46,39 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
 	for _, field := range rs {
-		//  クエリーのフィールドの子階層がFragmentの場合、このフィールドにそのFragmentの型を追加する
+		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
+		structTags = append(structTags, strings.Join(field.Tags, " "))
+	}
+	return types.NewStruct(vars, structTags)
+}
+
+// MergeFragmentFields returns merged ResponseFieldList, post-merged ResponseFieldList, and remove type names
+func (rs ResponseFieldList) MergeFragmentFields() (ResponseFieldList, map[string]*ResponseFieldList, []string) {
+	res := make(ResponseFieldList, 0)
+	fragmentChildrenFields := make(ResponseFieldList, 0)
+	removeTypeNames := make([]string, 0)
+	for _, field := range rs {
 		if field.IsFragmentSpread {
-			typ, ok := field.ResponseFields.StructType().Underlying().(*types.Struct)
-			if !ok {
-				continue
-			}
-			for j := range typ.NumFields() {
-				vars = append(vars, typ.Field(j))
-				structTags = append(structTags, typ.Tag(j))
-			}
+			fragmentChildrenFields = append(fragmentChildrenFields, field.ResponseFields...)
+			removeTypeNames = append(removeTypeNames, field.FieldTypeString())
 		} else {
-			vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
-			structTags = append(structTags, strings.Join(field.Tags, " "))
+			res = append(res, field)
 		}
 	}
 
-	return types.NewStruct(vars, structTags)
+	postMergedResponseFields := make(map[string]*ResponseFieldList)
+	for _, field := range fragmentChildrenFields {
+		for _, resField := range res {
+			if field.Name == resField.Name {
+				resField.ResponseFields = append(resField.ResponseFields, field.ResponseFields...)
+				postMergedResponseFields[resField.FieldTypeString()] = &resField.ResponseFields
+				removeTypeNames = append(removeTypeNames, field.FieldTypeString())
+				removeTypeNames = append(removeTypeNames, resField.FieldTypeString())
+				break
+			}
+		}
+	}
+	return res, postMergedResponseFields, removeTypeNames
 }
 
 func (rs ResponseFieldList) IsFragment() bool {
@@ -127,6 +149,24 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
+			fieldsResponseFields, postMergedResponseFields, preMergedTypeNames := fieldsResponseFields.MergeFragmentFields()
+			// remove pre-merged struct
+			for _, preMergedTypeName := range preMergedTypeNames {
+				for i, source := range r.StructSources {
+					if source.Name == preMergedTypeName {
+						r.StructSources = append(r.StructSources[:i], r.StructSources[i+1:]...)
+						break
+					}
+				}
+			}
+			// append post-merged struct
+			for postMergedName, responseFieldList := range postMergedResponseFields {
+				postMergedStructType := responseFieldList.StructType()
+				r.StructSources = append(r.StructSources, &StructSource{
+					Name: postMergedName,
+					Type: postMergedStructType,
+				})
+			}
 			structType := fieldsResponseFields.StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
 				Name: typeName,
