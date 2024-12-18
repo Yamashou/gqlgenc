@@ -14,4 +14,3 @@ generate:
   suffix:
     mutation: Bar
     query: Foo
-enable_model_json_omitempty_tag: false
