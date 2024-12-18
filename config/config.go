@@ -22,14 +22,15 @@ import (
 // Config extends the gqlgen basic config
 // and represents the config file
 type Config struct {
-	SchemaFilename StringList           `yaml:"schema,omitempty"`
-	Model          config.PackageConfig `yaml:"model,omitempty"`
-	AutoBind       []string             `yaml:"autobind"`
-	Client         config.PackageConfig `yaml:"client,omitempty"`
-	Federation     config.PackageConfig `yaml:"federation,omitempty"`
-	Models         config.TypeMap       `yaml:"models,omitempty"`
-	Endpoint       *EndPointConfig      `yaml:"endpoint,omitempty"`
-	Generate       *GenerateConfig      `yaml:"generate,omitempty"`
+	SchemaFilename              StringList           `yaml:"schema,omitempty"`
+	Model                       config.PackageConfig `yaml:"model,omitempty"`
+	AutoBind                    []string             `yaml:"autobind"`
+	Client                      config.PackageConfig `yaml:"client,omitempty"`
+	Federation                  config.PackageConfig `yaml:"federation,omitempty"`
+	Models                      config.TypeMap       `yaml:"models,omitempty"`
+	Endpoint                    *EndPointConfig      `yaml:"endpoint,omitempty"`
+	Generate                    *GenerateConfig      `yaml:"generate,omitempty"`
+	EnableModelJsonOmitemptyTag *bool                `yaml:"enable_model_json_omitempty_tag,omitempty"`
 
 	Query []string `yaml:"query"`
 
@@ -223,6 +224,7 @@ func LoadConfig(filename string) (*Config, error) {
 		ReturnPointersInUnmarshalInput: false,
 		ResolversAlwaysReturnPointers:  true,
 		NullableInputOmittable:         false,
+		EnableModelJsonOmitemptyTag:    cfg.EnableModelJsonOmitemptyTag,
 	}
 
 	if err := cfg.Client.Check(); err != nil {
