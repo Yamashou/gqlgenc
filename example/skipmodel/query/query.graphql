@@ -1,5 +1,8 @@
 mutation A($input: UserInput!) {
     user(input: $input) {
         id
+        profile {
+            id
+        }
     }
 }

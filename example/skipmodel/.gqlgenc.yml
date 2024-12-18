@@ -12,3 +12,4 @@ query:
 generate:
   clientV2: true
   onlyUsedModels: true
+  enableClientJsonOmitemptyTag: false

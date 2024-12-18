@@ -2,6 +2,7 @@ package clientgenv2
 
 import (
 	"fmt"
+	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 	"go/types"
 	"strings"
 
@@ -81,18 +82,20 @@ type StructSource struct {
 }
 
 type SourceGenerator struct {
-	cfg           *config.Config
-	binder        *config.Binder
-	client        config.PackageConfig
-	StructSources []*StructSource
+	cfg            *config.Config
+	binder         *config.Binder
+	client         config.PackageConfig
+	StructSources  []*StructSource
+	GenerateConfig *gqlgencConfig.GenerateConfig
 }
 
-func NewSourceGenerator(cfg *config.Config, client config.PackageConfig) *SourceGenerator {
+func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *SourceGenerator {
 	return &SourceGenerator{
-		cfg:           cfg,
-		binder:        cfg.NewBinder(),
-		client:        client,
-		StructSources: []*StructSource{},
+		cfg:            cfg,
+		binder:         cfg.NewBinder(),
+		client:         client,
+		StructSources:  []*StructSource{},
+		GenerateConfig: generateConfig,
 	}
 }
 
@@ -110,13 +113,13 @@ func NewLayerTypeName(base, thisField string) string {
 }
 
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
-	var nonNull bool
+	var isOptional bool
 	switch selection := selection.(type) {
 	case *ast.Field:
 		typeName = NewLayerTypeName(typeName, templates.ToGo(selection.Alias))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
 
-		nonNull = selection.Definition.Type.NonNull
+		isOptional = !selection.Definition.Type.NonNull
 
 		var baseType types.Type
 		switch {
@@ -147,9 +150,9 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
-		jsonTag := fmt.Sprintf(`json:"%s,omitempty"`, selection.Alias)
-		if nonNull {
-			jsonTag = fmt.Sprintf(`json:"%s"`, selection.Alias)
+		jsonTag := fmt.Sprintf(`json:"%s"`, selection.Alias)
+		if r.GenerateConfig.IsEnableClientJsonOmitemptyTag() && isOptional {
+			jsonTag = fmt.Sprintf(`json:"%s,omitempty"`, selection.Alias)
 		}
 		tags := []string{
 			jsonTag,
