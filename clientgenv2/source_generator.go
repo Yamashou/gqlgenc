@@ -82,20 +82,20 @@ type StructSource struct {
 }
 
 type SourceGenerator struct {
-	cfg            *config.Config
-	binder         *config.Binder
-	client         config.PackageConfig
-	GenerateConfig *gqlgencConfig.GenerateConfig
-	StructSources  []*StructSource
+	cfg           *config.Config
+	binder        *config.Binder
+	client        config.PackageConfig
+	genCfg        *gqlgencConfig.GenerateConfig
+	StructSources []*StructSource
 }
 
 func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *SourceGenerator {
 	return &SourceGenerator{
-		cfg:            cfg,
-		binder:         cfg.NewBinder(),
-		client:         client,
-		GenerateConfig: generateConfig,
-		StructSources:  []*StructSource{},
+		cfg:           cfg,
+		binder:        cfg.NewBinder(),
+		client:        client,
+		genCfg:        generateConfig,
+		StructSources: []*StructSource{},
 	}
 }
 
@@ -151,7 +151,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
 		jsonTag := fmt.Sprintf(`json:"%s"`, selection.Alias)
-		if r.GenerateConfig.IsEnableClientJsonOmitemptyTag() && isOptional {
+		if r.genCfg.IsEnableClientJsonOmitemptyTag() && isOptional {
 			jsonTag = fmt.Sprintf(`json:"%s,omitempty"`, selection.Alias)
 		}
 		tags := []string{
