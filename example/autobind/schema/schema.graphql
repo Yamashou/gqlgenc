@@ -13,7 +13,7 @@ type Mutation {
 
 type User {
     id: ID!
-    profile: Profile!
+    profile: Profile
 }
 
 type Profile {
