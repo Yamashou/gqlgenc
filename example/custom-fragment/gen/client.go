@@ -34,8 +34,20 @@ func (t *UserFragment) GetProfile() *UserFragment_Profile {
 	return &t.Profile
 }
 
+type UserFragment_Profile_Detail struct {
+	BirthDate string "json:\"birthDate\" graphql:\"birthDate\""
+}
+
+func (t *UserFragment_Profile_Detail) GetBirthDate() string {
+	if t == nil {
+		t = &UserFragment_Profile_Detail{}
+	}
+	return t.BirthDate
+}
+
 type UserFragment_Profile struct {
-	ID string "json:\"id\" graphql:\"id\""
+	ID     string                      "json:\"id\" graphql:\"id\""
+	Detail UserFragment_Profile_Detail "json:\"detail\" graphql:\"detail\""
 }
 
 func (t *UserFragment_Profile) GetID() string {
@@ -44,11 +56,36 @@ func (t *UserFragment_Profile) GetID() string {
 	}
 	return t.ID
 }
+func (t *UserFragment_Profile) GetDetail() *UserFragment_Profile_Detail {
+	if t == nil {
+		t = &UserFragment_Profile{}
+	}
+	return &t.Detail
+}
+
+type UserDetail_User_Profile_Detail struct {
+	ID        string "json:\"id\" graphql:\"id\""
+	BirthDate string "json:\"birthDate\" graphql:\"birthDate\""
+}
+
+func (t *UserDetail_User_Profile_Detail) GetID() string {
+	if t == nil {
+		t = &UserDetail_User_Profile_Detail{}
+	}
+	return t.ID
+}
+func (t *UserDetail_User_Profile_Detail) GetBirthDate() string {
+	if t == nil {
+		t = &UserDetail_User_Profile_Detail{}
+	}
+	return t.BirthDate
+}
 
 type UserDetail_User_Profile struct {
-	Name    string "json:\"name\" graphql:\"name\""
-	Company string "json:\"company\" graphql:\"company\""
-	ID      string "json:\"id\" graphql:\"id\""
+	Name    string                         "json:\"name\" graphql:\"name\""
+	Company string                         "json:\"company\" graphql:\"company\""
+	Detail  UserDetail_User_Profile_Detail "json:\"detail\" graphql:\"detail\""
+	ID      string                         "json:\"id\" graphql:\"id\""
 }
 
 func (t *UserDetail_User_Profile) GetName() string {
@@ -63,6 +100,12 @@ func (t *UserDetail_User_Profile) GetCompany() string {
 	}
 	return t.Company
 }
+func (t *UserDetail_User_Profile) GetDetail() *UserDetail_User_Profile_Detail {
+	if t == nil {
+		t = &UserDetail_User_Profile{}
+	}
+	return &t.Detail
+}
 func (t *UserDetail_User_Profile) GetID() string {
 	if t == nil {
 		t = &UserDetail_User_Profile{}
@@ -71,9 +114,16 @@ func (t *UserDetail_User_Profile) GetID() string {
 }
 
 type UserDetail_User struct {
-	Profile UserDetail_User_Profile "json:\"profile\" graphql:\"profile\""
+	UserFragment *UserFragment
+	Profile      UserDetail_User_Profile "json:\"profile\" graphql:\"profile\""
 }
 
+func (t *UserDetail_User) GetUserFragment() *UserFragment {
+	if t == nil {
+		t = &UserDetail_User{}
+	}
+	return t.UserFragment
+}
 func (t *UserDetail_User) GetProfile() *UserDetail_User_Profile {
 	if t == nil {
 		t = &UserDetail_User{}
@@ -98,6 +148,9 @@ const UserDetailDocument = `query UserDetail {
 		profile {
 			name
 			company
+			detail {
+				id
+			}
 		}
 	}
 }
@@ -105,6 +158,9 @@ fragment UserFragment on User {
 	id
 	profile {
 		id
+		detail {
+			birthDate
+		}
 	}
 }
 `

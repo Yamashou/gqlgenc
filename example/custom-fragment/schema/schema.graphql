@@ -15,4 +15,10 @@ type Profile {
   id: ID!
   name: String!
   company: String!
+  detail: ProfileDetail!
+}
+
+type ProfileDetail {
+  id: ID!
+  birthDate: String!
 }
