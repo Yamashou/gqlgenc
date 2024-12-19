@@ -57,13 +57,18 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 func (rs ResponseFieldList) MergeFragmentFields() (ResponseFieldList, map[string]*ResponseFieldList, []string) {
 	res := make(ResponseFieldList, 0)
 	fragmentChildrenFields := make(ResponseFieldList, 0)
-	removeTypeNames := make([]string, 0)
 	for _, field := range rs {
 		if field.IsFragmentSpread {
 			fragmentChildrenFields = append(fragmentChildrenFields, field.ResponseFields...)
-			removeTypeNames = append(removeTypeNames, field.FieldTypeString())
 		} else {
 			res = append(res, field)
+		}
+	}
+
+	removeTypeNames := make([]string, 0)
+	for _, field := range rs {
+		if field.IsFragmentSpread {
+			removeTypeNames = append(removeTypeNames, field.FieldTypeString())
 		}
 	}
 
@@ -79,6 +84,7 @@ func (rs ResponseFieldList) MergeFragmentFields() (ResponseFieldList, map[string
 			}
 		}
 	}
+
 	return res, postMergedResponseFields, removeTypeNames
 }
 
