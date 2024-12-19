@@ -52,11 +52,11 @@ func (c *GenerateConfig) IsEnableClientJsonOmitemptyTag() bool {
 		return true
 	}
 
-	if c.EnableClientJsonOmitemptyTag != nil && *c.EnableClientJsonOmitemptyTag {
+	if c.EnableClientJsonOmitemptyTag == nil {
 		return true
 	}
 
-	return false
+	return *c.EnableClientJsonOmitemptyTag
 }
 
 func (c *GenerateConfig) GetClientInterfaceName() *string {
