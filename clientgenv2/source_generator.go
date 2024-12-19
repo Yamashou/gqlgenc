@@ -199,6 +199,8 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
+			// 子フィールドにFragmentがある場合は、現在のフィールドとマージする
+			// if there is a fragment in child fields, merge it with the current field
 			generator := NewStructGenerator(fieldsResponseFields)
 
 			// remove pre-merged struct
