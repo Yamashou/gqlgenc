@@ -72,9 +72,11 @@ func (rs ResponseFieldList) MergeFragmentFields() (ResponseFieldList, map[string
 		}
 	}
 
+	// Child fields of fragment spread are inserted into the parent field
 	postMergedResponseFields := make(map[string]*ResponseFieldList)
 	for _, field := range fragmentChildrenFields {
 		for _, resField := range res {
+			// if there is a field with the same name, merge the fields
 			if field.Name == resField.Name {
 				resField.ResponseFields = append(resField.ResponseFields, field.ResponseFields...)
 				postMergedResponseFields[resField.FieldTypeString()] = &resField.ResponseFields
