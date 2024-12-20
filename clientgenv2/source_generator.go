@@ -71,7 +71,6 @@ func (rs ResponseFieldList) IsStructType() bool {
 
 type StructGenerator struct {
 	currentResponseFieldList *ResponseFieldList
-	fragmentStructSources    []*StructSource
 	preMergedStructSources   []*StructSource
 	postMergedStructSources  []*StructSource
 }
@@ -87,24 +86,21 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 		}
 	}
 
-	fragmentStructSources := make([]*StructSource, 0)
+	preMergedStructSources := make([]*StructSource, 0)
+	postMergedStructSources := make([]*StructSource, 0)
+
 	for _, field := range responseFieldList {
 		if field.IsFragmentSpread {
-			fragmentStructSources = append(fragmentStructSources, &StructSource{
+			preMergedStructSources = append(preMergedStructSources, &StructSource{
 				Name: field.FieldTypeString(),
 				Type: field.ResponseFields.StructType(),
 			})
 		}
 	}
 
-	preMergedStructSources := make([]*StructSource, 0)
-	postMergedStructSources := make([]*StructSource, 0)
-
 	currentFields = mergeFieldsRecursively(currentFields, fragmentChildrenFields, &preMergedStructSources, &postMergedStructSources)
-
 	return &StructGenerator{
 		currentResponseFieldList: &currentFields,
-		fragmentStructSources:    fragmentStructSources,
 		preMergedStructSources:   preMergedStructSources,
 		postMergedStructSources:  postMergedStructSources,
 	}
@@ -114,7 +110,7 @@ func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields Respons
 	for _, sourceField := range sourceFields {
 		sameNameFieldFlag := false
 		for _, targetField := range targetFields {
-			if sourceField.Name == targetField.Name {
+			if sourceField.Name == targetField.Name && !targetField.ResponseFields.IsBasicType() {
 				*preMerged = append(*preMerged, &StructSource{
 					Name: sourceField.FieldTypeString(),
 					Type: sourceField.ResponseFields.StructType(),
@@ -158,6 +154,10 @@ func (g *StructGenerator) MergedStructSources(sources []*StructSource) []*Struct
 	res = append(res, g.postMergedStructSources...)
 
 	return res
+}
+
+func (g *StructGenerator) GetCurrentResponseFieldList() ResponseFieldList {
+	return *g.currentResponseFieldList
 }
 
 type StructSource struct {
@@ -222,7 +222,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			r.StructSources = generator.MergedStructSources(r.StructSources)
 
 			// append current struct
-			structType := fieldsResponseFields.StructType()
+			structType := generator.GetCurrentResponseFieldList().StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
 				Name: typeName,
 				Type: structType,

@@ -114,21 +114,21 @@ func (t *UserDetail_User_Profile) GetID() string {
 }
 
 type UserDetail_User struct {
-	UserFragment *UserFragment
-	Profile      UserDetail_User_Profile "json:\"profile\" graphql:\"profile\""
+	Profile UserDetail_User_Profile "json:\"profile\" graphql:\"profile\""
+	ID      string                  "json:\"id\" graphql:\"id\""
 }
 
-func (t *UserDetail_User) GetUserFragment() *UserFragment {
-	if t == nil {
-		t = &UserDetail_User{}
-	}
-	return t.UserFragment
-}
 func (t *UserDetail_User) GetProfile() *UserDetail_User_Profile {
 	if t == nil {
 		t = &UserDetail_User{}
 	}
 	return &t.Profile
+}
+func (t *UserDetail_User) GetID() string {
+	if t == nil {
+		t = &UserDetail_User{}
+	}
+	return t.ID
 }
 
 type UserDetail struct {
