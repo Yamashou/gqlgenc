@@ -14,7 +14,7 @@ func main() {
 	key := os.Getenv("ANNICT_KEY")
 
 	annictClient := NewAnnictClient(clientv2.NewClient(http.DefaultClient, "https://api.annict.com/graphql", nil,
-		func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res interface{}, next clientv2.RequestInterceptorFunc) error {
+		func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res any, next clientv2.RequestInterceptorFunc) error {
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", key))
 
 			return next(ctx, req, gqlInfo, res)

@@ -661,7 +661,7 @@ func TestMarshalJSON(t *testing.T) {
 		{
 			name: "marshal NumberOne",
 			args: args{
-				v: map[string]interface{}{"input": NumberOne},
+				v: map[string]any{"input": NumberOne},
 			},
 			want: []byte(`{"input":"ONE"}`),
 		},
@@ -898,7 +898,7 @@ func TestUnsafeChainInterceptor(t *testing.T) {
 
 	t.Run("should properly propagate errors", func(t *testing.T) {
 		expectedError := errors.New("test error")
-		
+
 		// Interceptor that returns an error
 		errorInterceptor := func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
 			return expectedError
@@ -925,7 +925,7 @@ func TestUnsafeChainInterceptor(t *testing.T) {
 
 	t.Run("should execute interceptors in correct order", func(t *testing.T) {
 		var order []int
-		
+
 		// Create interceptors that record execution order
 		makeInterceptor := func(id int) RequestInterceptor {
 			return func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {

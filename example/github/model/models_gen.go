@@ -43,7 +43,7 @@ func (e ActorType) String() string {
 	return string(e)
 }
 
-func (e *ActorType) UnmarshalGQL(v interface{}) error {
+func (e *ActorType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -84,7 +84,7 @@ func (e AuditLogOrderField) String() string {
 	return string(e)
 }
 
-func (e *AuditLogOrderField) UnmarshalGQL(v interface{}) error {
+func (e *AuditLogOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -131,7 +131,7 @@ func (e CheckAnnotationLevel) String() string {
 	return string(e)
 }
 
-func (e *CheckAnnotationLevel) UnmarshalGQL(v interface{}) error {
+func (e *CheckAnnotationLevel) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -196,7 +196,7 @@ func (e CheckConclusionState) String() string {
 	return string(e)
 }
 
-func (e *CheckConclusionState) UnmarshalGQL(v interface{}) error {
+func (e *CheckConclusionState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -276,7 +276,7 @@ func (e CheckRunState) String() string {
 	return string(e)
 }
 
-func (e *CheckRunState) UnmarshalGQL(v interface{}) error {
+func (e *CheckRunState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -320,7 +320,7 @@ func (e CheckRunType) String() string {
 	return string(e)
 }
 
-func (e *CheckRunType) UnmarshalGQL(v interface{}) error {
+func (e *CheckRunType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -376,7 +376,7 @@ func (e CheckStatusState) String() string {
 	return string(e)
 }
 
-func (e *CheckStatusState) UnmarshalGQL(v interface{}) error {
+func (e *CheckStatusState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -423,7 +423,7 @@ func (e CollaboratorAffiliation) String() string {
 	return string(e)
 }
 
-func (e *CollaboratorAffiliation) UnmarshalGQL(v interface{}) error {
+func (e *CollaboratorAffiliation) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -485,7 +485,7 @@ func (e CommentAuthorAssociation) String() string {
 	return string(e)
 }
 
-func (e *CommentAuthorAssociation) UnmarshalGQL(v interface{}) error {
+func (e *CommentAuthorAssociation) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -544,7 +544,7 @@ func (e CommentCannotUpdateReason) String() string {
 	return string(e)
 }
 
-func (e *CommentCannotUpdateReason) UnmarshalGQL(v interface{}) error {
+func (e *CommentCannotUpdateReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -588,7 +588,7 @@ func (e CommitContributionOrderField) String() string {
 	return string(e)
 }
 
-func (e *CommitContributionOrderField) UnmarshalGQL(v interface{}) error {
+func (e *CommitContributionOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -638,7 +638,7 @@ func (e ComparisonStatus) String() string {
 	return string(e)
 }
 
-func (e *ComparisonStatus) UnmarshalGQL(v interface{}) error {
+func (e *ComparisonStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -691,7 +691,7 @@ func (e ContributionLevel) String() string {
 	return string(e)
 }
 
-func (e *ContributionLevel) UnmarshalGQL(v interface{}) error {
+func (e *ContributionLevel) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -741,7 +741,7 @@ func (e DefaultRepositoryPermissionField) String() string {
 	return string(e)
 }
 
-func (e *DefaultRepositoryPermissionField) UnmarshalGQL(v interface{}) error {
+func (e *DefaultRepositoryPermissionField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -812,7 +812,7 @@ func (e DependencyGraphEcosystem) String() string {
 	return string(e)
 }
 
-func (e *DependencyGraphEcosystem) UnmarshalGQL(v interface{}) error {
+func (e *DependencyGraphEcosystem) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -853,7 +853,7 @@ func (e DeploymentOrderField) String() string {
 	return string(e)
 }
 
-func (e *DeploymentOrderField) UnmarshalGQL(v interface{}) error {
+func (e *DeploymentOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -900,7 +900,7 @@ func (e DeploymentProtectionRuleType) String() string {
 	return string(e)
 }
 
-func (e *DeploymentProtectionRuleType) UnmarshalGQL(v interface{}) error {
+func (e *DeploymentProtectionRuleType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -944,7 +944,7 @@ func (e DeploymentReviewState) String() string {
 	return string(e)
 }
 
-func (e *DeploymentReviewState) UnmarshalGQL(v interface{}) error {
+func (e *DeploymentReviewState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1015,7 +1015,7 @@ func (e DeploymentState) String() string {
 	return string(e)
 }
 
-func (e *DeploymentState) UnmarshalGQL(v interface{}) error {
+func (e *DeploymentState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1077,7 +1077,7 @@ func (e DeploymentStatusState) String() string {
 	return string(e)
 }
 
-func (e *DeploymentStatusState) UnmarshalGQL(v interface{}) error {
+func (e *DeploymentStatusState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1121,7 +1121,7 @@ func (e DiffSide) String() string {
 	return string(e)
 }
 
-func (e *DiffSide) UnmarshalGQL(v interface{}) error {
+func (e *DiffSide) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1168,7 +1168,7 @@ func (e DiscussionCloseReason) String() string {
 	return string(e)
 }
 
-func (e *DiscussionCloseReason) UnmarshalGQL(v interface{}) error {
+func (e *DiscussionCloseReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1212,7 +1212,7 @@ func (e DiscussionOrderField) String() string {
 	return string(e)
 }
 
-func (e *DiscussionOrderField) UnmarshalGQL(v interface{}) error {
+func (e *DiscussionOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1256,7 +1256,7 @@ func (e DiscussionPollOptionOrderField) String() string {
 	return string(e)
 }
 
-func (e *DiscussionPollOptionOrderField) UnmarshalGQL(v interface{}) error {
+func (e *DiscussionPollOptionOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1300,7 +1300,7 @@ func (e DiscussionState) String() string {
 	return string(e)
 }
 
-func (e *DiscussionState) UnmarshalGQL(v interface{}) error {
+func (e *DiscussionState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1350,7 +1350,7 @@ func (e DiscussionStateReason) String() string {
 	return string(e)
 }
 
-func (e *DiscussionStateReason) UnmarshalGQL(v interface{}) error {
+func (e *DiscussionStateReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1403,7 +1403,7 @@ func (e DismissReason) String() string {
 	return string(e)
 }
 
-func (e *DismissReason) UnmarshalGQL(v interface{}) error {
+func (e *DismissReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1444,7 +1444,7 @@ func (e EnterpriseAdministratorInvitationOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseAdministratorInvitationOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseAdministratorInvitationOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1488,7 +1488,7 @@ func (e EnterpriseAdministratorRole) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseAdministratorRole) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseAdministratorRole) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1544,7 +1544,7 @@ func (e EnterpriseAllowPrivateRepositoryForkingPolicyValue) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseAllowPrivateRepositoryForkingPolicyValue) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseAllowPrivateRepositoryForkingPolicyValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1597,7 +1597,7 @@ func (e EnterpriseDefaultRepositoryPermissionSettingValue) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseDefaultRepositoryPermissionSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseDefaultRepositoryPermissionSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1641,7 +1641,7 @@ func (e EnterpriseDisallowedMethodsSettingValue) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseDisallowedMethodsSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseDisallowedMethodsSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1688,7 +1688,7 @@ func (e EnterpriseEnabledDisabledSettingValue) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseEnabledDisabledSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseEnabledDisabledSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1732,7 +1732,7 @@ func (e EnterpriseEnabledSettingValue) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseEnabledSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseEnabledSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1773,7 +1773,7 @@ func (e EnterpriseMemberInvitationOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseMemberInvitationOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseMemberInvitationOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1817,7 +1817,7 @@ func (e EnterpriseMemberOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseMemberOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseMemberOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1870,7 +1870,7 @@ func (e EnterpriseMembersCanCreateRepositoriesSettingValue) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseMembersCanCreateRepositoriesSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseMembersCanCreateRepositoriesSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1914,7 +1914,7 @@ func (e EnterpriseMembersCanMakePurchasesSettingValue) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseMembersCanMakePurchasesSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseMembersCanMakePurchasesSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -1964,7 +1964,7 @@ func (e EnterpriseMembershipType) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseMembershipType) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseMembershipType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2005,7 +2005,7 @@ func (e EnterpriseOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2052,7 +2052,7 @@ func (e EnterpriseServerInstallationOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseServerInstallationOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseServerInstallationOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2093,7 +2093,7 @@ func (e EnterpriseServerUserAccountEmailOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseServerUserAccountEmailOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseServerUserAccountEmailOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2137,7 +2137,7 @@ func (e EnterpriseServerUserAccountOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseServerUserAccountOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseServerUserAccountOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2178,7 +2178,7 @@ func (e EnterpriseServerUserAccountsUploadOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseServerUserAccountsUploadOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseServerUserAccountsUploadOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2225,7 +2225,7 @@ func (e EnterpriseServerUserAccountsUploadSyncState) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseServerUserAccountsUploadSyncState) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseServerUserAccountsUploadSyncState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2272,7 +2272,7 @@ func (e EnterpriseUserAccountMembershipRole) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseUserAccountMembershipRole) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseUserAccountMembershipRole) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2316,7 +2316,7 @@ func (e EnterpriseUserDeployment) String() string {
 	return string(e)
 }
 
-func (e *EnterpriseUserDeployment) UnmarshalGQL(v interface{}) error {
+func (e *EnterpriseUserDeployment) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2357,7 +2357,7 @@ func (e EnvironmentOrderField) String() string {
 	return string(e)
 }
 
-func (e *EnvironmentOrderField) UnmarshalGQL(v interface{}) error {
+func (e *EnvironmentOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2404,7 +2404,7 @@ func (e EnvironmentPinnedFilterField) String() string {
 	return string(e)
 }
 
-func (e *EnvironmentPinnedFilterField) UnmarshalGQL(v interface{}) error {
+func (e *EnvironmentPinnedFilterField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2451,7 +2451,7 @@ func (e FileViewedState) String() string {
 	return string(e)
 }
 
-func (e *FileViewedState) UnmarshalGQL(v interface{}) error {
+func (e *FileViewedState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2528,7 +2528,7 @@ func (e FundingPlatform) String() string {
 	return string(e)
 }
 
-func (e *FundingPlatform) UnmarshalGQL(v interface{}) error {
+func (e *FundingPlatform) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2575,7 +2575,7 @@ func (e GistOrderField) String() string {
 	return string(e)
 }
 
-func (e *GistOrderField) UnmarshalGQL(v interface{}) error {
+func (e *GistOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2622,7 +2622,7 @@ func (e GistPrivacy) String() string {
 	return string(e)
 }
 
-func (e *GistPrivacy) UnmarshalGQL(v interface{}) error {
+func (e *GistPrivacy) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2711,7 +2711,7 @@ func (e GitSignatureState) String() string {
 	return string(e)
 }
 
-func (e *GitSignatureState) UnmarshalGQL(v interface{}) error {
+func (e *GitSignatureState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2758,7 +2758,7 @@ func (e IdentityProviderConfigurationState) String() string {
 	return string(e)
 }
 
-func (e *IdentityProviderConfigurationState) UnmarshalGQL(v interface{}) error {
+func (e *IdentityProviderConfigurationState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2802,7 +2802,7 @@ func (e IPAllowListEnabledSettingValue) String() string {
 	return string(e)
 }
 
-func (e *IPAllowListEnabledSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *IPAllowListEnabledSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2846,7 +2846,7 @@ func (e IPAllowListEntryOrderField) String() string {
 	return string(e)
 }
 
-func (e *IPAllowListEntryOrderField) UnmarshalGQL(v interface{}) error {
+func (e *IPAllowListEntryOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2890,7 +2890,7 @@ func (e IPAllowListForInstalledAppsEnabledSettingValue) String() string {
 	return string(e)
 }
 
-func (e *IPAllowListForInstalledAppsEnabledSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *IPAllowListForInstalledAppsEnabledSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2937,7 +2937,7 @@ func (e IssueClosedStateReason) String() string {
 	return string(e)
 }
 
-func (e *IssueClosedStateReason) UnmarshalGQL(v interface{}) error {
+func (e *IssueClosedStateReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -2978,7 +2978,7 @@ func (e IssueCommentOrderField) String() string {
 	return string(e)
 }
 
-func (e *IssueCommentOrderField) UnmarshalGQL(v interface{}) error {
+func (e *IssueCommentOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3025,7 +3025,7 @@ func (e IssueOrderField) String() string {
 	return string(e)
 }
 
-func (e *IssueOrderField) UnmarshalGQL(v interface{}) error {
+func (e *IssueOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3069,7 +3069,7 @@ func (e IssueState) String() string {
 	return string(e)
 }
 
-func (e *IssueState) UnmarshalGQL(v interface{}) error {
+func (e *IssueState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3119,7 +3119,7 @@ func (e IssueStateReason) String() string {
 	return string(e)
 }
 
-func (e *IssueStateReason) UnmarshalGQL(v interface{}) error {
+func (e *IssueStateReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3250,7 +3250,7 @@ func (e IssueTimelineItemsItemType) String() string {
 	return string(e)
 }
 
-func (e *IssueTimelineItemsItemType) UnmarshalGQL(v interface{}) error {
+func (e *IssueTimelineItemsItemType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3294,7 +3294,7 @@ func (e LabelOrderField) String() string {
 	return string(e)
 }
 
-func (e *LabelOrderField) UnmarshalGQL(v interface{}) error {
+func (e *LabelOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3335,7 +3335,7 @@ func (e LanguageOrderField) String() string {
 	return string(e)
 }
 
-func (e *LanguageOrderField) UnmarshalGQL(v interface{}) error {
+func (e *LanguageOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3385,7 +3385,7 @@ func (e LockReason) String() string {
 	return string(e)
 }
 
-func (e *LockReason) UnmarshalGQL(v interface{}) error {
+func (e *LockReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3429,7 +3429,7 @@ func (e MannequinOrderField) String() string {
 	return string(e)
 }
 
-func (e *MannequinOrderField) UnmarshalGQL(v interface{}) error {
+func (e *MannequinOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3476,7 +3476,7 @@ func (e MergeCommitMessage) String() string {
 	return string(e)
 }
 
-func (e *MergeCommitMessage) UnmarshalGQL(v interface{}) error {
+func (e *MergeCommitMessage) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3520,7 +3520,7 @@ func (e MergeCommitTitle) String() string {
 	return string(e)
 }
 
-func (e *MergeCommitTitle) UnmarshalGQL(v interface{}) error {
+func (e *MergeCommitTitle) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3573,7 +3573,7 @@ func (e MergeQueueEntryState) String() string {
 	return string(e)
 }
 
-func (e *MergeQueueEntryState) UnmarshalGQL(v interface{}) error {
+func (e *MergeQueueEntryState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3617,7 +3617,7 @@ func (e MergeQueueGroupingStrategy) String() string {
 	return string(e)
 }
 
-func (e *MergeQueueGroupingStrategy) UnmarshalGQL(v interface{}) error {
+func (e *MergeQueueGroupingStrategy) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3664,7 +3664,7 @@ func (e MergeQueueMergeMethod) String() string {
 	return string(e)
 }
 
-func (e *MergeQueueMergeMethod) UnmarshalGQL(v interface{}) error {
+func (e *MergeQueueMergeMethod) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3708,7 +3708,7 @@ func (e MergeQueueMergingStrategy) String() string {
 	return string(e)
 }
 
-func (e *MergeQueueMergingStrategy) UnmarshalGQL(v interface{}) error {
+func (e *MergeQueueMergingStrategy) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3770,7 +3770,7 @@ func (e MergeStateStatus) String() string {
 	return string(e)
 }
 
-func (e *MergeStateStatus) UnmarshalGQL(v interface{}) error {
+func (e *MergeStateStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3817,7 +3817,7 @@ func (e MergeableState) String() string {
 	return string(e)
 }
 
-func (e *MergeableState) UnmarshalGQL(v interface{}) error {
+func (e *MergeableState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3864,7 +3864,7 @@ func (e MigrationSourceType) String() string {
 	return string(e)
 }
 
-func (e *MigrationSourceType) UnmarshalGQL(v interface{}) error {
+func (e *MigrationSourceType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3923,7 +3923,7 @@ func (e MigrationState) String() string {
 	return string(e)
 }
 
-func (e *MigrationState) UnmarshalGQL(v interface{}) error {
+func (e *MigrationState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -3973,7 +3973,7 @@ func (e MilestoneOrderField) String() string {
 	return string(e)
 }
 
-func (e *MilestoneOrderField) UnmarshalGQL(v interface{}) error {
+func (e *MilestoneOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4017,7 +4017,7 @@ func (e MilestoneState) String() string {
 	return string(e)
 }
 
-func (e *MilestoneState) UnmarshalGQL(v interface{}) error {
+func (e *MilestoneState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4061,7 +4061,7 @@ func (e NotificationRestrictionSettingValue) String() string {
 	return string(e)
 }
 
-func (e *NotificationRestrictionSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *NotificationRestrictionSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4102,7 +4102,7 @@ func (e OIDCProviderType) String() string {
 	return string(e)
 }
 
-func (e *OIDCProviderType) UnmarshalGQL(v interface{}) error {
+func (e *OIDCProviderType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4149,7 +4149,7 @@ func (e OauthApplicationCreateAuditEntryState) String() string {
 	return string(e)
 }
 
-func (e *OauthApplicationCreateAuditEntryState) UnmarshalGQL(v interface{}) error {
+func (e *OauthApplicationCreateAuditEntryState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4208,7 +4208,7 @@ func (e OperationType) String() string {
 	return string(e)
 }
 
-func (e *OperationType) UnmarshalGQL(v interface{}) error {
+func (e *OperationType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4252,7 +4252,7 @@ func (e OrderDirection) String() string {
 	return string(e)
 }
 
-func (e *OrderDirection) UnmarshalGQL(v interface{}) error {
+func (e *OrderDirection) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4296,7 +4296,7 @@ func (e OrgAddMemberAuditEntryPermission) String() string {
 	return string(e)
 }
 
-func (e *OrgAddMemberAuditEntryPermission) UnmarshalGQL(v interface{}) error {
+func (e *OrgAddMemberAuditEntryPermission) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4349,7 +4349,7 @@ func (e OrgCreateAuditEntryBillingPlan) String() string {
 	return string(e)
 }
 
-func (e *OrgCreateAuditEntryBillingPlan) UnmarshalGQL(v interface{}) error {
+func (e *OrgCreateAuditEntryBillingPlan) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4390,7 +4390,7 @@ func (e OrgEnterpriseOwnerOrderField) String() string {
 	return string(e)
 }
 
-func (e *OrgEnterpriseOwnerOrderField) UnmarshalGQL(v interface{}) error {
+func (e *OrgEnterpriseOwnerOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4437,7 +4437,7 @@ func (e OrgRemoveBillingManagerAuditEntryReason) String() string {
 	return string(e)
 }
 
-func (e *OrgRemoveBillingManagerAuditEntryReason) UnmarshalGQL(v interface{}) error {
+func (e *OrgRemoveBillingManagerAuditEntryReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4493,7 +4493,7 @@ func (e OrgRemoveMemberAuditEntryMembershipType) String() string {
 	return string(e)
 }
 
-func (e *OrgRemoveMemberAuditEntryMembershipType) UnmarshalGQL(v interface{}) error {
+func (e *OrgRemoveMemberAuditEntryMembershipType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4546,7 +4546,7 @@ func (e OrgRemoveMemberAuditEntryReason) String() string {
 	return string(e)
 }
 
-func (e *OrgRemoveMemberAuditEntryReason) UnmarshalGQL(v interface{}) error {
+func (e *OrgRemoveMemberAuditEntryReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4593,7 +4593,7 @@ func (e OrgRemoveOutsideCollaboratorAuditEntryMembershipType) String() string {
 	return string(e)
 }
 
-func (e *OrgRemoveOutsideCollaboratorAuditEntryMembershipType) UnmarshalGQL(v interface{}) error {
+func (e *OrgRemoveOutsideCollaboratorAuditEntryMembershipType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4637,7 +4637,7 @@ func (e OrgRemoveOutsideCollaboratorAuditEntryReason) String() string {
 	return string(e)
 }
 
-func (e *OrgRemoveOutsideCollaboratorAuditEntryReason) UnmarshalGQL(v interface{}) error {
+func (e *OrgRemoveOutsideCollaboratorAuditEntryReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4687,7 +4687,7 @@ func (e OrgUpdateDefaultRepositoryPermissionAuditEntryPermission) String() strin
 	return string(e)
 }
 
-func (e *OrgUpdateDefaultRepositoryPermissionAuditEntryPermission) UnmarshalGQL(v interface{}) error {
+func (e *OrgUpdateDefaultRepositoryPermissionAuditEntryPermission) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4731,7 +4731,7 @@ func (e OrgUpdateMemberAuditEntryPermission) String() string {
 	return string(e)
 }
 
-func (e *OrgUpdateMemberAuditEntryPermission) UnmarshalGQL(v interface{}) error {
+func (e *OrgUpdateMemberAuditEntryPermission) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4793,7 +4793,7 @@ func (e OrgUpdateMemberRepositoryCreationPermissionAuditEntryVisibility) String(
 	return string(e)
 }
 
-func (e *OrgUpdateMemberRepositoryCreationPermissionAuditEntryVisibility) UnmarshalGQL(v interface{}) error {
+func (e *OrgUpdateMemberRepositoryCreationPermissionAuditEntryVisibility) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4843,7 +4843,7 @@ func (e OrganizationInvitationRole) String() string {
 	return string(e)
 }
 
-func (e *OrganizationInvitationRole) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationInvitationRole) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4890,7 +4890,7 @@ func (e OrganizationInvitationSource) String() string {
 	return string(e)
 }
 
-func (e *OrganizationInvitationSource) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationInvitationSource) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4934,7 +4934,7 @@ func (e OrganizationInvitationType) String() string {
 	return string(e)
 }
 
-func (e *OrganizationInvitationType) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationInvitationType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -4978,7 +4978,7 @@ func (e OrganizationMemberRole) String() string {
 	return string(e)
 }
 
-func (e *OrganizationMemberRole) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationMemberRole) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5028,7 +5028,7 @@ func (e OrganizationMembersCanCreateRepositoriesSettingValue) String() string {
 	return string(e)
 }
 
-func (e *OrganizationMembersCanCreateRepositoriesSettingValue) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationMembersCanCreateRepositoriesSettingValue) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5096,7 +5096,7 @@ func (e OrganizationMigrationState) String() string {
 	return string(e)
 }
 
-func (e *OrganizationMigrationState) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationMigrationState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5140,7 +5140,7 @@ func (e OrganizationOrderField) String() string {
 	return string(e)
 }
 
-func (e *OrganizationOrderField) UnmarshalGQL(v interface{}) error {
+func (e *OrganizationOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5181,7 +5181,7 @@ func (e PackageFileOrderField) String() string {
 	return string(e)
 }
 
-func (e *PackageFileOrderField) UnmarshalGQL(v interface{}) error {
+func (e *PackageFileOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5222,7 +5222,7 @@ func (e PackageOrderField) String() string {
 	return string(e)
 }
 
-func (e *PackageOrderField) UnmarshalGQL(v interface{}) error {
+func (e *PackageOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5281,7 +5281,7 @@ func (e PackageType) String() string {
 	return string(e)
 }
 
-func (e *PackageType) UnmarshalGQL(v interface{}) error {
+func (e *PackageType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5322,7 +5322,7 @@ func (e PackageVersionOrderField) String() string {
 	return string(e)
 }
 
-func (e *PackageVersionOrderField) UnmarshalGQL(v interface{}) error {
+func (e *PackageVersionOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5378,7 +5378,7 @@ func (e PatchStatus) String() string {
 	return string(e)
 }
 
-func (e *PatchStatus) UnmarshalGQL(v interface{}) error {
+func (e *PatchStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5440,7 +5440,7 @@ func (e PinnableItemType) String() string {
 	return string(e)
 }
 
-func (e *PinnableItemType) UnmarshalGQL(v interface{}) error {
+func (e *PinnableItemType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5493,7 +5493,7 @@ func (e PinnedDiscussionGradient) String() string {
 	return string(e)
 }
 
-func (e *PinnedDiscussionGradient) UnmarshalGQL(v interface{}) error {
+func (e *PinnedDiscussionGradient) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5549,7 +5549,7 @@ func (e PinnedDiscussionPattern) String() string {
 	return string(e)
 }
 
-func (e *PinnedDiscussionPattern) UnmarshalGQL(v interface{}) error {
+func (e *PinnedDiscussionPattern) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5590,7 +5590,7 @@ func (e PinnedEnvironmentOrderField) String() string {
 	return string(e)
 }
 
-func (e *PinnedEnvironmentOrderField) UnmarshalGQL(v interface{}) error {
+func (e *PinnedEnvironmentOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5634,7 +5634,7 @@ func (e ProjectCardArchivedState) String() string {
 	return string(e)
 }
 
-func (e *ProjectCardArchivedState) UnmarshalGQL(v interface{}) error {
+func (e *ProjectCardArchivedState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5681,7 +5681,7 @@ func (e ProjectCardState) String() string {
 	return string(e)
 }
 
-func (e *ProjectCardState) UnmarshalGQL(v interface{}) error {
+func (e *ProjectCardState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5728,7 +5728,7 @@ func (e ProjectColumnPurpose) String() string {
 	return string(e)
 }
 
-func (e *ProjectColumnPurpose) UnmarshalGQL(v interface{}) error {
+func (e *ProjectColumnPurpose) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5775,7 +5775,7 @@ func (e ProjectOrderField) String() string {
 	return string(e)
 }
 
-func (e *ProjectOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ProjectOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5819,7 +5819,7 @@ func (e ProjectState) String() string {
 	return string(e)
 }
 
-func (e *ProjectState) UnmarshalGQL(v interface{}) error {
+func (e *ProjectState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5869,7 +5869,7 @@ func (e ProjectTemplate) String() string {
 	return string(e)
 }
 
-func (e *ProjectTemplate) UnmarshalGQL(v interface{}) error {
+func (e *ProjectTemplate) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5919,7 +5919,7 @@ func (e ProjectV2CustomFieldType) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2CustomFieldType) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2CustomFieldType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -5966,7 +5966,7 @@ func (e ProjectV2FieldOrderField) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2FieldOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2FieldOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6046,7 +6046,7 @@ func (e ProjectV2FieldType) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2FieldType) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2FieldType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6087,7 +6087,7 @@ func (e ProjectV2ItemFieldValueOrderField) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2ItemFieldValueOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2ItemFieldValueOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6128,7 +6128,7 @@ func (e ProjectV2ItemOrderField) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2ItemOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2ItemOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6178,7 +6178,7 @@ func (e ProjectV2ItemType) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2ItemType) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2ItemType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6228,7 +6228,7 @@ func (e ProjectV2OrderField) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2OrderField) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2OrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6275,7 +6275,7 @@ func (e ProjectV2PermissionLevel) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2PermissionLevel) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2PermissionLevel) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6325,7 +6325,7 @@ func (e ProjectV2Roles) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2Roles) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2Roles) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6387,7 +6387,7 @@ func (e ProjectV2SingleSelectFieldOptionColor) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2SingleSelectFieldOptionColor) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2SingleSelectFieldOptionColor) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6431,7 +6431,7 @@ func (e ProjectV2State) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2State) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2State) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6472,7 +6472,7 @@ func (e ProjectV2StatusUpdateOrderField) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2StatusUpdateOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2StatusUpdateOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6525,7 +6525,7 @@ func (e ProjectV2StatusUpdateStatus) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2StatusUpdateStatus) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2StatusUpdateStatus) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6572,7 +6572,7 @@ func (e ProjectV2ViewLayout) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2ViewLayout) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2ViewLayout) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6619,7 +6619,7 @@ func (e ProjectV2ViewOrderField) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2ViewOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2ViewOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6669,7 +6669,7 @@ func (e ProjectV2WorkflowsOrderField) String() string {
 	return string(e)
 }
 
-func (e *ProjectV2WorkflowsOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ProjectV2WorkflowsOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6713,7 +6713,7 @@ func (e PullRequestBranchUpdateMethod) String() string {
 	return string(e)
 }
 
-func (e *PullRequestBranchUpdateMethod) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestBranchUpdateMethod) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6760,7 +6760,7 @@ func (e PullRequestMergeMethod) String() string {
 	return string(e)
 }
 
-func (e *PullRequestMergeMethod) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestMergeMethod) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6804,7 +6804,7 @@ func (e PullRequestOrderField) String() string {
 	return string(e)
 }
 
-func (e *PullRequestOrderField) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6848,7 +6848,7 @@ func (e PullRequestReviewCommentState) String() string {
 	return string(e)
 }
 
-func (e *PullRequestReviewCommentState) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestReviewCommentState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6895,7 +6895,7 @@ func (e PullRequestReviewDecision) String() string {
 	return string(e)
 }
 
-func (e *PullRequestReviewDecision) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestReviewDecision) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6945,7 +6945,7 @@ func (e PullRequestReviewEvent) String() string {
 	return string(e)
 }
 
-func (e *PullRequestReviewEvent) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestReviewEvent) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -6998,7 +6998,7 @@ func (e PullRequestReviewState) String() string {
 	return string(e)
 }
 
-func (e *PullRequestReviewState) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestReviewState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7042,7 +7042,7 @@ func (e PullRequestReviewThreadSubjectType) String() string {
 	return string(e)
 }
 
-func (e *PullRequestReviewThreadSubjectType) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestReviewThreadSubjectType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7089,7 +7089,7 @@ func (e PullRequestState) String() string {
 	return string(e)
 }
 
-func (e *PullRequestState) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7301,7 +7301,7 @@ func (e PullRequestTimelineItemsItemType) String() string {
 	return string(e)
 }
 
-func (e *PullRequestTimelineItemsItemType) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestTimelineItemsItemType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7345,7 +7345,7 @@ func (e PullRequestUpdateState) String() string {
 	return string(e)
 }
 
-func (e *PullRequestUpdateState) UnmarshalGQL(v interface{}) error {
+func (e *PullRequestUpdateState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7407,7 +7407,7 @@ func (e ReactionContent) String() string {
 	return string(e)
 }
 
-func (e *ReactionContent) UnmarshalGQL(v interface{}) error {
+func (e *ReactionContent) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7448,7 +7448,7 @@ func (e ReactionOrderField) String() string {
 	return string(e)
 }
 
-func (e *ReactionOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ReactionOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7492,7 +7492,7 @@ func (e RefOrderField) String() string {
 	return string(e)
 }
 
-func (e *RefOrderField) UnmarshalGQL(v interface{}) error {
+func (e *RefOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7536,7 +7536,7 @@ func (e ReleaseOrderField) String() string {
 	return string(e)
 }
 
-func (e *ReleaseOrderField) UnmarshalGQL(v interface{}) error {
+func (e *ReleaseOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7583,7 +7583,7 @@ func (e RepoAccessAuditEntryVisibility) String() string {
 	return string(e)
 }
 
-func (e *RepoAccessAuditEntryVisibility) UnmarshalGQL(v interface{}) error {
+func (e *RepoAccessAuditEntryVisibility) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7630,7 +7630,7 @@ func (e RepoAddMemberAuditEntryVisibility) String() string {
 	return string(e)
 }
 
-func (e *RepoAddMemberAuditEntryVisibility) UnmarshalGQL(v interface{}) error {
+func (e *RepoAddMemberAuditEntryVisibility) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7677,7 +7677,7 @@ func (e RepoArchivedAuditEntryVisibility) String() string {
 	return string(e)
 }
 
-func (e *RepoArchivedAuditEntryVisibility) UnmarshalGQL(v interface{}) error {
+func (e *RepoArchivedAuditEntryVisibility) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7724,7 +7724,7 @@ func (e RepoChangeMergeSettingAuditEntryMergeType) String() string {
 	return string(e)
 }
 
-func (e *RepoChangeMergeSettingAuditEntryMergeType) UnmarshalGQL(v interface{}) error {
+func (e *RepoChangeMergeSettingAuditEntryMergeType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7771,7 +7771,7 @@ func (e RepoCreateAuditEntryVisibility) String() string {
 	return string(e)
 }
 
-func (e *RepoCreateAuditEntryVisibility) UnmarshalGQL(v interface{}) error {
+func (e *RepoCreateAuditEntryVisibility) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7818,7 +7818,7 @@ func (e RepoDestroyAuditEntryVisibility) String() string {
 	return string(e)
 }
 
-func (e *RepoDestroyAuditEntryVisibility) UnmarshalGQL(v interface{}) error {
+func (e *RepoDestroyAuditEntryVisibility) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7865,7 +7865,7 @@ func (e RepoRemoveMemberAuditEntryVisibility) String() string {
 	return string(e)
 }
 
-func (e *RepoRemoveMemberAuditEntryVisibility) UnmarshalGQL(v interface{}) error {
+func (e *RepoRemoveMemberAuditEntryVisibility) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7921,7 +7921,7 @@ func (e ReportedContentClassifiers) String() string {
 	return string(e)
 }
 
-func (e *ReportedContentClassifiers) UnmarshalGQL(v interface{}) error {
+func (e *ReportedContentClassifiers) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -7968,7 +7968,7 @@ func (e RepositoryAffiliation) String() string {
 	return string(e)
 }
 
-func (e *RepositoryAffiliation) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryAffiliation) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8021,7 +8021,7 @@ func (e RepositoryContributionType) String() string {
 	return string(e)
 }
 
-func (e *RepositoryContributionType) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryContributionType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8071,7 +8071,7 @@ func (e RepositoryInteractionLimit) String() string {
 	return string(e)
 }
 
-func (e *RepositoryInteractionLimit) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryInteractionLimit) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8124,7 +8124,7 @@ func (e RepositoryInteractionLimitExpiry) String() string {
 	return string(e)
 }
 
-func (e *RepositoryInteractionLimitExpiry) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryInteractionLimitExpiry) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8171,7 +8171,7 @@ func (e RepositoryInteractionLimitOrigin) String() string {
 	return string(e)
 }
 
-func (e *RepositoryInteractionLimitOrigin) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryInteractionLimitOrigin) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8212,7 +8212,7 @@ func (e RepositoryInvitationOrderField) String() string {
 	return string(e)
 }
 
-func (e *RepositoryInvitationOrderField) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryInvitationOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8268,7 +8268,7 @@ func (e RepositoryLockReason) String() string {
 	return string(e)
 }
 
-func (e *RepositoryLockReason) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryLockReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8312,7 +8312,7 @@ func (e RepositoryMigrationOrderDirection) String() string {
 	return string(e)
 }
 
-func (e *RepositoryMigrationOrderDirection) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryMigrationOrderDirection) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8353,7 +8353,7 @@ func (e RepositoryMigrationOrderField) String() string {
 	return string(e)
 }
 
-func (e *RepositoryMigrationOrderField) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryMigrationOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8406,7 +8406,7 @@ func (e RepositoryOrderField) String() string {
 	return string(e)
 }
 
-func (e *RepositoryOrderField) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8459,7 +8459,7 @@ func (e RepositoryPermission) String() string {
 	return string(e)
 }
 
-func (e *RepositoryPermission) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryPermission) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8503,7 +8503,7 @@ func (e RepositoryPrivacy) String() string {
 	return string(e)
 }
 
-func (e *RepositoryPrivacy) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryPrivacy) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8550,7 +8550,7 @@ func (e RepositoryRuleOrderField) String() string {
 	return string(e)
 }
 
-func (e *RepositoryRuleOrderField) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryRuleOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8678,7 +8678,7 @@ func (e RepositoryRuleType) String() string {
 	return string(e)
 }
 
-func (e *RepositoryRuleType) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryRuleType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8722,7 +8722,7 @@ func (e RepositoryRulesetBypassActorBypassMode) String() string {
 	return string(e)
 }
 
-func (e *RepositoryRulesetBypassActorBypassMode) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryRulesetBypassActorBypassMode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8769,7 +8769,7 @@ func (e RepositoryRulesetTarget) String() string {
 	return string(e)
 }
 
-func (e *RepositoryRulesetTarget) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryRulesetTarget) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8816,7 +8816,7 @@ func (e RepositoryVisibility) String() string {
 	return string(e)
 }
 
-func (e *RepositoryVisibility) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryVisibility) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8860,7 +8860,7 @@ func (e RepositoryVulnerabilityAlertDependencyScope) String() string {
 	return string(e)
 }
 
-func (e *RepositoryVulnerabilityAlertDependencyScope) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryVulnerabilityAlertDependencyScope) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8910,7 +8910,7 @@ func (e RepositoryVulnerabilityAlertState) String() string {
 	return string(e)
 }
 
-func (e *RepositoryVulnerabilityAlertState) UnmarshalGQL(v interface{}) error {
+func (e *RepositoryVulnerabilityAlertState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -8963,7 +8963,7 @@ func (e RequestableCheckStatusState) String() string {
 	return string(e)
 }
 
-func (e *RequestableCheckStatusState) UnmarshalGQL(v interface{}) error {
+func (e *RequestableCheckStatusState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9010,7 +9010,7 @@ func (e RoleInOrganization) String() string {
 	return string(e)
 }
 
-func (e *RoleInOrganization) UnmarshalGQL(v interface{}) error {
+func (e *RoleInOrganization) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9057,7 +9057,7 @@ func (e RuleEnforcement) String() string {
 	return string(e)
 }
 
-func (e *RuleEnforcement) UnmarshalGQL(v interface{}) error {
+func (e *RuleEnforcement) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9107,7 +9107,7 @@ func (e SamlDigestAlgorithm) String() string {
 	return string(e)
 }
 
-func (e *SamlDigestAlgorithm) UnmarshalGQL(v interface{}) error {
+func (e *SamlDigestAlgorithm) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9157,7 +9157,7 @@ func (e SamlSignatureAlgorithm) String() string {
 	return string(e)
 }
 
-func (e *SamlSignatureAlgorithm) UnmarshalGQL(v interface{}) error {
+func (e *SamlSignatureAlgorithm) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9198,7 +9198,7 @@ func (e SavedReplyOrderField) String() string {
 	return string(e)
 }
 
-func (e *SavedReplyOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SavedReplyOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9248,7 +9248,7 @@ func (e SearchType) String() string {
 	return string(e)
 }
 
-func (e *SearchType) UnmarshalGQL(v interface{}) error {
+func (e *SearchType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9292,7 +9292,7 @@ func (e SecurityAdvisoryClassification) String() string {
 	return string(e)
 }
 
-func (e *SecurityAdvisoryClassification) UnmarshalGQL(v interface{}) error {
+func (e *SecurityAdvisoryClassification) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9366,7 +9366,7 @@ func (e SecurityAdvisoryEcosystem) String() string {
 	return string(e)
 }
 
-func (e *SecurityAdvisoryEcosystem) UnmarshalGQL(v interface{}) error {
+func (e *SecurityAdvisoryEcosystem) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9410,7 +9410,7 @@ func (e SecurityAdvisoryIdentifierType) String() string {
 	return string(e)
 }
 
-func (e *SecurityAdvisoryIdentifierType) UnmarshalGQL(v interface{}) error {
+func (e *SecurityAdvisoryIdentifierType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9460,7 +9460,7 @@ func (e SecurityAdvisoryOrderField) String() string {
 	return string(e)
 }
 
-func (e *SecurityAdvisoryOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SecurityAdvisoryOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9510,7 +9510,7 @@ func (e SecurityAdvisorySeverity) String() string {
 	return string(e)
 }
 
-func (e *SecurityAdvisorySeverity) UnmarshalGQL(v interface{}) error {
+func (e *SecurityAdvisorySeverity) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9551,7 +9551,7 @@ func (e SecurityVulnerabilityOrderField) String() string {
 	return string(e)
 }
 
-func (e *SecurityVulnerabilityOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SecurityVulnerabilityOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9625,7 +9625,7 @@ func (e SocialAccountProvider) String() string {
 	return string(e)
 }
 
-func (e *SocialAccountProvider) UnmarshalGQL(v interface{}) error {
+func (e *SocialAccountProvider) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9672,7 +9672,7 @@ func (e SponsorAndLifetimeValueOrderField) String() string {
 	return string(e)
 }
 
-func (e *SponsorAndLifetimeValueOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SponsorAndLifetimeValueOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9716,7 +9716,7 @@ func (e SponsorOrderField) String() string {
 	return string(e)
 }
 
-func (e *SponsorOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SponsorOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9757,7 +9757,7 @@ func (e SponsorableOrderField) String() string {
 	return string(e)
 }
 
-func (e *SponsorableOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SponsorableOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9813,7 +9813,7 @@ func (e SponsorsActivityAction) String() string {
 	return string(e)
 }
 
-func (e *SponsorsActivityAction) UnmarshalGQL(v interface{}) error {
+func (e *SponsorsActivityAction) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9854,7 +9854,7 @@ func (e SponsorsActivityOrderField) String() string {
 	return string(e)
 }
 
-func (e *SponsorsActivityOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SponsorsActivityOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -9904,7 +9904,7 @@ func (e SponsorsActivityPeriod) String() string {
 	return string(e)
 }
 
-func (e *SponsorsActivityPeriod) UnmarshalGQL(v interface{}) error {
+func (e *SponsorsActivityPeriod) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10680,7 +10680,7 @@ func (e SponsorsCountryOrRegionCode) String() string {
 	return string(e)
 }
 
-func (e *SponsorsCountryOrRegionCode) UnmarshalGQL(v interface{}) error {
+func (e *SponsorsCountryOrRegionCode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10724,7 +10724,7 @@ func (e SponsorsGoalKind) String() string {
 	return string(e)
 }
 
-func (e *SponsorsGoalKind) UnmarshalGQL(v interface{}) error {
+func (e *SponsorsGoalKind) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10768,7 +10768,7 @@ func (e SponsorsListingFeaturedItemFeatureableType) String() string {
 	return string(e)
 }
 
-func (e *SponsorsListingFeaturedItemFeatureableType) UnmarshalGQL(v interface{}) error {
+func (e *SponsorsListingFeaturedItemFeatureableType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10812,7 +10812,7 @@ func (e SponsorsTierOrderField) String() string {
 	return string(e)
 }
 
-func (e *SponsorsTierOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SponsorsTierOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10853,7 +10853,7 @@ func (e SponsorshipNewsletterOrderField) String() string {
 	return string(e)
 }
 
-func (e *SponsorshipNewsletterOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SponsorshipNewsletterOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10894,7 +10894,7 @@ func (e SponsorshipOrderField) String() string {
 	return string(e)
 }
 
-func (e *SponsorshipOrderField) UnmarshalGQL(v interface{}) error {
+func (e *SponsorshipOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10938,7 +10938,7 @@ func (e SponsorshipPaymentSource) String() string {
 	return string(e)
 }
 
-func (e *SponsorshipPaymentSource) UnmarshalGQL(v interface{}) error {
+func (e *SponsorshipPaymentSource) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -10982,7 +10982,7 @@ func (e SponsorshipPrivacy) String() string {
 	return string(e)
 }
 
-func (e *SponsorshipPrivacy) UnmarshalGQL(v interface{}) error {
+func (e *SponsorshipPrivacy) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11029,7 +11029,7 @@ func (e SquashMergeCommitMessage) String() string {
 	return string(e)
 }
 
-func (e *SquashMergeCommitMessage) UnmarshalGQL(v interface{}) error {
+func (e *SquashMergeCommitMessage) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11073,7 +11073,7 @@ func (e SquashMergeCommitTitle) String() string {
 	return string(e)
 }
 
-func (e *SquashMergeCommitTitle) UnmarshalGQL(v interface{}) error {
+func (e *SquashMergeCommitTitle) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11114,7 +11114,7 @@ func (e StarOrderField) String() string {
 	return string(e)
 }
 
-func (e *StarOrderField) UnmarshalGQL(v interface{}) error {
+func (e *StarOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11167,7 +11167,7 @@ func (e StatusState) String() string {
 	return string(e)
 }
 
-func (e *StatusState) UnmarshalGQL(v interface{}) error {
+func (e *StatusState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11214,7 +11214,7 @@ func (e SubscriptionState) String() string {
 	return string(e)
 }
 
-func (e *SubscriptionState) UnmarshalGQL(v interface{}) error {
+func (e *SubscriptionState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11255,7 +11255,7 @@ func (e TeamDiscussionCommentOrderField) String() string {
 	return string(e)
 }
 
-func (e *TeamDiscussionCommentOrderField) UnmarshalGQL(v interface{}) error {
+func (e *TeamDiscussionCommentOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11296,7 +11296,7 @@ func (e TeamDiscussionOrderField) String() string {
 	return string(e)
 }
 
-func (e *TeamDiscussionOrderField) UnmarshalGQL(v interface{}) error {
+func (e *TeamDiscussionOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11340,7 +11340,7 @@ func (e TeamMemberOrderField) String() string {
 	return string(e)
 }
 
-func (e *TeamMemberOrderField) UnmarshalGQL(v interface{}) error {
+func (e *TeamMemberOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11384,7 +11384,7 @@ func (e TeamMemberRole) String() string {
 	return string(e)
 }
 
-func (e *TeamMemberRole) UnmarshalGQL(v interface{}) error {
+func (e *TeamMemberRole) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11431,7 +11431,7 @@ func (e TeamMembershipType) String() string {
 	return string(e)
 }
 
-func (e *TeamMembershipType) UnmarshalGQL(v interface{}) error {
+func (e *TeamMembershipType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11475,7 +11475,7 @@ func (e TeamNotificationSetting) String() string {
 	return string(e)
 }
 
-func (e *TeamNotificationSetting) UnmarshalGQL(v interface{}) error {
+func (e *TeamNotificationSetting) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11516,7 +11516,7 @@ func (e TeamOrderField) String() string {
 	return string(e)
 }
 
-func (e *TeamOrderField) UnmarshalGQL(v interface{}) error {
+func (e *TeamOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11560,7 +11560,7 @@ func (e TeamPrivacy) String() string {
 	return string(e)
 }
 
-func (e *TeamPrivacy) UnmarshalGQL(v interface{}) error {
+func (e *TeamPrivacy) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11616,7 +11616,7 @@ func (e TeamRepositoryOrderField) String() string {
 	return string(e)
 }
 
-func (e *TeamRepositoryOrderField) UnmarshalGQL(v interface{}) error {
+func (e *TeamRepositoryOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11660,7 +11660,7 @@ func (e TeamReviewAssignmentAlgorithm) String() string {
 	return string(e)
 }
 
-func (e *TeamReviewAssignmentAlgorithm) UnmarshalGQL(v interface{}) error {
+func (e *TeamReviewAssignmentAlgorithm) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11704,7 +11704,7 @@ func (e TeamRole) String() string {
 	return string(e)
 }
 
-func (e *TeamRole) UnmarshalGQL(v interface{}) error {
+func (e *TeamRole) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11751,7 +11751,7 @@ func (e ThreadSubscriptionFormAction) String() string {
 	return string(e)
 }
 
-func (e *ThreadSubscriptionFormAction) UnmarshalGQL(v interface{}) error {
+func (e *ThreadSubscriptionFormAction) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11816,7 +11816,7 @@ func (e ThreadSubscriptionState) String() string {
 	return string(e)
 }
 
-func (e *ThreadSubscriptionState) UnmarshalGQL(v interface{}) error {
+func (e *ThreadSubscriptionState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11866,7 +11866,7 @@ func (e TopicSuggestionDeclineReason) String() string {
 	return string(e)
 }
 
-func (e *TopicSuggestionDeclineReason) UnmarshalGQL(v interface{}) error {
+func (e *TopicSuggestionDeclineReason) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11910,7 +11910,7 @@ func (e TrackedIssueStates) String() string {
 	return string(e)
 }
 
-func (e *TrackedIssueStates) UnmarshalGQL(v interface{}) error {
+func (e *TrackedIssueStates) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -11957,7 +11957,7 @@ func (e TwoFactorCredentialSecurityType) String() string {
 	return string(e)
 }
 
-func (e *TwoFactorCredentialSecurityType) UnmarshalGQL(v interface{}) error {
+func (e *TwoFactorCredentialSecurityType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12010,7 +12010,7 @@ func (e UserBlockDuration) String() string {
 	return string(e)
 }
 
-func (e *UserBlockDuration) UnmarshalGQL(v interface{}) error {
+func (e *UserBlockDuration) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12051,7 +12051,7 @@ func (e UserStatusOrderField) String() string {
 	return string(e)
 }
 
-func (e *UserStatusOrderField) UnmarshalGQL(v interface{}) error {
+func (e *UserStatusOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12095,7 +12095,7 @@ func (e UserViewType) String() string {
 	return string(e)
 }
 
-func (e *UserViewType) UnmarshalGQL(v interface{}) error {
+func (e *UserViewType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12139,7 +12139,7 @@ func (e VerifiableDomainOrderField) String() string {
 	return string(e)
 }
 
-func (e *VerifiableDomainOrderField) UnmarshalGQL(v interface{}) error {
+func (e *VerifiableDomainOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12180,7 +12180,7 @@ func (e WorkflowRunOrderField) String() string {
 	return string(e)
 }
 
-func (e *WorkflowRunOrderField) UnmarshalGQL(v interface{}) error {
+func (e *WorkflowRunOrderField) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -12233,7 +12233,7 @@ func (e WorkflowState) String() string {
 	return string(e)
 }
 
-func (e *WorkflowState) UnmarshalGQL(v interface{}) error {
+func (e *WorkflowState) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")

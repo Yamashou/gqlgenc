@@ -13,7 +13,7 @@ const (
 	NumberTwo Number = 2
 )
 
-func (n *Number) UnmarshalGQL(v interface{}) error {
+func (n *Number) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")

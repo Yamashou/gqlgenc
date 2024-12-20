@@ -135,7 +135,7 @@ type mockRemoteServer struct {
 	body []byte
 }
 
-func newMockRemoteServer(t *testing.T, response interface{}) (mock *mockRemoteServer, closeServer func()) {
+func newMockRemoteServer(t *testing.T, response any) (mock *mockRemoteServer, closeServer func()) {
 	t.Helper()
 
 	mock = &mockRemoteServer{

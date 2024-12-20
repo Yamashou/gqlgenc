@@ -568,7 +568,7 @@ func TestUnmarshalGraphQL_jsonRawMessageInFragment(t *testing.T) {
 func TestUnmarshalGraphQL_map(t *testing.T) {
 	t.Parallel()
 	type query struct {
-		Outputs map[string]interface{}
+		Outputs map[string]any
 	}
 	var got query
 	err := graphqljson.UnmarshalData([]byte(`{
@@ -581,7 +581,7 @@ func TestUnmarshalGraphQL_map(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := query{
-		map[string]interface{}{
+		map[string]any{
 			"vpc":             "1",
 			"worker_role_arn": "2",
 		},

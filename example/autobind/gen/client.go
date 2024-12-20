@@ -64,7 +64,7 @@ const GetUserProfileNameDocument = `query GetUserProfileName {
 `
 
 func (c *Client) GetUserProfileName(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetUserProfileName, error) {
-	vars := map[string]interface{}{}
+	vars := map[string]any{}
 
 	var res GetUserProfileName
 	if err := c.Client.Post(ctx, "GetUserProfileName", GetUserProfileNameDocument, &res, vars, interceptors...); err != nil {

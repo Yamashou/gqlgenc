@@ -41,7 +41,7 @@ func TestReturnTypeName(t *testing.T) {
 			name:     "Interface",
 			input:    types.NewInterfaceType(nil, nil).Complete(),
 			nested:   false,
-			expected: "interface{}",
+			expected: "any",
 		},
 		{
 			name:     "Map",
