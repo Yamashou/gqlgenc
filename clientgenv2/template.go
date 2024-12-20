@@ -73,6 +73,8 @@ func (g *GenGettersGenerator) returnTypeName(t types.Type, nested bool) string {
 		return "any"
 	case *types.Map:
 		return "map[" + g.returnTypeName(it.Key(), true) + "]" + g.returnTypeName(it.Elem(), true)
+	case *types.Alias:
+		return g.returnTypeName(it.Underlying(), nested)
 	default:
 		return fmt.Sprintf("%T----", it)
 	}
