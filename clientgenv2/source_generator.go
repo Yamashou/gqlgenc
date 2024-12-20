@@ -141,20 +141,23 @@ func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields Respons
 	return targetFields
 }
 
-func (g *StructGenerator) GetCurrentResponseFieldList() *ResponseFieldList {
-	return g.currentResponseFieldList
-}
+func (g *StructGenerator) MergedStructSources(sources []*StructSource) []*StructSource {
+	res := sources
+	// remove pre-merged struct
+	for _, preMergedTypeName := range g.preMergedStructSources {
+		for i, source := range res {
+			// when name is same, remove it
+			if source.Name == preMergedTypeName.Name {
+				res = append(res[:i], res[i+1:]...)
+				break
+			}
+		}
+	}
 
-func (g *StructGenerator) GetFragmentStructSources() []*StructSource {
-	return g.fragmentStructSources
-}
+	// append post-merged struct
+	res = append(res, g.postMergedStructSources...)
 
-func (g *StructGenerator) GetPreMergedStructSources() []*StructSource {
-	return g.preMergedStructSources
-}
-
-func (g *StructGenerator) GetPostMergedStructSources() []*StructSource {
-	return g.postMergedStructSources
+	return res
 }
 
 type StructSource struct {
@@ -215,19 +218,8 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			// if there is a fragment in child fields, merge it with the current field
 			generator := NewStructGenerator(fieldsResponseFields)
 
-			// remove pre-merged struct
-			for _, preMergedTypeName := range generator.GetPreMergedStructSources() {
-				for i, source := range r.StructSources {
-					// when name is same, remove it
-					if source.Name == preMergedTypeName.Name {
-						r.StructSources = append(r.StructSources[:i], r.StructSources[i+1:]...)
-						break
-					}
-				}
-			}
-
-			// append post-merged struct
-			r.StructSources = append(r.StructSources, generator.GetPostMergedStructSources()...)
+			// restruct struct sources
+			r.StructSources = generator.MergedStructSources(r.StructSources)
 
 			// append current struct
 			structType := fieldsResponseFields.StructType()
