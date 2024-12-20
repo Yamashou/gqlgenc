@@ -103,9 +103,16 @@ func collectInputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, 
 	for _, field := range def.Fields {
 		var typeName string
 		// リスト型の要素型まで辿る
-		for field.Type != nil && field.Type.NamedType != "" {
+		switch {
+		case field.Type == nil:
+			// No type, nothing to do
+			continue
+		case field.Type.Elem != nil:
+			// Handle slices
+			typeName = field.Type.Elem.NamedType
+		case field.Type.NamedType != "":
+			// Handle scalar named types
 			typeName = field.Type.NamedType
-			break
 		}
 
 		if typeName != "" {
