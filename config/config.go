@@ -265,7 +265,7 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 }
 
 func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
-	addHeaderInterceptor := func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res interface{}, next clientv2.RequestInterceptorFunc) error {
+	addHeaderInterceptor := func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res any, next clientv2.RequestInterceptorFunc) error {
 		for key, value := range c.Endpoint.Headers {
 			req.Header.Set(key, value)
 		}

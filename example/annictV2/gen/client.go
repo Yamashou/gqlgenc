@@ -186,7 +186,7 @@ const CreateRecordMutationQuery = `mutation CreateRecordMutation ($episodeId: ID
 `
 
 func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, interceptors ...clientv2.RequestInterceptor) (*HogeCreateRecordMutationPayload, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"episodeId": episodeID,
 	}
 
@@ -206,7 +206,7 @@ const UpdateStatusMutationQuery = `mutation UpdateStatusMutation ($state: Status
 `
 
 func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, workID string, interceptors ...clientv2.RequestInterceptor) (*HogeUpdateStatusMutationPayload, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"state":  state,
 		"workId": workID,
 	}
@@ -227,7 +227,7 @@ const UpdateWorkStatusQuery = `mutation UpdateWorkStatus ($workId: ID!) {
 `
 
 func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, interceptors ...clientv2.RequestInterceptor) (*HogeUpdateWorkStatusPayload, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"workId": workID,
 	}
 
@@ -254,7 +254,7 @@ fragment ViewerFragment on User {
 `
 
 func (c *Client) GetProfile(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetProfile, error) {
-	vars := map[string]interface{}{}
+	vars := map[string]any{}
 
 	var res GetProfile
 	if err := c.Client.Post(ctx, "GetProfile", GetProfileQuery, &res, vars, interceptors...); err != nil {
@@ -298,7 +298,7 @@ fragment WorkFragment on Work {
 `
 
 func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *string, n int64, interceptors ...clientv2.RequestInterceptor) (*ListWorks, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"state": state,
 		"after": after,
 		"n":     n,
@@ -351,7 +351,7 @@ fragment WorkFragment on Work {
 `
 
 func (c *Client) ListRecords(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListRecords, error) {
-	vars := map[string]interface{}{}
+	vars := map[string]any{}
 
 	var res ListRecords
 	if err := c.Client.Post(ctx, "ListRecords", ListRecordsQuery, &res, vars, interceptors...); err != nil {
@@ -389,7 +389,7 @@ const ListNextEpisodesQuery = `query ListNextEpisodes {
 `
 
 func (c *Client) ListNextEpisodes(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListNextEpisodes, error) {
-	vars := map[string]interface{}{}
+	vars := map[string]any{}
 
 	var res ListNextEpisodes
 	if err := c.Client.Post(ctx, "ListNextEpisodes", ListNextEpisodesQuery, &res, vars, interceptors...); err != nil {
@@ -428,7 +428,7 @@ fragment WorkFragment on Work {
 `
 
 func (c *Client) GetWork(ctx context.Context, ids []int64, interceptors ...clientv2.RequestInterceptor) (*GetWork, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"ids": ids,
 	}
 
@@ -474,7 +474,7 @@ fragment WorkFragment on Work {
 `
 
 func (c *Client) SearchWorks(ctx context.Context, seasons []string, interceptors ...clientv2.RequestInterceptor) (*SearchWorks, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"seasons": seasons,
 	}
 

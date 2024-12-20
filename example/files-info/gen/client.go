@@ -192,7 +192,7 @@ fragment FileDataFragment on FileData {
 `
 
 func (c *Client) UploadFile(ctx context.Context, file graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*UploadFile, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"file": file,
 	}
 
@@ -222,7 +222,7 @@ fragment FileDataFragment on FileData {
 `
 
 func (c *Client) UploadFiles(ctx context.Context, files []*graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*UploadFiles, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"files": files,
 	}
 
@@ -265,7 +265,7 @@ const ManyMutationsInOneDocument = `mutation ManyMutationsInOne ($file: Upload!,
 `
 
 func (c *Client) ManyMutationsInOne(ctx context.Context, file graphql.Upload, files []*graphql.Upload, name string, interceptors ...clientv2.RequestInterceptor) (*ManyMutationsInOne, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"file":  file,
 		"files": files,
 		"name":  name,
@@ -295,7 +295,7 @@ fragment FileDataFragment on FileData {
 `
 
 func (c *Client) FileInfo(ctx context.Context, file graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*FileInfo, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"file": file,
 	}
 
@@ -325,7 +325,7 @@ fragment FileDataFragment on FileData {
 `
 
 func (c *Client) FilesInfo(ctx context.Context, files []*graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*FilesInfo, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"files": files,
 	}
 
@@ -360,7 +360,7 @@ fragment FileDataFragment on FileData {
 `
 
 func (c *Client) AllFilesInfo(ctx context.Context, file graphql.Upload, files []*graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*AllFilesInfo, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"file":  file,
 		"files": files,
 	}
@@ -404,7 +404,7 @@ const AllFilesInfoWithListItemsDocument = `query AllFilesInfoWithListItems ($fil
 `
 
 func (c *Client) AllFilesInfoWithListItems(ctx context.Context, file graphql.Upload, files []*graphql.Upload, input *ListItemsInput, interceptors ...clientv2.RequestInterceptor) (*AllFilesInfoWithListItems, error) {
-	vars := map[string]interface{}{
+	vars := map[string]any{
 		"file":  file,
 		"files": files,
 		"input": input,
