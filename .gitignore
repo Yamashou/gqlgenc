@@ -8,3 +8,6 @@
 
 coverage.out
 .vscode/
+
+# Actual files output by the end-to-end tests
+generator/testdata/**/actual
