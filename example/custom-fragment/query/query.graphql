@@ -1,0 +1,22 @@
+fragment UserFragment on User {
+    id
+    profile {
+        id
+        detail {
+            birthDate
+        }
+    }
+}
+
+query UserDetail {
+    user {
+        ...UserFragment
+        profile {
+            name
+            company
+            detail {
+                id
+            }
+        }
+    }
+}
