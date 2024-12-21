@@ -611,7 +611,7 @@ func TestMarshalJSONValueType(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := MarshalJSON(tt.args.v)
+			got, err := MarshalJSON(context.Background(), tt.args.v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("MarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
 
@@ -809,7 +809,7 @@ func TestMarshalJSON(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := MarshalJSON(tt.args.v)
+			got, err := MarshalJSON(context.Background(), tt.args.v)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("MarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
 
@@ -957,4 +957,180 @@ func TestUnsafeChainInterceptor(t *testing.T) {
 			t.Errorf("unexpected execution order\nexpected: %v\ngot: %v", expected, order)
 		}
 	})
+}
+
+func TestEncoder_encodeStruct(t *testing.T) {
+	type Address struct {
+		City    string  `json:"city"`
+		Country string  `json:"country,omitempty"`
+		Zip     *string `json:"zip,omitempty"`
+	}
+
+	type Person struct {
+		Name      string   `json:"name"`
+		Age       int64    `json:"age,omitempty"`
+		Email     *string  `json:"email,omitempty"`
+		Address   Address  `json:"address"`
+		Tags      []string `json:"tags,omitempty"`
+		Nickname  string   `json:"nickname,omitempty"`
+		Empty     string   `json:"-"`
+		unexposed string
+	}
+
+	zip := "123-4567"
+	email := "test@example.com"
+
+	tests := []struct {
+		name               string
+		input              Person
+		enableOmitemptyTag bool
+		want               map[string]interface{}
+		wantErr            bool
+	}{
+		{
+			name: "all fields filled",
+			input: Person{
+				Name:     "John",
+				Age:      30,
+				Email:    &email,
+				Address:  Address{City: "Tokyo", Country: "Japan", Zip: &zip},
+				Tags:     []string{"tag1", "tag2"},
+				Nickname: "Johnny",
+			},
+			enableOmitemptyTag: true,
+			want: map[string]any{
+				"name":     "John",
+				"age":      int64(30),
+				"email":    "test@example.com",
+				"address":  map[string]any{"city": "Tokyo", "country": "Japan", "zip": "123-4567"},
+				"tags":     []any{"tag1", "tag2"},
+				"nickname": "Johnny",
+			},
+		},
+		{
+			name: "omitempty fields with zero values",
+			input: Person{
+				Name:    "John",
+				Address: Address{City: "Tokyo"},
+			},
+			enableOmitemptyTag: true,
+			want: map[string]any{
+				"name":    "John",
+				"address": map[string]any{"city": "Tokyo"},
+			},
+		},
+		{
+			name: "omitempty disabled",
+			input: Person{
+				Name:    "John",
+				Address: Address{City: "Tokyo"},
+			},
+			enableOmitemptyTag: false,
+			want: map[string]any{
+				"name":     "John",
+				"age":      int64(0),
+				"email":    nil,
+				"address":  map[string]any{"city": "Tokyo", "country": "", "zip": nil},
+				"tags":     []any{},
+				"nickname": "",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			encoder := &Encoder{
+				EnableInputJsonOmitemptyTag: tt.enableOmitemptyTag,
+			}
+
+			got, err := encoder.encodeStruct(reflect.ValueOf(tt.input))
+			if (err != nil) != tt.wantErr {
+				t.Errorf("encodeStruct() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// 期待値をJSONに変換
+			want, err := json.Marshal(tt.want)
+			if err != nil {
+				t.Errorf("failed to marshal want: %v", err)
+				return
+			}
+
+			// JSONの文字列として比較
+			if string(got) != string(want) {
+				t.Errorf("encodeStruct() = %s, want %s", got, want)
+			}
+		})
+	}
+}
+
+func TestEncoder_isSkipOmitemptyField(t *testing.T) {
+	type testStruct struct {
+		Required string  `json:"required"`
+		Optional string  `json:"optional,omitempty"`
+		Ptr      *string `json:"ptr,omitempty"`
+	}
+
+	str := "test"
+	tests := []struct {
+		name               string
+		value              reflect.Value
+		field              fieldInfo
+		enableOmitemptyTag bool
+		want               bool
+	}{
+		{
+			name:               "non-empty value with omitempty",
+			value:              reflect.ValueOf("test"),
+			field:              fieldInfo{omitempty: true},
+			enableOmitemptyTag: true,
+			want:               false,
+		},
+		{
+			name:               "empty value with omitempty",
+			value:              reflect.ValueOf(""),
+			field:              fieldInfo{omitempty: true},
+			enableOmitemptyTag: true,
+			want:               true,
+		},
+		{
+			name:               "nil pointer with omitempty",
+			value:              reflect.ValueOf((*string)(nil)),
+			field:              fieldInfo{omitempty: true},
+			enableOmitemptyTag: true,
+			want:               true,
+		},
+		{
+			name:               "non-nil pointer with omitempty",
+			value:              reflect.ValueOf(&str),
+			field:              fieldInfo{omitempty: true},
+			enableOmitemptyTag: true,
+			want:               false,
+		},
+		{
+			name:               "empty value without omitempty",
+			value:              reflect.ValueOf(""),
+			field:              fieldInfo{omitempty: false},
+			enableOmitemptyTag: true,
+			want:               false,
+		},
+		{
+			name:               "omitempty tag disabled",
+			value:              reflect.ValueOf(""),
+			field:              fieldInfo{omitempty: true},
+			enableOmitemptyTag: false,
+			want:               false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			encoder := &Encoder{
+				EnableInputJsonOmitemptyTag: tt.enableOmitemptyTag,
+			}
+			if got := encoder.isSkipOmitemptyField(tt.value, tt.field); got != tt.want {
+				t.Errorf("isSkipOmitemptyField() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
