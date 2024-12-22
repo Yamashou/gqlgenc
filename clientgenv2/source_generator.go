@@ -70,7 +70,7 @@ func (rs ResponseFieldList) IsStructType() bool {
 }
 
 type StructGenerator struct {
-	currentResponseFieldList *ResponseFieldList
+	currentResponseFieldList ResponseFieldList
 	preMergedStructSources   []*StructSource
 	postMergedStructSources  []*StructSource
 }
@@ -100,17 +100,22 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 
 	currentFields = mergeFieldsRecursively(currentFields, fragmentChildrenFields, &preMergedStructSources, &postMergedStructSources)
 	return &StructGenerator{
-		currentResponseFieldList: &currentFields,
+		currentResponseFieldList: currentFields,
 		preMergedStructSources:   preMergedStructSources,
 		postMergedStructSources:  postMergedStructSources,
 	}
 }
 
 func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields ResponseFieldList, preMerged, postMerged *[]*StructSource) ResponseFieldList {
+	res := targetFields
 	for _, sourceField := range sourceFields {
 		sameNameFieldFlag := false
-		for _, targetField := range targetFields {
-			if sourceField.Name == targetField.Name && !targetField.ResponseFields.IsBasicType() {
+		for _, targetField := range res {
+			if sourceField.Name == targetField.Name {
+				if targetField.ResponseFields.IsBasicType() {
+					sameNameFieldFlag = true
+					break
+				}
 				*preMerged = append(*preMerged, &StructSource{
 					Name: sourceField.FieldTypeString(),
 					Type: sourceField.ResponseFields.StructType(),
@@ -131,10 +136,10 @@ func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields Respons
 		}
 		// if there is no same name field, append it
 		if !sameNameFieldFlag {
-			targetFields = append(targetFields, sourceField)
+			res = append(res, sourceField)
 		}
 	}
-	return targetFields
+	return res
 }
 
 func (g *StructGenerator) MergedStructSources(sources []*StructSource) []*StructSource {
@@ -157,7 +162,7 @@ func (g *StructGenerator) MergedStructSources(sources []*StructSource) []*Struct
 }
 
 func (g *StructGenerator) GetCurrentResponseFieldList() ResponseFieldList {
-	return *g.currentResponseFieldList
+	return g.currentResponseFieldList
 }
 
 type StructSource struct {
