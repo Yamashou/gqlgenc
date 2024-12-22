@@ -3,6 +3,7 @@ package clientgenv2
 import (
 	"fmt"
 	"go/types"
+	"sort"
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -69,6 +70,21 @@ func (rs ResponseFieldList) IsStructType() bool {
 	return len(rs) > 0 && !rs.IsFragment()
 }
 
+func (rs ResponseFieldList) MapByName() map[string]*ResponseField {
+	res := make(map[string]*ResponseField)
+	for _, field := range rs {
+		res[field.Name] = field
+	}
+	return res
+}
+
+func (rs ResponseFieldList) SortByName() ResponseFieldList {
+	sort.Slice(rs, func(i, j int) bool {
+		return rs[i].Name < rs[j].Name
+	})
+	return rs
+}
+
 type StructGenerator struct {
 	currentResponseFieldList ResponseFieldList
 	preMergedStructSources   []*StructSource
@@ -107,38 +123,35 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 }
 
 func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields ResponseFieldList, preMerged, postMerged *[]*StructSource) ResponseFieldList {
-	res := targetFields
+	res := make(ResponseFieldList, 0)
+	targetFieldsMap := targetFields.MapByName()
 	for _, sourceField := range sourceFields {
-		sameNameFieldFlag := false
-		for _, targetField := range res {
-			if sourceField.Name == targetField.Name {
-				if targetField.ResponseFields.IsBasicType() {
-					sameNameFieldFlag = true
-					break
-				}
-				*preMerged = append(*preMerged, &StructSource{
-					Name: sourceField.FieldTypeString(),
-					Type: sourceField.ResponseFields.StructType(),
-				})
-				*preMerged = append(*preMerged, &StructSource{
-					Name: targetField.FieldTypeString(),
-					Type: targetField.ResponseFields.StructType(),
-				})
-
-				targetField.ResponseFields = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, preMerged, postMerged)
-				*postMerged = append(*postMerged, &StructSource{
-					Name: targetField.FieldTypeString(),
-					Type: targetField.ResponseFields.StructType(),
-				})
-				sameNameFieldFlag = true
-				break
+		if targetField, ok := targetFieldsMap[sourceField.Name]; ok {
+			if targetField.ResponseFields.IsBasicType() {
+				continue
 			}
-		}
-		// if there is no same name field, append it
-		if !sameNameFieldFlag {
+			*preMerged = append(*preMerged, &StructSource{
+				Name: sourceField.FieldTypeString(),
+				Type: sourceField.ResponseFields.StructType(),
+			})
+			*preMerged = append(*preMerged, &StructSource{
+				Name: targetField.FieldTypeString(),
+				Type: targetField.ResponseFields.StructType(),
+			})
+
+			targetField.ResponseFields = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, preMerged, postMerged)
+			*postMerged = append(*postMerged, &StructSource{
+				Name: targetField.FieldTypeString(),
+				Type: targetField.ResponseFields.StructType(),
+			})
+		} else {
 			res = append(res, sourceField)
 		}
 	}
+	for _, field := range targetFieldsMap {
+		res = append(res, field)
+	}
+	res = res.SortByName()
 	return res
 }
 

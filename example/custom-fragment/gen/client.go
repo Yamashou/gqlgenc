@@ -46,54 +46,48 @@ func (t *UserFragment_Profile_Detail) GetBirthDate() string {
 }
 
 type UserFragment_Profile struct {
-	ID     string                      "json:\"id\" graphql:\"id\""
 	Detail UserFragment_Profile_Detail "json:\"detail\" graphql:\"detail\""
+	ID     string                      "json:\"id\" graphql:\"id\""
 }
 
-func (t *UserFragment_Profile) GetID() string {
-	if t == nil {
-		t = &UserFragment_Profile{}
-	}
-	return t.ID
-}
 func (t *UserFragment_Profile) GetDetail() *UserFragment_Profile_Detail {
 	if t == nil {
 		t = &UserFragment_Profile{}
 	}
 	return &t.Detail
 }
-
-type UserDetail_User_Profile_Detail struct {
-	ID        string "json:\"id\" graphql:\"id\""
-	BirthDate string "json:\"birthDate\" graphql:\"birthDate\""
-}
-
-func (t *UserDetail_User_Profile_Detail) GetID() string {
+func (t *UserFragment_Profile) GetID() string {
 	if t == nil {
-		t = &UserDetail_User_Profile_Detail{}
+		t = &UserFragment_Profile{}
 	}
 	return t.ID
 }
+
+type UserDetail_User_Profile_Detail struct {
+	BirthDate string "json:\"birthDate\" graphql:\"birthDate\""
+	ID        string "json:\"id\" graphql:\"id\""
+}
+
 func (t *UserDetail_User_Profile_Detail) GetBirthDate() string {
 	if t == nil {
 		t = &UserDetail_User_Profile_Detail{}
 	}
 	return t.BirthDate
 }
+func (t *UserDetail_User_Profile_Detail) GetID() string {
+	if t == nil {
+		t = &UserDetail_User_Profile_Detail{}
+	}
+	return t.ID
+}
 
 type UserDetail_User_Profile struct {
-	Name    string                         "json:\"name\" graphql:\"name\""
 	Company string                         "json:\"company\" graphql:\"company\""
 	Detail  UserDetail_User_Profile_Detail "json:\"detail\" graphql:\"detail\""
 	ID      string                         "json:\"id\" graphql:\"id\""
+	Name    string                         "json:\"name\" graphql:\"name\""
 }
 
-func (t *UserDetail_User_Profile) GetName() string {
-	if t == nil {
-		t = &UserDetail_User_Profile{}
-	}
-	return t.Name
-}
 func (t *UserDetail_User_Profile) GetCompany() string {
 	if t == nil {
 		t = &UserDetail_User_Profile{}
@@ -111,6 +105,12 @@ func (t *UserDetail_User_Profile) GetID() string {
 		t = &UserDetail_User_Profile{}
 	}
 	return t.ID
+}
+func (t *UserDetail_User_Profile) GetName() string {
+	if t == nil {
+		t = &UserDetail_User_Profile{}
+	}
+	return t.Name
 }
 
 type UserDetail_User struct {
