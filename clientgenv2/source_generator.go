@@ -114,7 +114,7 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 		}
 	}
 
-	currentFields = mergeFieldsRecursively(currentFields, fragmentChildrenFields, &preMergedStructSources, &postMergedStructSources)
+	currentFields, preMergedStructSources, postMergedStructSources = mergeFieldsRecursively(currentFields, fragmentChildrenFields, preMergedStructSources, postMergedStructSources)
 	return &StructGenerator{
 		currentResponseFieldList: currentFields,
 		preMergedStructSources:   preMergedStructSources,
@@ -122,37 +122,40 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 	}
 }
 
-func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields ResponseFieldList, preMerged, postMerged *[]*StructSource) ResponseFieldList {
-	res := make(ResponseFieldList, 0)
+func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields ResponseFieldList, preMerged, postMerged []*StructSource) (ResponseFieldList, []*StructSource, []*StructSource) {
+	responseFieldList := make(ResponseFieldList, 0)
 	targetFieldsMap := targetFields.MapByName()
+	newPreMerged := preMerged
+	newPostMerged := postMerged
+
 	for _, sourceField := range sourceFields {
 		if targetField, ok := targetFieldsMap[sourceField.Name]; ok {
 			if targetField.ResponseFields.IsBasicType() {
 				continue
 			}
-			*preMerged = append(*preMerged, &StructSource{
+			newPreMerged = append(newPreMerged, &StructSource{
 				Name: sourceField.FieldTypeString(),
 				Type: sourceField.ResponseFields.StructType(),
 			})
-			*preMerged = append(*preMerged, &StructSource{
+			newPreMerged = append(newPreMerged, &StructSource{
 				Name: targetField.FieldTypeString(),
 				Type: targetField.ResponseFields.StructType(),
 			})
 
-			targetField.ResponseFields = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, preMerged, postMerged)
-			*postMerged = append(*postMerged, &StructSource{
+			targetField.ResponseFields, newPreMerged, newPostMerged = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, newPreMerged, newPostMerged)
+			newPostMerged = append(newPostMerged, &StructSource{
 				Name: targetField.FieldTypeString(),
 				Type: targetField.ResponseFields.StructType(),
 			})
 		} else {
-			res = append(res, sourceField)
+			responseFieldList = append(responseFieldList, sourceField)
 		}
 	}
 	for _, field := range targetFieldsMap {
-		res = append(res, field)
+		responseFieldList = append(responseFieldList, field)
 	}
-	res = res.SortByName()
-	return res
+	responseFieldList = responseFieldList.SortByName()
+	return responseFieldList, newPreMerged, newPostMerged
 }
 
 func (g *StructGenerator) MergedStructSources(sources []*StructSource) []*StructSource {
