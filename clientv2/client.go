@@ -487,14 +487,6 @@ func getEnableInputJsonOmitemptyTagFromContext(ctx context.Context) bool {
 	return enableClientJsonOmitemptyTag
 }
 
-// WithEnableInputJsonOmitemptyTagInterceptor creates a RequestInterceptor that sets EnableInputJsonOmitemptyTag in context
-func WithEnableInputJsonOmitemptyTagInterceptor(enable bool) RequestInterceptor {
-	return func(ctx context.Context, req *http.Request, gqlInfo *GQLRequestInfo, res any, next RequestInterceptorFunc) error {
-		newCtx := WithEnableInputJsonOmitemptyTag(ctx, enable)
-		return next(newCtx, req, gqlInfo, res)
-	}
-}
-
 func MarshalJSON(ctx context.Context, v any) ([]byte, error) {
 	if v == nil {
 		return []byte("null"), nil
