@@ -92,7 +92,7 @@ func CollectTypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.Qu
 	return usedTypes
 }
 
-func collectInputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, usedTypes map[string]bool, processedTypes map[string]bool) {
+func collectInputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, usedTypes, processedTypes map[string]bool) {
 	if processedTypes[def.Name] {
 		return // この型は既に完全に処理済み
 	}
