@@ -3,6 +3,7 @@ package clientgenv2
 import (
 	"fmt"
 	"go/types"
+	"sort"
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -27,6 +28,12 @@ type ResponseField struct {
 	ResponseFields   ResponseFieldList
 }
 
+func (r ResponseField) FieldTypeString() string {
+	fullFieldType := r.Type.String()
+	parts := strings.Split(fullFieldType, ".")
+	return parts[len(parts)-1]
+}
+
 type ResponseFieldList []*ResponseField
 
 func (rs ResponseFieldList) IsFragmentSpread() bool {
@@ -40,23 +47,10 @@ func (rs ResponseFieldList) IsFragmentSpread() bool {
 func (rs ResponseFieldList) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
-	for _, filed := range rs {
-		//  クエリーのフィールドの子階層がFragmentの場合、このフィールドにそのFragmentの型を追加する
-		if filed.IsFragmentSpread {
-			typ, ok := filed.ResponseFields.StructType().Underlying().(*types.Struct)
-			if !ok {
-				continue
-			}
-			for j := range typ.NumFields() {
-				vars = append(vars, typ.Field(j))
-				structTags = append(structTags, typ.Tag(j))
-			}
-		} else {
-			vars = append(vars, types.NewVar(0, nil, templates.ToGo(filed.Name), filed.Type))
-			structTags = append(structTags, strings.Join(filed.Tags, " "))
-		}
+	for _, field := range rs {
+		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
+		structTags = append(structTags, strings.Join(field.Tags, " "))
 	}
-
 	return types.NewStruct(vars, structTags)
 }
 
@@ -74,6 +68,123 @@ func (rs ResponseFieldList) IsBasicType() bool {
 
 func (rs ResponseFieldList) IsStructType() bool {
 	return len(rs) > 0 && !rs.IsFragment()
+}
+
+func (rs ResponseFieldList) MapByName() map[string]*ResponseField {
+	res := make(map[string]*ResponseField)
+	for _, field := range rs {
+		res[field.Name] = field
+	}
+	return res
+}
+
+func (rs ResponseFieldList) SortByName() ResponseFieldList {
+	sort.Slice(rs, func(i, j int) bool {
+		return rs[i].Name < rs[j].Name
+	})
+	return rs
+}
+
+type StructGenerator struct {
+	currentResponseFieldList ResponseFieldList // Create fields based on this ResponseFieldList
+	preMergedStructSources   []*StructSource   // Struct sources that will no longer be created due to merging
+	postMergedStructSources  []*StructSource   // Struct sources that will be created due to merging
+}
+
+func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
+	currentFields := make(ResponseFieldList, 0)
+	fragmentChildrenFields := make(ResponseFieldList, 0)
+	for _, field := range responseFieldList {
+		if field.IsFragmentSpread {
+			fragmentChildrenFields = append(fragmentChildrenFields, field.ResponseFields...)
+		} else {
+			currentFields = append(currentFields, field)
+		}
+	}
+
+	preMergedStructSources := make([]*StructSource, 0)
+
+	for _, field := range responseFieldList {
+		if field.IsFragmentSpread {
+			preMergedStructSources = append(preMergedStructSources, &StructSource{
+				Name: field.FieldTypeString(),
+				Type: field.ResponseFields.StructType(),
+			})
+		}
+	}
+
+	currentFields, preMergedStructSources, postMergedStructSources := mergeFieldsRecursively(currentFields, fragmentChildrenFields, preMergedStructSources, nil)
+	return &StructGenerator{
+		currentResponseFieldList: currentFields,
+		preMergedStructSources:   preMergedStructSources,
+		postMergedStructSources:  postMergedStructSources,
+	}
+}
+
+func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields ResponseFieldList, preMerged, postMerged []*StructSource) (ResponseFieldList, []*StructSource, []*StructSource) {
+	responseFieldList := make(ResponseFieldList, 0)
+	targetFieldsMap := targetFields.MapByName()
+	newPreMerged := preMerged
+	newPostMerged := postMerged
+
+	for _, sourceField := range sourceFields {
+		if targetField, ok := targetFieldsMap[sourceField.Name]; ok {
+			if targetField.ResponseFields.IsBasicType() {
+				continue
+			}
+			newPreMerged = append(newPreMerged, &StructSource{
+				Name: sourceField.FieldTypeString(),
+				Type: sourceField.ResponseFields.StructType(),
+			})
+			newPreMerged = append(newPreMerged, &StructSource{
+				Name: targetField.FieldTypeString(),
+				Type: targetField.ResponseFields.StructType(),
+			})
+
+			targetField.ResponseFields, newPreMerged, newPostMerged = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, newPreMerged, newPostMerged)
+			newPostMerged = append(newPostMerged, &StructSource{
+				Name: targetField.FieldTypeString(),
+				Type: targetField.ResponseFields.StructType(),
+			})
+		} else {
+			responseFieldList = append(responseFieldList, sourceField)
+		}
+	}
+	for _, field := range targetFieldsMap {
+		responseFieldList = append(responseFieldList, field)
+	}
+	responseFieldList = responseFieldList.SortByName()
+	return responseFieldList, newPreMerged, newPostMerged
+}
+
+func structSourcesMapByTypeName(sources []*StructSource) map[string]*StructSource {
+	res := make(map[string]*StructSource)
+	for _, source := range sources {
+		res[source.Name] = source
+	}
+	return res
+}
+
+func (g *StructGenerator) MergedStructSources(sources []*StructSource) []*StructSource {
+	preMergedStructSourcesMap := structSourcesMapByTypeName(g.preMergedStructSources)
+	res := make([]*StructSource, 0)
+	// remove pre-merged struct
+	for _, source := range sources {
+		// when name is same, remove it
+		if _, ok := preMergedStructSourcesMap[source.Name]; ok {
+			continue
+		}
+		res = append(res, source)
+	}
+
+	// append post-merged struct
+	res = append(res, g.postMergedStructSources...)
+
+	return res
+}
+
+func (g *StructGenerator) GetCurrentResponseFieldList() ResponseFieldList {
+	return g.currentResponseFieldList
 }
 
 type StructSource struct {
@@ -130,7 +241,15 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
-			structType := fieldsResponseFields.StructType()
+			// 子フィールドにFragmentがある場合は、現在のフィールドとマージする
+			// if there is a fragment in child fields, merge it with the current field
+			generator := NewStructGenerator(fieldsResponseFields)
+
+			// restruct struct sources
+			r.StructSources = generator.MergedStructSources(r.StructSources)
+
+			// append current struct
+			structType := generator.GetCurrentResponseFieldList().StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
 				Name: typeName,
 				Type: structType,
