@@ -86,9 +86,9 @@ func (rs ResponseFieldList) SortByName() ResponseFieldList {
 }
 
 type StructGenerator struct {
-	currentResponseFieldList ResponseFieldList
-	preMergedStructSources   []*StructSource
-	postMergedStructSources  []*StructSource
+	currentResponseFieldList ResponseFieldList // Create fields based on this ResponseFieldList
+	preMergedStructSources   []*StructSource   // Struct sources that will no longer be created due to merging
+	postMergedStructSources  []*StructSource   // Struct sources that will be created due to merging
 }
 
 func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
