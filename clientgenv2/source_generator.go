@@ -103,7 +103,6 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 	}
 
 	preMergedStructSources := make([]*StructSource, 0)
-	postMergedStructSources := make([]*StructSource, 0)
 
 	for _, field := range responseFieldList {
 		if field.IsFragmentSpread {
@@ -114,7 +113,7 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 		}
 	}
 
-	currentFields, preMergedStructSources, postMergedStructSources = mergeFieldsRecursively(currentFields, fragmentChildrenFields, preMergedStructSources, postMergedStructSources)
+	currentFields, preMergedStructSources, postMergedStructSources := mergeFieldsRecursively(currentFields, fragmentChildrenFields, preMergedStructSources, nil)
 	return &StructGenerator{
 		currentResponseFieldList: currentFields,
 		preMergedStructSources:   preMergedStructSources,
