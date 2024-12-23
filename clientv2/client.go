@@ -437,7 +437,7 @@ func (c *Client) unmarshal(data []byte, res any) error {
 	}
 
 	var err error
-	if resp.Errors != nil && len(resp.Errors) > 0 {
+	if len(resp.Errors) > 0 {
 		// try to parse standard graphql error
 		err = &GqlErrorList{}
 		if e := json.Unmarshal(data, err); e != nil {
