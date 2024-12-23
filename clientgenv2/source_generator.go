@@ -158,17 +158,24 @@ func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields Respons
 	return responseFieldList, newPreMerged, newPostMerged
 }
 
+func structSourcesMapByTypeName(sources []*StructSource) map[string]*StructSource {
+	res := make(map[string]*StructSource)
+	for _, source := range sources {
+		res[source.Name] = source
+	}
+	return res
+}
+
 func (g *StructGenerator) MergedStructSources(sources []*StructSource) []*StructSource {
-	res := sources
+	preMergedStructSourcesMap := structSourcesMapByTypeName(g.preMergedStructSources)
+	res := make([]*StructSource, 0)
 	// remove pre-merged struct
-	for _, preMergedTypeName := range g.preMergedStructSources {
-		for i, source := range res {
-			// when name is same, remove it
-			if source.Name == preMergedTypeName.Name {
-				res = append(res[:i], res[i+1:]...)
-				break
-			}
+	for _, source := range sources {
+		// when name is same, remove it
+		if _, ok := preMergedStructSourcesMap[source.Name]; ok {
+			continue
 		}
+		res = append(res, source)
 	}
 
 	// append post-merged struct
