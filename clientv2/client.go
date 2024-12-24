@@ -651,6 +651,10 @@ func (e *Encoder) isSkipOmitemptyField(v reflect.Value, field fieldInfo) bool {
 		return false
 	}
 
+	if !field.omitempty {
+		return false
+	}
+
 	if !v.IsValid() {
 		return true
 	}
@@ -659,11 +663,7 @@ func (e *Encoder) isSkipOmitemptyField(v reflect.Value, field fieldInfo) bool {
 		return true
 	}
 
-	if field.omitempty && v.IsZero() {
-		return true
-	}
-
-	return false
+	return v.IsZero()
 }
 
 // encodeStruct encodes a struct value

@@ -970,6 +970,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 		Name      string   `json:"name"`
 		Age       int64    `json:"age,omitempty"`
 		Email     *string  `json:"email,omitempty"`
+		Email2    *string  `json:"email2"`
 		Address   Address  `json:"address"`
 		Tags      []string `json:"tags,omitempty"`
 		Nickname  string   `json:"nickname,omitempty"`
@@ -1002,6 +1003,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				"name":     "John",
 				"age":      int64(30),
 				"email":    "test@example.com",
+				"email2":   nil,
 				"address":  map[string]any{"city": "Tokyo", "country": "Japan", "zip": "123-4567"},
 				"tags":     []any{"tag1", "tag2"},
 				"nickname": "Johnny",
@@ -1016,6 +1018,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 			enableOmitemptyTag: true,
 			want: map[string]any{
 				"name":    "John",
+				"email2":   nil,
 				"address": map[string]any{"city": "Tokyo"},
 			},
 		},
@@ -1030,6 +1033,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				"name":     "John",
 				"age":      int64(0),
 				"email":    nil,
+				"email2":   nil,
 				"address":  map[string]any{"city": "Tokyo", "country": "", "zip": nil},
 				"tags":     []any{},
 				"nickname": "",
