@@ -124,7 +124,7 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 	}
 }
 
-func mergeFieldsRecursively(targetFields ResponseFieldList, sourceFields ResponseFieldList, preMerged, postMerged []*StructSource) (ResponseFieldList, []*StructSource, []*StructSource) {
+func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMerged, postMerged []*StructSource) (ResponseFieldList, []*StructSource, []*StructSource) {
 	responseFieldList := make(ResponseFieldList, 0)
 	targetFieldsMap := targetFields.MapByName()
 	newPreMerged := preMerged

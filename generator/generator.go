@@ -116,15 +116,14 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 		return fmt.Errorf(": %w", err)
 	}
 
-	usedTypes := querydocument.CollectTypesFromQueryDocuments(cfg.GQLConfig.Schema, operationQueryDocuments)
-
 	var clientGen api.Option
 	if cfg.Generate != nil {
-		clientGen = api.AddPlugin(clientgenv2.New(cfg.Query, queryDocument, operationQueryDocuments, cfg.Client, cfg.Generate))
+		clientGen = api.AddPlugin(clientgenv2.New(queryDocument, operationQueryDocuments, cfg.Client, cfg.Generate))
 	}
 
 	var plugins []plugin.Plugin
 	if cfg.Model.IsDefined() {
+	usedTypes := querydocument.CollectTypesFromQueryDocuments(cfg.GQLConfig.Schema, operationQueryDocuments)
 		p := &modelgen.Plugin{
 			MutateHook: mutateHook(cfg, usedTypes),
 			FieldHook:  modelgen.DefaultFieldMutateHook,
