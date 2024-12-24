@@ -21,9 +21,8 @@ type Plugin struct {
 	GenerateConfig          *gqlgencConfig.GenerateConfig
 }
 
-func New(queryFilePaths []string, queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *Plugin {
+func New(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *Plugin {
 	return &Plugin{
-		queryFilePaths:          queryFilePaths,
 		queryDocument:           queryDocument,
 		operationQueryDocuments: operationQueryDocuments,
 		Client:                  client,
