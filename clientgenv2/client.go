@@ -6,6 +6,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
+	"github.com/Yamashou/gqlgenc/parsequery"
+	"github.com/Yamashou/gqlgenc/querydocument"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -19,11 +21,18 @@ type Plugin struct {
 	GenerateConfig          *gqlgencConfig.GenerateConfig
 }
 
-func New(queryFilePaths []string, queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *Plugin {
+func New(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *Plugin {
 	return &Plugin{
-		queryFilePaths:          queryFilePaths,
 		queryDocument:           queryDocument,
 		operationQueryDocuments: operationQueryDocuments,
+		Client:                  client,
+		GenerateConfig:          generateConfig,
+	}
+}
+
+func NewWithQueryDocument(queryFilePaths []string, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *Plugin {
+	return &Plugin{
+		queryFilePaths:          queryFilePaths,
 		Client:                  client,
 		GenerateConfig:          generateConfig,
 	}
@@ -34,10 +43,32 @@ func (p *Plugin) Name() string {
 }
 
 func (p *Plugin) MutateConfig(cfg *config.Config) error {
+	queryDocument := p.queryDocument
+	if queryDocument == nil {
+	querySources, err := parsequery.LoadQuerySources(p.queryFilePaths)
+	if err != nil {
+		return fmt.Errorf("load query sources failed: %w", err)
+	}
+
+	queryDocument, err = parsequery.ParseQueryDocuments(cfg.Schema, querySources)
+	if err != nil {
+		return fmt.Errorf(": %w", err)
+		}
+	}
+
+	var err error
+	operationQueryDocuments := p.operationQueryDocuments
+	if operationQueryDocuments == nil {
+		operationQueryDocuments, err = querydocument.QueryDocumentsByOperations(cfg.Schema, queryDocument.Operations)
+		if err != nil {
+			return fmt.Errorf(": %w", err)
+		}
+	}
+
 	// テンプレートと情報ソースを元にコード生成
 	// Generate code from template and document source
 	sourceGenerator := NewSourceGenerator(cfg, p.Client, p.GenerateConfig)
-	source := NewSource(cfg.Schema, p.queryDocument, sourceGenerator, p.GenerateConfig)
+	source := NewSource(cfg.Schema, queryDocument, sourceGenerator, p.GenerateConfig)
 
 	fragments, err := source.Fragments()
 	if err != nil {
@@ -49,7 +80,7 @@ func (p *Plugin) MutateConfig(cfg *config.Config) error {
 		return fmt.Errorf("generating operation response failed: %w", err)
 	}
 
-	operations, err := source.Operations(p.operationQueryDocuments)
+	operations, err := source.Operations(operationQueryDocuments)
 	if err != nil {
 		return fmt.Errorf("generating operation failed: %w", err)
 	}

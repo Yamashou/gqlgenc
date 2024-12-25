@@ -2,13 +2,14 @@ package generator_test
 
 import (
 	"context"
+	"os"
+	"path/filepath"
+	"testing"
+
 	"github.com/Yamashou/gqlgenc/config"
 	"github.com/Yamashou/gqlgenc/generator"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/tools/go/packages"
-	"os"
-	"path/filepath"
-	"testing"
 )
 
 type Suite struct {
@@ -25,12 +26,10 @@ const (
 )
 
 func (s *Suite) TestGenerator_withTestData() {
-
 	dirs := s.getTestDirs()
 
 	for _, dir := range dirs {
 		s.Run(dir, func() {
-
 			// temporary change working directory
 			s.useDirForTest(filepath.Join("testdata", dir))
 
@@ -64,8 +63,8 @@ func (s *Suite) TestGenerator_withTestData() {
 				for path, content := range actualFiles {
 					s.T().Logf("resetting expected file %s", path)
 					expectedPath := filepath.Join(expected, path)
-					_ = os.MkdirAll(filepath.Dir(expectedPath), 0700)
-					err = os.WriteFile(expectedPath, []byte(content), 0644)
+					_ = os.MkdirAll(filepath.Dir(expectedPath), 0o700)
+					err = os.WriteFile(expectedPath, []byte(content), 0o644)
 					s.Require().NoError(err)
 				}
 				return
@@ -115,7 +114,6 @@ func (s *Suite) loadFiles(dir string) map[string]string {
 		rel, err := filepath.Rel(dir, path)
 		if err != nil {
 			return err
-
 		}
 		files[rel] = string(content)
 		return nil

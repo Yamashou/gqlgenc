@@ -1018,7 +1018,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 			enableOmitemptyTag: true,
 			want: map[string]any{
 				"name":    "John",
-				"email2":   nil,
+				"email2":  nil,
 				"address": map[string]any{"city": "Tokyo"},
 			},
 		},
