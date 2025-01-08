@@ -150,6 +150,7 @@ func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMer
 				Type: targetField.ResponseFields.StructType(),
 			})
 		} else {
+			targetFieldsMap[sourceField.Name] = sourceField
 			responseFieldList = append(responseFieldList, sourceField)
 		}
 	}
