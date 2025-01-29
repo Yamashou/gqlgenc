@@ -9,7 +9,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const version = "0.30.2"
+const version = "0.30.3"
 
 var versionCmd = &cli.Command{
 	Name:  "version",
