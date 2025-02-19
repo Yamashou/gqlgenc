@@ -1045,7 +1045,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 			},
 		},
 		{
-			name: "nil array set to null on omitempty disabled",
+			name: "nil slice set to null on omitempty disabled",
 			input: Person{
 				Name:    "John",
 				Address: Address{City: "Tokyo"},
@@ -1067,12 +1067,12 @@ func TestEncoder_encodeStruct(t *testing.T) {
 			},
 		},
 		{
-			name: "zero value of array (i.e. nil array) dropped on omitempty enabled",
+			name: "zero value of slice (i.e. nil slice) dropped on omitempty enabled",
 			input: Person{
 				Name:    "John",
 				Address: Address{City: "Tokyo"},
 				Hobbies: nil,
-				Tags:    nil,
+				Tags:    nil, // will be dropped as omitempty is enabled
 			},
 			enableOmitemptyTag: true,
 			want: map[string]any{
@@ -1083,10 +1083,10 @@ func TestEncoder_encodeStruct(t *testing.T) {
 			},
 		},
 		{
-			name: "nil array set to null",
+			name: "nil slice set to null",
 			input: Person{
-				Tags:    []string{},
-				Hobbies: nil,
+				Tags:    []string{}, // this is not zero value, so omitempty will not be applied
+				Hobbies: nil,        // will continue to be nil
 			},
 			enableOmitemptyTag: true,
 			want: map[string]any{
