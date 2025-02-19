@@ -686,10 +686,6 @@ func (e *Encoder) encodeStruct(v reflect.Value) ([]byte, error) {
 	return json.Marshal(result)
 }
 
-func isTypeNilable(v reflect.Value) bool {
-	return v.Kind() == reflect.Ptr || v.Kind() == reflect.Slice || v.Kind() == reflect.Map
-}
-
 // encodeMap encodes a map value
 func (e *Encoder) encodeMap(v reflect.Value) ([]byte, error) {
 	if v.IsNil() {
