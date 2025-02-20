@@ -145,13 +145,13 @@ func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMer
 			})
 
 			targetField.ResponseFields, newPreMerged, newPostMerged = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, newPreMerged, newPostMerged)
+
 			newPostMerged = append(newPostMerged, &StructSource{
 				Name: targetField.FieldTypeString(),
 				Type: targetField.ResponseFields.StructType(),
 			})
 		} else {
 			targetFieldsMap[sourceField.Name] = sourceField
-			responseFieldList = append(responseFieldList, sourceField)
 		}
 	}
 	for _, field := range targetFieldsMap {
