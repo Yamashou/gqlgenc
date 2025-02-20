@@ -976,6 +976,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 		Nickname  string   `json:"nickname,omitempty"`
 		Empty     string   `json:"-"`
 		unexposed string
+		Hobbies   []string `json:"hobbies"`
 	}
 
 	zip := "123-4567"
@@ -997,6 +998,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				Address:  Address{City: "Tokyo", Country: "Japan", Zip: &zip},
 				Tags:     []string{"tag1", "tag2"},
 				Nickname: "Johnny",
+				Hobbies:  []string{"reading", "swimming"},
 			},
 			enableOmitemptyTag: true,
 			want: map[string]any{
@@ -1007,6 +1009,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				"address":  map[string]any{"city": "Tokyo", "country": "Japan", "zip": "123-4567"},
 				"tags":     []any{"tag1", "tag2"},
 				"nickname": "Johnny",
+				"hobbies":  []any{"reading", "swimming"},
 			},
 		},
 		{
@@ -1020,6 +1023,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				"name":    "John",
 				"email2":  nil,
 				"address": map[string]any{"city": "Tokyo"},
+				"hobbies": nil,
 			},
 		},
 		{
@@ -1035,8 +1039,62 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				"email":    nil,
 				"email2":   nil,
 				"address":  map[string]any{"city": "Tokyo", "country": "", "zip": nil},
-				"tags":     []any{},
+				"tags":     nil,
 				"nickname": "",
+				"hobbies":  nil,
+			},
+		},
+		{
+			name: "nil slice set to null on omitempty disabled",
+			input: Person{
+				Name:    "John",
+				Address: Address{City: "Tokyo"},
+			},
+			enableOmitemptyTag: false,
+			want: map[string]any{
+				"name":    "John",
+				"age":     int64(0),
+				"email":   nil, // omitempty is ignored
+				"email2":  nil,
+				"tags":    nil, // omitempty is ignored
+				"hobbies": nil,
+				"address": map[string]any{
+					"city":    "Tokyo",
+					"country": "", // omitempty is ignored
+					"zip":     nil,
+				},
+				"nickname": "", // omitempty is ignored
+			},
+		},
+		{
+			name: "zero value of slice (i.e. nil slice) dropped on omitempty enabled",
+			input: Person{
+				Name:    "John",
+				Address: Address{City: "Tokyo"},
+				Hobbies: nil,
+				Tags:    nil, // will be dropped as omitempty is enabled
+			},
+			enableOmitemptyTag: true,
+			want: map[string]any{
+				"name":    "John",
+				"email2":  nil,
+				"hobbies": nil,
+				"address": map[string]any{"city": "Tokyo"},
+			},
+		},
+		{
+			name: "nil slice set to null",
+			input: Person{
+				Tags:    []string{}, // this is not zero value, so omitempty will not be applied
+				Hobbies: nil,        // will continue to be nil
+			},
+			enableOmitemptyTag: true,
+			want: map[string]any{
+				"name":    "",
+				"email2":  nil,
+				"tags":    []any{},
+				"hobbies": nil,
+				"address": map[string]any{"city": ""},
 			},
 		},
 	}
