@@ -35,7 +35,7 @@ func mutateHook(cfg *config.Config, usedTypes map[string]bool) func(b *modelgen.
 		// For more info see https://github.com/99designs/gqlgen/blob/master/docs/content/recipes/modelgen-hook.md
 		for _, model := range build.Models {
 			// only handle input type model
-			if schemaModel, ok := cfg.GQLConfig.Schema.Types[model.Name]; ok && (schemaModel.IsInputType() || cfg.Generate.ShouldOmitEmptyTypes()) {
+			if schemaModel, ok := cfg.GQLConfig.Schema.Types[model.Name]; ok && cfg.Generate.ShouldOmitEmptyTypes() {
 				for _, field := range model.Fields {
 					// find field in graphql schema
 					for _, def := range schemaModel.Fields {
@@ -123,7 +123,7 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 
 	var plugins []plugin.Plugin
 	if cfg.Model.IsDefined() {
-	usedTypes := querydocument.CollectTypesFromQueryDocuments(cfg.GQLConfig.Schema, operationQueryDocuments)
+		usedTypes := querydocument.CollectTypesFromQueryDocuments(cfg.GQLConfig.Schema, operationQueryDocuments)
 		p := &modelgen.Plugin{
 			MutateHook: mutateHook(cfg, usedTypes),
 			FieldHook:  modelgen.DefaultFieldMutateHook,

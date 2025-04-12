@@ -731,7 +731,7 @@ func TestMarshalJSON(t *testing.T) {
 					},
 				},
 			},
-			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"input":"TWO"}}`),
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":"TWO"}}`),
 		},
 		{
 			name: "marshal nested",
@@ -748,7 +748,7 @@ func TestMarshalJSON(t *testing.T) {
 					},
 				},
 			},
-			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"where":{"not":{"id":"1"}}}}`),
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"where":{"not":{"id":"1"}}}}`),
 		},
 		{
 			name: "marshal nil",
@@ -760,7 +760,7 @@ func TestMarshalJSON(t *testing.T) {
 					},
 				},
 			},
-			want: []byte(`{"operationName":"query", "query":"","variables":{"v":null}}`),
+			want: []byte(`{"operationName":"query","query":"","variables":{"v":null}}`),
 		},
 		{
 			name: "marshal a struct with custom marshaler",
@@ -809,7 +809,7 @@ func TestMarshalJSON(t *testing.T) {
 					},
 				},
 			},
-			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"input":{"id":"1"}}}`),
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":{"id":"1"}}}`),
 		},
 		{
 			name: "marshal fields",
@@ -825,7 +825,7 @@ func TestMarshalJSON(t *testing.T) {
 					},
 				},
 			},
-			want: []byte(`{"operationName":"query", "query":"query ($input: Number!) { input }","variables":{"input":{"id":"1", "tags":["tag1","tag2"]}}}`),
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":{"id":"1", "tags":["tag1","tag2"]}}}`),
 		},
 		{
 			name: "marshal time.Time",
@@ -883,6 +883,520 @@ func TestMarshalJSON(t *testing.T) {
 
 			if !cmp.Equal(gotMap, wantMap) {
 				t.Errorf("MarshalJSON() got = %v, want %v", gotMap, wantMap)
+			}
+		})
+	}
+}
+
+func TestMarshalOmittableJSON(t *testing.T) {
+	t.Parallel()
+	type Example struct {
+		Name   graphql.Omittable[string] `json:"name"`
+		Number graphql.Omittable[Number] `json:"number,omitzero"`
+	}
+	type ContextExample struct {
+		Name   graphql.Omittable[string]        `json:"name"`
+		Number graphql.Omittable[ContextNumber] `json:"number,omitzero"`
+	}
+
+	// example nested struct
+	type WhereInput struct {
+		Not graphql.Omittable[*WhereInput] `json:"not,omitzero"`
+		ID  graphql.Omittable[*string]     `json:"id,omitzero"`
+	}
+
+	testID := "1"
+
+	// example with omitted fields
+	type Input struct {
+		ID   graphql.Omittable[string]   `json:"id,omitzero"`
+		Tags graphql.Omittable[[]string] `json:"tags,omitzero"`
+	}
+
+	testDate := time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
+	type args struct {
+		v any
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    []byte
+		wantErr bool
+	}{
+		{
+			name: "marshal nested",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"where": WhereInput{
+							Not: graphql.OmittableOf(&WhereInput{
+								ID:  graphql.OmittableOf(&testID),
+								Not: graphql.OmittableOf[*WhereInput](nil),
+							}),
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"where":{"not":{"not":null,"id":"1"}}}}`),
+		},
+		{
+			name: "marshal nested - Omittable.IsSet=true",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"where": WhereInput{
+							Not: graphql.OmittableOf(&WhereInput{
+								ID: func() graphql.Omittable[*string] {
+									var a *string
+									return graphql.OmittableOf(a)
+								}(),
+								Not: graphql.Omittable[*WhereInput]{},
+							}),
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"where":{"not":{"id":null}}}}`),
+		},
+		{
+			name: "marshal nested - Omittable.IsSet=false",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"where": WhereInput{
+							Not: graphql.Omittable[*WhereInput]{},
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"where":{}}}`),
+		},
+		{
+			name: "marshal a struct with custom marshaler - not set Omittable",
+			args: args{
+				v: Example{},
+			},
+			want: []byte(`{"name":""}`),
+		},
+		{
+			name: "marshal a struct with custom marshaler",
+			args: args{
+				v: Example{
+					Name:   graphql.OmittableOf("John"),
+					Number: graphql.OmittableOf(NumberOne),
+				},
+			},
+			want: []byte(`{"name":"John","number":"ONE"}`),
+		},
+		{
+			name: "marshal a struct with custom marshaler Name is not omitempty, Number is omitempty - Omittable.IsSet=false",
+			args: args{
+				v: Example{
+					Name:   graphql.Omittable[string]{},
+					Number: graphql.Omittable[Number]{},
+				},
+			},
+			want: []byte(`{"name":""}`),
+		},
+		{
+			name: "marshal map with custom marshaler",
+			args: args{
+				v: map[string]any{
+					"number": NumberOne,
+					"example2": &Example{
+						Name:   graphql.OmittableOf("John"),
+						Number: graphql.OmittableOf(NumberOne),
+					},
+				},
+			},
+			want: []byte(`{"example2":{"name":"John","number":"ONE"},"number":"ONE"}`),
+		},
+		{
+			name: "marshal map with custom marshaler - Omittable.IsSet=true",
+			args: args{
+				v: map[string]any{
+					"number":   NumberOne,
+					"example2": nil,
+				},
+			},
+			want: []byte(`{"example2":null,"number":"ONE"}`),
+		},
+		{
+			name: "marshal map with custom marshaler - Omittable.IsSet=false",
+			args: args{
+				v: map[string]any{
+					"number":   NumberOne,
+					"example2": graphql.Omittable[*Example]{}, // no omitempty
+				},
+			},
+			want: []byte(`{"example2":null,"number":"ONE"}`),
+		},
+		{
+			name: "marshal a struct with custom marshaler context - not set Omittable",
+			args: args{
+				v: ContextExample{},
+			},
+			want: []byte(`{"name":""}`),
+		},
+		{
+			name: "marshal a struct with custom marshaler context",
+			args: args{
+				v: ContextExample{
+					Name:   graphql.OmittableOf("John"),
+					Number: graphql.OmittableOf(ContextNumberOne),
+				},
+			},
+			want: []byte(`{"name":"John","number":"ONE"}`),
+		},
+		{
+			name: "marshal a struct with custom marshaler context Name is not omitempty, Number is omitempty - Omittable.IsSet=false",
+			args: args{
+				v: ContextExample{
+					Name:   graphql.Omittable[string]{},
+					Number: graphql.Omittable[ContextNumber]{},
+				},
+			},
+			want: []byte(`{"name":""}`),
+		},
+		{
+			name: "marshal map with custom marshaler context",
+			args: args{
+				v: map[string]any{
+					"number": ContextNumberOne,
+					"example2": &ContextExample{
+						Name:   graphql.OmittableOf("John"),
+						Number: graphql.OmittableOf(ContextNumberOne),
+					},
+				},
+			},
+			want: []byte(`{"example2":{"name":"John","number":"ONE"},"number":"ONE"}`),
+		},
+		{
+			name: "marshal map with custom marshaler - Omittable.IsSet=true",
+			args: args{
+				v: map[string]any{
+					"number":   ContextNumberOne,
+					"example2": nil,
+				},
+			},
+			want: []byte(`{"example2":null,"number":"ONE"}`),
+		},
+		{
+			name: "marshal map with custom marshaler contextt - Omittable.IsSet=false",
+			args: args{
+				v: map[string]any{
+					"number":   ContextNumberOne,
+					"example2": graphql.Omittable[*ContextExample]{}, // no omitempty
+				},
+			},
+			want: []byte(`{"example2":null,"number":"ONE"}`),
+		},
+		{
+			name: "marshal time.Time",
+			args: args{
+				v: struct {
+					Time graphql.Omittable[*time.Time] `json:"time,omitempty"`
+				}{
+					Time: graphql.OmittableOf(&testDate),
+				},
+			},
+			want: []byte(`{"time":"2021-01-01T00:00:00Z"}`),
+		},
+		{
+			name: "marshal time.Time - Omittable.IsSet=true",
+			args: args{
+				v: struct {
+					Time graphql.Omittable[*time.Time] `json:"time,omitempty"`
+				}{
+					Time: func() graphql.Omittable[*time.Time] {
+						var a *time.Time
+						return graphql.OmittableOf(a)
+					}(),
+				},
+			},
+			want: []byte(`{"time":null}`),
+		},
+		{
+			name: "marshal time.Time - Omittable.IsSet=false",
+			args: args{
+				v: struct {
+					Time graphql.Omittable[*time.Time] `json:"time,omitempty"`
+				}{
+					Time: graphql.Omittable[*time.Time]{},
+				},
+			},
+			want: []byte(`{"time":null}`),
+		},
+		{
+			name: "marshal omitted fields",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": Input{
+							ID: graphql.OmittableOf("1"),
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":{"id":"1"}}}`),
+		},
+		{
+			name: "marshal omitted fields - Omittable.IsSet=true",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": Input{
+							ID: func() graphql.Omittable[string] {
+								var a string
+								return graphql.OmittableOf(a)
+							}(),
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":{"id":""}}}`),
+		},
+		{
+			name: "marshal omitted fields - Omittable.IsSet=false",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": Input{
+							ID: graphql.Omittable[string]{},
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":{}}}`),
+		},
+		{
+			name: "marshal fields",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": Input{
+							ID:   graphql.OmittableOf("1"),
+							Tags: graphql.OmittableOf([]string{"tag1", "tag2"}),
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":{"id":"1","tags":["tag1","tag2"]}}}`),
+		},
+		{
+			name: "marshal fields - Omittable.IsSet=true",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": Input{
+							ID: graphql.OmittableOf("1"),
+							Tags: func() graphql.Omittable[[]string] {
+								var a []string
+								return graphql.OmittableOf(a)
+							}(),
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":{"id":"1","tags":null}}}`),
+		},
+		{
+			name: "marshal fields - Omittable.IsSet=false",
+			args: args{
+				v: Request{
+					OperationName: "query",
+					Query:         `query ($input: Number!) { input }`,
+					Variables: map[string]any{
+						"input": Input{
+							ID:   graphql.OmittableOf("1"),
+							Tags: graphql.Omittable[[]string]{},
+						},
+					},
+				},
+			},
+			want: []byte(`{"operationName":"query","query":"query ($input: Number!) { input }","variables":{"input":{"id":"1"}}}`),
+		},
+		{
+			name: "marshal time.Time",
+			args: args{
+				v: struct {
+					T struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitempty"`
+					}
+				}{
+					T: struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitempty"`
+					}{
+						Time: graphql.OmittableOf(testDate),
+					},
+				},
+			},
+			want: []byte(`{"T":{"time":"2021-01-01T00:00:00Z"}}`),
+		},
+		{
+			name: "marshal time.Time - Omittable.IsSet=true",
+			args: args{
+				v: struct {
+					T struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitempty"`
+					}
+				}{
+					T: struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitempty"`
+					}{
+						Time: graphql.OmittableOf(time.Time{}),
+					},
+				},
+			},
+			want: []byte(`{"T":{"time":"0001-01-01T00:00:00Z"}}`),
+		},
+		{
+			name: "marshal time.Time omitzero - Omittable.IsSet=false",
+			args: args{
+				v: struct {
+					T struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitzero"`
+					}
+				}{
+					T: struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitzero"`
+					}{
+						Time: graphql.Omittable[time.Time]{},
+					},
+				},
+			},
+			want: []byte(`{"T":{}}`),
+		},
+		{
+			name: "marshal time.Time omitempty - Omittable.IsSet=false",
+			args: args{
+				v: struct {
+					T struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitempty"`
+					}
+				}{
+					T: struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitempty"`
+					}{
+						Time: graphql.Omittable[time.Time]{},
+					},
+				},
+			},
+			want: []byte(`{"T":{"time":"0001-01-01T00:00:00Z"}}`),
+		},
+		{
+			name: "marshal time.Time omitzero - Omittable.IsSet=false",
+			args: args{
+				v: struct {
+					T struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitzero"`
+					}
+				}{
+					T: struct {
+						Time graphql.Omittable[time.Time] `json:"time,omitzero"`
+					}{
+						Time: graphql.Omittable[time.Time]{},
+					},
+				},
+			},
+			want: []byte(`{"T":{}}`),
+		},
+		{
+			name: "marshal uuid",
+			args: args{
+				v: struct {
+					T struct {
+						UUID graphql.Omittable[uuid.UUID] `json:"uuid,omitempty"`
+					}
+				}{
+					T: struct {
+						UUID graphql.Omittable[uuid.UUID] `json:"uuid,omitempty"`
+					}{
+						UUID: graphql.OmittableOf(uuid.MustParse("0bd42821-463a-4224-a41b-c5861fc91268")),
+					},
+				},
+			},
+			want: []byte(`{"T":{"uuid":"0bd42821-463a-4224-a41b-c5861fc91268"}}`),
+		},
+		{
+			name: "marshal uuid - Omittable.IsSet=true",
+			args: args{
+				v: struct {
+					T struct {
+						UUID graphql.Omittable[uuid.UUID] `json:"uuid,omitempty"`
+					}
+				}{
+					T: struct {
+						UUID graphql.Omittable[uuid.UUID] `json:"uuid,omitempty"`
+					}{
+						UUID: graphql.OmittableOf(uuid.UUID{}),
+					},
+				},
+			},
+			want: []byte(`{"T":{"uuid":"00000000-0000-0000-0000-000000000000"}}`),
+		},
+		{
+			name: "marshal uuid omitzero - Omittable.IsSet=false",
+			args: args{
+				v: struct {
+					T struct {
+						UUID graphql.Omittable[uuid.UUID] `json:"uuid,omitzero"`
+					}
+				}{
+					T: struct {
+						UUID graphql.Omittable[uuid.UUID] `json:"uuid,omitzero"`
+					}{
+						UUID: graphql.Omittable[uuid.UUID]{},
+					},
+				},
+			},
+			want: []byte(`{"T":{}}`),
+		},
+		{
+			name: "marshal uuid omitempty - Omittable.IsSet=false",
+			args: args{
+				v: struct {
+					T struct {
+						UUID graphql.Omittable[uuid.UUID] `json:"uuid,omitempty"`
+					}
+				}{
+					T: struct {
+						UUID graphql.Omittable[uuid.UUID] `json:"uuid,omitempty"`
+					}{
+						UUID: graphql.Omittable[uuid.UUID]{},
+					},
+				},
+			},
+			want: []byte(`{"T":{"uuid":"00000000-0000-0000-0000-000000000000"}}`),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MarshalJSON(context.Background(), tt.args.v)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("MarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+
+				return
+			}
+
+			if diff := cmp.Diff(string(tt.want), string(got)); diff != "" {
+				t.Errorf("MarshalJSON()\n%vwant:%s\n got:%s\n", diff, tt.want, got)
 			}
 		})
 	}
@@ -1132,50 +1646,179 @@ func TestEncoder_encodeStruct(t *testing.T) {
 	}
 }
 
-func TestEncoder_isSkipOmitemptyField(t *testing.T) {
+func Test_isEmptyValue(t *testing.T) {
 	str := "test"
+	type User struct {
+		Name string `json:"name,omitempty"`
+	}
+	type Where struct {
+		Not graphql.Omittable[*Where] `json:"not,omitempty"`
+	}
 	tests := []struct {
 		name  string
-		value reflect.Value
-		field fieldInfo
+		value any
 		want  bool
 	}{
 		{
 			name:  "non-empty value with omitempty",
-			value: reflect.ValueOf("test"),
-			field: fieldInfo{omitempty: true},
+			value: "string",
 			want:  false,
 		},
 		{
 			name:  "empty value with omitempty",
-			value: reflect.ValueOf(""),
-			field: fieldInfo{omitempty: true},
+			value: "",
 			want:  true,
 		},
 		{
 			name:  "nil pointer with omitempty",
-			value: reflect.ValueOf((*string)(nil)),
-			field: fieldInfo{omitempty: true},
+			value: (*string)(nil),
 			want:  true,
 		},
 		{
 			name:  "non-nil pointer with omitempty",
-			value: reflect.ValueOf(&str),
-			field: fieldInfo{omitempty: true},
+			value: &str,
 			want:  false,
 		},
 		{
-			name:  "empty value without omitempty",
-			value: reflect.ValueOf(""),
-			field: fieldInfo{omitempty: false},
+			name:  "slice value with omitempty",
+			value: []string{"string"},
+			want:  false,
+		},
+		{
+			name:  "empty slice value with omitempty",
+			value: []string{},
+			want:  true,
+		},
+		{
+			name:  "nil slice value with omitempty",
+			value: func() []string { return nil }(),
+			want:  true,
+		},
+		{
+			name:  "Omittable IsSet is true",
+			value: graphql.OmittableOf("test"),
+			want:  false,
+		},
+		{
+			name:  "Omittable IsSet is true and empty string",
+			value: graphql.OmittableOf(""),
+			want:  false,
+		},
+		{
+			name:  "Omittable IsSet is false",
+			value: graphql.Omittable[string]{},
+			want:  false,
+		},
+		{
+			name:  "Omittable IsSet is true, value struct",
+			value: graphql.OmittableOf(User{Name: "test"}),
+			want:  false,
+		},
+		{
+			name:  "Omittable IsSet is false, value struct",
+			value: graphql.Omittable[User]{},
+			want:  false,
+		},
+		{
+			name:  "Omittable IsSet is true, value nest struct",
+			value: graphql.OmittableOf(Where{Not: graphql.OmittableOf(&Where{})}),
 			want:  false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isSkipField(tt.field.omitempty, tt.value); got != tt.want {
-				t.Errorf("isSkipField() = %v, want %v", got, tt.want)
+			if got := isEmptyValue(reflect.ValueOf(tt.value)); got != tt.want {
+				t.Errorf("isEmtpyValue() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func Test_isZeroValue(t *testing.T) {
+	str := "test"
+	type User struct {
+		Name string `json:"name,omitzero"`
+	}
+	type Where struct {
+		Not graphql.Omittable[*Where] `json:"not,omitzero"`
+	}
+	tests := []struct {
+		name  string
+		value any
+		want  bool
+	}{
+		{
+			name:  "non-empty value with omitzeero",
+			value: "string",
+			want:  false,
+		},
+		{
+			name:  "empty value with omitzeero",
+			value: "",
+			want:  true,
+		},
+		{
+			name:  "nil pointer with omitzeero",
+			value: (*string)(nil),
+			want:  true,
+		},
+		{
+			name:  "non-nil pointer with omitzeero",
+			value: &str,
+			want:  false,
+		},
+		{
+			name:  "slice value with omitempty",
+			value: []string{"string"},
+			want:  false,
+		},
+		{
+			name:  "empty slice value with omitempty",
+			value: []string{},
+			want:  false, // omitempty is skip but omitzero is not skip
+		},
+		{
+			name:  "nil slice value with omitempty",
+			value: func() []string { return nil }(),
+			want:  true,
+		},
+		{
+			name:  "Omittable IsSet is true",
+			value: graphql.OmittableOf("test"),
+			want:  false,
+		},
+		{
+			name:  "Omittable IsSet is true and empty string",
+			value: graphql.OmittableOf(""),
+			want:  false,
+		},
+		{
+			name:  "Omittable IsSet is false",
+			value: graphql.Omittable[string]{},
+			want:  true,
+		},
+		{
+			name:  "Omittable IsSet is true, value struct",
+			value: graphql.OmittableOf(User{Name: "test"}),
+			want:  false,
+		},
+		{
+			name:  "Omittable IsSet is false, value struct",
+			value: graphql.Omittable[User]{},
+			want:  true,
+		},
+		{
+			name:  "Omittable IsSet is true, value nest struct",
+			value: graphql.OmittableOf(Where{Not: graphql.OmittableOf(&Where{})}),
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := isZeroValue(reflect.ValueOf(tt.value)); got != tt.want {
+				t.Errorf("isZeroValue() = %v, want %v", got, tt.want)
 			}
 		})
 	}

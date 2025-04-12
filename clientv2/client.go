@@ -476,6 +476,7 @@ type fieldInfo struct {
 	name      string       // field name
 	jsonName  string       // field name in JSON
 	omitempty bool         // omitempty flag
+	omitzero  bool         // omitzero flag
 	typ       reflect.Type // field type
 }
 
@@ -612,7 +613,7 @@ func (e *Encoder) trimQuotes(s string) string {
 	return s
 }
 
-func isSkipField(omitempty bool, v reflect.Value) bool {
+func isSkipField(omitempty, omitzero bool, v reflect.Value) bool {
 	if !v.IsValid() {
 		return true
 	}
@@ -622,7 +623,12 @@ func isSkipField(omitempty bool, v reflect.Value) bool {
 		skipByOmitEmpty = isEmptyValue(v)
 	}
 
-	return skipByOmitEmpty
+	var skipByOmitZero bool
+	if omitzero {
+		skipByOmitZero = isZeroValue(v)
+	}
+
+	return skipByOmitEmpty || skipByOmitZero
 }
 
 // https://cs.opensource.google/go/go/+/refs/tags/go1.24.2:src/encoding/json/encode.go;l=318-330
@@ -640,13 +646,62 @@ func isEmptyValue(v reflect.Value) bool {
 	return false
 }
 
+type isZeroer interface {
+	IsZero() bool
+}
+
+var isZeroerType = reflect.TypeFor[isZeroer]()
+
+func isZeroValue(v reflect.Value) bool {
+	// https://cs.opensource.google/go/go/+/refs/tags/go1.24.2:src/encoding/json/encode.go;l=1187-1219
+	var isZero func(v reflect.Value) bool
+	t := v.Type()
+	// Provide a function that uses a type's IsZero method.
+	switch {
+	case t.Kind() == reflect.Interface && t.Implements(isZeroerType):
+		isZero = func(v reflect.Value) bool {
+			// Avoid panics calling IsZero on a nil interface or
+			// non-nil interface with nil pointer.
+			return v.IsNil() ||
+				(v.Elem().Kind() == reflect.Pointer && v.Elem().IsNil()) ||
+				//nolint:forcetypeassert
+				v.Interface().(isZeroer).IsZero()
+		}
+	case t.Kind() == reflect.Pointer && t.Implements(isZeroerType):
+		//nolint:forcetypeassert
+		isZero = func(v reflect.Value) bool {
+			// Avoid panics calling IsZero on nil pointer.
+			return v.IsNil() || v.Interface().(isZeroer).IsZero()
+		}
+	case t.Implements(isZeroerType):
+		//nolint:forcetypeassert
+		isZero = func(v reflect.Value) bool {
+			return v.Interface().(isZeroer).IsZero()
+		}
+	case reflect.PointerTo(t).Implements(isZeroerType):
+		isZero = func(v reflect.Value) bool {
+			if !v.CanAddr() {
+				// Temporarily box v so we can take the address.
+				v2 := reflect.New(v.Type()).Elem()
+				v2.Set(v)
+				v = v2
+			}
+			//nolint:forcetypeassert
+			return v.Addr().Interface().(isZeroer).IsZero()
+		}
+	}
+
+	// https://cs.opensource.google/go/go/+/refs/tags/go1.24.2:src/encoding/json/encode.go;l=716
+	return isZero == nil && v.IsZero() || (isZero != nil && isZero(v))
+}
+
 // encodeStruct encodes a struct value
 func (e *Encoder) encodeStruct(v reflect.Value) ([]byte, error) {
 	fields := e.prepareFields(v.Type())
 	result := make(map[string]json.RawMessage)
 	for _, field := range fields {
 		fieldValue := v.FieldByName(field.name)
-		if isSkipField(field.omitempty, fieldValue) {
+		if isSkipField(field.omitempty, field.omitzero, fieldValue) {
 			continue
 		}
 
@@ -753,6 +808,7 @@ func (e *Encoder) prepareFields(t reflect.Type) []fieldInfo {
 			fi.jsonName = parts[0]
 			if len(parts) > 1 {
 				fi.omitempty = slices.Contains(parts[1:], "omitempty")
+				fi.omitzero = slices.Contains(parts[1:], "omitzero")
 			}
 		}
 

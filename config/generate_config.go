@@ -11,7 +11,9 @@ type GenerateConfig struct {
 	Client                       *bool   `yaml:"client,omitempty"`
 	ClientInterfaceName          *string `yaml:"clientInterfaceName,omitempty"`
 	OmitEmptyTypes               *bool   `yaml:"omitEmptyTypes,omitempty"`
+	NullableInputOmittable       bool    `yaml:"nullableInputOmittable,omitempty"`
 	EnableClientJsonOmitemptyTag *bool   `yaml:"enableClientJsonOmitemptyTag,omitempty"`
+	EnableClientJsonOmitzeroTag  *bool   `yaml:"enableClientJsonOmitzeroTag,omitempty"`
 
 	// Deprecated: not working because v1 is deleted. Must use ClientV2
 	// if true, used client v2 in generate code
@@ -42,21 +44,6 @@ func (c *GenerateConfig) ShouldOmitEmptyTypes() bool {
 	}
 
 	return false
-}
-
-// IsEnableClientJsonOmitemptyTag controls whether the "omitempty" option is added to JSON tags.
-// If EnableClientJsonOmitemptyTag is set to false, even optional fields will not include "omitempty".
-// The default value is true.
-func (c *GenerateConfig) IsEnableClientJsonOmitemptyTag() bool {
-	if c == nil {
-		return true
-	}
-
-	if c.EnableClientJsonOmitemptyTag == nil {
-		return true
-	}
-
-	return *c.EnableClientJsonOmitemptyTag
 }
 
 func (c *GenerateConfig) GetClientInterfaceName() *string {
