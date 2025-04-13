@@ -1096,13 +1096,12 @@ func TestEncoder_encodeStruct(t *testing.T) {
 		{
 			name: "nil slice set to null",
 			input: Person{
-				Tags:    []string{}, // this is not zero value, so omitempty will not be applied
+				Tags:    []string{}, // empty slice is empty value but not zero value
 				Hobbies: nil,        // will continue to be nil
 			},
 			want: map[string]any{
 				"name":    "",
 				"email2":  nil,
-				"tags":    []any{},
 				"hobbies": nil,
 				"address": map[string]any{"city": ""},
 			},
@@ -1175,8 +1174,8 @@ func TestEncoder_isSkipOmitemptyField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isSkipOmitemptyField(tt.value, tt.field); got != tt.want {
-				t.Errorf("isSkipOmitemptyField() = %v, want %v", got, tt.want)
+			if got := isSkipField(tt.field.omitempty, tt.value); got != tt.want {
+				t.Errorf("isSkipField() = %v, want %v", got, tt.want)
 			}
 		})
 	}

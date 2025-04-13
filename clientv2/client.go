@@ -611,20 +611,32 @@ func (e *Encoder) trimQuotes(s string) string {
 	return s
 }
 
-func isSkipOmitemptyField(v reflect.Value, field fieldInfo) bool {
-	if !field.omitempty {
-		return false
-	}
-
+func isSkipField(omitempty bool, v reflect.Value) bool {
 	if !v.IsValid() {
 		return true
 	}
 
-	if isNil(v) {
-		return true
+	var skipByOmitEmpty bool
+	if omitempty {
+		skipByOmitEmpty = isEmptyValue(v)
 	}
 
-	return v.IsZero()
+	return skipByOmitEmpty
+}
+
+// https://cs.opensource.google/go/go/+/refs/tags/go1.24.2:src/encoding/json/encode.go;l=318-330
+func isEmptyValue(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+		return v.Len() == 0
+	case reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+		reflect.Float32, reflect.Float64,
+		reflect.Interface, reflect.Pointer:
+		return v.IsZero()
+	}
+	return false
 }
 
 // encodeStruct encodes a struct value
@@ -633,7 +645,7 @@ func (e *Encoder) encodeStruct(v reflect.Value) ([]byte, error) {
 	result := make(map[string]json.RawMessage)
 	for _, field := range fields {
 		fieldValue := v.FieldByName(field.name)
-		if isSkipOmitemptyField(fieldValue, field) {
+		if isSkipField(field.omitempty, fieldValue) {
 			continue
 		}
 
