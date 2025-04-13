@@ -524,6 +524,9 @@ func (e *Encoder) Encode(v reflect.Value) ([]byte, error) {
 	}
 
 	vi := v.Interface()
+	if marshaler, ok := vi.(graphql.ContextMarshaler); ok {
+		return e.encodeGQLContextMarshaler(context.Background(), marshaler)
+	}
 	if marshaler, ok := vi.(graphql.Marshaler); ok {
 		return e.encodeGQLMarshaler(marshaler)
 	}
@@ -564,6 +567,19 @@ func (e *Encoder) Encode(v reflect.Value) ([]byte, error) {
 	default:
 		panic(fmt.Sprintf("unsupported type: %s", t))
 	}
+}
+
+// encodeGQLContextMarshaler encodes a value that implements graphql.ContextMarshaler interface
+func (e *Encoder) encodeGQLContextMarshaler(ctx context.Context, v graphql.ContextMarshaler) ([]byte, error) {
+	if isNil(reflect.ValueOf(v)) {
+		return []byte("null"), nil
+	}
+
+	var buf bytes.Buffer
+	if err := v.MarshalGQLContext(ctx, &buf); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 // encodeGQLMarshaler encodes a value that implements graphql.Marshaler interface
