@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -17,7 +18,6 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/validator"
 	"gopkg.in/yaml.v3"
-	"slices"
 )
 
 // Config extends the gqlgen basic config

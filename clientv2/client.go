@@ -12,6 +12,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -742,21 +743,17 @@ func (e *Encoder) prepareFields(t reflect.Type) []fieldInfo {
 		if jsonTag == "-" {
 			continue
 		}
-
-		jsonName := f.Name
-		if jsonTag != "" {
-			parts := strings.Split(jsonTag, ",")
-			jsonName = parts[0]
-		}
-
 		fi := fieldInfo{
 			name:     f.Name,
-			jsonName: jsonName,
+			jsonName: f.Name,
 			typ:      f.Type,
 		}
-
-		if strings.Contains(jsonTag, "omitempty") {
-			fi.omitempty = true
+		if jsonTag != "" {
+			parts := strings.Split(jsonTag, ",")
+			fi.jsonName = parts[0]
+			if len(parts) > 1 {
+				fi.omitempty = slices.Contains(parts[1:], "omitempty")
+			}
 		}
 
 		fields = append(fields, fi)
