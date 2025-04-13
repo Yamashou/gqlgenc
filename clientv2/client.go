@@ -581,17 +581,17 @@ func (e *Encoder) encodeBool(v reflect.Value) ([]byte, error) {
 
 // encodeInt encodes an integer value
 func (e *Encoder) encodeInt(v reflect.Value) ([]byte, error) {
-	return []byte(fmt.Sprintf("%d", v.Int())), nil
+	return fmt.Appendf(nil, "%d", v.Int()), nil
 }
 
 // encodeUint encodes an unsigned integer value
 func (e *Encoder) encodeUint(v reflect.Value) ([]byte, error) {
-	return []byte(fmt.Sprintf("%d", v.Uint())), nil
+	return fmt.Appendf(nil, "%d", v.Uint()), nil
 }
 
 // encodeFloat encodes a floating-point value
 func (e *Encoder) encodeFloat(v reflect.Value) ([]byte, error) {
-	return []byte(fmt.Sprintf("%f", v.Float())), nil
+	return fmt.Appendf(nil, "%f", v.Float()), nil
 }
 
 // encodeString encodes a string value

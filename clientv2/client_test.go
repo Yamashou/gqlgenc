@@ -1040,7 +1040,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 	tests := []struct {
 		name    string
 		input   Person
-		want    map[string]interface{}
+		want    map[string]any
 		wantErr bool
 	}{
 		{
