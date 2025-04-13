@@ -504,13 +504,6 @@ func MarshalJSON(ctx context.Context, v any) ([]byte, error) {
 	return encoder.Encode(val)
 }
 
-func checkImplements[I any](v reflect.Value) bool {
-	t := v.Type()
-	interfaceType := reflect.TypeOf((*I)(nil)).Elem()
-
-	return t.Implements(interfaceType) || (t.Kind() == reflect.Ptr && reflect.PointerTo(t).Implements(interfaceType))
-}
-
 // Encoder is a struct for encoding GraphQL requests to JSON
 type Encoder struct {
 	EnableInputJsonOmitemptyTag bool
@@ -526,20 +519,19 @@ type fieldInfo struct {
 
 // Encode encodes any value to JSON
 func (e *Encoder) Encode(v reflect.Value) ([]byte, error) {
-	if !v.IsValid() || (v.Kind() == reflect.Ptr && v.IsNil()) {
+	if !v.IsValid() || isNil(v) {
 		return []byte("null"), nil
 	}
 
-	if checkImplements[graphql.Marshaler](v) {
-		return e.encodeGQLMarshaler(v.Interface())
+	vi := v.Interface()
+	if marshaler, ok := vi.(graphql.Marshaler); ok {
+		return e.encodeGQLMarshaler(marshaler)
 	}
-
-	if checkImplements[json.Marshaler](v) {
-		return e.encodeJsonMarshaler(v.Interface())
+	if marshaler, ok := vi.(json.Marshaler); ok {
+		return e.encodeJsonMarshaler(marshaler)
 	}
-
-	if checkImplements[encoding.TextMarshaler](v) {
-		return e.encodeTextMarshaler(v.Interface())
+	if marshaler, ok := vi.(encoding.TextMarshaler); ok {
+		return e.encodeTextMarshaler(marshaler)
 	}
 
 	t := v.Type()
@@ -575,35 +567,30 @@ func (e *Encoder) Encode(v reflect.Value) ([]byte, error) {
 }
 
 // encodeGQLMarshaler encodes a value that implements graphql.Marshaler interface
-func (e *Encoder) encodeGQLMarshaler(v any) ([]byte, error) {
-	if v == nil {
+func (e *Encoder) encodeGQLMarshaler(v graphql.Marshaler) ([]byte, error) {
+	if isNil(reflect.ValueOf(v)) {
 		return []byte("null"), nil
 	}
 
 	var buf bytes.Buffer
-	if val, ok := v.(graphql.Marshaler); ok {
-		val.MarshalGQL(&buf)
-	} else {
-		return nil, fmt.Errorf("failed to encode graphql.Marshaler: %v", v)
-	}
-
+	v.MarshalGQL(&buf)
 	return buf.Bytes(), nil
 }
 
 // encodeJsonMarshaler encodes a value that implements json.Marshaler interface
-func (e *Encoder) encodeJsonMarshaler(v any) ([]byte, error) {
-	if val, ok := v.(json.Marshaler); ok {
-		return val.MarshalJSON()
+func (e *Encoder) encodeJsonMarshaler(v json.Marshaler) ([]byte, error) {
+	if isNil(reflect.ValueOf(v)) {
+		return []byte("null"), nil
 	}
-	return nil, fmt.Errorf("failed to encode json.Marshaler: %v", v)
+	return v.MarshalJSON()
 }
 
 // encodeTextMarshaler encodes a value that implements encoding.TextMarshaler interface
-func (e *Encoder) encodeTextMarshaler(v any) ([]byte, error) {
-	if _, ok := v.(encoding.TextMarshaler); ok {
-		return json.Marshal(v)
+func (e *Encoder) encodeTextMarshaler(v encoding.TextMarshaler) ([]byte, error) {
+	if isNil(reflect.ValueOf(v)) {
+		return []byte("null"), nil
 	}
-	return nil, fmt.Errorf("failed to encode encoding.TextMarshaler: %v", v)
+	return json.Marshal(v)
 }
 
 // encodeBool encodes a boolean value
@@ -791,4 +778,13 @@ func (e *Encoder) prepareFields(t reflect.Type) []fieldInfo {
 	}
 
 	return fields
+}
+
+func isNil(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Ptr, reflect.Map, reflect.Slice, reflect.Chan, reflect.Func, reflect.Interface:
+		return v.IsNil()
+	default:
+		return false
+	}
 }
