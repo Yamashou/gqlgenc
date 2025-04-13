@@ -462,52 +462,13 @@ func (c *Client) unmarshal(data []byte, res any) error {
 	return err
 }
 
-// contextKey is a type for context keys
-type contextKey string
-
-const (
-	// EnableInputJsonOmitemptyTagKey is a context key for EnableInputJsonOmitemptyTag
-	EnableInputJsonOmitemptyTagKey contextKey = "enable_input_json_omitempty_tag"
-)
-
-// WithEnableInputJsonOmitemptyTag returns a new context with EnableInputJsonOmitemptyTag value
-func WithEnableInputJsonOmitemptyTag(ctx context.Context, enable bool) context.Context {
-	return context.WithValue(ctx, EnableInputJsonOmitemptyTagKey, enable)
-}
-
-// getEnableInputJsonOmitemptyTagFromContext retrieves the EnableInputJsonOmitemptyTag value from context
-func getEnableInputJsonOmitemptyTagFromContext(ctx context.Context) bool {
-	enableClientJsonOmitemptyTag := true
-	if ctx != nil {
-		enable, ok := ctx.Value(EnableInputJsonOmitemptyTagKey).(bool)
-		if ok {
-			enableClientJsonOmitemptyTag = enable
-		}
-	}
-	return enableClientJsonOmitemptyTag
-}
-
-func MarshalJSON(ctx context.Context, v any) ([]byte, error) {
-	if v == nil {
-		return []byte("null"), nil
-	}
-
-	val := reflect.ValueOf(v)
-	if !val.IsValid() || (val.Kind() == reflect.Ptr && val.IsNil()) {
-		return []byte("null"), nil
-	}
-
-	encoder := &Encoder{
-		EnableInputJsonOmitemptyTag: getEnableInputJsonOmitemptyTagFromContext(ctx),
-	}
-
-	return encoder.Encode(val)
+func MarshalJSON(_ context.Context, v any) ([]byte, error) {
+	encoder := &Encoder{}
+	return encoder.Encode(reflect.ValueOf(v))
 }
 
 // Encoder is a struct for encoding GraphQL requests to JSON
-type Encoder struct {
-	EnableInputJsonOmitemptyTag bool
-}
+type Encoder struct{}
 
 // fieldInfo holds field information of a struct
 type fieldInfo struct {
@@ -651,10 +612,6 @@ func (e *Encoder) trimQuotes(s string) string {
 }
 
 func (e *Encoder) isSkipOmitemptyField(v reflect.Value, field fieldInfo) bool {
-	if !e.EnableInputJsonOmitemptyTag {
-		return false
-	}
-
 	if !field.omitempty {
 		return false
 	}

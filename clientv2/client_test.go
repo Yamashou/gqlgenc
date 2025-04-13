@@ -1038,11 +1038,10 @@ func TestEncoder_encodeStruct(t *testing.T) {
 	email := "test@example.com"
 
 	tests := []struct {
-		name               string
-		input              Person
-		enableOmitemptyTag bool
-		want               map[string]interface{}
-		wantErr            bool
+		name    string
+		input   Person
+		want    map[string]interface{}
+		wantErr bool
 	}{
 		{
 			name: "all fields filled",
@@ -1055,7 +1054,6 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				Nickname: "Johnny",
 				Hobbies:  []string{"reading", "swimming"},
 			},
-			enableOmitemptyTag: true,
 			want: map[string]any{
 				"name":     "John",
 				"age":      int64(30),
@@ -1073,52 +1071,11 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				Name:    "John",
 				Address: Address{City: "Tokyo"},
 			},
-			enableOmitemptyTag: true,
 			want: map[string]any{
 				"name":    "John",
 				"email2":  nil,
 				"address": map[string]any{"city": "Tokyo"},
 				"hobbies": nil,
-			},
-		},
-		{
-			name: "omitempty disabled",
-			input: Person{
-				Name:    "John",
-				Address: Address{City: "Tokyo"},
-			},
-			enableOmitemptyTag: false,
-			want: map[string]any{
-				"name":     "John",
-				"age":      int64(0),
-				"email":    nil,
-				"email2":   nil,
-				"address":  map[string]any{"city": "Tokyo", "country": "", "zip": nil},
-				"tags":     nil,
-				"nickname": "",
-				"hobbies":  nil,
-			},
-		},
-		{
-			name: "nil slice set to null on omitempty disabled",
-			input: Person{
-				Name:    "John",
-				Address: Address{City: "Tokyo"},
-			},
-			enableOmitemptyTag: false,
-			want: map[string]any{
-				"name":    "John",
-				"age":     int64(0),
-				"email":   nil, // omitempty is ignored
-				"email2":  nil,
-				"tags":    nil, // omitempty is ignored
-				"hobbies": nil,
-				"address": map[string]any{
-					"city":    "Tokyo",
-					"country": "", // omitempty is ignored
-					"zip":     nil,
-				},
-				"nickname": "", // omitempty is ignored
 			},
 		},
 		{
@@ -1129,7 +1086,6 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				Hobbies: nil,
 				Tags:    nil, // will be dropped as omitempty is enabled
 			},
-			enableOmitemptyTag: true,
 			want: map[string]any{
 				"name":    "John",
 				"email2":  nil,
@@ -1143,7 +1099,6 @@ func TestEncoder_encodeStruct(t *testing.T) {
 				Tags:    []string{}, // this is not zero value, so omitempty will not be applied
 				Hobbies: nil,        // will continue to be nil
 			},
-			enableOmitemptyTag: true,
 			want: map[string]any{
 				"name":    "",
 				"email2":  nil,
@@ -1156,10 +1111,7 @@ func TestEncoder_encodeStruct(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			encoder := &Encoder{
-				EnableInputJsonOmitemptyTag: tt.enableOmitemptyTag,
-			}
-
+			encoder := &Encoder{}
 			got, err := encoder.encodeStruct(reflect.ValueOf(tt.input))
 			if (err != nil) != tt.wantErr {
 				t.Errorf("encodeStruct() error = %v, wantErr %v", err, tt.wantErr)
@@ -1175,76 +1127,55 @@ func TestEncoder_encodeStruct(t *testing.T) {
 
 			// JSONの文字列として比較
 			if string(got) != string(want) {
-				t.Errorf("encodeStruct() = %s, want %s", got, want)
+				t.Errorf("encodeStruct()\n got: %s\nwant: %s", got, want)
 			}
 		})
 	}
 }
 
 func TestEncoder_isSkipOmitemptyField(t *testing.T) {
-	type testStruct struct {
-		Required string  `json:"required"`
-		Optional string  `json:"optional,omitempty"`
-		Ptr      *string `json:"ptr,omitempty"`
-	}
-
 	str := "test"
 	tests := []struct {
-		name               string
-		value              reflect.Value
-		field              fieldInfo
-		enableOmitemptyTag bool
-		want               bool
+		name  string
+		value reflect.Value
+		field fieldInfo
+		want  bool
 	}{
 		{
-			name:               "non-empty value with omitempty",
-			value:              reflect.ValueOf("test"),
-			field:              fieldInfo{omitempty: true},
-			enableOmitemptyTag: true,
-			want:               false,
+			name:  "non-empty value with omitempty",
+			value: reflect.ValueOf("test"),
+			field: fieldInfo{omitempty: true},
+			want:  false,
 		},
 		{
-			name:               "empty value with omitempty",
-			value:              reflect.ValueOf(""),
-			field:              fieldInfo{omitempty: true},
-			enableOmitemptyTag: true,
-			want:               true,
+			name:  "empty value with omitempty",
+			value: reflect.ValueOf(""),
+			field: fieldInfo{omitempty: true},
+			want:  true,
 		},
 		{
-			name:               "nil pointer with omitempty",
-			value:              reflect.ValueOf((*string)(nil)),
-			field:              fieldInfo{omitempty: true},
-			enableOmitemptyTag: true,
-			want:               true,
+			name:  "nil pointer with omitempty",
+			value: reflect.ValueOf((*string)(nil)),
+			field: fieldInfo{omitempty: true},
+			want:  true,
 		},
 		{
-			name:               "non-nil pointer with omitempty",
-			value:              reflect.ValueOf(&str),
-			field:              fieldInfo{omitempty: true},
-			enableOmitemptyTag: true,
-			want:               false,
+			name:  "non-nil pointer with omitempty",
+			value: reflect.ValueOf(&str),
+			field: fieldInfo{omitempty: true},
+			want:  false,
 		},
 		{
-			name:               "empty value without omitempty",
-			value:              reflect.ValueOf(""),
-			field:              fieldInfo{omitempty: false},
-			enableOmitemptyTag: true,
-			want:               false,
-		},
-		{
-			name:               "omitempty tag disabled",
-			value:              reflect.ValueOf(""),
-			field:              fieldInfo{omitempty: true},
-			enableOmitemptyTag: false,
-			want:               false,
+			name:  "empty value without omitempty",
+			value: reflect.ValueOf(""),
+			field: fieldInfo{omitempty: false},
+			want:  false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			encoder := &Encoder{
-				EnableInputJsonOmitemptyTag: tt.enableOmitemptyTag,
-			}
+			encoder := &Encoder{}
 			if got := encoder.isSkipOmitemptyField(tt.value, tt.field); got != tt.want {
 				t.Errorf("isSkipOmitemptyField() = %v, want %v", got, tt.want)
 			}
