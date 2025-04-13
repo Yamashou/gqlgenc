@@ -1175,8 +1175,7 @@ func TestEncoder_isSkipOmitemptyField(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			encoder := &Encoder{}
-			if got := encoder.isSkipOmitemptyField(tt.value, tt.field); got != tt.want {
+			if got := isSkipOmitemptyField(tt.value, tt.field); got != tt.want {
 				t.Errorf("isSkipOmitemptyField() = %v, want %v", got, tt.want)
 			}
 		})

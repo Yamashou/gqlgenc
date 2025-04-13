@@ -611,7 +611,7 @@ func (e *Encoder) trimQuotes(s string) string {
 	return s
 }
 
-func (e *Encoder) isSkipOmitemptyField(v reflect.Value, field fieldInfo) bool {
+func isSkipOmitemptyField(v reflect.Value, field fieldInfo) bool {
 	if !field.omitempty {
 		return false
 	}
@@ -620,7 +620,7 @@ func (e *Encoder) isSkipOmitemptyField(v reflect.Value, field fieldInfo) bool {
 		return true
 	}
 
-	if v.Kind() == reflect.Ptr && v.IsNil() {
+	if isNil(v) {
 		return true
 	}
 
@@ -633,7 +633,7 @@ func (e *Encoder) encodeStruct(v reflect.Value) ([]byte, error) {
 	result := make(map[string]json.RawMessage)
 	for _, field := range fields {
 		fieldValue := v.FieldByName(field.name)
-		if e.isSkipOmitemptyField(fieldValue, field) {
+		if isSkipOmitemptyField(fieldValue, field) {
 			continue
 		}
 
