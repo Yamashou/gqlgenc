@@ -521,7 +521,7 @@ func (n *Number) UnmarshalGQL(v any) error {
 		*n = NumberTwo
 	default:
 
-		return fmt.Errorf("Number not found Type: %d", n)
+		return fmt.Errorf("Number not found Type: %s", str)
 	}
 
 	return nil
@@ -536,6 +536,45 @@ func (n Number) MarshalGQL(w io.Writer) {
 		str = "TWO"
 	}
 	fmt.Fprint(w, strconv.Quote(str))
+}
+
+type ContextNumber int64
+
+const (
+	ContextNumberOne ContextNumber = 1
+	ContextNumberTwo ContextNumber = 2
+)
+
+func (n *ContextNumber) UnmarshalGQLContext(_ context.Context, v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	switch str {
+	case "ONE":
+		*n = ContextNumberOne
+	case "TWO":
+		*n = ContextNumberTwo
+	default:
+		return fmt.Errorf("Number not found Type: %s", str)
+	}
+
+	return nil
+}
+
+func (n ContextNumber) MarshalGQLContext(_ context.Context, w io.Writer) error {
+	var str string
+	switch n {
+	case ContextNumberOne:
+		str = "ONE"
+	case ContextNumberTwo:
+		str = "TWO"
+	default:
+		return fmt.Errorf("Number not found Type: %d", n)
+	}
+	fmt.Fprint(w, strconv.Quote(str))
+	return nil
 }
 
 func TestMarshalJSONValueType(t *testing.T) {
@@ -586,7 +625,7 @@ func TestMarshalJSONValueType(t *testing.T) {
 			want: []byte("null"),
 		},
 		{
-			name: "marshal map",
+			name: "marshal map with MarshalGQL",
 			args: args{
 				v: map[Number]string{
 					NumberOne: "ONE",
@@ -595,9 +634,25 @@ func TestMarshalJSONValueType(t *testing.T) {
 			want: []byte(`{"ONE":"ONE"}`),
 		},
 		{
-			name: "marshal slice",
+			name: "marshal map with MarshalGQLContext",
+			args: args{
+				v: map[ContextNumber]string{
+					ContextNumberOne: "ONE",
+				},
+			},
+			want: []byte(`{"ONE":"ONE"}`),
+		},
+		{
+			name: "marshal slice with MarshalGQL",
 			args: args{
 				v: []Number{NumberOne, NumberTwo},
+			},
+			want: []byte(`["ONE","TWO"]`),
+		},
+		{
+			name: "marshal slice with MarshalGQLContext",
+			args: args{
+				v: []ContextNumber{ContextNumberOne, ContextNumberTwo},
 			},
 			want: []byte(`["ONE","TWO"]`),
 		},
@@ -619,7 +674,7 @@ func TestMarshalJSONValueType(t *testing.T) {
 			}
 
 			if !cmp.Equal(tt.want, got) {
-				t.Errorf("MarshalJSON() = %v, want %v", got, tt.want)
+				t.Errorf("MarshalJSON() = %s, want %s", got, tt.want)
 			}
 		})
 	}
