@@ -5,7 +5,7 @@
 /client.go
 /query/
 /.idea/
-
+bin
 coverage.out
 .vscode/
 

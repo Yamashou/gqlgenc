@@ -14,6 +14,15 @@ import (
 	"golang.org/x/text/language"
 )
 
+var (
+	builtinTypes = map[string]types.Type{
+		"string":  types.Typ[types.String],
+		"int64":   types.Typ[types.Int],
+		"bool":    types.Typ[types.Bool],
+		"float64": types.Typ[types.Float64],
+	}
+)
+
 type Argument struct {
 	Variable string
 	Type     types.Type
@@ -365,9 +374,16 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 	return argumentTypes
 }
 
-// Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
+// Type resolves type based on schema type.  Added support for Go's builtin types
 func (r *SourceGenerator) Type(typeName string) types.Type {
-	goType, err := r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
+	var goType types.Type
+	var err error
+
+	if t, ok := builtinTypes[r.cfg.Models[typeName].Model[0]]; ok {
+		goType = t
+	} else {
+		goType, err = r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
+	}
 	if err != nil {
 		panic(fmt.Sprintf("%+v", err))
 	}

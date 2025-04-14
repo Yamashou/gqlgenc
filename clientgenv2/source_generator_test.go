@@ -1,6 +1,8 @@
 package clientgenv2
 
 import (
+	"github.com/99designs/gqlgen/codegen/config"
+	gqlgencConfig "github.com/Yamashou/gqlgenc/config"
 	"go/types"
 	"testing"
 )
@@ -231,6 +233,51 @@ func TestMergeFieldsRecursively(t *testing.T) {
 						t.Errorf("Tag does not match: got %v, want %v", resultFields[i].Tags[j], tag)
 					}
 				}
+			}
+		})
+	}
+}
+
+func TestBuiltInTypeSupport(t *testing.T) {
+	tests := []struct {
+		name     string
+		config   *config.Config
+		expected types.Type
+	}{
+		{"String", &config.Config{
+			Models: config.TypeMap{
+				"String": config.TypeMapEntry{Model: []string{"string"}},
+			},
+		}, types.Typ[types.String]},
+		{"Int", &config.Config{
+			Models: config.TypeMap{
+				"Int": config.TypeMapEntry{Model: []string{"int64"}},
+			},
+		}, types.Typ[types.Int]},
+		{"Float", &config.Config{
+			Models: config.TypeMap{
+				"Float": config.TypeMapEntry{Model: []string{"float64"}},
+			},
+		}, types.Typ[types.Float64]},
+		{"Boolean", &config.Config{
+			Models: config.TypeMap{
+				"Boolean": config.TypeMapEntry{Model: []string{"bool"}},
+			},
+		}, types.Typ[types.Bool]},
+		{"HTML", &config.Config{
+			Models: config.TypeMap{
+				"HTML": config.TypeMapEntry{Model: []string{"string"}},
+			},
+		}, types.Typ[types.String]},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			sourceGenerator := NewSourceGenerator(tt.config, config.PackageConfig{}, &gqlgencConfig.GenerateConfig{})
+			goType := sourceGenerator.Type(tt.name)
+			
+			if tt.expected != goType {
+				t.Errorf("Expected %s, got %s", tt.expected, goType.String())
 			}
 		})
 	}
