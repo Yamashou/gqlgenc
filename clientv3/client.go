@@ -10,9 +10,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	"github.com/Yamashou/gqlgenc/graphqljson"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type Client struct {
@@ -21,42 +20,71 @@ type Client struct {
 }
 
 // NewClient creates a new http client wrapper
-func NewClient(client *http.Client, endpoint string) *Client {
-	return &Client{
-		client:   client,
+func NewClient(endpoint string, options ...Option) *Client {
+	client := &Client{
+		client:   http.DefaultClient,
 		endpoint: endpoint,
+	}
+	for _, option := range options {
+		option(client)
+	}
+
+	return client
+}
+
+type Option func(*Client)
+
+func WithHTTPClient(httpClient *http.Client) Option {
+	return func(c *Client) {
+		c.client = httpClient
 	}
 }
 
-func (c *Client) Post(ctx context.Context, operationName, query string, variables map[string]any, out any) error {
-	req, err := newRequest(ctx, c.endpoint, operationName, query, variables)
+func (c *Client) Post(ctx context.Context, operationName, query string, variables map[string]any, out any, options ...Option) error {
+	client := &Client{
+		client:   c.client,
+		endpoint: c.endpoint,
+	}
+	for _, option := range options {
+		option(client)
+	}
+
+	req, err := newRequest(ctx, client.endpoint, operationName, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed to create post request: %w", err)
 	}
 
-	resp, err := c.client.Do(req)
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
-	return c.parseResponse(resp, out)
+	return client.parseResponse(resp, out)
 }
 
 // PostMultipart send multipart form with files https://gqlgen.com/reference/file-upload/ https://github.com/jaydenseric/graphql-multipart-request-spec
-func (c *Client) PostMultipart(ctx context.Context, operationName, query string, variables map[string]any, out any) error {
-	req, err := multipartRequest(ctx, c.endpoint, operationName, query, variables)
+func (c *Client) PostMultipart(ctx context.Context, operationName, query string, variables map[string]any, out any, options ...Option) error {
+	client := &Client{
+		client:   c.client,
+		endpoint: c.endpoint,
+	}
+	for _, option := range options {
+		option(client)
+	}
+
+	req, err := multipartRequest(ctx, client.endpoint, operationName, query, variables)
 	if err != nil {
 		return fmt.Errorf("failed to create post multipart request: %w", err)
 	}
 
-	resp, err := c.client.Do(req)
+	resp, err := client.client.Do(req)
 	if err != nil {
 		return fmt.Errorf("request failed: %w", err)
 	}
 	defer resp.Body.Close()
 
-	return c.parseResponse(resp, out)
+	return client.parseResponse(resp, out)
 }
 
 /////////////////////////////////////////////////////////////////////
