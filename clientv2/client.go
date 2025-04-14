@@ -82,11 +82,13 @@ func UnsafeChainInterceptor(interceptors ...RequestInterceptor) RequestIntercept
 
 // Client is the http client wrapper
 type Client struct {
-	Client                     HttpClient
-	BaseURL                    string
-	RequestInterceptor         RequestInterceptor
-	CustomDo                   RequestInterceptorFunc
-	ParseDataWhenErrors        bool
+	Client              HttpClient
+	BaseURL             string
+	RequestInterceptor  RequestInterceptor
+	CustomDo            RequestInterceptorFunc
+	ParseDataWhenErrors bool
+	// UseStandardJSONMarshal is a flag that use json.Marshal instead of MarshalJSON
+	UseStandardJSONMarshal     bool
 	IsUnsafeRequestInterceptor bool
 }
 
@@ -109,6 +111,7 @@ func NewClient(client HttpClient, baseURL string, options *Options, interceptors
 
 	if options != nil {
 		c.ParseDataWhenErrors = options.ParseDataAlongWithErrors
+		c.UseStandardJSONMarshal = options.UseStandardJSONMarshal
 	}
 
 	return c
@@ -126,6 +129,7 @@ func NewClientWithUnsafeRequestInterceptor(client HttpClient, baseURL string, op
 
 	if options != nil {
 		c.ParseDataWhenErrors = options.ParseDataAlongWithErrors
+		c.UseStandardJSONMarshal = options.UseStandardJSONMarshal
 	}
 
 	return c
@@ -136,6 +140,8 @@ type Options struct {
 	// ParseDataAlongWithErrors is a flag that indicates whether the client should try to parse and return the data along with error
 	// when error appeared. So in the end you'll get list of gql errors and data.
 	ParseDataAlongWithErrors bool
+	// UseStandardJSONMarshal is a flag that use json.Marshal instead of MarshalJSON
+	UseStandardJSONMarshal bool
 }
 
 // GqlErrorList is the struct of a standard graphql error response
@@ -230,9 +236,19 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 
 		headers = append(headers, header{key: "Content-Type", value: contentType})
 	} else {
-		requestBody, err := MarshalJSON(ctx, r)
-		if err != nil {
-			return fmt.Errorf("encode: %w", err)
+		var requestBody []byte
+		if c.UseStandardJSONMarshal {
+			var err error
+			requestBody, err = json.Marshal(r)
+			if err != nil {
+				return fmt.Errorf("encode: %w", err)
+			}
+		} else {
+			var err error
+			requestBody, err = MarshalJSON(ctx, r)
+			if err != nil {
+				return fmt.Errorf("encode: %w", err)
+			}
 		}
 
 		body = bytes.NewBuffer(requestBody)
