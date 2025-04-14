@@ -12,6 +12,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -462,52 +463,13 @@ func (c *Client) unmarshal(data []byte, res any) error {
 	return err
 }
 
-// contextKey is a type for context keys
-type contextKey string
-
-const (
-	// EnableInputJsonOmitemptyTagKey is a context key for EnableInputJsonOmitemptyTag
-	EnableInputJsonOmitemptyTagKey contextKey = "enable_input_json_omitempty_tag"
-)
-
-// WithEnableInputJsonOmitemptyTag returns a new context with EnableInputJsonOmitemptyTag value
-func WithEnableInputJsonOmitemptyTag(ctx context.Context, enable bool) context.Context {
-	return context.WithValue(ctx, EnableInputJsonOmitemptyTagKey, enable)
-}
-
-// getEnableInputJsonOmitemptyTagFromContext retrieves the EnableInputJsonOmitemptyTag value from context
-func getEnableInputJsonOmitemptyTagFromContext(ctx context.Context) bool {
-	enableClientJsonOmitemptyTag := true
-	if ctx != nil {
-		enable, ok := ctx.Value(EnableInputJsonOmitemptyTagKey).(bool)
-		if ok {
-			enableClientJsonOmitemptyTag = enable
-		}
-	}
-	return enableClientJsonOmitemptyTag
-}
-
-func MarshalJSON(ctx context.Context, v any) ([]byte, error) {
-	if v == nil {
-		return []byte("null"), nil
-	}
-
-	val := reflect.ValueOf(v)
-	if !val.IsValid() || (val.Kind() == reflect.Ptr && val.IsNil()) {
-		return []byte("null"), nil
-	}
-
-	encoder := &Encoder{
-		EnableInputJsonOmitemptyTag: getEnableInputJsonOmitemptyTagFromContext(ctx),
-	}
-
-	return encoder.Encode(val)
+func MarshalJSON(_ context.Context, v any) ([]byte, error) {
+	encoder := &Encoder{}
+	return encoder.Encode(reflect.ValueOf(v))
 }
 
 // Encoder is a struct for encoding GraphQL requests to JSON
-type Encoder struct {
-	EnableInputJsonOmitemptyTag bool
-}
+type Encoder struct{}
 
 // fieldInfo holds field information of a struct
 type fieldInfo struct {
@@ -620,17 +582,17 @@ func (e *Encoder) encodeBool(v reflect.Value) ([]byte, error) {
 
 // encodeInt encodes an integer value
 func (e *Encoder) encodeInt(v reflect.Value) ([]byte, error) {
-	return []byte(fmt.Sprintf("%d", v.Int())), nil
+	return fmt.Appendf(nil, "%d", v.Int()), nil
 }
 
 // encodeUint encodes an unsigned integer value
 func (e *Encoder) encodeUint(v reflect.Value) ([]byte, error) {
-	return []byte(fmt.Sprintf("%d", v.Uint())), nil
+	return fmt.Appendf(nil, "%d", v.Uint()), nil
 }
 
 // encodeFloat encodes a floating-point value
 func (e *Encoder) encodeFloat(v reflect.Value) ([]byte, error) {
-	return []byte(fmt.Sprintf("%f", v.Float())), nil
+	return fmt.Appendf(nil, "%f", v.Float()), nil
 }
 
 // encodeString encodes a string value
@@ -650,24 +612,32 @@ func (e *Encoder) trimQuotes(s string) string {
 	return s
 }
 
-func (e *Encoder) isSkipOmitemptyField(v reflect.Value, field fieldInfo) bool {
-	if !e.EnableInputJsonOmitemptyTag {
-		return false
-	}
-
-	if !field.omitempty {
-		return false
-	}
-
+func isSkipField(omitempty bool, v reflect.Value) bool {
 	if !v.IsValid() {
 		return true
 	}
 
-	if v.Kind() == reflect.Ptr && v.IsNil() {
-		return true
+	var skipByOmitEmpty bool
+	if omitempty {
+		skipByOmitEmpty = isEmptyValue(v)
 	}
 
-	return v.IsZero()
+	return skipByOmitEmpty
+}
+
+// https://cs.opensource.google/go/go/+/refs/tags/go1.24.2:src/encoding/json/encode.go;l=318-330
+func isEmptyValue(v reflect.Value) bool {
+	switch v.Kind() {
+	case reflect.Array, reflect.Map, reflect.Slice, reflect.String:
+		return v.Len() == 0
+	case reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr,
+		reflect.Float32, reflect.Float64,
+		reflect.Interface, reflect.Pointer:
+		return v.IsZero()
+	}
+	return false
 }
 
 // encodeStruct encodes a struct value
@@ -676,7 +646,7 @@ func (e *Encoder) encodeStruct(v reflect.Value) ([]byte, error) {
 	result := make(map[string]json.RawMessage)
 	for _, field := range fields {
 		fieldValue := v.FieldByName(field.name)
-		if e.isSkipOmitemptyField(fieldValue, field) {
+		if isSkipField(field.omitempty, fieldValue) {
 			continue
 		}
 
@@ -773,21 +743,17 @@ func (e *Encoder) prepareFields(t reflect.Type) []fieldInfo {
 		if jsonTag == "-" {
 			continue
 		}
-
-		jsonName := f.Name
-		if jsonTag != "" {
-			parts := strings.Split(jsonTag, ",")
-			jsonName = parts[0]
-		}
-
 		fi := fieldInfo{
 			name:     f.Name,
-			jsonName: jsonName,
+			jsonName: f.Name,
 			typ:      f.Type,
 		}
-
-		if strings.Contains(jsonTag, "omitempty") {
-			fi.omitempty = true
+		if jsonTag != "" {
+			parts := strings.Split(jsonTag, ",")
+			fi.jsonName = parts[0]
+			if len(parts) > 1 {
+				fi.omitempty = slices.Contains(parts[1:], "omitempty")
+			}
 		}
 
 		fields = append(fields, fi)

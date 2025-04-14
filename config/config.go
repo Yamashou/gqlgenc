@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -44,13 +45,7 @@ type StringList []string
 
 // Has checks if the strings array has a give value
 func (a StringList) Has(file string) bool {
-	for _, existing := range a {
-		if existing == file {
-			return true
-		}
-	}
-
-	return false
+	return slices.Contains(a, file)
 }
 
 // LoadConfigFromDefaultLocations looks for a config file in the specified directory, and all parent directories
