@@ -28,6 +28,11 @@ query GetNode($id: ID!) {
         id
         ... on Repository {
             ...RepositoryFragment
+            languages(first: 100) {
+                nodes {
+                    ...LanguageFragment
+                }
+            }
         }
         ... on Reaction {
             id

@@ -227,6 +227,39 @@ func NewLayerTypeName(base, thisField string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
 }
 
+func (r *SourceGenerator) expandFragmentFields(responseFields ResponseFieldList) ResponseFieldList {
+	result := make(ResponseFieldList, 0, len(responseFields))
+	for _, field := range responseFields {
+		if field.IsFragmentSpread {
+			for _, fragmentField := range field.ResponseFields {
+				result = append(result, fragmentField)
+			}
+		} else {
+			result = append(result, field)
+		}
+	}
+	return result
+}
+
+func (r *SourceGenerator) hasFragmentSpread(fields ResponseFieldList) bool {
+	for _, field := range fields {
+		if field.IsFragmentSpread {
+			return true
+		}
+	}
+	return false
+}
+
+func (r *SourceGenerator) collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
+	var fragmentFields ResponseFieldList
+	for _, field := range fields {
+		if field.IsFragmentSpread {
+			fragmentFields = append(fragmentFields, field.ResponseFields...)
+		}
+	}
+	return fragmentFields
+}
+
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
 	var isOptional bool
 	switch selection := selection.(type) {
@@ -312,24 +345,51 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
+		// InlineFragment has child elements, so create a struct type here
 		name := NewLayerTypeName(typeName, templates.ToGo(selection.TypeCondition))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
 
-		if fieldsResponseFields.IsFragmentSpread() {
+		hasFragmentSpread := r.hasFragmentSpread(fieldsResponseFields)
+		fragmentFields := r.collectFragmentFields(fieldsResponseFields)
+
+		// フラグメントスプレッドがある場合
+		// if there is a fragment spread
+		if hasFragmentSpread {
+			// フラグメントからの全フィールドを集めます
+			// collect all fields from fragment
+			allFields := make(ResponseFieldList, 0)
+			for _, field := range fieldsResponseFields {
+				if !field.IsFragmentSpread {
+					allFields = append(allFields, field)
+				}
+			}
+			// フラグメントのフィールドを追加
+			// append fragment fields
+			allFields = append(allFields, fragmentFields...)
+
+			// 構造体を生成
+			// generate struct
+			structType := allFields.StructType()
+			r.StructSources = append(r.StructSources, &StructSource{
+				Name: name,
+				Type: structType,
+			})
 			typ := types.NewNamed(
-				types.NewTypeName(0, r.client.Pkg(), templates.ToGo(fieldsResponseFields[0].Name), nil),
-				fieldsResponseFields.StructType(),
+				types.NewTypeName(0, r.client.Pkg(), name, nil),
+				structType,
 				nil,
 			)
 
 			return &ResponseField{
-				Name:           selection.TypeCondition,
-				Type:           typ,
-				Tags:           []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
-				ResponseFields: fieldsResponseFields,
+				Name:             selection.TypeCondition,
+				Type:             typ,
+				IsInlineFragment: true,
+				Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
+				ResponseFields:   allFields.SortByName(),
 			}
 		}
-
+		// フラグメントスプレッドがない場合
+		// if there is no fragment spread
 		structType := fieldsResponseFields.StructType()
 		r.StructSources = append(r.StructSources, &StructSource{
 			Name: name,
@@ -346,7 +406,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			Type:             typ,
 			IsInlineFragment: true,
 			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
-			ResponseFields:   fieldsResponseFields,
+			ResponseFields:   fieldsResponseFields.SortByName(),
 		}
 	}
 

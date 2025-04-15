@@ -74,8 +74,8 @@ func (t *GetUser_Viewer_Repositories_Nodes_Languages) GetNodes() []*LanguageFrag
 
 type GetUser_Viewer_Repositories_Nodes struct {
 	ID        string                                       "json:\"id\" graphql:\"id\""
-	Name      string                                       "json:\"name\" graphql:\"name\""
 	Languages *GetUser_Viewer_Repositories_Nodes_Languages "json:\"languages,omitempty\" graphql:\"languages\""
+	Name      string                                       "json:\"name\" graphql:\"name\""
 }
 
 func (t *GetUser_Viewer_Repositories_Nodes) GetID() string {
@@ -84,17 +84,17 @@ func (t *GetUser_Viewer_Repositories_Nodes) GetID() string {
 	}
 	return t.ID
 }
-func (t *GetUser_Viewer_Repositories_Nodes) GetName() string {
-	if t == nil {
-		t = &GetUser_Viewer_Repositories_Nodes{}
-	}
-	return t.Name
-}
 func (t *GetUser_Viewer_Repositories_Nodes) GetLanguages() *GetUser_Viewer_Repositories_Nodes_Languages {
 	if t == nil {
 		t = &GetUser_Viewer_Repositories_Nodes{}
 	}
 	return t.Languages
+}
+func (t *GetUser_Viewer_Repositories_Nodes) GetName() string {
+	if t == nil {
+		t = &GetUser_Viewer_Repositories_Nodes{}
+	}
+	return t.Name
 }
 
 type GetUser_Viewer_Repositories struct {
@@ -133,6 +133,42 @@ func (t *GetUser_Viewer) GetRepositories() *GetUser_Viewer_Repositories {
 	return &t.Repositories
 }
 
+type GetNode_Node_Repository_Languages struct {
+	Nodes []*LanguageFragment "json:\"nodes,omitempty\" graphql:\"nodes\""
+}
+
+func (t *GetNode_Node_Repository_Languages) GetNodes() []*LanguageFragment {
+	if t == nil {
+		t = &GetNode_Node_Repository_Languages{}
+	}
+	return t.Nodes
+}
+
+type GetNode_Node_Repository struct {
+	Languages *GetNode_Node_Repository_Languages "json:\"languages,omitempty\" graphql:\"languages\""
+	ID        string                             "json:\"id\" graphql:\"id\""
+	Name      string                             "json:\"name\" graphql:\"name\""
+}
+
+func (t *GetNode_Node_Repository) GetLanguages() *GetNode_Node_Repository_Languages {
+	if t == nil {
+		t = &GetNode_Node_Repository{}
+	}
+	return t.Languages
+}
+func (t *GetNode_Node_Repository) GetID() string {
+	if t == nil {
+		t = &GetNode_Node_Repository{}
+	}
+	return t.ID
+}
+func (t *GetNode_Node_Repository) GetName() string {
+	if t == nil {
+		t = &GetNode_Node_Repository{}
+	}
+	return t.Name
+}
+
 type GetNode_Node_Reaction_User struct {
 	ID string "json:\"id\" graphql:\"id\""
 }
@@ -163,28 +199,28 @@ func (t *GetNode_Node_Reaction) GetUser() *GetNode_Node_Reaction_User {
 }
 
 type GetNode_Node struct {
-	ID         string                "json:\"id\" graphql:\"id\""
-	Repository RepositoryFragment    "graphql:\"... on Repository\""
-	Reaction   GetNode_Node_Reaction "graphql:\"... on Reaction\""
+	Reaction   GetNode_Node_Reaction   "graphql:\"... on Reaction\""
+	Repository GetNode_Node_Repository "graphql:\"... on Repository\""
+	ID         string                  "json:\"id\" graphql:\"id\""
 }
 
-func (t *GetNode_Node) GetID() string {
-	if t == nil {
-		t = &GetNode_Node{}
-	}
-	return t.ID
-}
-func (t *GetNode_Node) GetRepository() *RepositoryFragment {
-	if t == nil {
-		t = &GetNode_Node{}
-	}
-	return &t.Repository
-}
 func (t *GetNode_Node) GetReaction() *GetNode_Node_Reaction {
 	if t == nil {
 		t = &GetNode_Node{}
 	}
 	return &t.Reaction
+}
+func (t *GetNode_Node) GetRepository() *GetNode_Node_Repository {
+	if t == nil {
+		t = &GetNode_Node{}
+	}
+	return &t.Repository
+}
+func (t *GetNode_Node) GetID() string {
+	if t == nil {
+		t = &GetNode_Node{}
+	}
+	return t.ID
 }
 
 type AddStar_AddStar_Starrable_Repository struct {
@@ -206,11 +242,17 @@ func (t *AddStar_AddStar_Starrable_Repository) GetName() string {
 }
 
 type AddStar_AddStar_Starrable struct {
+	Repository       AddStar_AddStar_Starrable_Repository "graphql:\"... on Repository\""
 	ID               string                               "json:\"id\" graphql:\"id\""
 	ViewerHasStarred bool                                 "json:\"viewerHasStarred\" graphql:\"viewerHasStarred\""
-	Repository       AddStar_AddStar_Starrable_Repository "graphql:\"... on Repository\""
 }
 
+func (t *AddStar_AddStar_Starrable) GetRepository() *AddStar_AddStar_Starrable_Repository {
+	if t == nil {
+		t = &AddStar_AddStar_Starrable{}
+	}
+	return &t.Repository
+}
 func (t *AddStar_AddStar_Starrable) GetID() string {
 	if t == nil {
 		t = &AddStar_AddStar_Starrable{}
@@ -222,12 +264,6 @@ func (t *AddStar_AddStar_Starrable) GetViewerHasStarred() bool {
 		t = &AddStar_AddStar_Starrable{}
 	}
 	return t.ViewerHasStarred
-}
-func (t *AddStar_AddStar_Starrable) GetRepository() *AddStar_AddStar_Starrable_Repository {
-	if t == nil {
-		t = &AddStar_AddStar_Starrable{}
-	}
-	return &t.Repository
 }
 
 type AddStar_AddStar struct {
@@ -367,6 +403,11 @@ const GetNodeDocument = `query GetNode ($id: ID!) {
 		id
 		... on Repository {
 			... RepositoryFragment
+			languages(first: 100) {
+				nodes {
+					... LanguageFragment
+				}
+			}
 		}
 		... on Reaction {
 			id
@@ -377,6 +418,10 @@ const GetNodeDocument = `query GetNode ($id: ID!) {
 	}
 }
 fragment RepositoryFragment on Repository {
+	id
+	name
+}
+fragment LanguageFragment on Language {
 	id
 	name
 }
