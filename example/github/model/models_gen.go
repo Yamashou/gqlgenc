@@ -1469,16 +1469,19 @@ const (
 	EnterpriseAdministratorRoleOwner EnterpriseAdministratorRole = "OWNER"
 	// Represents a billing manager of the enterprise account.
 	EnterpriseAdministratorRoleBillingManager EnterpriseAdministratorRole = "BILLING_MANAGER"
+	// Unaffiliated member of the enterprise account without an admin role.
+	EnterpriseAdministratorRoleUnaffiliated EnterpriseAdministratorRole = "UNAFFILIATED"
 )
 
 var AllEnterpriseAdministratorRole = []EnterpriseAdministratorRole{
 	EnterpriseAdministratorRoleOwner,
 	EnterpriseAdministratorRoleBillingManager,
+	EnterpriseAdministratorRoleUnaffiliated,
 }
 
 func (e EnterpriseAdministratorRole) IsValid() bool {
 	switch e {
-	case EnterpriseAdministratorRoleOwner, EnterpriseAdministratorRoleBillingManager:
+	case EnterpriseAdministratorRoleOwner, EnterpriseAdministratorRoleBillingManager, EnterpriseAdministratorRoleUnaffiliated:
 		return true
 	}
 	return false
@@ -3096,7 +3099,7 @@ const (
 	IssueStateReasonNotPlanned IssueStateReason = "NOT_PLANNED"
 	// An issue that has been closed as completed
 	IssueStateReasonCompleted IssueStateReason = "COMPLETED"
-	// An issue that has been closed as a duplicate
+	// An issue that has been closed as a duplicate. To retrieve this value, set `(enableDuplicate: true)` when querying the stateReason field.
 	IssueStateReasonDuplicate IssueStateReason = "DUPLICATE"
 )
 
@@ -3202,6 +3205,20 @@ const (
 	IssueTimelineItemsItemTypeUnpinnedEvent IssueTimelineItemsItemType = "UNPINNED_EVENT"
 	// Represents an 'unsubscribed' event on a given `Subscribable`.
 	IssueTimelineItemsItemTypeUnsubscribedEvent IssueTimelineItemsItemType = "UNSUBSCRIBED_EVENT"
+	// Represents a 'issue_type_added' event on a given issue.
+	IssueTimelineItemsItemTypeIssueTypeAddedEvent IssueTimelineItemsItemType = "ISSUE_TYPE_ADDED_EVENT"
+	// Represents a 'issue_type_removed' event on a given issue.
+	IssueTimelineItemsItemTypeIssueTypeRemovedEvent IssueTimelineItemsItemType = "ISSUE_TYPE_REMOVED_EVENT"
+	// Represents a 'issue_type_changed' event on a given issue.
+	IssueTimelineItemsItemTypeIssueTypeChangedEvent IssueTimelineItemsItemType = "ISSUE_TYPE_CHANGED_EVENT"
+	// Represents a 'sub_issue_added' event on a given issue.
+	IssueTimelineItemsItemTypeSubIssueAddedEvent IssueTimelineItemsItemType = "SUB_ISSUE_ADDED_EVENT"
+	// Represents a 'sub_issue_removed' event on a given issue.
+	IssueTimelineItemsItemTypeSubIssueRemovedEvent IssueTimelineItemsItemType = "SUB_ISSUE_REMOVED_EVENT"
+	// Represents a 'parent_issue_added' event on a given issue.
+	IssueTimelineItemsItemTypeParentIssueAddedEvent IssueTimelineItemsItemType = "PARENT_ISSUE_ADDED_EVENT"
+	// Represents a 'parent_issue_removed' event on a given issue.
+	IssueTimelineItemsItemTypeParentIssueRemovedEvent IssueTimelineItemsItemType = "PARENT_ISSUE_REMOVED_EVENT"
 )
 
 var AllIssueTimelineItemsItemType = []IssueTimelineItemsItemType{
@@ -3236,11 +3253,18 @@ var AllIssueTimelineItemsItemType = []IssueTimelineItemsItemType{
 	IssueTimelineItemsItemTypeUnmarkedAsDuplicateEvent,
 	IssueTimelineItemsItemTypeUnpinnedEvent,
 	IssueTimelineItemsItemTypeUnsubscribedEvent,
+	IssueTimelineItemsItemTypeIssueTypeAddedEvent,
+	IssueTimelineItemsItemTypeIssueTypeRemovedEvent,
+	IssueTimelineItemsItemTypeIssueTypeChangedEvent,
+	IssueTimelineItemsItemTypeSubIssueAddedEvent,
+	IssueTimelineItemsItemTypeSubIssueRemovedEvent,
+	IssueTimelineItemsItemTypeParentIssueAddedEvent,
+	IssueTimelineItemsItemTypeParentIssueRemovedEvent,
 }
 
 func (e IssueTimelineItemsItemType) IsValid() bool {
 	switch e {
-	case IssueTimelineItemsItemTypeIssueComment, IssueTimelineItemsItemTypeCrossReferencedEvent, IssueTimelineItemsItemTypeAddedToProjectEvent, IssueTimelineItemsItemTypeAssignedEvent, IssueTimelineItemsItemTypeClosedEvent, IssueTimelineItemsItemTypeCommentDeletedEvent, IssueTimelineItemsItemTypeConnectedEvent, IssueTimelineItemsItemTypeConvertedNoteToIssueEvent, IssueTimelineItemsItemTypeConvertedToDiscussionEvent, IssueTimelineItemsItemTypeDemilestonedEvent, IssueTimelineItemsItemTypeDisconnectedEvent, IssueTimelineItemsItemTypeLabeledEvent, IssueTimelineItemsItemTypeLockedEvent, IssueTimelineItemsItemTypeMarkedAsDuplicateEvent, IssueTimelineItemsItemTypeMentionedEvent, IssueTimelineItemsItemTypeMilestonedEvent, IssueTimelineItemsItemTypeMovedColumnsInProjectEvent, IssueTimelineItemsItemTypePinnedEvent, IssueTimelineItemsItemTypeReferencedEvent, IssueTimelineItemsItemTypeRemovedFromProjectEvent, IssueTimelineItemsItemTypeRenamedTitleEvent, IssueTimelineItemsItemTypeReopenedEvent, IssueTimelineItemsItemTypeSubscribedEvent, IssueTimelineItemsItemTypeTransferredEvent, IssueTimelineItemsItemTypeUnassignedEvent, IssueTimelineItemsItemTypeUnlabeledEvent, IssueTimelineItemsItemTypeUnlockedEvent, IssueTimelineItemsItemTypeUserBlockedEvent, IssueTimelineItemsItemTypeUnmarkedAsDuplicateEvent, IssueTimelineItemsItemTypeUnpinnedEvent, IssueTimelineItemsItemTypeUnsubscribedEvent:
+	case IssueTimelineItemsItemTypeIssueComment, IssueTimelineItemsItemTypeCrossReferencedEvent, IssueTimelineItemsItemTypeAddedToProjectEvent, IssueTimelineItemsItemTypeAssignedEvent, IssueTimelineItemsItemTypeClosedEvent, IssueTimelineItemsItemTypeCommentDeletedEvent, IssueTimelineItemsItemTypeConnectedEvent, IssueTimelineItemsItemTypeConvertedNoteToIssueEvent, IssueTimelineItemsItemTypeConvertedToDiscussionEvent, IssueTimelineItemsItemTypeDemilestonedEvent, IssueTimelineItemsItemTypeDisconnectedEvent, IssueTimelineItemsItemTypeLabeledEvent, IssueTimelineItemsItemTypeLockedEvent, IssueTimelineItemsItemTypeMarkedAsDuplicateEvent, IssueTimelineItemsItemTypeMentionedEvent, IssueTimelineItemsItemTypeMilestonedEvent, IssueTimelineItemsItemTypeMovedColumnsInProjectEvent, IssueTimelineItemsItemTypePinnedEvent, IssueTimelineItemsItemTypeReferencedEvent, IssueTimelineItemsItemTypeRemovedFromProjectEvent, IssueTimelineItemsItemTypeRenamedTitleEvent, IssueTimelineItemsItemTypeReopenedEvent, IssueTimelineItemsItemTypeSubscribedEvent, IssueTimelineItemsItemTypeTransferredEvent, IssueTimelineItemsItemTypeUnassignedEvent, IssueTimelineItemsItemTypeUnlabeledEvent, IssueTimelineItemsItemTypeUnlockedEvent, IssueTimelineItemsItemTypeUserBlockedEvent, IssueTimelineItemsItemTypeUnmarkedAsDuplicateEvent, IssueTimelineItemsItemTypeUnpinnedEvent, IssueTimelineItemsItemTypeUnsubscribedEvent, IssueTimelineItemsItemTypeIssueTypeAddedEvent, IssueTimelineItemsItemTypeIssueTypeRemovedEvent, IssueTimelineItemsItemTypeIssueTypeChangedEvent, IssueTimelineItemsItemTypeSubIssueAddedEvent, IssueTimelineItemsItemTypeSubIssueRemovedEvent, IssueTimelineItemsItemTypeParentIssueAddedEvent, IssueTimelineItemsItemTypeParentIssueRemovedEvent:
 		return true
 	}
 	return false
@@ -3264,6 +3288,112 @@ func (e *IssueTimelineItemsItemType) UnmarshalGQL(v any) error {
 }
 
 func (e IssueTimelineItemsItemType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// The possible color for an issue type
+type IssueTypeColor string
+
+const (
+	// gray
+	IssueTypeColorGray IssueTypeColor = "GRAY"
+	// blue
+	IssueTypeColorBlue IssueTypeColor = "BLUE"
+	// green
+	IssueTypeColorGreen IssueTypeColor = "GREEN"
+	// yellow
+	IssueTypeColorYellow IssueTypeColor = "YELLOW"
+	// orange
+	IssueTypeColorOrange IssueTypeColor = "ORANGE"
+	// red
+	IssueTypeColorRed IssueTypeColor = "RED"
+	// pink
+	IssueTypeColorPink IssueTypeColor = "PINK"
+	// purple
+	IssueTypeColorPurple IssueTypeColor = "PURPLE"
+)
+
+var AllIssueTypeColor = []IssueTypeColor{
+	IssueTypeColorGray,
+	IssueTypeColorBlue,
+	IssueTypeColorGreen,
+	IssueTypeColorYellow,
+	IssueTypeColorOrange,
+	IssueTypeColorRed,
+	IssueTypeColorPink,
+	IssueTypeColorPurple,
+}
+
+func (e IssueTypeColor) IsValid() bool {
+	switch e {
+	case IssueTypeColorGray, IssueTypeColorBlue, IssueTypeColorGreen, IssueTypeColorYellow, IssueTypeColorOrange, IssueTypeColorRed, IssueTypeColorPink, IssueTypeColorPurple:
+		return true
+	}
+	return false
+}
+
+func (e IssueTypeColor) String() string {
+	return string(e)
+}
+
+func (e *IssueTypeColor) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IssueTypeColor(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IssueTypeColor", str)
+	}
+	return nil
+}
+
+func (e IssueTypeColor) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// Properties by which issue type connections can be ordered.
+type IssueTypeOrderField string
+
+const (
+	// Order issue types by creation time
+	IssueTypeOrderFieldCreatedAt IssueTypeOrderField = "CREATED_AT"
+	// Order issue types by name
+	IssueTypeOrderFieldName IssueTypeOrderField = "NAME"
+)
+
+var AllIssueTypeOrderField = []IssueTypeOrderField{
+	IssueTypeOrderFieldCreatedAt,
+	IssueTypeOrderFieldName,
+}
+
+func (e IssueTypeOrderField) IsValid() bool {
+	switch e {
+	case IssueTypeOrderFieldCreatedAt, IssueTypeOrderFieldName:
+		return true
+	}
+	return false
+}
+
+func (e IssueTypeOrderField) String() string {
+	return string(e)
+}
+
+func (e *IssueTypeOrderField) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = IssueTypeOrderField(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid IssueTypeOrderField", str)
+	}
+	return nil
+}
+
+func (e IssueTypeOrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -4414,20 +4544,20 @@ const (
 	// The organization required 2FA of its billing managers and this user did not have 2FA enabled.
 	OrgRemoveBillingManagerAuditEntryReasonTwoFactorRequirementNonCompliance OrgRemoveBillingManagerAuditEntryReason = "TWO_FACTOR_REQUIREMENT_NON_COMPLIANCE"
 	// SAML external identity missing
-	OrgRemoveBillingManagerAuditEntryReasonSamlExternalIDEntityMissing OrgRemoveBillingManagerAuditEntryReason = "SAML_EXTERNAL_IDENTITY_MISSING"
+	OrgRemoveBillingManagerAuditEntryReasonSamlExternalIdentityMissing OrgRemoveBillingManagerAuditEntryReason = "SAML_EXTERNAL_IDENTITY_MISSING"
 	// SAML SSO enforcement requires an external identity
-	OrgRemoveBillingManagerAuditEntryReasonSamlSsoEnforcementRequiresExternalIDEntity OrgRemoveBillingManagerAuditEntryReason = "SAML_SSO_ENFORCEMENT_REQUIRES_EXTERNAL_IDENTITY"
+	OrgRemoveBillingManagerAuditEntryReasonSamlSsoEnforcementRequiresExternalIdentity OrgRemoveBillingManagerAuditEntryReason = "SAML_SSO_ENFORCEMENT_REQUIRES_EXTERNAL_IDENTITY"
 )
 
 var AllOrgRemoveBillingManagerAuditEntryReason = []OrgRemoveBillingManagerAuditEntryReason{
 	OrgRemoveBillingManagerAuditEntryReasonTwoFactorRequirementNonCompliance,
-	OrgRemoveBillingManagerAuditEntryReasonSamlExternalIDEntityMissing,
-	OrgRemoveBillingManagerAuditEntryReasonSamlSsoEnforcementRequiresExternalIDEntity,
+	OrgRemoveBillingManagerAuditEntryReasonSamlExternalIdentityMissing,
+	OrgRemoveBillingManagerAuditEntryReasonSamlSsoEnforcementRequiresExternalIdentity,
 }
 
 func (e OrgRemoveBillingManagerAuditEntryReason) IsValid() bool {
 	switch e {
-	case OrgRemoveBillingManagerAuditEntryReasonTwoFactorRequirementNonCompliance, OrgRemoveBillingManagerAuditEntryReasonSamlExternalIDEntityMissing, OrgRemoveBillingManagerAuditEntryReasonSamlSsoEnforcementRequiresExternalIDEntity:
+	case OrgRemoveBillingManagerAuditEntryReasonTwoFactorRequirementNonCompliance, OrgRemoveBillingManagerAuditEntryReasonSamlExternalIdentityMissing, OrgRemoveBillingManagerAuditEntryReasonSamlSsoEnforcementRequiresExternalIdentity:
 		return true
 	}
 	return false
@@ -4517,9 +4647,9 @@ const (
 	// The organization required 2FA of its billing managers and this user did not have 2FA enabled.
 	OrgRemoveMemberAuditEntryReasonTwoFactorRequirementNonCompliance OrgRemoveMemberAuditEntryReason = "TWO_FACTOR_REQUIREMENT_NON_COMPLIANCE"
 	// SAML external identity missing
-	OrgRemoveMemberAuditEntryReasonSamlExternalIDEntityMissing OrgRemoveMemberAuditEntryReason = "SAML_EXTERNAL_IDENTITY_MISSING"
+	OrgRemoveMemberAuditEntryReasonSamlExternalIdentityMissing OrgRemoveMemberAuditEntryReason = "SAML_EXTERNAL_IDENTITY_MISSING"
 	// SAML SSO enforcement requires an external identity
-	OrgRemoveMemberAuditEntryReasonSamlSsoEnforcementRequiresExternalIDEntity OrgRemoveMemberAuditEntryReason = "SAML_SSO_ENFORCEMENT_REQUIRES_EXTERNAL_IDENTITY"
+	OrgRemoveMemberAuditEntryReasonSamlSsoEnforcementRequiresExternalIdentity OrgRemoveMemberAuditEntryReason = "SAML_SSO_ENFORCEMENT_REQUIRES_EXTERNAL_IDENTITY"
 	// User account has been deleted
 	OrgRemoveMemberAuditEntryReasonUserAccountDeleted OrgRemoveMemberAuditEntryReason = "USER_ACCOUNT_DELETED"
 	// User was removed from organization during account recovery
@@ -4528,15 +4658,15 @@ const (
 
 var AllOrgRemoveMemberAuditEntryReason = []OrgRemoveMemberAuditEntryReason{
 	OrgRemoveMemberAuditEntryReasonTwoFactorRequirementNonCompliance,
-	OrgRemoveMemberAuditEntryReasonSamlExternalIDEntityMissing,
-	OrgRemoveMemberAuditEntryReasonSamlSsoEnforcementRequiresExternalIDEntity,
+	OrgRemoveMemberAuditEntryReasonSamlExternalIdentityMissing,
+	OrgRemoveMemberAuditEntryReasonSamlSsoEnforcementRequiresExternalIdentity,
 	OrgRemoveMemberAuditEntryReasonUserAccountDeleted,
 	OrgRemoveMemberAuditEntryReasonTwoFactorAccountRecovery,
 }
 
 func (e OrgRemoveMemberAuditEntryReason) IsValid() bool {
 	switch e {
-	case OrgRemoveMemberAuditEntryReasonTwoFactorRequirementNonCompliance, OrgRemoveMemberAuditEntryReasonSamlExternalIDEntityMissing, OrgRemoveMemberAuditEntryReasonSamlSsoEnforcementRequiresExternalIDEntity, OrgRemoveMemberAuditEntryReasonUserAccountDeleted, OrgRemoveMemberAuditEntryReasonTwoFactorAccountRecovery:
+	case OrgRemoveMemberAuditEntryReasonTwoFactorRequirementNonCompliance, OrgRemoveMemberAuditEntryReasonSamlExternalIdentityMissing, OrgRemoveMemberAuditEntryReasonSamlSsoEnforcementRequiresExternalIdentity, OrgRemoveMemberAuditEntryReasonUserAccountDeleted, OrgRemoveMemberAuditEntryReasonTwoFactorAccountRecovery:
 		return true
 	}
 	return false
@@ -4617,17 +4747,17 @@ const (
 	// The organization required 2FA of its billing managers and this user did not have 2FA enabled.
 	OrgRemoveOutsideCollaboratorAuditEntryReasonTwoFactorRequirementNonCompliance OrgRemoveOutsideCollaboratorAuditEntryReason = "TWO_FACTOR_REQUIREMENT_NON_COMPLIANCE"
 	// SAML external identity missing
-	OrgRemoveOutsideCollaboratorAuditEntryReasonSamlExternalIDEntityMissing OrgRemoveOutsideCollaboratorAuditEntryReason = "SAML_EXTERNAL_IDENTITY_MISSING"
+	OrgRemoveOutsideCollaboratorAuditEntryReasonSamlExternalIdentityMissing OrgRemoveOutsideCollaboratorAuditEntryReason = "SAML_EXTERNAL_IDENTITY_MISSING"
 )
 
 var AllOrgRemoveOutsideCollaboratorAuditEntryReason = []OrgRemoveOutsideCollaboratorAuditEntryReason{
 	OrgRemoveOutsideCollaboratorAuditEntryReasonTwoFactorRequirementNonCompliance,
-	OrgRemoveOutsideCollaboratorAuditEntryReasonSamlExternalIDEntityMissing,
+	OrgRemoveOutsideCollaboratorAuditEntryReasonSamlExternalIdentityMissing,
 }
 
 func (e OrgRemoveOutsideCollaboratorAuditEntryReason) IsValid() bool {
 	switch e {
-	case OrgRemoveOutsideCollaboratorAuditEntryReasonTwoFactorRequirementNonCompliance, OrgRemoveOutsideCollaboratorAuditEntryReasonSamlExternalIDEntityMissing:
+	case OrgRemoveOutsideCollaboratorAuditEntryReasonTwoFactorRequirementNonCompliance, OrgRemoveOutsideCollaboratorAuditEntryReasonSamlExternalIdentityMissing:
 		return true
 	}
 	return false
@@ -5898,6 +6028,8 @@ const (
 	ProjectV2CustomFieldTypeNumber ProjectV2CustomFieldType = "NUMBER"
 	// Date
 	ProjectV2CustomFieldTypeDate ProjectV2CustomFieldType = "DATE"
+	// Iteration
+	ProjectV2CustomFieldTypeIteration ProjectV2CustomFieldType = "ITERATION"
 )
 
 var AllProjectV2CustomFieldType = []ProjectV2CustomFieldType{
@@ -5905,11 +6037,12 @@ var AllProjectV2CustomFieldType = []ProjectV2CustomFieldType{
 	ProjectV2CustomFieldTypeSingleSelect,
 	ProjectV2CustomFieldTypeNumber,
 	ProjectV2CustomFieldTypeDate,
+	ProjectV2CustomFieldTypeIteration,
 }
 
 func (e ProjectV2CustomFieldType) IsValid() bool {
 	switch e {
-	case ProjectV2CustomFieldTypeText, ProjectV2CustomFieldTypeSingleSelect, ProjectV2CustomFieldTypeNumber, ProjectV2CustomFieldTypeDate:
+	case ProjectV2CustomFieldTypeText, ProjectV2CustomFieldTypeSingleSelect, ProjectV2CustomFieldTypeNumber, ProjectV2CustomFieldTypeDate, ProjectV2CustomFieldTypeIteration:
 		return true
 	}
 	return false
@@ -6015,6 +6148,12 @@ const (
 	ProjectV2FieldTypeTracks ProjectV2FieldType = "TRACKS"
 	// Tracked by
 	ProjectV2FieldTypeTrackedBy ProjectV2FieldType = "TRACKED_BY"
+	// Issue type
+	ProjectV2FieldTypeIssueType ProjectV2FieldType = "ISSUE_TYPE"
+	// Parent issue
+	ProjectV2FieldTypeParentIssue ProjectV2FieldType = "PARENT_ISSUE"
+	// Sub-issues progress
+	ProjectV2FieldTypeSubIssuesProgress ProjectV2FieldType = "SUB_ISSUES_PROGRESS"
 )
 
 var AllProjectV2FieldType = []ProjectV2FieldType{
@@ -6032,11 +6171,14 @@ var AllProjectV2FieldType = []ProjectV2FieldType{
 	ProjectV2FieldTypeIteration,
 	ProjectV2FieldTypeTracks,
 	ProjectV2FieldTypeTrackedBy,
+	ProjectV2FieldTypeIssueType,
+	ProjectV2FieldTypeParentIssue,
+	ProjectV2FieldTypeSubIssuesProgress,
 }
 
 func (e ProjectV2FieldType) IsValid() bool {
 	switch e {
-	case ProjectV2FieldTypeAssignees, ProjectV2FieldTypeLinkedPullRequests, ProjectV2FieldTypeReviewers, ProjectV2FieldTypeLabels, ProjectV2FieldTypeMilestone, ProjectV2FieldTypeRepository, ProjectV2FieldTypeTitle, ProjectV2FieldTypeText, ProjectV2FieldTypeSingleSelect, ProjectV2FieldTypeNumber, ProjectV2FieldTypeDate, ProjectV2FieldTypeIteration, ProjectV2FieldTypeTracks, ProjectV2FieldTypeTrackedBy:
+	case ProjectV2FieldTypeAssignees, ProjectV2FieldTypeLinkedPullRequests, ProjectV2FieldTypeReviewers, ProjectV2FieldTypeLabels, ProjectV2FieldTypeMilestone, ProjectV2FieldTypeRepository, ProjectV2FieldTypeTitle, ProjectV2FieldTypeText, ProjectV2FieldTypeSingleSelect, ProjectV2FieldTypeNumber, ProjectV2FieldTypeDate, ProjectV2FieldTypeIteration, ProjectV2FieldTypeTracks, ProjectV2FieldTypeTrackedBy, ProjectV2FieldTypeIssueType, ProjectV2FieldTypeParentIssue, ProjectV2FieldTypeSubIssuesProgress:
 		return true
 	}
 	return false
@@ -6686,6 +6828,53 @@ func (e ProjectV2WorkflowsOrderField) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+// Array of allowed merge methods. Allowed values include `merge`, `squash`, and `rebase`. At least one option must be enabled.
+type PullRequestAllowedMergeMethods string
+
+const (
+	// Add all commits from the head branch to the base branch with a merge commit.
+	PullRequestAllowedMergeMethodsMerge PullRequestAllowedMergeMethods = "MERGE"
+	// Combine all commits from the head branch into a single commit in the base branch.
+	PullRequestAllowedMergeMethodsSquash PullRequestAllowedMergeMethods = "SQUASH"
+	// Add all commits from the head branch onto the base branch individually.
+	PullRequestAllowedMergeMethodsRebase PullRequestAllowedMergeMethods = "REBASE"
+)
+
+var AllPullRequestAllowedMergeMethods = []PullRequestAllowedMergeMethods{
+	PullRequestAllowedMergeMethodsMerge,
+	PullRequestAllowedMergeMethodsSquash,
+	PullRequestAllowedMergeMethodsRebase,
+}
+
+func (e PullRequestAllowedMergeMethods) IsValid() bool {
+	switch e {
+	case PullRequestAllowedMergeMethodsMerge, PullRequestAllowedMergeMethodsSquash, PullRequestAllowedMergeMethodsRebase:
+		return true
+	}
+	return false
+}
+
+func (e PullRequestAllowedMergeMethods) String() string {
+	return string(e)
+}
+
+func (e *PullRequestAllowedMergeMethods) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PullRequestAllowedMergeMethods(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PullRequestAllowedMergeMethods", str)
+	}
+	return nil
+}
+
+func (e PullRequestAllowedMergeMethods) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 // The possible methods for updating a pull request's head branch with the base branch.
 type PullRequestBranchUpdateMethod string
 
@@ -7120,6 +7309,8 @@ const (
 	PullRequestTimelineItemsItemTypePullRequestReviewThread PullRequestTimelineItemsItemType = "PULL_REQUEST_REVIEW_THREAD"
 	// Represents the latest point in the pull request timeline for which the viewer has seen the pull request's commits.
 	PullRequestTimelineItemsItemTypePullRequestRevisionMarker PullRequestTimelineItemsItemType = "PULL_REQUEST_REVISION_MARKER"
+	// Represents an 'added_to_merge_queue' event on a given pull request.
+	PullRequestTimelineItemsItemTypeAddedToMergeQueueEvent PullRequestTimelineItemsItemType = "ADDED_TO_MERGE_QUEUE_EVENT"
 	// Represents a 'automatic_base_change_failed' event on a given pull request.
 	PullRequestTimelineItemsItemTypeAutomaticBaseChangeFailedEvent PullRequestTimelineItemsItemType = "AUTOMATIC_BASE_CHANGE_FAILED_EVENT"
 	// Represents a 'automatic_base_change_succeeded' event on a given pull request.
@@ -7138,6 +7329,8 @@ const (
 	PullRequestTimelineItemsItemTypeBaseRefForcePushedEvent PullRequestTimelineItemsItemType = "BASE_REF_FORCE_PUSHED_EVENT"
 	// Represents a 'base_ref_deleted' event on a given pull request.
 	PullRequestTimelineItemsItemTypeBaseRefDeletedEvent PullRequestTimelineItemsItemType = "BASE_REF_DELETED_EVENT"
+	// Represents a 'convert_to_draft' event on a given pull request.
+	PullRequestTimelineItemsItemTypeConvertToDraftEvent PullRequestTimelineItemsItemType = "CONVERT_TO_DRAFT_EVENT"
 	// Represents a 'deployed' event on a given pull request.
 	PullRequestTimelineItemsItemTypeDeployedEvent PullRequestTimelineItemsItemType = "DEPLOYED_EVENT"
 	// Represents a 'deployment_environment_changed' event on a given pull request.
@@ -7150,20 +7343,16 @@ const (
 	PullRequestTimelineItemsItemTypeHeadRefRestoredEvent PullRequestTimelineItemsItemType = "HEAD_REF_RESTORED_EVENT"
 	// Represents a 'merged' event on a given pull request.
 	PullRequestTimelineItemsItemTypeMergedEvent PullRequestTimelineItemsItemType = "MERGED_EVENT"
+	// Represents a 'ready_for_review' event on a given pull request.
+	PullRequestTimelineItemsItemTypeReadyForReviewEvent PullRequestTimelineItemsItemType = "READY_FOR_REVIEW_EVENT"
+	// Represents a 'removed_from_merge_queue' event on a given pull request.
+	PullRequestTimelineItemsItemTypeRemovedFromMergeQueueEvent PullRequestTimelineItemsItemType = "REMOVED_FROM_MERGE_QUEUE_EVENT"
 	// Represents a 'review_dismissed' event on a given issue or pull request.
 	PullRequestTimelineItemsItemTypeReviewDismissedEvent PullRequestTimelineItemsItemType = "REVIEW_DISMISSED_EVENT"
 	// Represents an 'review_requested' event on a given pull request.
 	PullRequestTimelineItemsItemTypeReviewRequestedEvent PullRequestTimelineItemsItemType = "REVIEW_REQUESTED_EVENT"
 	// Represents an 'review_request_removed' event on a given pull request.
 	PullRequestTimelineItemsItemTypeReviewRequestRemovedEvent PullRequestTimelineItemsItemType = "REVIEW_REQUEST_REMOVED_EVENT"
-	// Represents a 'ready_for_review' event on a given pull request.
-	PullRequestTimelineItemsItemTypeReadyForReviewEvent PullRequestTimelineItemsItemType = "READY_FOR_REVIEW_EVENT"
-	// Represents a 'convert_to_draft' event on a given pull request.
-	PullRequestTimelineItemsItemTypeConvertToDraftEvent PullRequestTimelineItemsItemType = "CONVERT_TO_DRAFT_EVENT"
-	// Represents an 'added_to_merge_queue' event on a given pull request.
-	PullRequestTimelineItemsItemTypeAddedToMergeQueueEvent PullRequestTimelineItemsItemType = "ADDED_TO_MERGE_QUEUE_EVENT"
-	// Represents a 'removed_from_merge_queue' event on a given pull request.
-	PullRequestTimelineItemsItemTypeRemovedFromMergeQueueEvent PullRequestTimelineItemsItemType = "REMOVED_FROM_MERGE_QUEUE_EVENT"
 	// Represents a comment on an Issue.
 	PullRequestTimelineItemsItemTypeIssueComment PullRequestTimelineItemsItemType = "ISSUE_COMMENT"
 	// Represents a mention made by one issue or pull request to another.
@@ -7226,6 +7415,20 @@ const (
 	PullRequestTimelineItemsItemTypeUnpinnedEvent PullRequestTimelineItemsItemType = "UNPINNED_EVENT"
 	// Represents an 'unsubscribed' event on a given `Subscribable`.
 	PullRequestTimelineItemsItemTypeUnsubscribedEvent PullRequestTimelineItemsItemType = "UNSUBSCRIBED_EVENT"
+	// Represents a 'issue_type_added' event on a given issue.
+	PullRequestTimelineItemsItemTypeIssueTypeAddedEvent PullRequestTimelineItemsItemType = "ISSUE_TYPE_ADDED_EVENT"
+	// Represents a 'issue_type_removed' event on a given issue.
+	PullRequestTimelineItemsItemTypeIssueTypeRemovedEvent PullRequestTimelineItemsItemType = "ISSUE_TYPE_REMOVED_EVENT"
+	// Represents a 'issue_type_changed' event on a given issue.
+	PullRequestTimelineItemsItemTypeIssueTypeChangedEvent PullRequestTimelineItemsItemType = "ISSUE_TYPE_CHANGED_EVENT"
+	// Represents a 'sub_issue_added' event on a given issue.
+	PullRequestTimelineItemsItemTypeSubIssueAddedEvent PullRequestTimelineItemsItemType = "SUB_ISSUE_ADDED_EVENT"
+	// Represents a 'sub_issue_removed' event on a given issue.
+	PullRequestTimelineItemsItemTypeSubIssueRemovedEvent PullRequestTimelineItemsItemType = "SUB_ISSUE_REMOVED_EVENT"
+	// Represents a 'parent_issue_added' event on a given issue.
+	PullRequestTimelineItemsItemTypeParentIssueAddedEvent PullRequestTimelineItemsItemType = "PARENT_ISSUE_ADDED_EVENT"
+	// Represents a 'parent_issue_removed' event on a given issue.
+	PullRequestTimelineItemsItemTypeParentIssueRemovedEvent PullRequestTimelineItemsItemType = "PARENT_ISSUE_REMOVED_EVENT"
 )
 
 var AllPullRequestTimelineItemsItemType = []PullRequestTimelineItemsItemType{
@@ -7234,6 +7437,7 @@ var AllPullRequestTimelineItemsItemType = []PullRequestTimelineItemsItemType{
 	PullRequestTimelineItemsItemTypePullRequestReview,
 	PullRequestTimelineItemsItemTypePullRequestReviewThread,
 	PullRequestTimelineItemsItemTypePullRequestRevisionMarker,
+	PullRequestTimelineItemsItemTypeAddedToMergeQueueEvent,
 	PullRequestTimelineItemsItemTypeAutomaticBaseChangeFailedEvent,
 	PullRequestTimelineItemsItemTypeAutomaticBaseChangeSucceededEvent,
 	PullRequestTimelineItemsItemTypeAutoMergeDisabledEvent,
@@ -7243,19 +7447,18 @@ var AllPullRequestTimelineItemsItemType = []PullRequestTimelineItemsItemType{
 	PullRequestTimelineItemsItemTypeBaseRefChangedEvent,
 	PullRequestTimelineItemsItemTypeBaseRefForcePushedEvent,
 	PullRequestTimelineItemsItemTypeBaseRefDeletedEvent,
+	PullRequestTimelineItemsItemTypeConvertToDraftEvent,
 	PullRequestTimelineItemsItemTypeDeployedEvent,
 	PullRequestTimelineItemsItemTypeDeploymentEnvironmentChangedEvent,
 	PullRequestTimelineItemsItemTypeHeadRefDeletedEvent,
 	PullRequestTimelineItemsItemTypeHeadRefForcePushedEvent,
 	PullRequestTimelineItemsItemTypeHeadRefRestoredEvent,
 	PullRequestTimelineItemsItemTypeMergedEvent,
+	PullRequestTimelineItemsItemTypeReadyForReviewEvent,
+	PullRequestTimelineItemsItemTypeRemovedFromMergeQueueEvent,
 	PullRequestTimelineItemsItemTypeReviewDismissedEvent,
 	PullRequestTimelineItemsItemTypeReviewRequestedEvent,
 	PullRequestTimelineItemsItemTypeReviewRequestRemovedEvent,
-	PullRequestTimelineItemsItemTypeReadyForReviewEvent,
-	PullRequestTimelineItemsItemTypeConvertToDraftEvent,
-	PullRequestTimelineItemsItemTypeAddedToMergeQueueEvent,
-	PullRequestTimelineItemsItemTypeRemovedFromMergeQueueEvent,
 	PullRequestTimelineItemsItemTypeIssueComment,
 	PullRequestTimelineItemsItemTypeCrossReferencedEvent,
 	PullRequestTimelineItemsItemTypeAddedToProjectEvent,
@@ -7287,11 +7490,18 @@ var AllPullRequestTimelineItemsItemType = []PullRequestTimelineItemsItemType{
 	PullRequestTimelineItemsItemTypeUnmarkedAsDuplicateEvent,
 	PullRequestTimelineItemsItemTypeUnpinnedEvent,
 	PullRequestTimelineItemsItemTypeUnsubscribedEvent,
+	PullRequestTimelineItemsItemTypeIssueTypeAddedEvent,
+	PullRequestTimelineItemsItemTypeIssueTypeRemovedEvent,
+	PullRequestTimelineItemsItemTypeIssueTypeChangedEvent,
+	PullRequestTimelineItemsItemTypeSubIssueAddedEvent,
+	PullRequestTimelineItemsItemTypeSubIssueRemovedEvent,
+	PullRequestTimelineItemsItemTypeParentIssueAddedEvent,
+	PullRequestTimelineItemsItemTypeParentIssueRemovedEvent,
 }
 
 func (e PullRequestTimelineItemsItemType) IsValid() bool {
 	switch e {
-	case PullRequestTimelineItemsItemTypePullRequestCommit, PullRequestTimelineItemsItemTypePullRequestCommitCommentThread, PullRequestTimelineItemsItemTypePullRequestReview, PullRequestTimelineItemsItemTypePullRequestReviewThread, PullRequestTimelineItemsItemTypePullRequestRevisionMarker, PullRequestTimelineItemsItemTypeAutomaticBaseChangeFailedEvent, PullRequestTimelineItemsItemTypeAutomaticBaseChangeSucceededEvent, PullRequestTimelineItemsItemTypeAutoMergeDisabledEvent, PullRequestTimelineItemsItemTypeAutoMergeEnabledEvent, PullRequestTimelineItemsItemTypeAutoRebaseEnabledEvent, PullRequestTimelineItemsItemTypeAutoSquashEnabledEvent, PullRequestTimelineItemsItemTypeBaseRefChangedEvent, PullRequestTimelineItemsItemTypeBaseRefForcePushedEvent, PullRequestTimelineItemsItemTypeBaseRefDeletedEvent, PullRequestTimelineItemsItemTypeDeployedEvent, PullRequestTimelineItemsItemTypeDeploymentEnvironmentChangedEvent, PullRequestTimelineItemsItemTypeHeadRefDeletedEvent, PullRequestTimelineItemsItemTypeHeadRefForcePushedEvent, PullRequestTimelineItemsItemTypeHeadRefRestoredEvent, PullRequestTimelineItemsItemTypeMergedEvent, PullRequestTimelineItemsItemTypeReviewDismissedEvent, PullRequestTimelineItemsItemTypeReviewRequestedEvent, PullRequestTimelineItemsItemTypeReviewRequestRemovedEvent, PullRequestTimelineItemsItemTypeReadyForReviewEvent, PullRequestTimelineItemsItemTypeConvertToDraftEvent, PullRequestTimelineItemsItemTypeAddedToMergeQueueEvent, PullRequestTimelineItemsItemTypeRemovedFromMergeQueueEvent, PullRequestTimelineItemsItemTypeIssueComment, PullRequestTimelineItemsItemTypeCrossReferencedEvent, PullRequestTimelineItemsItemTypeAddedToProjectEvent, PullRequestTimelineItemsItemTypeAssignedEvent, PullRequestTimelineItemsItemTypeClosedEvent, PullRequestTimelineItemsItemTypeCommentDeletedEvent, PullRequestTimelineItemsItemTypeConnectedEvent, PullRequestTimelineItemsItemTypeConvertedNoteToIssueEvent, PullRequestTimelineItemsItemTypeConvertedToDiscussionEvent, PullRequestTimelineItemsItemTypeDemilestonedEvent, PullRequestTimelineItemsItemTypeDisconnectedEvent, PullRequestTimelineItemsItemTypeLabeledEvent, PullRequestTimelineItemsItemTypeLockedEvent, PullRequestTimelineItemsItemTypeMarkedAsDuplicateEvent, PullRequestTimelineItemsItemTypeMentionedEvent, PullRequestTimelineItemsItemTypeMilestonedEvent, PullRequestTimelineItemsItemTypeMovedColumnsInProjectEvent, PullRequestTimelineItemsItemTypePinnedEvent, PullRequestTimelineItemsItemTypeReferencedEvent, PullRequestTimelineItemsItemTypeRemovedFromProjectEvent, PullRequestTimelineItemsItemTypeRenamedTitleEvent, PullRequestTimelineItemsItemTypeReopenedEvent, PullRequestTimelineItemsItemTypeSubscribedEvent, PullRequestTimelineItemsItemTypeTransferredEvent, PullRequestTimelineItemsItemTypeUnassignedEvent, PullRequestTimelineItemsItemTypeUnlabeledEvent, PullRequestTimelineItemsItemTypeUnlockedEvent, PullRequestTimelineItemsItemTypeUserBlockedEvent, PullRequestTimelineItemsItemTypeUnmarkedAsDuplicateEvent, PullRequestTimelineItemsItemTypeUnpinnedEvent, PullRequestTimelineItemsItemTypeUnsubscribedEvent:
+	case PullRequestTimelineItemsItemTypePullRequestCommit, PullRequestTimelineItemsItemTypePullRequestCommitCommentThread, PullRequestTimelineItemsItemTypePullRequestReview, PullRequestTimelineItemsItemTypePullRequestReviewThread, PullRequestTimelineItemsItemTypePullRequestRevisionMarker, PullRequestTimelineItemsItemTypeAddedToMergeQueueEvent, PullRequestTimelineItemsItemTypeAutomaticBaseChangeFailedEvent, PullRequestTimelineItemsItemTypeAutomaticBaseChangeSucceededEvent, PullRequestTimelineItemsItemTypeAutoMergeDisabledEvent, PullRequestTimelineItemsItemTypeAutoMergeEnabledEvent, PullRequestTimelineItemsItemTypeAutoRebaseEnabledEvent, PullRequestTimelineItemsItemTypeAutoSquashEnabledEvent, PullRequestTimelineItemsItemTypeBaseRefChangedEvent, PullRequestTimelineItemsItemTypeBaseRefForcePushedEvent, PullRequestTimelineItemsItemTypeBaseRefDeletedEvent, PullRequestTimelineItemsItemTypeConvertToDraftEvent, PullRequestTimelineItemsItemTypeDeployedEvent, PullRequestTimelineItemsItemTypeDeploymentEnvironmentChangedEvent, PullRequestTimelineItemsItemTypeHeadRefDeletedEvent, PullRequestTimelineItemsItemTypeHeadRefForcePushedEvent, PullRequestTimelineItemsItemTypeHeadRefRestoredEvent, PullRequestTimelineItemsItemTypeMergedEvent, PullRequestTimelineItemsItemTypeReadyForReviewEvent, PullRequestTimelineItemsItemTypeRemovedFromMergeQueueEvent, PullRequestTimelineItemsItemTypeReviewDismissedEvent, PullRequestTimelineItemsItemTypeReviewRequestedEvent, PullRequestTimelineItemsItemTypeReviewRequestRemovedEvent, PullRequestTimelineItemsItemTypeIssueComment, PullRequestTimelineItemsItemTypeCrossReferencedEvent, PullRequestTimelineItemsItemTypeAddedToProjectEvent, PullRequestTimelineItemsItemTypeAssignedEvent, PullRequestTimelineItemsItemTypeClosedEvent, PullRequestTimelineItemsItemTypeCommentDeletedEvent, PullRequestTimelineItemsItemTypeConnectedEvent, PullRequestTimelineItemsItemTypeConvertedNoteToIssueEvent, PullRequestTimelineItemsItemTypeConvertedToDiscussionEvent, PullRequestTimelineItemsItemTypeDemilestonedEvent, PullRequestTimelineItemsItemTypeDisconnectedEvent, PullRequestTimelineItemsItemTypeLabeledEvent, PullRequestTimelineItemsItemTypeLockedEvent, PullRequestTimelineItemsItemTypeMarkedAsDuplicateEvent, PullRequestTimelineItemsItemTypeMentionedEvent, PullRequestTimelineItemsItemTypeMilestonedEvent, PullRequestTimelineItemsItemTypeMovedColumnsInProjectEvent, PullRequestTimelineItemsItemTypePinnedEvent, PullRequestTimelineItemsItemTypeReferencedEvent, PullRequestTimelineItemsItemTypeRemovedFromProjectEvent, PullRequestTimelineItemsItemTypeRenamedTitleEvent, PullRequestTimelineItemsItemTypeReopenedEvent, PullRequestTimelineItemsItemTypeSubscribedEvent, PullRequestTimelineItemsItemTypeTransferredEvent, PullRequestTimelineItemsItemTypeUnassignedEvent, PullRequestTimelineItemsItemTypeUnlabeledEvent, PullRequestTimelineItemsItemTypeUnlockedEvent, PullRequestTimelineItemsItemTypeUserBlockedEvent, PullRequestTimelineItemsItemTypeUnmarkedAsDuplicateEvent, PullRequestTimelineItemsItemTypeUnpinnedEvent, PullRequestTimelineItemsItemTypeUnsubscribedEvent, PullRequestTimelineItemsItemTypeIssueTypeAddedEvent, PullRequestTimelineItemsItemTypeIssueTypeRemovedEvent, PullRequestTimelineItemsItemTypeIssueTypeChangedEvent, PullRequestTimelineItemsItemTypeSubIssueAddedEvent, PullRequestTimelineItemsItemTypeSubIssueRemovedEvent, PullRequestTimelineItemsItemTypeParentIssueAddedEvent, PullRequestTimelineItemsItemTypeParentIssueRemovedEvent:
 		return true
 	}
 	return false
@@ -7557,7 +7767,7 @@ func (e ReleaseOrderField) MarshalGQL(w io.Writer) {
 type RepoAccessAuditEntryVisibility string
 
 const (
-	// The repository is visible only to users in the same business.
+	// The repository is visible only to users in the same enterprise.
 	RepoAccessAuditEntryVisibilityInternal RepoAccessAuditEntryVisibility = "INTERNAL"
 	// The repository is visible only to those with explicit access.
 	RepoAccessAuditEntryVisibilityPrivate RepoAccessAuditEntryVisibility = "PRIVATE"
@@ -7604,7 +7814,7 @@ func (e RepoAccessAuditEntryVisibility) MarshalGQL(w io.Writer) {
 type RepoAddMemberAuditEntryVisibility string
 
 const (
-	// The repository is visible only to users in the same business.
+	// The repository is visible only to users in the same enterprise.
 	RepoAddMemberAuditEntryVisibilityInternal RepoAddMemberAuditEntryVisibility = "INTERNAL"
 	// The repository is visible only to those with explicit access.
 	RepoAddMemberAuditEntryVisibilityPrivate RepoAddMemberAuditEntryVisibility = "PRIVATE"
@@ -7651,7 +7861,7 @@ func (e RepoAddMemberAuditEntryVisibility) MarshalGQL(w io.Writer) {
 type RepoArchivedAuditEntryVisibility string
 
 const (
-	// The repository is visible only to users in the same business.
+	// The repository is visible only to users in the same enterprise.
 	RepoArchivedAuditEntryVisibilityInternal RepoArchivedAuditEntryVisibility = "INTERNAL"
 	// The repository is visible only to those with explicit access.
 	RepoArchivedAuditEntryVisibilityPrivate RepoArchivedAuditEntryVisibility = "PRIVATE"
@@ -7745,7 +7955,7 @@ func (e RepoChangeMergeSettingAuditEntryMergeType) MarshalGQL(w io.Writer) {
 type RepoCreateAuditEntryVisibility string
 
 const (
-	// The repository is visible only to users in the same business.
+	// The repository is visible only to users in the same enterprise.
 	RepoCreateAuditEntryVisibilityInternal RepoCreateAuditEntryVisibility = "INTERNAL"
 	// The repository is visible only to those with explicit access.
 	RepoCreateAuditEntryVisibilityPrivate RepoCreateAuditEntryVisibility = "PRIVATE"
@@ -7792,7 +8002,7 @@ func (e RepoCreateAuditEntryVisibility) MarshalGQL(w io.Writer) {
 type RepoDestroyAuditEntryVisibility string
 
 const (
-	// The repository is visible only to users in the same business.
+	// The repository is visible only to users in the same enterprise.
 	RepoDestroyAuditEntryVisibilityInternal RepoDestroyAuditEntryVisibility = "INTERNAL"
 	// The repository is visible only to those with explicit access.
 	RepoDestroyAuditEntryVisibilityPrivate RepoDestroyAuditEntryVisibility = "PRIVATE"
@@ -7839,7 +8049,7 @@ func (e RepoDestroyAuditEntryVisibility) MarshalGQL(w io.Writer) {
 type RepoRemoveMemberAuditEntryVisibility string
 
 const (
-	// The repository is visible only to users in the same business.
+	// The repository is visible only to users in the same enterprise.
 	RepoRemoveMemberAuditEntryVisibilityInternal RepoRemoveMemberAuditEntryVisibility = "INTERNAL"
 	// The repository is visible only to those with explicit access.
 	RepoRemoveMemberAuditEntryVisibilityPrivate RepoRemoveMemberAuditEntryVisibility = "PRIVATE"
@@ -8615,13 +8825,13 @@ const (
 	RepositoryRuleTypeBranchNamePattern RepositoryRuleType = "BRANCH_NAME_PATTERN"
 	// Tag name pattern
 	RepositoryRuleTypeTagNamePattern RepositoryRuleType = "TAG_NAME_PATTERN"
-	// Prevent commits that include changes in specified file paths from being pushed to the commit graph.
+	// Prevent commits that include changes in specified file and folder paths from being pushed to the commit graph. This includes absolute paths that contain file names.
 	RepositoryRuleTypeFilePathRestriction RepositoryRuleType = "FILE_PATH_RESTRICTION"
-	// Prevent commits that include file paths that exceed a specified character limit from being pushed to the commit graph.
+	// Prevent commits that include file paths that exceed the specified character limit from being pushed to the commit graph.
 	RepositoryRuleTypeMaxFilePathLength RepositoryRuleType = "MAX_FILE_PATH_LENGTH"
 	// Prevent commits that include files with specified file extensions from being pushed to the commit graph.
 	RepositoryRuleTypeFileExtensionRestriction RepositoryRuleType = "FILE_EXTENSION_RESTRICTION"
-	// Prevent commits that exceed a specified file size limit from being pushed to the commit.
+	// Prevent commits with individual files that exceed the specified limit from being pushed to the commit graph.
 	RepositoryRuleTypeMaxFileSize RepositoryRuleType = "MAX_FILE_SIZE"
 	// Require all changes made to a targeted branch to pass the specified workflows before they can be merged.
 	RepositoryRuleTypeWorkflows RepositoryRuleType = "WORKFLOWS"
@@ -8749,17 +8959,20 @@ const (
 	RepositoryRulesetTargetTag RepositoryRulesetTarget = "TAG"
 	// Push
 	RepositoryRulesetTargetPush RepositoryRulesetTarget = "PUSH"
+	// repository
+	RepositoryRulesetTargetRepository RepositoryRulesetTarget = "REPOSITORY"
 )
 
 var AllRepositoryRulesetTarget = []RepositoryRulesetTarget{
 	RepositoryRulesetTargetBranch,
 	RepositoryRulesetTargetTag,
 	RepositoryRulesetTargetPush,
+	RepositoryRulesetTargetRepository,
 }
 
 func (e RepositoryRulesetTarget) IsValid() bool {
 	switch e {
-	case RepositoryRulesetTargetBranch, RepositoryRulesetTargetTag, RepositoryRulesetTargetPush:
+	case RepositoryRulesetTargetBranch, RepositoryRulesetTargetTag, RepositoryRulesetTargetPush, RepositoryRulesetTargetRepository:
 		return true
 	}
 	return false
@@ -8794,7 +9007,7 @@ const (
 	RepositoryVisibilityPrivate RepositoryVisibility = "PRIVATE"
 	// The repository is visible to everyone.
 	RepositoryVisibilityPublic RepositoryVisibility = "PUBLIC"
-	// The repository is visible only to users in the same business.
+	// The repository is visible only to users in the same enterprise.
 	RepositoryVisibilityInternal RepositoryVisibility = "INTERNAL"
 )
 
@@ -8830,6 +9043,53 @@ func (e *RepositoryVisibility) UnmarshalGQL(v any) error {
 }
 
 func (e RepositoryVisibility) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+// The possible relationships of an alert's dependency.
+type RepositoryVulnerabilityAlertDependencyRelationship string
+
+const (
+	// The relationship is unknown
+	RepositoryVulnerabilityAlertDependencyRelationshipUnknown RepositoryVulnerabilityAlertDependencyRelationship = "UNKNOWN"
+	// A direct dependency of your project
+	RepositoryVulnerabilityAlertDependencyRelationshipDirect RepositoryVulnerabilityAlertDependencyRelationship = "DIRECT"
+	// A transitive dependency of your project
+	RepositoryVulnerabilityAlertDependencyRelationshipTransitive RepositoryVulnerabilityAlertDependencyRelationship = "TRANSITIVE"
+)
+
+var AllRepositoryVulnerabilityAlertDependencyRelationship = []RepositoryVulnerabilityAlertDependencyRelationship{
+	RepositoryVulnerabilityAlertDependencyRelationshipUnknown,
+	RepositoryVulnerabilityAlertDependencyRelationshipDirect,
+	RepositoryVulnerabilityAlertDependencyRelationshipTransitive,
+}
+
+func (e RepositoryVulnerabilityAlertDependencyRelationship) IsValid() bool {
+	switch e {
+	case RepositoryVulnerabilityAlertDependencyRelationshipUnknown, RepositoryVulnerabilityAlertDependencyRelationshipDirect, RepositoryVulnerabilityAlertDependencyRelationshipTransitive:
+		return true
+	}
+	return false
+}
+
+func (e RepositoryVulnerabilityAlertDependencyRelationship) String() string {
+	return string(e)
+}
+
+func (e *RepositoryVulnerabilityAlertDependencyRelationship) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RepositoryVulnerabilityAlertDependencyRelationship(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RepositoryVulnerabilityAlertDependencyRelationship", str)
+	}
+	return nil
+}
+
+func (e RepositoryVulnerabilityAlertDependencyRelationship) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
@@ -9221,6 +9481,8 @@ type SearchType string
 const (
 	// Returns results matching issues in repositories.
 	SearchTypeIssue SearchType = "ISSUE"
+	// Returns results matching issues in repositories.
+	SearchTypeIssueAdvanced SearchType = "ISSUE_ADVANCED"
 	// Returns results matching repositories.
 	SearchTypeRepository SearchType = "REPOSITORY"
 	// Returns results matching users and organizations on GitHub.
@@ -9231,6 +9493,7 @@ const (
 
 var AllSearchType = []SearchType{
 	SearchTypeIssue,
+	SearchTypeIssueAdvanced,
 	SearchTypeRepository,
 	SearchTypeUser,
 	SearchTypeDiscussion,
@@ -9238,7 +9501,7 @@ var AllSearchType = []SearchType{
 
 func (e SearchType) IsValid() bool {
 	switch e {
-	case SearchTypeIssue, SearchTypeRepository, SearchTypeUser, SearchTypeDiscussion:
+	case SearchTypeIssue, SearchTypeIssueAdvanced, SearchTypeRepository, SearchTypeUser, SearchTypeDiscussion:
 		return true
 	}
 	return false
