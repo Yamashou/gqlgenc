@@ -26,7 +26,7 @@ func TestLoadConfig(t *testing.T) {
 	t.Run("malformed config", func(t *testing.T) {
 		t.Parallel()
 		_, err := LoadConfig("testdata/cfg/malformedconfig.yml")
-		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `asdf` into config.Config")
+		require.EqualError(t, err, "unable to parse config: [1:1] string was used where mapping is expected\n>  1 | asdf\n       ^\n")
 	})
 
 	t.Run("'schema' and 'endpoint' both specified", func(t *testing.T) {
@@ -44,7 +44,7 @@ func TestLoadConfig(t *testing.T) {
 	t.Run("unknown keys", func(t *testing.T) {
 		t.Parallel()
 		_, err := LoadConfig("testdata/cfg/unknownkeys.yml")
-		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 3: field unknown not found in type config.Config")
+		require.EqualError(t, err, "unable to parse config: [3:1] unknown field \"unknown\"\n   1 | schema:\n   2 |   - outer\n>  3 | unknown: foo\n       ^\n")
 	})
 
 	t.Run("globbed filenames", func(t *testing.T) {

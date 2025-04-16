@@ -14,10 +14,10 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/Yamashou/gqlgenc/clientv2"
 	"github.com/Yamashou/gqlgenc/introspection"
+	"github.com/goccy/go-yaml"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/validator"
-	"gopkg.in/yaml.v3"
 )
 
 // Config extends the gqlgen basic config
@@ -122,9 +122,7 @@ func LoadConfig(filename string) (*Config, error) {
 
 	confContent := []byte(os.ExpandEnv(string(b)))
 
-	decoder := yaml.NewDecoder(bytes.NewReader(confContent))
-	decoder.KnownFields(true)
-
+	decoder := yaml.NewDecoder(bytes.NewReader(confContent), yaml.DisallowUnknownField())
 	if err := decoder.Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
