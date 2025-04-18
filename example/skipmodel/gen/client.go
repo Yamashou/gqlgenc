@@ -5,16 +5,16 @@ package gen
 import (
 	"context"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/Yamashou/gqlgenc/example/skipmodel/model"
+	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/example/skipmodel/model"
 )
 
 type Client struct {
-	Client *clientv2.Client
+	Client *client.Client
 }
 
-func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) *Client {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
+func NewClient(cli client.HttpClient, baseURL string, options *client.Options, interceptors ...client.RequestInterceptor) *Client {
+	return &Client{Client: client.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type UserFragment struct {
@@ -124,7 +124,7 @@ fragment UserFragment on User {
 }
 `
 
-func (c *Client) A(ctx context.Context, input model.UserInput, interceptors ...clientv2.RequestInterceptor) (*A, error) {
+func (c *Client) A(ctx context.Context, input model.UserInput, interceptors ...client.RequestInterceptor) (*A, error) {
 	vars := map[string]any{
 		"input": input,
 	}

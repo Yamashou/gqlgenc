@@ -1,4 +1,4 @@
-package clientv3
+package client
 
 import (
 	"bytes"
@@ -10,7 +10,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/Yamashou/gqlgenc/graphqljson"
+	"github.com/Yamashou/gqlgenc/v3/graphqljson"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 

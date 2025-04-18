@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Yamashou/gqlgenc/config"
-	"github.com/Yamashou/gqlgenc/generator"
+	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/generator"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/tools/go/packages"
 )

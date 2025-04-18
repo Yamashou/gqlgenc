@@ -11,10 +11,10 @@ import (
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/99designs/gqlgen/plugin/modelgen"
-	"github.com/Yamashou/gqlgenc/clientgenv2"
-	"github.com/Yamashou/gqlgenc/config"
-	"github.com/Yamashou/gqlgenc/parsequery"
-	"github.com/Yamashou/gqlgenc/querydocument"
+	"github.com/Yamashou/gqlgenc/v3/clientgen"
+	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/parsequery"
+	"github.com/Yamashou/gqlgenc/v3/querydocument"
 )
 
 func mutateHook(cfg *config.Config, usedTypes map[string]bool) func(b *modelgen.ModelBuild) *modelgen.ModelBuild {
@@ -97,7 +97,7 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 
 	var clientGen api.Option
 	if cfg.Generate != nil {
-		clientGen = api.AddPlugin(clientgenv2.New(queryDocument, operationQueryDocuments, cfg.Client, cfg.Generate))
+		clientGen = api.AddPlugin(clientgen.New(queryDocument, operationQueryDocuments, cfg.Client, cfg.Generate))
 	}
 
 	var plugins []plugin.Plugin

@@ -1,4 +1,4 @@
-package clientgenv2
+package clientgen
 
 import (
 	"go/types"

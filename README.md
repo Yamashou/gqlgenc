@@ -109,7 +109,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Yamashou/gqlgenc/clientgenv2"
+	"github.com/Yamashou/gqlgenc/v3/clientgen"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -127,7 +127,7 @@ func main() {
 		Package:  "gen",
 	}
 
-	clientPlugin := clientgenv2.New(queries, clientPackage, nil)
+	clientPlugin := clientgen.New(queries, clientPackage, nil)
 	err = api.Generate(cfg,
 		api.AddPlugin(clientPlugin),
 	)
@@ -155,4 +155,4 @@ This client does not support subscription. If you need a subscription, please cr
 
 ### Pre-conditions
 
-[clientgenv2](https://github.com/Yamashou/gqlgenc/tree/master/clientgenv2) is created based on [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen). So if you don't have a modelgen, it may be a mysterious move.
+[clientgen](https://github.com/Yamashou/gqlgenc/v3/tree/master/clientgen) is created based on [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen). So if you don't have a modelgen, it may be a mysterious move.

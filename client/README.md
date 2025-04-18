@@ -1,7 +1,7 @@
-# clientv3
+# client
 
 ## Remove MarshalJSON function
-clientv3はclientv2.MarshalJSONに相当するものはありません。代わりに json.Marshal を使用します。
+clientはclient.MarshalJSONに相当するものはありません。代わりに json.Marshal を使用します。
 そのためenumの型には必ずjson.Marshalerの実装が必要になります。
 gqlgen v1.17.71以降では、enumの型にjson.Marshalerのコードが生成されます。
 ```go

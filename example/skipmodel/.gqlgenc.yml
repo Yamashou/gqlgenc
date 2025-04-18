@@ -10,6 +10,6 @@ models:
 query:
   - "./query/*.graphql"
 generate:
-  clientV2: true
+  client: true
   onlyUsedModels: true
   enableClientJsonOmitemptyTag: false

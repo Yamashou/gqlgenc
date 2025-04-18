@@ -7,15 +7,15 @@ import (
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/Yamashou/gqlgenc/v3/client"
 )
 
 type Client struct {
-	Client *clientv2.Client
+	Client *client.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, option *clientv2.Options, interceptors ...clientv2.RequestInterceptor) *Client {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, option, interceptors...)}
+func NewClient(cli *http.Client, baseURL string, option *client.Options, interceptors ...client.RequestInterceptor) *Client {
+	return &Client{Client: client.NewClient(cli, baseURL, option, interceptors...)}
 }
 
 type Query struct {
@@ -191,7 +191,7 @@ fragment FileDataFragment on FileData {
 }
 `
 
-func (c *Client) UploadFile(ctx context.Context, file graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*UploadFile, error) {
+func (c *Client) UploadFile(ctx context.Context, file graphql.Upload, interceptors ...client.RequestInterceptor) (*UploadFile, error) {
 	vars := map[string]any{
 		"file": file,
 	}
@@ -221,7 +221,7 @@ fragment FileDataFragment on FileData {
 }
 `
 
-func (c *Client) UploadFiles(ctx context.Context, files []*graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*UploadFiles, error) {
+func (c *Client) UploadFiles(ctx context.Context, files []*graphql.Upload, interceptors ...client.RequestInterceptor) (*UploadFiles, error) {
 	vars := map[string]any{
 		"files": files,
 	}
@@ -264,7 +264,7 @@ const ManyMutationsInOneDocument = `mutation ManyMutationsInOne ($file: Upload!,
 }
 `
 
-func (c *Client) ManyMutationsInOne(ctx context.Context, file graphql.Upload, files []*graphql.Upload, name string, interceptors ...clientv2.RequestInterceptor) (*ManyMutationsInOne, error) {
+func (c *Client) ManyMutationsInOne(ctx context.Context, file graphql.Upload, files []*graphql.Upload, name string, interceptors ...client.RequestInterceptor) (*ManyMutationsInOne, error) {
 	vars := map[string]any{
 		"file":  file,
 		"files": files,
@@ -294,7 +294,7 @@ fragment FileDataFragment on FileData {
 }
 `
 
-func (c *Client) FileInfo(ctx context.Context, file graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*FileInfo, error) {
+func (c *Client) FileInfo(ctx context.Context, file graphql.Upload, interceptors ...client.RequestInterceptor) (*FileInfo, error) {
 	vars := map[string]any{
 		"file": file,
 	}
@@ -324,7 +324,7 @@ fragment FileDataFragment on FileData {
 }
 `
 
-func (c *Client) FilesInfo(ctx context.Context, files []*graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*FilesInfo, error) {
+func (c *Client) FilesInfo(ctx context.Context, files []*graphql.Upload, interceptors ...client.RequestInterceptor) (*FilesInfo, error) {
 	vars := map[string]any{
 		"files": files,
 	}
@@ -359,7 +359,7 @@ fragment FileDataFragment on FileData {
 }
 `
 
-func (c *Client) AllFilesInfo(ctx context.Context, file graphql.Upload, files []*graphql.Upload, interceptors ...clientv2.RequestInterceptor) (*AllFilesInfo, error) {
+func (c *Client) AllFilesInfo(ctx context.Context, file graphql.Upload, files []*graphql.Upload, interceptors ...client.RequestInterceptor) (*AllFilesInfo, error) {
 	vars := map[string]any{
 		"file":  file,
 		"files": files,
@@ -403,7 +403,7 @@ const AllFilesInfoWithListItemsDocument = `query AllFilesInfoWithListItems ($fil
 }
 `
 
-func (c *Client) AllFilesInfoWithListItems(ctx context.Context, file graphql.Upload, files []*graphql.Upload, input *ListItemsInput, interceptors ...clientv2.RequestInterceptor) (*AllFilesInfoWithListItems, error) {
+func (c *Client) AllFilesInfoWithListItems(ctx context.Context, file graphql.Upload, files []*graphql.Upload, input *ListItemsInput, interceptors ...client.RequestInterceptor) (*AllFilesInfoWithListItems, error) {
 	vars := map[string]any{
 		"file":  file,
 		"files": files,

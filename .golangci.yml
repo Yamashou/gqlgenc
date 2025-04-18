@@ -75,17 +75,17 @@ issues:
       linters:
         - structcheck
     - path: config/config.go
-      text: "`ClientV2` is unused" # used in config/config.go
+      text: "`client` is unused" # used in config/config.go
       linters:
         - structcheck
     - path: graphqljson/graphql.go
       text: "append to slice `frontier` with non-zero initialized length" # used in config/config.go
       linters:
         - makezero
-    - path: clientv2/client_test.go
+    - path: client/client_test.go
       text: "should not use built-in type string as key for value; define your own type to avoid collisions"
       linters:
         - staticcheck
-    - path: clientv2/client_test.go
+    - path: client/client_test.go
       linters:
         - revive

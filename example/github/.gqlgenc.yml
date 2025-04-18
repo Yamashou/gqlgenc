@@ -1,7 +1,7 @@
 model:
   filename: ./model/models_gen.go
 autobind:
-  - github.com/Yamashou/gqlgenc/example/github/model
+  - github.com/Yamashou/gqlgenc/v3/example/github/model
 client:
   filename: ./gen/client.go
 models:
@@ -14,6 +14,6 @@ endpoint:
 query:
   - "./query/*.graphql"
 generate:
-  clientV2: true
+  client: true
   clientInterfaceName: "GithubGraphQLClient"
   onlyUsedModels: true

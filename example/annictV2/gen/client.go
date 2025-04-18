@@ -7,15 +7,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/Yamashou/gqlgenc/v3/client"
 )
 
 type Client struct {
-	Client *clientv2.Client
+	Client *client.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) *Client {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
+func NewClient(cli *http.Client, baseURL string, options *client.Options, interceptors ...client.RequestInterceptor) *Client {
+	return &Client{Client: client.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type Query struct {
@@ -185,7 +185,7 @@ const CreateRecordMutationQuery = `mutation CreateRecordMutation ($episodeId: ID
 }
 `
 
-func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, interceptors ...clientv2.RequestInterceptor) (*HogeCreateRecordMutationPayload, error) {
+func (c *Client) CreateRecordMutation(ctx context.Context, episodeID string, interceptors ...client.RequestInterceptor) (*HogeCreateRecordMutationPayload, error) {
 	vars := map[string]any{
 		"episodeId": episodeID,
 	}
@@ -205,7 +205,7 @@ const UpdateStatusMutationQuery = `mutation UpdateStatusMutation ($state: Status
 }
 `
 
-func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, workID string, interceptors ...clientv2.RequestInterceptor) (*HogeUpdateStatusMutationPayload, error) {
+func (c *Client) UpdateStatusMutation(ctx context.Context, state StatusState, workID string, interceptors ...client.RequestInterceptor) (*HogeUpdateStatusMutationPayload, error) {
 	vars := map[string]any{
 		"state":  state,
 		"workId": workID,
@@ -226,7 +226,7 @@ const UpdateWorkStatusQuery = `mutation UpdateWorkStatus ($workId: ID!) {
 }
 `
 
-func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, interceptors ...clientv2.RequestInterceptor) (*HogeUpdateWorkStatusPayload, error) {
+func (c *Client) UpdateWorkStatus(ctx context.Context, workID string, interceptors ...client.RequestInterceptor) (*HogeUpdateWorkStatusPayload, error) {
 	vars := map[string]any{
 		"workId": workID,
 	}
@@ -253,7 +253,7 @@ fragment ViewerFragment on User {
 }
 `
 
-func (c *Client) GetProfile(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetProfile, error) {
+func (c *Client) GetProfile(ctx context.Context, interceptors ...client.RequestInterceptor) (*GetProfile, error) {
 	vars := map[string]any{}
 
 	var res GetProfile
@@ -297,7 +297,7 @@ fragment WorkFragment on Work {
 }
 `
 
-func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *string, n int64, interceptors ...clientv2.RequestInterceptor) (*ListWorks, error) {
+func (c *Client) ListWorks(ctx context.Context, state *StatusState, after *string, n int64, interceptors ...client.RequestInterceptor) (*ListWorks, error) {
 	vars := map[string]any{
 		"state": state,
 		"after": after,
@@ -350,7 +350,7 @@ fragment WorkFragment on Work {
 }
 `
 
-func (c *Client) ListRecords(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListRecords, error) {
+func (c *Client) ListRecords(ctx context.Context, interceptors ...client.RequestInterceptor) (*ListRecords, error) {
 	vars := map[string]any{}
 
 	var res ListRecords
@@ -388,7 +388,7 @@ const ListNextEpisodesQuery = `query ListNextEpisodes {
 }
 `
 
-func (c *Client) ListNextEpisodes(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*ListNextEpisodes, error) {
+func (c *Client) ListNextEpisodes(ctx context.Context, interceptors ...client.RequestInterceptor) (*ListNextEpisodes, error) {
 	vars := map[string]any{}
 
 	var res ListNextEpisodes
@@ -427,7 +427,7 @@ fragment WorkFragment on Work {
 }
 `
 
-func (c *Client) GetWork(ctx context.Context, ids []int64, interceptors ...clientv2.RequestInterceptor) (*GetWork, error) {
+func (c *Client) GetWork(ctx context.Context, ids []int64, interceptors ...client.RequestInterceptor) (*GetWork, error) {
 	vars := map[string]any{
 		"ids": ids,
 	}
@@ -473,7 +473,7 @@ fragment WorkFragment on Work {
 }
 `
 
-func (c *Client) SearchWorks(ctx context.Context, seasons []string, interceptors ...clientv2.RequestInterceptor) (*SearchWorks, error) {
+func (c *Client) SearchWorks(ctx context.Context, seasons []string, interceptors ...client.RequestInterceptor) (*SearchWorks, error) {
 	vars := map[string]any{
 		"seasons": seasons,
 	}

@@ -6,15 +6,15 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/Yamashou/gqlgenc/example/annictV2/gen"
+	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/example/annictV2/gen"
 )
 
 func main() {
 	key := os.Getenv("ANNICT_KEY")
 
-	annictClient := NewAnnictClient(clientv2.NewClient(http.DefaultClient, "https://api.annict.com/graphql", nil,
-		func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res any, next clientv2.RequestInterceptorFunc) error {
+	annictClient := NewAnnictClient(client.NewClient(http.DefaultClient, "https://api.annict.com/graphql", nil,
+		func(ctx context.Context, req *http.Request, gqlInfo *client.GQLRequestInfo, res any, next client.RequestInterceptorFunc) error {
 			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", key))
 
 			return next(ctx, req, gqlInfo, res)
@@ -73,6 +73,6 @@ func main() {
 	fmt.Println(res.Viewer.Works.Edges[0].Node.Title, res.Viewer.Works.Edges[0].Cursor, len(res.Viewer.Works.Edges))
 }
 
-func NewAnnictClient(c *clientv2.Client) *gen.Client {
+func NewAnnictClient(c *client.Client) *gen.Client {
 	return &gen.Client{Client: c}
 }

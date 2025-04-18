@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/Yamashou/gqlgenc/introspection"
+	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/introspection"
 	"github.com/goccy/go-yaml"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -275,7 +275,7 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 }
 
 func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
-	addHeaderInterceptor := func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res any, next clientv2.RequestInterceptorFunc) error {
+	addHeaderInterceptor := func(ctx context.Context, req *http.Request, gqlInfo *client.GQLRequestInfo, res any, next client.RequestInterceptorFunc) error {
 		for key, value := range c.Endpoint.Headers {
 			req.Header.Set(key, value)
 		}
@@ -283,7 +283,7 @@ func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
 		return next(ctx, req, gqlInfo, res)
 	}
 
-	gqlclient := clientv2.NewClient(http.DefaultClient, c.Endpoint.URL, nil, addHeaderInterceptor)
+	gqlclient := client.NewClient(http.DefaultClient, c.Endpoint.URL, nil, addHeaderInterceptor)
 
 	var res introspection.Query
 	if err := gqlclient.Post(ctx, "Query", introspection.Introspection, &res, nil); err != nil {

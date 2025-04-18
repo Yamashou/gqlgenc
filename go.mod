@@ -1,4 +1,4 @@
-module github.com/Yamashou/gqlgenc
+module github.com/Yamashou/gqlgenc/v3
 
 go 1.24.2
 
@@ -6,7 +6,6 @@ require (
 	github.com/99designs/gqlgen v0.17.71
 	github.com/goccy/go-yaml v1.17.1
 	github.com/google/go-cmp v0.7.0
-	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
 	github.com/vektah/gqlparser/v2 v2.5.25
@@ -18,6 +17,7 @@ require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect

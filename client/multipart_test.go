@@ -1,4 +1,4 @@
-package clientv3
+package client
 
 import (
 	"context"

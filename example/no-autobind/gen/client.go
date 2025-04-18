@@ -6,19 +6,19 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/Yamashou/gqlgenc/v3/client"
 )
 
 type GithubGraphQLClient interface {
-	GetUserProfileName(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetUserProfileName, error)
+	GetUserProfileName(ctx context.Context, interceptors ...client.RequestInterceptor) (*GetUserProfileName, error)
 }
 
 type Client struct {
-	Client *clientv2.Client
+	Client *client.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) GithubGraphQLClient {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
+func NewClient(cli *http.Client, baseURL string, options *client.Options, interceptors ...client.RequestInterceptor) GithubGraphQLClient {
+	return &Client{Client: client.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type GetUserProfileName_User_Profile struct {
@@ -63,7 +63,7 @@ const GetUserProfileNameDocument = `query GetUserProfileName {
 }
 `
 
-func (c *Client) GetUserProfileName(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*GetUserProfileName, error) {
+func (c *Client) GetUserProfileName(ctx context.Context, interceptors ...client.RequestInterceptor) (*GetUserProfileName, error) {
 	vars := map[string]any{}
 
 	var res GetUserProfileName

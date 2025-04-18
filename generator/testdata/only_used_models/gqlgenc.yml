@@ -9,5 +9,5 @@ schema:
 query:
   - "./queries/*.graphql"
 generate:
-  clientV2: true
+  client: true
   onlyUsedModels: true

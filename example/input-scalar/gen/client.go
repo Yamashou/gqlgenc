@@ -6,20 +6,20 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/Yamashou/gqlgenc/example/input-scalar/scalar"
+	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/example/input-scalar/scalar"
 )
 
 type GithubGraphQLClient interface {
-	GetNumber(ctx context.Context, number scalar.Number, interceptors ...clientv2.RequestInterceptor) (*GetNumber, error)
+	GetNumber(ctx context.Context, number scalar.Number, interceptors ...client.RequestInterceptor) (*GetNumber, error)
 }
 
 type Client struct {
-	Client *clientv2.Client
+	Client *client.Client
 }
 
-func NewClient(cli *http.Client, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) GithubGraphQLClient {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
+func NewClient(cli *http.Client, baseURL string, options *client.Options, interceptors ...client.RequestInterceptor) GithubGraphQLClient {
+	return &Client{Client: client.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type GetNumber struct {
@@ -38,7 +38,7 @@ const GetNumberDocument = `query GetNumber ($number: Number!) {
 }
 `
 
-func (c *Client) GetNumber(ctx context.Context, number scalar.Number, interceptors ...clientv2.RequestInterceptor) (*GetNumber, error) {
+func (c *Client) GetNumber(ctx context.Context, number scalar.Number, interceptors ...client.RequestInterceptor) (*GetNumber, error) {
 	vars := map[string]any{
 		"number": number,
 	}
