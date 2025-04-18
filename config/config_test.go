@@ -90,6 +90,22 @@ func TestLoadConfig(t *testing.T) {
 
 		require.Equal(t, false, c.Generate.ShouldGenerateClient())
 	})
+
+	t.Run("nullable input omittable", func(t *testing.T) {
+		t.Parallel()
+		c, err := LoadConfig("testdata/cfg/nullable_input_omittable.yml")
+		require.NoError(t, err)
+
+		require.True(t, c.GQLConfig.NullableInputOmittable)
+	})
+	t.Run("omitempty, omitzero", func(t *testing.T) {
+		t.Parallel()
+		c, err := LoadConfig("testdata/cfg/omitempty_omitzero.yml")
+		require.NoError(t, err)
+
+		require.True(t, *c.GQLConfig.EnableModelJsonOmitemptyTag)
+		require.True(t, *c.GQLConfig.EnableModelJsonOmitzeroTag)
+	})
 }
 
 func TestLoadConfig_LoadSchema(t *testing.T) {

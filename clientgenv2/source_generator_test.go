@@ -242,9 +242,9 @@ func TestFragmentSpreadExpansionInInlineFragment(t *testing.T) {
 	// このテストでは、フラグメントスプレッドがあるインラインフラグメントで
 	// `hasFragmentSpread` と `collectFragmentFields` 関数が正しく動作することを確認します
 	//
-	// This test verifies that `hasFragmentSpread` and `collectFragmentFields` functions 
+	// This test verifies that `hasFragmentSpread` and `collectFragmentFields` functions
 	// work correctly when handling fragment spreads in inline fragments.
-	
+
 	// テストデータを作成
 	// Create test data
 	// フラグメントスプレッドを含むフィールドのセット
@@ -284,11 +284,11 @@ func TestFragmentSpreadExpansionInInlineFragment(t *testing.T) {
 	mockGenCfg := &gqlgencConfig.GenerateConfig{}
 
 	sg := &SourceGenerator{
-		cfg:           mockCfg,
-		binder:        mockBinder,
-		client:        mockPackageConfig,
-		genCfg:        mockGenCfg,
-		StructSources: make([]*StructSource, 0),
+		cfg:            mockCfg,
+		binder:         mockBinder,
+		client:         mockPackageConfig,
+		generateConfig: mockGenCfg,
+		StructSources:  make([]*StructSource, 0),
 	}
 
 	// フラグメントスプレッドの存在を確認
@@ -297,14 +297,14 @@ func TestFragmentSpreadExpansionInInlineFragment(t *testing.T) {
 	if !hasFragmentSpread {
 		t.Errorf("Expected hasFragmentSpread to return true when a fragment spread is present")
 	}
-	
+
 	// フラグメントフィールドの収集をテスト
 	// Test the collection of fragment fields
 	fragmentFields := sg.collectFragmentFields(responseFields)
 	if len(fragmentFields) != 2 {
 		t.Errorf("Expected 2 fields from fragment spread, got %d", len(fragmentFields))
 	}
-	
+
 	// フィールド名を検証
 	// Validate field names
 	foundID := false

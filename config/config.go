@@ -200,8 +200,23 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 
 	structFieldsAlwaysPointers := true
-	if cfg.Generate != nil && cfg.Generate.StructFieldsAlwaysPointers != nil {
-		structFieldsAlwaysPointers = *cfg.Generate.StructFieldsAlwaysPointers
+	enableClientJsonOmitemptyTag := true
+	enableModelJsonOmitzeroTag := false
+	if cfg.Generate == nil {
+		cfg.Generate = &GenerateConfig{
+			StructFieldsAlwaysPointers:   &structFieldsAlwaysPointers,
+			EnableClientJsonOmitemptyTag: &enableClientJsonOmitemptyTag,
+			EnableClientJsonOmitzeroTag:  &enableModelJsonOmitzeroTag,
+		}
+	}
+	if cfg.Generate.StructFieldsAlwaysPointers == nil {
+		cfg.Generate.StructFieldsAlwaysPointers = &structFieldsAlwaysPointers
+	}
+	if cfg.Generate.EnableClientJsonOmitemptyTag == nil {
+		cfg.Generate.EnableClientJsonOmitemptyTag = &enableClientJsonOmitemptyTag
+	}
+	if cfg.Generate.EnableClientJsonOmitzeroTag == nil {
+		cfg.Generate.EnableClientJsonOmitzeroTag = &enableModelJsonOmitzeroTag
 	}
 
 	cfg.GQLConfig = &config.Config{
@@ -212,10 +227,12 @@ func LoadConfig(filename string) (*Config, error) {
 		Exec:                           config.ExecConfig{Filename: "generated.go"},
 		Directives:                     map[string]config.DirectiveConfig{},
 		Sources:                        sources,
-		StructFieldsAlwaysPointers:     structFieldsAlwaysPointers,
+		StructFieldsAlwaysPointers:     *cfg.Generate.StructFieldsAlwaysPointers,
 		ReturnPointersInUnmarshalInput: false,
 		ResolversAlwaysReturnPointers:  true,
-		NullableInputOmittable:         false,
+		NullableInputOmittable:         cfg.Generate.NullableInputOmittable,
+		EnableModelJsonOmitemptyTag:    cfg.Generate.EnableClientJsonOmitemptyTag,
+		EnableModelJsonOmitzeroTag:     cfg.Generate.EnableClientJsonOmitzeroTag,
 	}
 
 	if err := cfg.Client.Check(); err != nil {

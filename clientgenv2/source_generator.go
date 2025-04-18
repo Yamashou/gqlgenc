@@ -197,20 +197,20 @@ type StructSource struct {
 }
 
 type SourceGenerator struct {
-	cfg           *config.Config
-	binder        *config.Binder
-	client        config.PackageConfig
-	genCfg        *gqlgencConfig.GenerateConfig
-	StructSources []*StructSource
+	cfg            *config.Config
+	binder         *config.Binder
+	client         config.PackageConfig
+	generateConfig *gqlgencConfig.GenerateConfig
+	StructSources  []*StructSource
 }
 
 func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *SourceGenerator {
 	return &SourceGenerator{
-		cfg:           cfg,
-		binder:        cfg.NewBinder(),
-		client:        client,
-		genCfg:        generateConfig,
-		StructSources: []*StructSource{},
+		cfg:            cfg,
+		binder:         cfg.NewBinder(),
+		client:         client,
+		generateConfig: generateConfig,
+		StructSources:  []*StructSource{},
 	}
 }
 
@@ -306,10 +306,19 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
-		jsonTag := fmt.Sprintf(`json:"%s"`, selection.Alias)
-		if r.genCfg.IsEnableClientJsonOmitemptyTag() && isOptional {
-			jsonTag = fmt.Sprintf(`json:"%s,omitempty"`, selection.Alias)
+		// json tag
+		jsonTag := fmt.Sprintf(`json:"%s`, selection.Alias)
+		if isOptional {
+			if r.generateConfig.EnableClientJsonOmitemptyTag != nil && *r.generateConfig.EnableClientJsonOmitemptyTag {
+				jsonTag += `,omitempty`
+			}
+			if r.generateConfig.EnableClientJsonOmitzeroTag != nil && *r.generateConfig.EnableClientJsonOmitzeroTag {
+				jsonTag += `,omitzero`
+			}
 		}
+		jsonTag += `"`
+
+		// graphql tag
 		tags := []string{
 			jsonTag,
 			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
