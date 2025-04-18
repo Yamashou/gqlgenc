@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-package parsequery
+package queryparser
 
 import (
 	"fmt"
@@ -40,8 +40,7 @@ var path2regex = strings.NewReplacer(
 	`/`, `[\\/]`,
 )
 
-// LoadQuerySourceなどは、gqlgenがLoadConfigでSchemaを読み込む時の実装をコピーして一部修正している
-// **/test/*.graphqlなどに対応している
+// LoadQuerySources returns gqlgen ast.Source parsed GraphQL Query files
 func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 	var noGlobQueryFileNames config.StringList
 

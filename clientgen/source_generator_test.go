@@ -1,8 +1,8 @@
 package clientgen
 
 import (
-	"github.com/99designs/gqlgen/codegen/config"
-	gqlgencConfig "github.com/Yamashou/gqlgenc/v3/config"
+	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
+	"github.com/Yamashou/gqlgenc/v3/config"
 	"go/types"
 	"testing"
 )
@@ -279,16 +279,12 @@ func TestFragmentSpreadExpansionInInlineFragment(t *testing.T) {
 	}
 
 	mockCfg := &config.Config{}
-	mockBinder := &config.Binder{}
-	mockPackageConfig := config.PackageConfig{}
-	mockGenCfg := &gqlgencConfig.GenerateConfig{}
+	mockBinder := &gqlgenconfig.Binder{}
 
 	sg := &SourceGenerator{
-		cfg:            mockCfg,
-		binder:         mockBinder,
-		client:         mockPackageConfig,
-		generateConfig: mockGenCfg,
-		StructSources:  make([]*StructSource, 0),
+		config:        mockCfg,
+		binder:        mockBinder,
+		StructSources: make([]*StructSource, 0),
 	}
 
 	// フラグメントスプレッドの存在を確認

@@ -74,10 +74,6 @@ issues:
       text: "`Extensions` is unused" # used in line 48
       linters:
         - structcheck
-    - path: config/config.go
-      text: "`client` is unused" # used in config/config.go
-      linters:
-        - structcheck
     - path: graphqljson/graphql.go
       text: "append to slice `frontier` with non-zero initialized length" # used in config/config.go
       linters:

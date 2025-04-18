@@ -212,7 +212,7 @@ func Test_multipartRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := multipartRequest(tt.args.ctx, tt.args.endpoint, tt.args.operationName, tt.args.query, tt.args.variables)
+			got, err := NewMultipartRequest(tt.args.ctx, tt.args.endpoint, tt.args.operationName, tt.args.query, tt.args.variables)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("multipartRequest() error = %v, wantErr %v", err, tt.wantErr)
 				return

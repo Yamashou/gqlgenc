@@ -1,13 +1,33 @@
-package querydocument
+package queryparser
 
 import (
 	"fmt"
-
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/parser"
 	"github.com/vektah/gqlparser/v2/validator"
 )
 
-func QueryDocumentsByOperations(schema *ast.Schema, operations ast.OperationList) ([]*ast.QueryDocument, error) {
+// QueryDocument parses and validate query sources.
+func QueryDocument(schema *ast.Schema, querySources []*ast.Source) (*ast.QueryDocument, error) {
+	var queryDocument ast.QueryDocument
+	for _, querySource := range querySources {
+		query, gqlerr := parser.ParseQuery(querySource)
+		if gqlerr != nil {
+			return nil, fmt.Errorf(": %w", gqlerr)
+		}
+
+		queryDocument.Operations = append(queryDocument.Operations, query.Operations...)
+		queryDocument.Fragments = append(queryDocument.Fragments, query.Fragments...)
+	}
+
+	if errs := validator.Validate(schema, &queryDocument); errs != nil {
+		return nil, fmt.Errorf(": %w", errs)
+	}
+
+	return &queryDocument, nil
+}
+
+func OperationQueryDocuments(schema *ast.Schema, operations ast.OperationList) ([]*ast.QueryDocument, error) {
 	queryDocuments := make([]*ast.QueryDocument, 0, len(operations))
 	for _, operation := range operations {
 		fragments := fragmentsInOperationDefinition(operation)
@@ -69,20 +89,20 @@ func fragmentsInOperationWalker(selectionSet ast.SelectionSet) ast.FragmentDefin
 	return fragments
 }
 
-// CollectTypesFromQueryDocuments returns a map of type names used in query document arguments
-func CollectTypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.QueryDocument) map[string]bool {
+// TypesFromQueryDocuments returns a map of type names used in query document arguments
+func TypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.QueryDocument) map[string]bool {
 	usedTypes := make(map[string]bool)
-	processedTypes := make(map[string]bool) // 完全に処理済みの型を追跡
+	processedTypes := make(map[string]bool)
 
 	for _, doc := range queryDocuments {
 		for _, op := range doc.Operations {
 			// Collect types from variable definitions
 			for _, v := range op.VariableDefinitions {
-				collectTypeFromTypeReference(v.Type, usedTypes)
+				typeFromTypeReference(v.Type, usedTypes)
 				// Recursively collect input object fields
 				if typeName := v.Type.Name(); typeName != "" {
 					if def, ok := schema.Types[typeName]; ok && def.IsInputType() {
-						collectInputObjectFieldsWithCycle(def, schema, usedTypes, processedTypes)
+						inputObjectFieldsWithCycle(def, schema, usedTypes, processedTypes)
 					}
 				}
 			}
@@ -92,17 +112,17 @@ func CollectTypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.Qu
 	return usedTypes
 }
 
-func collectInputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, usedTypes, processedTypes map[string]bool) {
+func inputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, usedTypes, processedTypes map[string]bool) {
 	if processedTypes[def.Name] {
-		return // この型は既に完全に処理済み
+		return
 	}
 
-	processedTypes[def.Name] = true // この型の処理が完了したことをマーク
-	usedTypes[def.Name] = true      // この型を使用済みとしてマーク
+	processedTypes[def.Name] = true
+	usedTypes[def.Name] = true
 
 	for _, field := range def.Fields {
 		var typeName string
-		// リスト型の要素型まで辿る
+		// Traverse to the element type of a list type
 		switch {
 		case field.Type == nil:
 			// No type, nothing to do
@@ -117,16 +137,16 @@ func collectInputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, 
 
 		if typeName != "" {
 			usedTypes[typeName] = true
-			// 入力型のフィールドを再帰的に収集
+			// Recursively collect input type fields
 			if fieldDef, ok := schema.Types[typeName]; ok && fieldDef.IsInputType() {
-				collectInputObjectFieldsWithCycle(fieldDef, schema, usedTypes, processedTypes)
+				inputObjectFieldsWithCycle(fieldDef, schema, usedTypes, processedTypes)
 			}
 		}
 	}
 }
 
-// collectTypeFromTypeReference is a helper function to collect type names from type references
-func collectTypeFromTypeReference(t *ast.Type, usedTypes map[string]bool) {
+// typeFromTypeReference is a helper function to collect type names from type references
+func typeFromTypeReference(t *ast.Type, usedTypes map[string]bool) {
 	if t == nil {
 		return
 	}
@@ -135,5 +155,5 @@ func collectTypeFromTypeReference(t *ast.Type, usedTypes map[string]bool) {
 		usedTypes[t.NamedType] = true
 	}
 
-	collectTypeFromTypeReference(t.Elem, usedTypes)
+	typeFromTypeReference(t.Elem, usedTypes)
 }
