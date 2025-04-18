@@ -10,7 +10,6 @@ type GenerateConfig struct {
 	Mutation                     *bool   `yaml:"mutation,omitempty"`
 	Client                       *bool   `yaml:"client,omitempty"`
 	ClientInterfaceName          *string `yaml:"clientInterfaceName,omitempty"`
-	OmitEmptyTypes               *bool   `yaml:"omitEmptyTypes,omitempty"`
 	NullableInputOmittable       bool    `yaml:"nullableInputOmittable,omitempty"`
 	EnableClientJsonOmitemptyTag *bool   `yaml:"enableClientJsonOmitemptyTag,omitempty"`
 	EnableClientJsonOmitzeroTag  *bool   `yaml:"enableClientJsonOmitzeroTag,omitempty"`
@@ -32,18 +31,6 @@ func (c *GenerateConfig) ShouldGenerateClient() bool {
 	}
 
 	return true
-}
-
-func (c *GenerateConfig) ShouldOmitEmptyTypes() bool {
-	if c == nil {
-		return false
-	}
-
-	if c.OmitEmptyTypes != nil && *c.OmitEmptyTypes {
-		return true
-	}
-
-	return false
 }
 
 func (c *GenerateConfig) GetClientInterfaceName() *string {

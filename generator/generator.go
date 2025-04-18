@@ -31,27 +31,6 @@ func mutateHook(cfg *config.Config, usedTypes map[string]bool) func(b *modelgen.
 			build.Interfaces = nil
 		}
 
-		// adds the "omitempty" option to optional field from input type model as defined in graphql schema
-		// For more info see https://github.com/99designs/gqlgen/blob/master/docs/content/recipes/modelgen-hook.md
-		for _, model := range build.Models {
-			// only handle input type model
-			if schemaModel, ok := cfg.GQLConfig.Schema.Types[model.Name]; ok && cfg.Generate.ShouldOmitEmptyTypes() {
-				for _, field := range model.Fields {
-					// find field in graphql schema
-					for _, def := range schemaModel.Fields {
-						if def.Name == field.Name {
-							// only add 'omitempty' on optional field as defined in graphql schema
-							if !def.Type.NonNull {
-								field.Tag = `json:"` + field.Name + `,omitempty"`
-							}
-
-							break
-						}
-					}
-				}
-			}
-		}
-
 		return build
 	}
 }
