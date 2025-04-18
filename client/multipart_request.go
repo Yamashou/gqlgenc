@@ -13,13 +13,17 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-type FormField struct {
+type formField struct {
 	Name  string
 	Value any
 }
 
-func multipartRequest(ctx context.Context, endpoint, operationName, query string, variables map[string]any) (*http.Request, error) {
+func NewMultipartRequest(ctx context.Context, endpoint, operationName, query string, variables map[string]any) (*http.Request, error) {
 	multipartFilesGroups, mapping, variables := parseMultipartFiles(variables)
+	if len(multipartFilesGroups) == 0 {
+		return nil, nil
+	}
+
 	r := &Request{
 		Query:         query,
 		Variables:     variables,
@@ -27,7 +31,7 @@ func multipartRequest(ctx context.Context, endpoint, operationName, query string
 	}
 
 	body := new(bytes.Buffer)
-	formFields := []FormField{
+	formFields := []formField{
 		{
 			Name:  "operations",
 			Value: r,
@@ -52,19 +56,19 @@ func multipartRequest(ctx context.Context, endpoint, operationName, query string
 	return req, nil
 }
 
-type MultipartFile struct {
+type multipartFile struct {
 	File  graphql.Upload
 	Index int
 }
 
-type MultipartFilesGroup struct {
-	Files      []MultipartFile
+type multipartFilesGroup struct {
+	Files      []multipartFile
 	IsMultiple bool
 }
 
-func parseMultipartFiles(vars map[string]any) ([]MultipartFilesGroup, map[string][]string, map[string]any) {
+func parseMultipartFiles(vars map[string]any) ([]multipartFilesGroup, map[string][]string, map[string]any) {
 	var (
-		multipartFilesGroups []MultipartFilesGroup
+		multipartFilesGroups []multipartFilesGroup
 		mapping              = map[string][]string{}
 		i                    = 0
 	)
@@ -76,8 +80,8 @@ func parseMultipartFiles(vars map[string]any) ([]MultipartFilesGroup, map[string
 			vars[k] = nil
 			mapping[iStr] = []string{fmt.Sprintf("variables.%s", k)}
 
-			multipartFilesGroups = append(multipartFilesGroups, MultipartFilesGroup{
-				Files: []MultipartFile{
+			multipartFilesGroups = append(multipartFilesGroups, multipartFilesGroup{
+				Files: []multipartFile{
 					{
 						Index: i,
 						File:  item,
@@ -96,8 +100,8 @@ func parseMultipartFiles(vars map[string]any) ([]MultipartFilesGroup, map[string
 			vars[k] = nil
 			mapping[iStr] = []string{fmt.Sprintf("variables.%s", k)}
 
-			multipartFilesGroups = append(multipartFilesGroups, MultipartFilesGroup{
-				Files: []MultipartFile{
+			multipartFilesGroups = append(multipartFilesGroups, multipartFilesGroup{
+				Files: []multipartFile{
 					{
 						Index: i,
 						File:  *item,
@@ -108,13 +112,13 @@ func parseMultipartFiles(vars map[string]any) ([]MultipartFilesGroup, map[string
 			i++
 		case []*graphql.Upload:
 			vars[k] = make([]struct{}, len(item))
-			var groupFiles []MultipartFile
+			var groupFiles []multipartFile
 
 			for itemI, itemV := range item {
 				iStr := strconv.Itoa(i)
 				mapping[iStr] = []string{fmt.Sprintf("variables.%s.%s", k, strconv.Itoa(itemI))}
 
-				groupFiles = append(groupFiles, MultipartFile{
+				groupFiles = append(groupFiles, multipartFile{
 					Index: i,
 					File:  *itemV,
 				})
@@ -122,7 +126,7 @@ func parseMultipartFiles(vars map[string]any) ([]MultipartFilesGroup, map[string
 				i++
 			}
 
-			multipartFilesGroups = append(multipartFilesGroups, MultipartFilesGroup{
+			multipartFilesGroups = append(multipartFilesGroups, multipartFilesGroup{
 				Files:      groupFiles,
 				IsMultiple: true,
 			})
@@ -132,7 +136,7 @@ func parseMultipartFiles(vars map[string]any) ([]MultipartFilesGroup, map[string
 	return multipartFilesGroups, mapping, vars
 }
 
-func prepareMultipartFormBody(buffer *bytes.Buffer, formFields []FormField, files []MultipartFilesGroup) (string, error) {
+func prepareMultipartFormBody(buffer *bytes.Buffer, formFields []formField, files []multipartFilesGroup) (string, error) {
 	writer := multipart.NewWriter(buffer)
 	defer writer.Close()
 

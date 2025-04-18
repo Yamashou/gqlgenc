@@ -14,14 +14,6 @@
 	{{ reserveImport "github.com/Yamashou/gqlgenc/v3/client" }}
 
 
-	{{- if .ClientInterfaceName }}
-        type {{ .ClientInterfaceName }} interface {
-            {{- range $model := .Operation }}
-                {{ $model.Name | go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, interceptors ...client.RequestInterceptor) (*{{ $model.ResponseStructName | go }}, error)
-            {{- end }}
-        }
-    {{- end }}
-
 	type Client struct {
 	    Client *client.Client
 	}

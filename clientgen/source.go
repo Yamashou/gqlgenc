@@ -6,7 +6,6 @@ import (
 	"go/types"
 
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 )
@@ -15,15 +14,13 @@ type Source struct {
 	schema          *ast.Schema
 	queryDocument   *ast.QueryDocument
 	sourceGenerator *SourceGenerator
-	generateConfig  *config.GenerateConfig
 }
 
-func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGenerator *SourceGenerator, generateConfig *config.GenerateConfig) *Source {
+func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGenerator *SourceGenerator) *Source {
 	return &Source{
 		schema:          schema,
 		queryDocument:   queryDocument,
 		sourceGenerator: sourceGenerator,
-		generateConfig:  generateConfig,
 	}
 }
 
@@ -36,7 +33,7 @@ func (s *Source) Fragments() ([]*Fragment, error) {
 	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
 	for _, fragment := range s.queryDocument.Fragments {
 		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, fragment.Name)
-		if s.sourceGenerator.cfg.Models.Exists(fragment.Name) {
+		if s.sourceGenerator.config.GQLGenConfig.Models.Exists(fragment.Name) {
 			return nil, fmt.Errorf("%s is duplicated", fragment.Name)
 		}
 
@@ -50,9 +47,9 @@ func (s *Source) Fragments() ([]*Fragment, error) {
 
 	for _, fragment := range fragments {
 		name := fragment.Name
-		s.sourceGenerator.cfg.Models.Add(
+		s.sourceGenerator.config.GQLGenConfig.Models.Add(
 			name,
-			fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(name)),
+			fmt.Sprintf("%s.%s", s.sourceGenerator.config.GQLGencConfig.Client.Pkg(), templates.ToGo(name)),
 		)
 	}
 
@@ -61,16 +58,17 @@ func (s *Source) Fragments() ([]*Fragment, error) {
 
 type Operation struct {
 	Name                string
-	ResponseStructName  string
 	Operation           string
+	ResponseStructName  string
 	Args                []*Argument
 	VariableDefinitions ast.VariableDefinitionList
 }
 
-func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*Argument, generateConfig *config.GenerateConfig) *Operation {
+func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*Argument) *Operation {
 	return &Operation{
-		Name:                operation.Name,
-		ResponseStructName:  getResponseStructName(operation, generateConfig),
+		Name: operation.Name,
+		// TODO: Nameと同じなので消す
+		ResponseStructName:  operation.Name,
 		Operation:           queryString(queryDocument),
 		Args:                args,
 		VariableDefinitions: operation.VariableDefinitions,
@@ -111,12 +109,7 @@ func (s *Source) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, 
 		queryDocument := queryDocumentsMap[operation.Name]
 
 		args := operationArgsMap[operation.Name]
-		operations = append(operations, NewOperation(
-			operation,
-			queryDocument,
-			args,
-			s.generateConfig,
-		))
+		operations = append(operations, NewOperation(operation, queryDocument, args))
 	}
 
 	return operations, nil
@@ -158,21 +151,20 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
 	for _, operation := range s.queryDocument.Operations {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
-		name := getResponseStructName(operation, s.generateConfig)
-		if s.sourceGenerator.cfg.Models.Exists(name) {
-			return nil, fmt.Errorf("%s is duplicated", name)
+		if s.sourceGenerator.config.GQLGenConfig.Models.Exists(operation.Name) {
+			return nil, fmt.Errorf("%s is duplicated", operation.Name)
 		}
 		operationResponse = append(operationResponse, &OperationResponse{
-			Name: name,
+			Name: operation.Name,
 			Type: responseFields.StructType(),
 		})
 	}
 
 	for _, operationResponse := range operationResponse {
 		name := operationResponse.Name
-		s.sourceGenerator.cfg.Models.Add(
+		s.sourceGenerator.config.GQLGenConfig.Models.Add(
 			name,
-			fmt.Sprintf("%s.%s", s.sourceGenerator.client.Pkg(), templates.ToGo(name)),
+			fmt.Sprintf("%s.%s", s.sourceGenerator.config.GQLGencConfig.Client.Pkg(), templates.ToGo(name)),
 		)
 	}
 
@@ -181,31 +173,4 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 
 func (s *Source) ResponseSubTypes() []*StructSource {
 	return s.sourceGenerator.StructSources
-}
-
-func getResponseStructName(operation *ast.OperationDefinition, generateConfig *config.GenerateConfig) string {
-	name := operation.Name
-	if generateConfig != nil {
-		if generateConfig.Prefix != nil {
-			if operation.Operation == ast.Mutation {
-				name = fmt.Sprintf("%s%s", generateConfig.Prefix.Mutation, name)
-			}
-
-			if operation.Operation == ast.Query {
-				name = fmt.Sprintf("%s%s", generateConfig.Prefix.Query, name)
-			}
-		}
-
-		if generateConfig.Suffix != nil {
-			if operation.Operation == ast.Mutation {
-				name = fmt.Sprintf("%s%s", name, generateConfig.Suffix.Mutation)
-			}
-
-			if operation.Operation == ast.Query {
-				name = fmt.Sprintf("%s%s", name, generateConfig.Suffix.Query)
-			}
-		}
-	}
-
-	return name
 }

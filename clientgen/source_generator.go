@@ -3,12 +3,12 @@ package clientgen
 import (
 	"fmt"
 	"go/types"
-	"sort"
+	"slices"
 	"strings"
 
-	"github.com/99designs/gqlgen/codegen/config"
+	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	gqlgencConfig "github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -79,8 +79,8 @@ func (rs ResponseFieldList) MapByName() map[string]*ResponseField {
 }
 
 func (rs ResponseFieldList) SortByName() ResponseFieldList {
-	sort.Slice(rs, func(i, j int) bool {
-		return rs[i].Name < rs[j].Name
+	slices.SortFunc(rs, func(a, b *ResponseField) int {
+		return strings.Compare(a.Name, b.Name)
 	})
 	return rs
 }
@@ -197,20 +197,16 @@ type StructSource struct {
 }
 
 type SourceGenerator struct {
-	cfg            *config.Config
-	binder         *config.Binder
-	client         config.PackageConfig
-	generateConfig *gqlgencConfig.GenerateConfig
-	StructSources  []*StructSource
+	config        *config.Config
+	binder        *gqlgenconfig.Binder
+	StructSources []*StructSource
 }
 
-func NewSourceGenerator(cfg *config.Config, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *SourceGenerator {
+func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
 	return &SourceGenerator{
-		cfg:            cfg,
-		binder:         cfg.NewBinder(),
-		client:         client,
-		generateConfig: generateConfig,
-		StructSources:  []*StructSource{},
+		config:        cfg,
+		binder:        cfg.GQLGenConfig.NewBinder(),
+		StructSources: []*StructSource{},
 	}
 }
 
@@ -274,11 +270,9 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		case fieldsResponseFields.IsBasicType():
 			baseType = r.Type(selection.Definition.Type.Name())
 		case fieldsResponseFields.IsFragment():
-			// 子フィールドがFragmentの場合はこのFragmentがフィールドの型になる
 			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
 		case fieldsResponseFields.IsStructType():
-			// 子フィールドにFragmentがある場合は、現在のフィールドとマージする
 			// if there is a fragment in child fields, merge it with the current field
 			generator := NewStructGenerator(fieldsResponseFields)
 
@@ -292,12 +286,11 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 				Type: structType,
 			})
 			baseType = types.NewNamed(
-				types.NewTypeName(0, r.client.Pkg(), typeName, nil),
+				types.NewTypeName(0, r.config.GQLGencConfig.Client.Pkg(), typeName, nil),
 				structType,
 				nil,
 			)
 		default:
-			// ここにきたらバグ
 			// here is bug
 			panic("not match type")
 		}
@@ -309,25 +302,22 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		// json tag
 		jsonTag := fmt.Sprintf(`json:"%s`, selection.Alias)
 		if isOptional {
-			if r.generateConfig.EnableClientJsonOmitemptyTag != nil && *r.generateConfig.EnableClientJsonOmitemptyTag {
+			if r.config.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *r.config.GQLGenConfig.EnableModelJsonOmitemptyTag {
 				jsonTag += `,omitempty`
 			}
-			if r.generateConfig.EnableClientJsonOmitzeroTag != nil && *r.generateConfig.EnableClientJsonOmitzeroTag {
+			if r.config.GQLGenConfig.EnableModelJsonOmitzeroTag == nil && *r.config.GQLGenConfig.EnableModelJsonOmitzeroTag {
 				jsonTag += `,omitzero`
 			}
 		}
 		jsonTag += `"`
 
 		// graphql tag
-		tags := []string{
-			jsonTag,
-			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
-		}
+		graphqlTag := fmt.Sprintf(`graphql:"%s"`, selection.Alias)
 
 		return &ResponseField{
 			Name:           selection.Alias,
 			Type:           typ,
-			Tags:           tags,
+			Tags:           []string{jsonTag, graphqlTag},
 			ResponseFields: fieldsResponseFields,
 		}
 
@@ -335,13 +325,13 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, NewLayerTypeName(typeName, templates.ToGo(selection.Name)))
 		baseType := types.NewNamed(
-			types.NewTypeName(0, r.client.Pkg(), templates.ToGo(selection.Name), nil),
+			types.NewTypeName(0, r.config.GQLGencConfig.Client.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
 			nil,
 		)
 
 		var typ types.Type = baseType
-		if r.cfg.StructFieldsAlwaysPointers {
+		if r.config.GQLGenConfig.StructFieldsAlwaysPointers {
 			typ = types.NewPointer(baseType)
 		}
 
@@ -384,7 +374,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 				Type: structType,
 			})
 			typ := types.NewNamed(
-				types.NewTypeName(0, r.client.Pkg(), name, nil),
+				types.NewTypeName(0, r.config.GQLGencConfig.Client.Pkg(), name, nil),
 				structType,
 				nil,
 			)
@@ -405,7 +395,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			Type: structType,
 		})
 		typ := types.NewNamed(
-			types.NewTypeName(0, r.client.Pkg(), name, nil),
+			types.NewTypeName(0, r.config.GQLGencConfig.Client.Pkg(), name, nil),
 			structType,
 			nil,
 		)
@@ -434,9 +424,10 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 	return argumentTypes
 }
 
-// Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
+// The typeName passed as an argument to Type must be the name of the type derived from the parsed result,
+// such as from a selection.
 func (r *SourceGenerator) Type(typeName string) types.Type {
-	goType, err := r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
+	goType, err := r.binder.FindTypeFromName(r.config.GQLGenConfig.Models[typeName].Model[0])
 	if err != nil {
 		panic(fmt.Sprintf("%+v", err))
 	}

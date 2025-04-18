@@ -38,8 +38,8 @@ func (s *Suite) TestGenerator_withTestData() {
 			s.Require().NoError(err)
 
 			// disable unnecessary validations
-			cfg.GQLConfig.SkipValidation = true
-			cfg.GQLConfig.SkipModTidy = true
+			cfg.GQLGenConfig.SkipValidation = true
+			cfg.GQLGenConfig.SkipModTidy = true
 
 			// generate code
 			err = generator.Generate(context.Background(), cfg)

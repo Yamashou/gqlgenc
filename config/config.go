@@ -8,10 +8,9 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"slices"
 	"strings"
 
-	"github.com/99designs/gqlgen/codegen/config"
+	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/Yamashou/gqlgenc/v3/client"
 	"github.com/Yamashou/gqlgenc/v3/introspection"
 	"github.com/goccy/go-yaml"
@@ -23,30 +22,23 @@ import (
 // Config extends the gqlgen basic config
 // and represents the config file
 type Config struct {
-	SchemaFilename StringList           `yaml:"schema,omitempty"`
-	Model          config.PackageConfig `yaml:"model,omitempty"`
-	AutoBind       []string             `yaml:"autobind"`
-	Client         config.PackageConfig `yaml:"client,omitempty"`
-	Federation     config.PackageConfig `yaml:"federation,omitempty"`
-	Models         config.TypeMap       `yaml:"models,omitempty"`
-	Endpoint       *EndPointConfig      `yaml:"endpoint,omitempty"`
-	Generate       *GenerateConfig      `yaml:"generate,omitempty"`
+	GQLGencConfig *GQLGencConfig       `yaml:"gqlgenc"`
+	GQLGenConfig  *gqlgenconfig.Config `yaml:"gqlgen"`
+}
 
-	Query []string `yaml:"query"`
+type GQLGencConfig struct {
+	Query    []string                   `yaml:"query"`
+	Client   gqlgenconfig.PackageConfig `yaml:"client,omitempty"`
+	Endpoint *EndPointConfig            `yaml:"endpoint,omitempty"`
+	Generate *GenerateConfig            `yaml:"generate,omitempty"`
+}
 
-	// gqlgen config struct
-	GQLConfig *config.Config `yaml:"-"`
+type GenerateConfig struct {
+	Client         *bool `yaml:"client,omitempty"`
+	UsedOnlyModels *bool `yaml:"usedModelsOnly,omitempty"`
 }
 
 var cfgFilenames = []string{".gqlgenc.yml", "gqlgenc.yml", "gqlgenc.yaml"}
-
-// StringList is a simple array of strings
-type StringList []string
-
-// Has checks if the strings array has a give value
-func (a StringList) Has(file string) bool {
-	return slices.Contains(a, file)
-}
 
 // LoadConfigFromDefaultLocations looks for a config file in the specified directory, and all parent directories
 // walking up the tree. The closest config file will be returned.
@@ -114,30 +106,34 @@ var path2regex = strings.NewReplacer(
 
 // LoadConfig loads and parses the config gqlgenc config
 func LoadConfig(filename string) (*Config, error) {
-	var cfg Config
 	b, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
-
 	confContent := []byte(os.ExpandEnv(string(b)))
-
 	decoder := yaml.NewDecoder(bytes.NewReader(confContent), yaml.DisallowUnknownField())
+
+	var cfg Config
 	if err := decoder.Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
+	// gqlgen must be Directives nd Exec
+	cfg.GQLGenConfig.Directives = make(map[string]gqlgenconfig.DirectiveConfig)
+	cfg.GQLGenConfig.Exec = gqlgenconfig.ExecConfig{Filename: "generated.go"}
+	cfg.GQLGenConfig.Resolver = gqlgenconfig.ResolverConfig{Filename: "generated.go"}
+	cfg.GQLGenConfig.Federation = gqlgenconfig.PackageConfig{Filename: "generated.go"}
 
-	if cfg.SchemaFilename != nil && cfg.Endpoint != nil {
+	if cfg.GQLGenConfig.SchemaFilename != nil && cfg.GQLGencConfig.Endpoint != nil {
 		return nil, fmt.Errorf("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
-	if cfg.SchemaFilename == nil && cfg.Endpoint == nil {
+	if cfg.GQLGenConfig.SchemaFilename == nil && cfg.GQLGencConfig.Endpoint == nil {
 		return nil, fmt.Errorf("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
 	// https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/codegen/config/config.go#L120
-	files := StringList{}
-	for _, f := range cfg.SchemaFilename {
+	files := gqlgenconfig.StringList{}
+	for _, f := range cfg.GQLGenConfig.SchemaFilename {
 		var matches []string
 
 		// for ** we want to override default globbing patterns and walk all
@@ -175,19 +171,12 @@ func LoadConfig(filename string) (*Config, error) {
 			}
 		}
 	}
-
 	if len(files) > 0 {
-		cfg.SchemaFilename = files
+		cfg.GQLGenConfig.SchemaFilename = files
 	}
 
-	models := make(config.TypeMap)
-	if cfg.Models != nil {
-		models = cfg.Models
-	}
-
-	sources := []*ast.Source{}
-
-	for _, filename := range cfg.SchemaFilename {
+	sources := make([]*ast.Source, 0, len(cfg.GQLGenConfig.SchemaFilename))
+	for _, filename := range cfg.GQLGenConfig.SchemaFilename {
 		filename = filepath.ToSlash(filename)
 		var err error
 		var schemaRaw []byte
@@ -198,44 +187,9 @@ func LoadConfig(filename string) (*Config, error) {
 
 		sources = append(sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
+	cfg.GQLGenConfig.Sources = sources
 
-	structFieldsAlwaysPointers := true
-	enableClientJsonOmitemptyTag := true
-	enableModelJsonOmitzeroTag := false
-	if cfg.Generate == nil {
-		cfg.Generate = &GenerateConfig{
-			StructFieldsAlwaysPointers:   &structFieldsAlwaysPointers,
-			EnableClientJsonOmitemptyTag: &enableClientJsonOmitemptyTag,
-			EnableClientJsonOmitzeroTag:  &enableModelJsonOmitzeroTag,
-		}
-	}
-	if cfg.Generate.StructFieldsAlwaysPointers == nil {
-		cfg.Generate.StructFieldsAlwaysPointers = &structFieldsAlwaysPointers
-	}
-	if cfg.Generate.EnableClientJsonOmitemptyTag == nil {
-		cfg.Generate.EnableClientJsonOmitemptyTag = &enableClientJsonOmitemptyTag
-	}
-	if cfg.Generate.EnableClientJsonOmitzeroTag == nil {
-		cfg.Generate.EnableClientJsonOmitzeroTag = &enableModelJsonOmitzeroTag
-	}
-
-	cfg.GQLConfig = &config.Config{
-		Model:    cfg.Model,
-		Models:   models,
-		AutoBind: cfg.AutoBind,
-		// TODO: gqlgen must be set exec but client not used
-		Exec:                           config.ExecConfig{Filename: "generated.go"},
-		Directives:                     map[string]config.DirectiveConfig{},
-		Sources:                        sources,
-		StructFieldsAlwaysPointers:     *cfg.Generate.StructFieldsAlwaysPointers,
-		ReturnPointersInUnmarshalInput: false,
-		ResolversAlwaysReturnPointers:  true,
-		NullableInputOmittable:         cfg.Generate.NullableInputOmittable,
-		EnableModelJsonOmitemptyTag:    cfg.Generate.EnableClientJsonOmitemptyTag,
-		EnableModelJsonOmitzeroTag:     cfg.Generate.EnableClientJsonOmitzeroTag,
-	}
-
-	if err := cfg.Client.Check(); err != nil {
+	if err := cfg.GQLGencConfig.Client.Check(); err != nil {
 		return nil, fmt.Errorf("config.exec: %w", err)
 	}
 
@@ -245,12 +199,11 @@ func LoadConfig(filename string) (*Config, error) {
 // LoadSchema load and parses the schema from a local file or a remote server
 func (c *Config) LoadSchema(ctx context.Context) error {
 	var schema *ast.Schema
-	if c.SchemaFilename != nil {
+	if c.GQLGenConfig.SchemaFilename != nil {
 		s, err := c.loadLocalSchema()
 		if err != nil {
 			return fmt.Errorf("load local schema failed: %w", err)
 		}
-
 		schema = s
 	} else {
 		s, err := c.loadRemoteSchema(ctx)
@@ -269,28 +222,29 @@ func (c *Config) LoadSchema(ctx context.Context) error {
 		schema.Types["Query"] = schema.Query
 	}
 
-	c.GQLConfig.Schema = schema
+	c.GQLGenConfig.Schema = schema
 
 	return nil
 }
 
 func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
-	addHeaderInterceptor := func(ctx context.Context, req *http.Request, gqlInfo *client.GQLRequestInfo, res any, next client.RequestInterceptorFunc) error {
-		for key, value := range c.Endpoint.Headers {
-			req.Header.Set(key, value)
-		}
-
-		return next(ctx, req, gqlInfo, res)
+	header := make(http.Header, len(c.GQLGencConfig.Endpoint.Headers))
+	for key, value := range c.GQLGencConfig.Endpoint.Headers {
+		header[key] = []string{value}
 	}
-
-	gqlclient := client.NewClient(http.DefaultClient, c.Endpoint.URL, nil, addHeaderInterceptor)
+	transport := TransportAppend(
+		http.DefaultTransport,
+		NewHeaderTransport(func(ctx context.Context) http.Header { return header }),
+	)
+	httpClient := &http.Client{Transport: transport}
+	gqlgencClient := client.NewClient(c.GQLGencConfig.Endpoint.URL, client.WithHTTPClient(httpClient))
 
 	var res introspection.Query
-	if err := gqlclient.Post(ctx, "Query", introspection.Introspection, &res, nil); err != nil {
+	if err := gqlgencClient.Post(ctx, "Query", introspection.Introspection, nil, &res); err != nil {
 		return nil, fmt.Errorf("introspection query failed: %w", err)
 	}
 
-	schema, err := validator.ValidateSchemaDocument(introspection.ParseIntrospectionQuery(c.Endpoint.URL, res))
+	schema, err := validator.ValidateSchemaDocument(introspection.ParseIntrospectionQuery(c.GQLGencConfig.Endpoint.URL, res))
 	if err != nil {
 		return nil, fmt.Errorf("validation error: %w", err)
 	}
@@ -299,7 +253,7 @@ func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
 }
 
 func (c *Config) loadLocalSchema() (*ast.Schema, error) {
-	schema, err := gqlparser.LoadSchema(c.GQLConfig.Sources...)
+	schema, err := gqlparser.LoadSchema(c.GQLGenConfig.Sources...)
 	if err != nil {
 		return nil, fmt.Errorf("loadLocalSchema: %w", err)
 	}

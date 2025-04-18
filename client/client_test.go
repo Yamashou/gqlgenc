@@ -126,11 +126,7 @@ func TestClient_unmarshalResponse(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &Client{
-				client:   tt.fields.client,
-				endpoint: tt.fields.endpoint,
-			}
-			err := c.unmarshalResponse(tt.args.respBody, tt.args.out)
+			err := unmarshalResponse(tt.args.respBody, tt.args.out)
 
 			// Error validation
 			if err == nil && tt.want.err == nil {
@@ -305,12 +301,7 @@ func TestClient_parseResponse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := &Client{
-				client:   tt.fields.client,
-				endpoint: tt.fields.endpoint,
-			}
-
-			err := c.parseResponse(tt.args.resp, tt.args.out)
+			err := ParseResponse(tt.args.resp, tt.args.out)
 
 			// Error validation
 			if err == nil && tt.want.err == nil {

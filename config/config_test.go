@@ -53,11 +53,11 @@ func TestLoadConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		if runtime.GOOS == "windows" {
-			require.Equal(t, loadConfig.SchemaFilename[0], `testdata\cfg\glob\bar\bar with spaces.graphql`)
-			require.Equal(t, loadConfig.SchemaFilename[1], `testdata\cfg\glob\foo\foo.graphql`)
+			require.Equal(t, loadConfig.GQLGenConfig.SchemaFilename[0], `testdata\cfg\glob\bar\bar with spaces.graphql`)
+			require.Equal(t, loadConfig.GQLGenConfig.SchemaFilename[1], `testdata\cfg\glob\foo\foo.graphql`)
 		} else {
-			require.Equal(t, loadConfig.SchemaFilename[0], "testdata/cfg/glob/bar/bar with spaces.graphql")
-			require.Equal(t, loadConfig.SchemaFilename[1], "testdata/cfg/glob/foo/foo.graphql")
+			require.Equal(t, loadConfig.GQLGenConfig.SchemaFilename[0], "testdata/cfg/glob/bar/bar with spaces.graphql")
+			require.Equal(t, loadConfig.GQLGenConfig.SchemaFilename[1], "testdata/cfg/glob/foo/foo.graphql")
 		}
 	})
 
@@ -75,12 +75,7 @@ func TestLoadConfig(t *testing.T) {
 		t.Parallel()
 		loadConfig, err := LoadConfig("testdata/cfg/generate.yml")
 		require.NoError(t, err)
-		require.Equal(t, true, loadConfig.Generate.ShouldGenerateClient())
-		require.Equal(t, loadConfig.Generate.UnamedPattern, "Empty")
-		require.Equal(t, loadConfig.Generate.Suffix.Mutation, "Bar")
-		require.Equal(t, loadConfig.Generate.Suffix.Query, "Foo")
-		require.Equal(t, loadConfig.Generate.Prefix.Mutation, "Hoge")
-		require.Equal(t, loadConfig.Generate.Prefix.Query, "Data")
+		require.Equal(t, true, loadConfig.GQLGencConfig.Generate.Client)
 	})
 
 	t.Run("generate skip client", func(t *testing.T) {
@@ -88,7 +83,7 @@ func TestLoadConfig(t *testing.T) {
 		c, err := LoadConfig("testdata/cfg/generate_client_false.yml")
 		require.NoError(t, err)
 
-		require.Equal(t, false, c.Generate.ShouldGenerateClient())
+		require.Equal(t, false, c.GQLGencConfig.Generate.Client)
 	})
 
 	t.Run("nullable input omittable", func(t *testing.T) {
@@ -96,15 +91,15 @@ func TestLoadConfig(t *testing.T) {
 		c, err := LoadConfig("testdata/cfg/nullable_input_omittable.yml")
 		require.NoError(t, err)
 
-		require.True(t, c.GQLConfig.NullableInputOmittable)
+		require.True(t, c.GQLGenConfig.NullableInputOmittable)
 	})
 	t.Run("omitempty, omitzero", func(t *testing.T) {
 		t.Parallel()
 		c, err := LoadConfig("testdata/cfg/omitempty_omitzero.yml")
 		require.NoError(t, err)
 
-		require.True(t, *c.GQLConfig.EnableModelJsonOmitemptyTag)
-		require.True(t, *c.GQLConfig.EnableModelJsonOmitzeroTag)
+		require.True(t, *c.GQLGenConfig.EnableModelJsonOmitemptyTag)
+		require.True(t, *c.GQLGenConfig.EnableModelJsonOmitzeroTag)
 	})
 }
 
@@ -118,9 +113,11 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 		defer closeServer()
 
 		config := &Config{
-			GQLConfig: &config.Config{},
-			Endpoint: &EndPointConfig{
-				URL: mockServer.URL,
+			GQLGenConfig: &config.Config{},
+			GQLGencConfig: &GQLGencConfig{
+				Endpoint: &EndPointConfig{
+					URL: mockServer.URL,
+				},
 			},
 		}
 
@@ -135,9 +132,11 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 		defer closeServer()
 
 		config := &Config{
-			GQLConfig: &config.Config{},
-			Endpoint: &EndPointConfig{
-				URL: mockServer.URL,
+			GQLGenConfig: &config.Config{},
+			GQLGencConfig: &GQLGencConfig{
+				Endpoint: &EndPointConfig{
+					URL: mockServer.URL,
+				},
 			},
 		}
 
