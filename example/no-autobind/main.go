@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/Yamashou/gqlgenc/example/github/gen"
+	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/example/github/gen"
 )
 
 func main() {
@@ -16,8 +16,8 @@ func main() {
 	ctx := context.Background()
 
 	githubClient := &gen.Client{
-		Client: clientv2.NewClient(http.DefaultClient, "https://api.github.com/graphql", nil,
-			func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res any, next clientv2.RequestInterceptorFunc) error {
+		Client: client.NewClient(http.DefaultClient, "https://api.github.com/graphql", nil,
+			func(ctx context.Context, req *http.Request, gqlInfo *client.GQLRequestInfo, res any, next client.RequestInterceptorFunc) error {
 				req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 
 				return next(ctx, req, gqlInfo, res)
@@ -25,7 +25,7 @@ func main() {
 	}
 	getUser, err := githubClient.GetUser(ctx, 10, 10)
 	if err != nil {
-		if handledError, ok := err.(*clientv2.ErrorResponse); ok {
+		if handledError, ok := err.(*client.ErrorResponse); ok {
 			fmt.Fprintf(os.Stderr, "handled error: %s\n", handledError.Error())
 		} else {
 			fmt.Fprintf(os.Stderr, "unhandled error: %s\n", err.Error())
@@ -42,7 +42,7 @@ func main() {
 
 		res, err := githubClient.GetNode(ctx, repository.ID)
 		if err != nil {
-			if handledError, ok := err.(*clientv2.ErrorResponse); ok {
+			if handledError, ok := err.(*client.ErrorResponse); ok {
 				fmt.Fprintf(os.Stderr, "handled error: %s\n", handledError.Error())
 			} else {
 				fmt.Fprintf(os.Stderr, "unhandled error: %s\n", err.Error())

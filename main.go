@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Yamashou/gqlgenc/config"
-	"github.com/Yamashou/gqlgenc/generator"
+	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/generator"
 	"github.com/urfave/cli/v2"
 )
 

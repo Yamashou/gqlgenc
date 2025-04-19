@@ -5,15 +5,15 @@ package generated
 import (
 	"context"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
+	"github.com/Yamashou/gqlgenc/v3/client"
 )
 
 type Client struct {
-	Client *clientv2.Client
+	Client *client.Client
 }
 
-func NewClient(cli clientv2.HttpClient, baseURL string, options *clientv2.Options, interceptors ...clientv2.RequestInterceptor) *Client {
-	return &Client{Client: clientv2.NewClient(cli, baseURL, options, interceptors...)}
+func NewClient(cli client.HttpClient, baseURL string, options *client.Options, interceptors ...client.RequestInterceptor) *Client {
+	return &Client{Client: client.NewClient(cli, baseURL, options, interceptors...)}
 }
 
 type UserFragment struct {
@@ -166,7 +166,7 @@ fragment UserFragment on User {
 }
 `
 
-func (c *Client) UserDetail(ctx context.Context, interceptors ...clientv2.RequestInterceptor) (*UserDetail, error) {
+func (c *Client) UserDetail(ctx context.Context, interceptors ...client.RequestInterceptor) (*UserDetail, error) {
 	vars := map[string]any{}
 
 	var res UserDetail

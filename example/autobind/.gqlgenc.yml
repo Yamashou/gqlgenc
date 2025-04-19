@@ -3,7 +3,7 @@ schema:
 model:
   filename: ./model/models_gen.go
 autobind:
-  - github.com/Yamashou/gqlgenc/example/autobind/model
+  - github.com/Yamashou/gqlgenc/v3/example/autobind/model
 client:
   filename: ./gen/client.go
 models:
@@ -12,5 +12,5 @@ models:
 query:
   - "./query/*.graphql"
 generate:
-  clientV2: true
+  client: true
   clientInterfaceName: "GithubGraphQLClient"

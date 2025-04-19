@@ -6,16 +6,16 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/Yamashou/gqlgenc/example/input-scalar/gen"
+	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/example/input-scalar/gen"
 )
 
 func main() {
-	c := clientv2.Client{
+	c := client.Client{
 		Client:             http.DefaultClient,
 		BaseURL:            "http://localhost:8080/query",
-		RequestInterceptor: clientv2.ChainInterceptor(),
-		CustomDo: func(ctx context.Context, req *http.Request, gqlInfo *clientv2.GQLRequestInfo, res any) error {
+		RequestInterceptor: client.ChainInterceptor(),
+		CustomDo: func(ctx context.Context, req *http.Request, gqlInfo *client.GQLRequestInfo, res any) error {
 			fmt.Println("Do request")
 			r, err := io.ReadAll(req.Body)
 			if err != nil {

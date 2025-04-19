@@ -9,8 +9,8 @@ import (
 	"os"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/Yamashou/gqlgenc/clientv2"
-	"github.com/Yamashou/gqlgenc/example/files-info/gen"
+	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/example/files-info/gen"
 )
 
 const FilesDir = "./example/files-info/files/"
@@ -38,7 +38,7 @@ func getFiles(files ...string) ([]*graphql.Upload, error) {
 
 func main() {
 	client := NewFilesInfoClient(
-		clientv2.NewClient(
+		client.NewClient(
 			http.DefaultClient,
 			"http://localhost:8080/query",
 			nil,
@@ -220,6 +220,6 @@ func NewUploadFile(filePath string) (file graphql.Upload, err error) {
 	return file, nil
 }
 
-func NewFilesInfoClient(c *clientv2.Client) *gen.Client {
+func NewFilesInfoClient(c *client.Client) *gen.Client {
 	return &gen.Client{Client: c}
 }
