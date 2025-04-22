@@ -2,6 +2,7 @@ package queryparser
 
 import (
 	"fmt"
+	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/parser"
 	"github.com/vektah/gqlparser/v2/validator"
@@ -24,7 +25,22 @@ func QueryDocument(schema *ast.Schema, querySources []*ast.Source) (*ast.QueryDo
 		return nil, fmt.Errorf(": %w", errs)
 	}
 
+	if err := isUniqueOperationName(queryDocument.Operations); err != nil {
+		return nil, fmt.Errorf("is not unique operation name: %w", err)
+	}
+
 	return &queryDocument, nil
+}
+
+func isUniqueOperationName(operations ast.OperationList) error {
+	operationNames := make(map[string]struct{}, len(operations))
+	for _, operation := range operations {
+		if _, ok := operationNames[templates.ToGo(operation.Name)]; ok {
+			return fmt.Errorf("duplicate operation: %s", operation.Name)
+		}
+	}
+
+	return nil
 }
 
 func OperationQueryDocuments(schema *ast.Schema, operations ast.OperationList) ([]*ast.QueryDocument, error) {

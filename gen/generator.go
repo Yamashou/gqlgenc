@@ -20,6 +20,8 @@ import (
 )
 
 func Generate(ctx context.Context, cfg *config.Config) error {
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Config
 	if cfg.GQLGenConfig.Model.IsDefined() {
 		_ = syscall.Unlink(cfg.GQLGenConfig.Model.Filename)
 	}
@@ -57,6 +59,8 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 		})
 	}
 
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Load Query
 	querySources, err := queryparser.LoadQuerySources(cfg.GQLGencConfig.Query)
 	if err != nil {
 		return fmt.Errorf("load query sources failed: %w", err)
@@ -66,20 +70,19 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 	if err != nil {
 		return fmt.Errorf(": %w", err)
 	}
-	if err := ValidateOperationList(queryDocument.Operations); err != nil {
-		return fmt.Errorf("validation error: %w", err)
-	}
 
 	operationQueryDocuments, err := queryparser.OperationQueryDocuments(cfg.GQLGenConfig.Schema, queryDocument.Operations)
 	if err != nil {
 		return fmt.Errorf(": %w", err)
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// modelgen
+	// modelgen before querygen and clientgen because modelgen fills cfg.GQLGenConfig.Models.
 	var modelGen plugin.Plugin
 	if cfg.GQLGenConfig.Model.IsDefined() {
 		modelGen = modelgen.New(cfg, operationQueryDocuments)
 	}
-
-	// modelgen before querygen and clientgen because modelgen fills cfg.GQLGenConfig.Models.
 	if mut, ok := modelGen.(plugin.ConfigMutator); ok {
 		err := mut.MutateConfig(cfg.GQLGenConfig)
 		if err != nil {
@@ -87,7 +90,8 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 		}
 	}
 
-	// Generate code from template and document source
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// generating source
 	sourceGenerator := generator.NewSourceGenerator(cfg)
 	source := generator.NewSource(cfg.GQLGenConfig.Schema, queryDocument, sourceGenerator)
 
@@ -119,7 +123,8 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 	// Struct Source TODO: なにこれ？
 	structSources := source.ResponseSubTypes()
 
-	// Plugins
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// gqlgenc Plugins
 	var gqlgencPlugins []plugin.Plugin
 
 	// querygen
@@ -133,30 +138,13 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 		clientGen := clientgen.New(cfg, operations)
 		gqlgencPlugins = append(gqlgencPlugins, clientGen)
 	}
+
 	for _, gqlgencPlugin := range gqlgencPlugins {
 		if mut, ok := gqlgencPlugin.(plugin.ConfigMutator); ok {
 			err := mut.MutateConfig(cfg.GQLGenConfig)
 			if err != nil {
 				return fmt.Errorf("%s failed: %w", gqlgencPlugin.Name(), err)
 			}
-		}
-	}
-
-	return nil
-}
-func ValidateOperationList(os ast.OperationList) error {
-	if err := IsUniqueName(os); err != nil {
-		return fmt.Errorf("is not unique operation name: %w", err)
-	}
-
-	return nil
-}
-func IsUniqueName(os ast.OperationList) error {
-	operationNames := make(map[string]struct{})
-	for _, operation := range os {
-		_, exist := operationNames[templates.ToGo(operation.Name)]
-		if exist {
-			return fmt.Errorf("duplicate operation: %s", operation.Name)
 		}
 	}
 

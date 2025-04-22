@@ -4,23 +4,23 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"slices"
 )
 
 type Client struct {
-	client   *http.Client
 	endpoint string
+	client   *http.Client
 }
 
 // NewClient creates a new http client wrapper
 func NewClient(endpoint string, options ...Option) *Client {
 	client := &Client{
-		client:   http.DefaultClient,
 		endpoint: endpoint,
+		client:   http.DefaultClient,
 	}
 	for _, option := range options {
 		option(client)
 	}
-
 	return client
 }
 
@@ -33,13 +33,7 @@ func WithHTTPClient(httpClient *http.Client) Option {
 }
 
 func (c *Client) Post(ctx context.Context, operationName, query string, variables map[string]any, out any, options ...Option) error {
-	client := &Client{
-		client:   c.client,
-		endpoint: c.endpoint,
-	}
-	for _, option := range options {
-		option(client)
-	}
+	client := NewClient(c.endpoint, slices.Concat([]Option{WithHTTPClient(c.client)}, options)...)
 
 	// PostMultipart send multipart form with files https://gqlgen.com/reference/file-upload/ https://github.com/jaydenseric/graphql-multipart-request-spec
 	req, err := NewMultipartRequest(ctx, client.endpoint, operationName, query, variables)

@@ -1,17 +1,6 @@
-{{ reserveImport "bytes" }}
 {{ reserveImport "context" }}
-{{ reserveImport "encoding/json" }}
-{{ reserveImport "fmt" }}
-{{ reserveImport "io" }}
-{{ reserveImport "net/http" }}
-{{ reserveImport "net/url" }}
-{{ reserveImport "path" }}
-{{ reserveImport "time" }}
 
-
-{{ reserveImport "github.com/Yamashou/gqlgenc/v3/graphqljson" }}
 {{ reserveImport "github.com/Yamashou/gqlgenc/v3/client" }}
-
 
 type Client struct {
 	client *client.Client
@@ -21,20 +10,20 @@ func NewClient(c *client.Client) *Client {
 	return &Client{client: c}
 }
 
-{{- range $operation := .Operation}}
-    func (c *Client) {{ $operation.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, options ...client.Option) (*{{ $operation.OperationResponse.Type | ref }}, error) {
-		vars := map[string]any{
-		{{- range $args := .VariableDefinitions}}
-			"{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
-		{{- end }}
-		}
-
-		var res {{ $operation.OperationResponse.Type | ref }}
-		if err := c.client.Post(ctx, "{{ $operation.Name }}", {{ $.QueryPackage }}.{{ $operation.Name|go }}Document, vars, &res, options...); err != nil {
-			return nil, err
-		}
-
-		return &res, nil
+{{range $operation := .Operation}}
+func (c *Client) {{ $operation.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, options ...client.Option) (*{{ $operation.OperationResponse.Type | ref }}, error) {
+	vars := map[string]any{
+	{{- range $args := .VariableDefinitions}}
+    "{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
+	{{- end }}
 	}
-{{- end}}
 
+	var res {{ $operation.OperationResponse.Type | ref }}
+	if err := c.client.Post(ctx, "{{ $operation.Name }}", {{ $.QueryPackage }}.{{ $operation.Name|go }}Document, vars, &res, options...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+{{end}}
