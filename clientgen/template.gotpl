@@ -1,74 +1,40 @@
-{{- if .GenerateClient }}
-	{{ reserveImport "bytes" }}
-	{{ reserveImport "context" }}
-	{{ reserveImport "encoding/json" }}
-	{{ reserveImport "fmt" }}
-	{{ reserveImport "io" }}
-	{{ reserveImport "net/http" }}
-	{{ reserveImport "net/url" }}
-	{{ reserveImport "path" }}
-	{{ reserveImport "time" }}
+{{ reserveImport "bytes" }}
+{{ reserveImport "context" }}
+{{ reserveImport "encoding/json" }}
+{{ reserveImport "fmt" }}
+{{ reserveImport "io" }}
+{{ reserveImport "net/http" }}
+{{ reserveImport "net/url" }}
+{{ reserveImport "path" }}
+{{ reserveImport "time" }}
 
 
-	{{ reserveImport "github.com/Yamashou/gqlgenc/v3/graphqljson" }}
-	{{ reserveImport "github.com/Yamashou/gqlgenc/v3/client" }}
+{{ reserveImport "github.com/Yamashou/gqlgenc/v3/graphqljson" }}
+{{ reserveImport "github.com/Yamashou/gqlgenc/v3/client" }}
 
 
-	type Client struct {
-	    Client *client.Client
-	}
-
-    func NewClient(cli client.HttpClient, baseURL string, options *client.Options, interceptors ...client.RequestInterceptor) {{- if .ClientInterfaceName }} {{ .ClientInterfaceName }} {{- else }} *Client {{- end }} {
-        return &Client{Client: client.NewClient(cli, baseURL, options, interceptors...)}
-    }
-
-{{- end }}
-
-{{- range $name, $element := .Fragment }}
-	type  {{ .Name | go  }} {{ .Type | ref }}
-
-    {{ genGetters (.Name|go) .Type }}
-{{- end }}
-
-{{- range $name, $element := .StructSources }}
-	type {{ .Name }} {{ .Type | ref }}
-
-    {{ genGetters .Name .Type }}
-{{- end}}
-
-{{- range $name, $element := .OperationResponse }}
-	type  {{ .Name | go  }} {{ .Type | ref }}
-
-    {{ genGetters (.Name|go) .Type }}
-{{- end }}
-
-{{- range $model := .Operation}}
-	const {{ $model.Name|go }}Document = `{{ $model.Operation }}`
-
-	{{- if $.GenerateClient }}
-		func (c *Client) {{ $model.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}, interceptors ...client.RequestInterceptor) (*{{ $model.ResponseStructName | go }}, error) {
-			vars := map[string]any{
-			{{- range $args := .VariableDefinitions}}
-				"{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
-			{{- end }}
-			}
-
-			var res {{ $model.ResponseStructName | go }}
-			if err := c.Client.Post(ctx, "{{ $model.Name }}", {{ $model.Name|go }}Document, &res, vars, interceptors...); err != nil {
-				if c.Client.ParseDataWhenErrors {
-					return &res, err
-				}
-
-				return nil, err
-			}
-
-			return &res, nil
-		}
-	{{- end}}
-{{- end}}
-
-var DocumentOperationNames = map[string]string{
-   {{- range $model := .Operation}}
-    {{ $model.Name|go }}Document: "{{ $model.Name }}",
-   {{- end}}
+type Client struct {
+    Client *client.Client
 }
+
+func NewClient(httpClient *http.Client, endpoint string) *Client {
+    return &client.Client{Client: client.NewClient(httpClient, endpoint)}
+}
+
+{{- range $operation := .Operation}}
+    func (c *Client) {{ $operation.Name|go }} (ctx context.Context{{- range $arg := .Args }}, {{ $arg.Variable | goPrivate }} {{ $arg.Type | ref }} {{- end }}) (*{{ $operation.OperationResponse.Type | ref }}, error) {
+		vars := map[string]any{
+		{{- range $args := .VariableDefinitions}}
+			"{{ $args.Variable }}": {{ $args.Variable | goPrivate }},
+		{{- end }}
+		}
+
+		var res {{ $operation.OperationResponse.Type | ref }}
+		if err := c.Client.Post(ctx, "{{ $operation.Name }}", {{ $.QueryPackage }}.{{ $operation.Name|go }}Document, &res, vars); err != nil {
+			return nil, err
+		}
+
+		return &res, nil
+	}
+{{- end}}
+

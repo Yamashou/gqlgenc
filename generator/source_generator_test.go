@@ -1,4 +1,4 @@
-package clientgen
+package generator
 
 import (
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"

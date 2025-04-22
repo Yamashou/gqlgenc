@@ -1,4 +1,4 @@
-package clientgen
+package generator
 
 import (
 	"go/types"
@@ -52,12 +52,12 @@ func TestReturnTypeName(t *testing.T) {
 	}
 
 	g := &GenGettersGenerator{
-		ClientPackageName: "hoge",
+		queryGenPackageName: "hoge",
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			output := g.returnTypeName(test.input, test.nested)
+			output := returnTypeName(test.input, test.nested)
 			if output != test.expected {
 				t.Errorf("Expected %s, but got %s", test.expected, output)
 			}

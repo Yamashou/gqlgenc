@@ -3,25 +3,23 @@ package clientgen
 import (
 	"fmt"
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
+	"github.com/Yamashou/gqlgenc/v3/generator"
 
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
-	cfg                     *config.Config
-	queryDocument           *ast.QueryDocument
-	operationQueryDocuments []*ast.QueryDocument
+	cfg        *config.Config
+	operations []*generator.Operation
 }
 
-func New(cfg *config.Config, queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) *Plugin {
+func New(cfg *config.Config, operations []*generator.Operation) *Plugin {
 	return &Plugin{
-		cfg:                     cfg,
-		queryDocument:           queryDocument,
-		operationQueryDocuments: operationQueryDocuments,
+		cfg:        cfg,
+		operations: operations,
 	}
 }
 
@@ -29,27 +27,8 @@ func (p *Plugin) Name() string {
 	return "clientgen"
 }
 
-func (p *Plugin) MutateConfig(gqlgenCfg *gqlgenconfig.Config) error {
-	// Generate code from template and document source
-	sourceGenerator := NewSourceGenerator(p.cfg)
-	source := NewSource(gqlgenCfg.Schema, p.queryDocument, sourceGenerator)
-
-	fragments, err := source.Fragments()
-	if err != nil {
-		return fmt.Errorf("generating fragment failed: %w", err)
-	}
-
-	operationResponses, err := source.OperationResponses()
-	if err != nil {
-		return fmt.Errorf("generating operation response failed: %w", err)
-	}
-
-	operations, err := source.Operations(p.operationQueryDocuments)
-	if err != nil {
-		return fmt.Errorf("generating operation failed: %w", err)
-	}
-
-	if err := RenderTemplate(p.cfg, fragments, operations, operationResponses, source.ResponseSubTypes()); err != nil {
+func (p *Plugin) MutateConfig(_ *gqlgenconfig.Config) error {
+	if err := RenderTemplate(p.cfg, p.operations); err != nil {
 		return fmt.Errorf("template failed: %w", err)
 	}
 
