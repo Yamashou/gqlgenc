@@ -71,21 +71,6 @@ func TestLoadConfig(t *testing.T) {
 		}
 	})
 
-	t.Run("generate", func(t *testing.T) {
-		t.Parallel()
-		loadConfig, err := LoadConfig("testdata/cfg/generate.yml")
-		require.NoError(t, err)
-		require.Equal(t, true, loadConfig.GQLGencConfig.Generate.Client)
-	})
-
-	t.Run("generate skip client", func(t *testing.T) {
-		t.Parallel()
-		c, err := LoadConfig("testdata/cfg/generate_client_false.yml")
-		require.NoError(t, err)
-
-		require.Equal(t, false, c.GQLGencConfig.Generate.Client)
-	})
-
 	t.Run("nullable input omittable", func(t *testing.T) {
 		t.Parallel()
 		c, err := LoadConfig("testdata/cfg/nullable_input_omittable.yml")

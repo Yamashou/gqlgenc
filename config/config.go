@@ -27,15 +27,11 @@ type Config struct {
 }
 
 type GQLGencConfig struct {
-	Query    []string                   `yaml:"query"`
-	Client   gqlgenconfig.PackageConfig `yaml:"client,omitempty"`
-	Endpoint *EndPointConfig            `yaml:"endpoint,omitempty"`
-	Generate *GenerateConfig            `yaml:"generate,omitempty"`
-}
-
-type GenerateConfig struct {
-	Client         *bool `yaml:"client,omitempty"`
-	UsedOnlyModels *bool `yaml:"usedModelsOnly,omitempty"`
+	Query          []string                   `yaml:"query"`
+	QueryGen       gqlgenconfig.PackageConfig `yaml:"querygen,omitempty"`
+	ClientGen      gqlgenconfig.PackageConfig `yaml:"clientgen,omitempty"`
+	Endpoint       *EndPointConfig            `yaml:"endpoint,omitempty"`
+	UsedOnlyModels *bool                      `yaml:"usedModelsOnly,omitempty"`
 }
 
 var cfgFilenames = []string{".gqlgenc.yml", "gqlgenc.yml", "gqlgenc.yaml"}
@@ -189,10 +185,13 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 	cfg.GQLGenConfig.Sources = sources
 
-	if err := cfg.GQLGencConfig.Client.Check(); err != nil {
-		return nil, fmt.Errorf("config.exec: %w", err)
+	if err := cfg.GQLGencConfig.QueryGen.Check(); err != nil {
+		return nil, fmt.Errorf("gen-query: %w", err)
 	}
 
+	if err := cfg.GQLGencConfig.ClientGen.Check(); err != nil {
+		return nil, fmt.Errorf("gen-client: %w", err)
+	}
 	return &cfg, nil
 }
 

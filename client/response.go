@@ -5,10 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Yamashou/gqlgenc/v3/graphqljson"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 	"io"
 	"net/http"
+
+	"github.com/Yamashou/gqlgenc/v3/graphqljson"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func ParseResponse(resp *http.Response, out any) error {

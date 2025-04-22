@@ -1,4 +1,4 @@
-package clientgen
+package generator
 
 import (
 	"fmt"
@@ -286,7 +286,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 				Type: structType,
 			})
 			baseType = types.NewNamed(
-				types.NewTypeName(0, r.config.GQLGencConfig.Client.Pkg(), typeName, nil),
+				types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), typeName, nil),
 				structType,
 				nil,
 			)
@@ -325,7 +325,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, NewLayerTypeName(typeName, templates.ToGo(selection.Name)))
 		baseType := types.NewNamed(
-			types.NewTypeName(0, r.config.GQLGencConfig.Client.Pkg(), templates.ToGo(selection.Name), nil),
+			types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
 			nil,
 		)
@@ -374,7 +374,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 				Type: structType,
 			})
 			typ := types.NewNamed(
-				types.NewTypeName(0, r.config.GQLGencConfig.Client.Pkg(), name, nil),
+				types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil),
 				structType,
 				nil,
 			)
@@ -395,7 +395,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			Type: structType,
 		})
 		typ := types.NewNamed(
-			types.NewTypeName(0, r.config.GQLGencConfig.Client.Pkg(), name, nil),
+			types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil),
 			structType,
 			nil,
 		)
@@ -422,6 +422,17 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 	}
 
 	return argumentTypes
+}
+
+func (r *SourceGenerator) OperationResponse(selection ast.Selection) *OperationResponse {
+	switch v := selection.(type) {
+	case *ast.Field:
+		return &OperationResponse{
+			Name: v.Definition.Type.Name(),
+			Type: r.binder.CopyModifiersFromAst(v.Definition.Type, r.Type(v.Definition.Type.Name())),
+		}
+	}
+	return nil
 }
 
 // The typeName passed as an argument to Type must be the name of the type derived from the parsed result,

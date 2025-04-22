@@ -1,13 +1,13 @@
-package generator_test
+package gen_test
 
 import (
 	"context"
+	"github.com/Yamashou/gqlgenc/v3/gen"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/generator"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/tools/go/packages"
 )
@@ -42,7 +42,7 @@ func (s *Suite) TestGenerator_withTestData() {
 			cfg.GQLGenConfig.SkipModTidy = true
 
 			// generate code
-			err = generator.Generate(context.Background(), cfg)
+			err = gen.Generate(context.Background(), cfg)
 			s.Require().NoError(err)
 
 			// load all files
