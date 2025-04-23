@@ -1,11 +1,14 @@
-model:
-  filename: ./gen/models_gen.go
-client:
-  filename: ./gen/client.go
-schema:
-  - testdata/cfg/glob/**/*.graphql
-query:
-  - "./queries/*.graphql"
-generate:
-  enableClientJsonOmitemptyTag: true
-  enableClientJsonOmitzeroTag: true
+gqlgenc:
+  clientgen:
+    filename: ./gen/client.go
+  querygen:
+    filename: ./gen/query.go
+  query:
+    - "./queries/*.graphql"
+gqlgen:
+  model:
+    filename: ./gen/models_gen.go
+  schema:
+    - testdata/cfg/glob/**/*.graphql
+  enable_model_json_omitempty_tag: true
+  enable_model_json_omitzero_tag: true
