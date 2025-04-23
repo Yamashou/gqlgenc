@@ -1,7 +1,7 @@
 name: Go
 on:
   push:
-    branches: [ v3dev ] # TODO: change to v3
+    branches: [ v3 ]
   pull_request:
 jobs:
   build:
