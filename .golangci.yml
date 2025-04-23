@@ -1,4 +1,3 @@
-# See https://github.com/golangci/golangci-lint/blob/master/.golangci.example.yml
 linters-settings:
   govet:
     enable-all: true
