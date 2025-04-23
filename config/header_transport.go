@@ -35,6 +35,7 @@ func (t *HeaderTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	return resp, nil
 }
+
 func TransportAppend(roundTripper http.RoundTripper, newRoundTrippers ...func(http.RoundTripper) http.RoundTripper) http.RoundTripper {
 	for _, newRoundTripper := range newRoundTrippers {
 		roundTripper = newRoundTripper(roundTripper)

@@ -77,6 +77,28 @@ func (s *Source) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, 
 	return operations, nil
 }
 
+type OperationResponse struct {
+	Name string
+	Type types.Type
+}
+
+func (s *Source) OperationResponses() ([]*OperationResponse, error) {
+	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+	for _, operation := range s.queryDocument.Operations {
+		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
+		operationResponse = append(operationResponse, &OperationResponse{
+			Name: operation.Name,
+			Type: responseFields.StructType(),
+		})
+	}
+
+	return operationResponse, nil
+}
+
+func (s *Source) ResponseSubTypes() []*StructSource {
+	return s.sourceGenerator.StructSources
+}
+
 func (s *Source) operationArgsMapByOperationName() map[string][]*Argument {
 	operationArgsMap := make(map[string][]*Argument)
 	for _, operation := range s.queryDocument.Operations {
@@ -111,26 +133,4 @@ func queryString(queryDocument *ast.QueryDocument) string {
 	astFormatter.FormatQueryDocument(queryDocument)
 
 	return buf.String()
-}
-
-type OperationResponse struct {
-	Name string
-	Type types.Type
-}
-
-func (s *Source) OperationResponses() ([]*OperationResponse, error) {
-	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
-	for _, operation := range s.queryDocument.Operations {
-		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
-		operationResponse = append(operationResponse, &OperationResponse{
-			Name: operation.Name,
-			Type: responseFields.StructType(),
-		})
-	}
-
-	return operationResponse, nil
-}
-
-func (s *Source) ResponseSubTypes() []*StructSource {
-	return s.sourceGenerator.StructSources
 }

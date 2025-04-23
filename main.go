@@ -1,62 +1,34 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
 	"os"
-
-	"github.com/urfave/cli/v2"
 
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/gen"
 )
 
-const version = "0.31.0"
+const version = "3.0.0"
 
-var versionCmd = &cli.Command{
-	Name:  "version",
-	Usage: "print the version",
-	Action: func(ctx *cli.Context) error {
-		fmt.Println(version)
-		return nil
-	},
-}
-
-var generateCmd = &cli.Command{
-	Name:  "generate",
-	Usage: "generate a graphql client based on schema",
-	Flags: []cli.Flag{
-		&cli.StringFlag{Name: "configdir, c", Usage: "the directory with configuration file", Value: "."},
-	},
-	Action: func(ctx *cli.Context) error {
-		configDir := ctx.String("configdir")
-		cfg, err := config.LoadConfigFromDefaultLocations(configDir)
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
-			os.Exit(2)
-		}
-
-		if err := gen.Generate(ctx.Context, cfg); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
-			os.Exit(4)
-		}
-
-		return nil
-	},
-}
+var versionOption = flag.Bool("version", false, "gqlgenc version")
 
 func main() {
-	app := cli.NewApp()
-	app.Name = "gqlgenc"
-	app.Description = "This is a library for quickly creating strictly typed graphql client in golang"
-	app.Usage = generateCmd.Usage
-	app.DefaultCommand = "generate"
-	app.Commands = []*cli.Command{
-		versionCmd,
-		generateCmd,
+	flag.Parse()
+	if *versionOption {
+		fmt.Printf("gqlgenc v%s", version)
+		return
 	}
 
-	if err := app.Run(os.Args); err != nil {
-		_, _ = fmt.Fprint(os.Stderr, err.Error()+"\n")
-		os.Exit(1)
+	cfg, err := config.LoadConfigFromDefaultLocations(".")
+	if err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
+		os.Exit(2)
+	}
+
+	if err := gen.Generate(context.Background(), cfg); err != nil {
+		_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
+		os.Exit(4)
 	}
 }

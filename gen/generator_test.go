@@ -2,12 +2,12 @@ package gen_test
 
 import (
 	"context"
-	"github.com/Yamashou/gqlgenc/v3/gen"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/gen"
 	"github.com/stretchr/testify/suite"
 	"golang.org/x/tools/go/packages"
 )

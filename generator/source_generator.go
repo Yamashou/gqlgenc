@@ -124,69 +124,6 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 	}
 }
 
-func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMerged, postMerged []*StructSource) (ResponseFieldList, []*StructSource, []*StructSource) {
-	responseFieldList := make(ResponseFieldList, 0)
-	targetFieldsMap := targetFields.MapByName()
-	newPreMerged := preMerged
-	newPostMerged := postMerged
-
-	for _, sourceField := range sourceFields {
-		if targetField, ok := targetFieldsMap[sourceField.Name]; ok {
-			if targetField.ResponseFields.IsBasicType() {
-				continue
-			}
-			newPreMerged = append(newPreMerged, &StructSource{
-				Name: sourceField.FieldTypeString(),
-				Type: sourceField.ResponseFields.StructType(),
-			})
-			newPreMerged = append(newPreMerged, &StructSource{
-				Name: targetField.FieldTypeString(),
-				Type: targetField.ResponseFields.StructType(),
-			})
-
-			targetField.ResponseFields, newPreMerged, newPostMerged = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, newPreMerged, newPostMerged)
-
-			newPostMerged = append(newPostMerged, &StructSource{
-				Name: targetField.FieldTypeString(),
-				Type: targetField.ResponseFields.StructType(),
-			})
-		} else {
-			targetFieldsMap[sourceField.Name] = sourceField
-		}
-	}
-	for _, field := range targetFieldsMap {
-		responseFieldList = append(responseFieldList, field)
-	}
-	responseFieldList = responseFieldList.SortByName()
-	return responseFieldList, newPreMerged, newPostMerged
-}
-
-func structSourcesMapByTypeName(sources []*StructSource) map[string]*StructSource {
-	res := make(map[string]*StructSource)
-	for _, source := range sources {
-		res[source.Name] = source
-	}
-	return res
-}
-
-func (g *StructGenerator) MergedStructSources(sources []*StructSource) []*StructSource {
-	preMergedStructSourcesMap := structSourcesMapByTypeName(g.preMergedStructSources)
-	res := make([]*StructSource, 0)
-	// remove pre-merged struct
-	for _, source := range sources {
-		// when name is same, remove it
-		if _, ok := preMergedStructSourcesMap[source.Name]; ok {
-			continue
-		}
-		res = append(res, source)
-	}
-
-	// append post-merged struct
-	res = append(res, g.postMergedStructSources...)
-
-	return res
-}
-
 func (g *StructGenerator) GetCurrentResponseFieldList() ResponseFieldList {
 	return g.currentResponseFieldList
 }
@@ -219,48 +156,11 @@ func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, typeN
 	return responseFields
 }
 
-func NewLayerTypeName(base, thisField string) string {
-	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
-}
-
-func (r *SourceGenerator) expandFragmentFields(responseFields ResponseFieldList) ResponseFieldList {
-	result := make(ResponseFieldList, 0, len(responseFields))
-	for _, field := range responseFields {
-		if field.IsFragmentSpread {
-			for _, fragmentField := range field.ResponseFields {
-				result = append(result, fragmentField)
-			}
-		} else {
-			result = append(result, field)
-		}
-	}
-	return result
-}
-
-func (r *SourceGenerator) hasFragmentSpread(fields ResponseFieldList) bool {
-	for _, field := range fields {
-		if field.IsFragmentSpread {
-			return true
-		}
-	}
-	return false
-}
-
-func (r *SourceGenerator) collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
-	var fragmentFields ResponseFieldList
-	for _, field := range fields {
-		if field.IsFragmentSpread {
-			fragmentFields = append(fragmentFields, field.ResponseFields...)
-		}
-	}
-	return fragmentFields
-}
-
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
 	var isOptional bool
 	switch selection := selection.(type) {
 	case *ast.Field:
-		typeName = NewLayerTypeName(typeName, templates.ToGo(selection.Alias))
+		typeName = layerTypeName(typeName, templates.ToGo(selection.Alias))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
 
 		isOptional = !selection.Definition.Type.NonNull
@@ -277,7 +177,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			generator := NewStructGenerator(fieldsResponseFields)
 
 			// restruct struct sources
-			r.StructSources = generator.MergedStructSources(r.StructSources)
+			r.StructSources = MergedStructSources(r.StructSources, generator.preMergedStructSources, generator.postMergedStructSources)
 
 			// append current struct
 			structType := generator.GetCurrentResponseFieldList().StructType()
@@ -323,7 +223,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 
 	case *ast.FragmentSpread:
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
-		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, NewLayerTypeName(typeName, templates.ToGo(selection.Name)))
+		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, layerTypeName(typeName, templates.ToGo(selection.Name)))
 		baseType := types.NewNamed(
 			types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
@@ -345,11 +245,11 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
 		// InlineFragment has child elements, so create a struct type here
-		name := NewLayerTypeName(typeName, templates.ToGo(selection.TypeCondition))
+		name := layerTypeName(typeName, templates.ToGo(selection.TypeCondition))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
 
-		hasFragmentSpread := r.hasFragmentSpread(fieldsResponseFields)
-		fragmentFields := r.collectFragmentFields(fieldsResponseFields)
+		hasFragmentSpread := hasFragmentSpread(fieldsResponseFields)
+		fragmentFields := collectFragmentFields(fieldsResponseFields)
 
 		// フラグメントスプレッドがある場合
 		// if there is a fragment spread
@@ -444,4 +344,90 @@ func (r *SourceGenerator) Type(typeName string) types.Type {
 	}
 
 	return goType
+}
+
+func MergedStructSources(sources, preMergedStructSources, postMergedStructSources []*StructSource) []*StructSource {
+	preMergedStructSourcesMap := structSourcesMapByTypeName(preMergedStructSources)
+	res := make([]*StructSource, 0)
+	// remove pre-merged struct
+	for _, source := range sources {
+		// when name is same, remove it
+		if _, ok := preMergedStructSourcesMap[source.Name]; ok {
+			continue
+		}
+		res = append(res, source)
+	}
+
+	// append post-merged struct
+	res = append(res, postMergedStructSources...)
+
+	return res
+}
+
+func hasFragmentSpread(fields ResponseFieldList) bool {
+	for _, field := range fields {
+		if field.IsFragmentSpread {
+			return true
+		}
+	}
+	return false
+}
+
+func collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
+	var fragmentFields ResponseFieldList
+	for _, field := range fields {
+		if field.IsFragmentSpread {
+			fragmentFields = append(fragmentFields, field.ResponseFields...)
+		}
+	}
+	return fragmentFields
+}
+
+func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMerged, postMerged []*StructSource) (ResponseFieldList, []*StructSource, []*StructSource) {
+	responseFieldList := make(ResponseFieldList, 0)
+	targetFieldsMap := targetFields.MapByName()
+	newPreMerged := preMerged
+	newPostMerged := postMerged
+
+	for _, sourceField := range sourceFields {
+		if targetField, ok := targetFieldsMap[sourceField.Name]; ok {
+			if targetField.ResponseFields.IsBasicType() {
+				continue
+			}
+			newPreMerged = append(newPreMerged, &StructSource{
+				Name: sourceField.FieldTypeString(),
+				Type: sourceField.ResponseFields.StructType(),
+			})
+			newPreMerged = append(newPreMerged, &StructSource{
+				Name: targetField.FieldTypeString(),
+				Type: targetField.ResponseFields.StructType(),
+			})
+
+			targetField.ResponseFields, newPreMerged, newPostMerged = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, newPreMerged, newPostMerged)
+
+			newPostMerged = append(newPostMerged, &StructSource{
+				Name: targetField.FieldTypeString(),
+				Type: targetField.ResponseFields.StructType(),
+			})
+		} else {
+			targetFieldsMap[sourceField.Name] = sourceField
+		}
+	}
+	for _, field := range targetFieldsMap {
+		responseFieldList = append(responseFieldList, field)
+	}
+	responseFieldList = responseFieldList.SortByName()
+	return responseFieldList, newPreMerged, newPostMerged
+}
+
+func structSourcesMapByTypeName(sources []*StructSource) map[string]*StructSource {
+	res := make(map[string]*StructSource)
+	for _, source := range sources {
+		res[source.Name] = source
+	}
+	return res
+}
+
+func layerTypeName(base, thisField string) string {
+	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
 }

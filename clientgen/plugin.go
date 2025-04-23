@@ -2,12 +2,12 @@ package clientgen
 
 import (
 	"fmt"
-	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
-	"github.com/Yamashou/gqlgenc/v3/generator"
-	"golang.org/x/tools/imports"
 
+	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/generator"
+	"golang.org/x/tools/imports"
 )
 
 var _ plugin.ConfigMutator = &Plugin{}

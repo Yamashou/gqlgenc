@@ -3,18 +3,18 @@ package gen
 import (
 	"context"
 	"fmt"
-	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/Yamashou/gqlgenc/v3/generator"
-	"github.com/Yamashou/gqlgenc/v3/modelgen"
-	"github.com/Yamashou/gqlgenc/v3/querygen"
 	"slices"
 	"strings"
 	"syscall"
 
+	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/Yamashou/gqlgenc/v3/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/generator"
+	"github.com/Yamashou/gqlgenc/v3/modelgen"
+	"github.com/Yamashou/gqlgenc/v3/querygen"
 	"github.com/Yamashou/gqlgenc/v3/queryparser"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -78,7 +78,7 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// modelgen
-	// modelgen before querygen and clientgen because modelgen fills cfg.GQLGenConfig.Models.
+	// before querygen and clientgen because modelgen fills cfg.GQLGenConfig.Models.
 	var modelGen plugin.Plugin
 	if cfg.GQLGenConfig.Model.IsDefined() {
 		modelGen = modelgen.New(cfg, operationQueryDocuments)

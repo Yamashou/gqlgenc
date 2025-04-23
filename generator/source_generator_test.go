@@ -1,8 +1,6 @@
 package generator
 
 import (
-	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
-	"github.com/Yamashou/gqlgenc/v3/config"
 	"go/types"
 	"testing"
 )
@@ -278,25 +276,16 @@ func TestFragmentSpreadExpansionInInlineFragment(t *testing.T) {
 		},
 	}
 
-	mockCfg := &config.Config{}
-	mockBinder := &gqlgenconfig.Binder{}
-
-	sg := &SourceGenerator{
-		config:        mockCfg,
-		binder:        mockBinder,
-		StructSources: make([]*StructSource, 0),
-	}
-
 	// フラグメントスプレッドの存在を確認
 	// Verify the existence of fragment spreads
-	hasFragmentSpread := sg.hasFragmentSpread(responseFields)
+	hasFragmentSpread := hasFragmentSpread(responseFields)
 	if !hasFragmentSpread {
 		t.Errorf("Expected hasFragmentSpread to return true when a fragment spread is present")
 	}
 
 	// フラグメントフィールドの収集をテスト
 	// Test the collection of fragment fields
-	fragmentFields := sg.collectFragmentFields(responseFields)
+	fragmentFields := collectFragmentFields(responseFields)
 	if len(fragmentFields) != 2 {
 		t.Errorf("Expected 2 fields from fragment spread, got %d", len(fragmentFields))
 	}

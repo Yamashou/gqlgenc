@@ -1,86 +1,157 @@
-linters-settings:
-  govet:
-    enable-all: true
-    disable:
-      - shadow
-  unparam:
-    check-exported: true
-  nakedret:
-    max-func-lines: 1
-
-
+version: "2"
 linters:
-  enable-all: true
+  default: all
   disable:
-    - testpackage
-    - nestif
-    - godot
-    - wsl
-    - lll
-    - dupl
-    - funlen
-    - gochecknoinits
-    - gochecknoglobals
-    - godox
-    - gocognit
-    - gocyclo
-    - gomnd
-    - err113
-    - errorlint # TODO able this lint
-    - forbidigo
+    - asasalint
+    - bodyclose
+    - canonicalheader
+    - containedctx
+    - contextcheck
     - cyclop
-    - govet
-    - errname
-    - varnamelen
-    - nilnil
-    - exhaustruct
-    - nonamedreturns
     - depguard
-    - musttag
-    - paralleltest
-    - nlreturn
+    - dupl
+    - durationcheck
+    - err113
+    - errcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - exhaustive
+    - exhaustruct
+    - exptostd
+    - fatcontext
+    - forbidigo
+    - forcetypeassert
+    - funlen
+    - ginkgolinter
+    - gochecknoglobals
+    - gochecknoinits
+    - gochecksumtype
+    - gocognit
+    - gocritic
+    - gocyclo
+    - godot
+    - godox
+    - gosec
+    - gosmopolitan
+    - govet
+    - iface
+    - importas
+    - intrange
+    - ireturn
+    - lll
+    - loggercheck
+    - makezero
+    - mirror
     - mnd
-  fast: true
-
+    - musttag
+    - nestif
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - nlreturn
+    - noctx
+    - nonamedreturns
+    - paralleltest
+    - perfsprint
+    - protogetter
+    - reassign
+    - recvcheck
+    - revive
+    - rowserrcheck
+    - sloglint
+    - spancheck
+    - sqlclosecheck
+    - staticcheck
+    - tagliatelle
+    - testifylint
+    - testpackage
+    - thelper
+    - tparallel
+    - unconvert
+    - unparam
+    - unused
+    - usetesting
+    - varnamelen
+    - wastedassign
+    - wrapcheck
+    - wsl
+    - zerologlint
+  settings:
+    govet:
+      disable:
+        - shadow
+      enable-all: true
+    nakedret:
+      max-func-lines: 1
+    unparam:
+      check-exported: true
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - scopelint
+        path: _test\.go
+        text: Using the variable on range scope `tt` in function literal
+      - linters:
+          - forcetypeassert
+          - structcheck
+          - unused
+        path: _test\.go
+      - linters:
+          - structcheck
+        path: introspection/type.go
+      - linters:
+          - structcheck
+        path: config/config.go
+        text: '`Query` is unused'
+      - linters:
+          - structcheck
+        path: graphqljson/graphql.go
+        text: '`Extensions` is unused'
+      - linters:
+          - makezero
+        path: graphqljson/graphql.go
+        text: append to slice `frontier` with non-zero initialized length
+      - linters:
+          - staticcheck
+        path: client/client_test.go
+        text: should not use built-in type string as key for value; define your own type to avoid collisions
+      - linters:
+          - revive
+        path: client/client_test.go
+    paths:
+      - _test\.go
+      - example/*/*.go
+      - example
+      - third_party$
+      - builtin$
+      - examples$
 issues:
-  fix: true
-  exclude-files:
-    - _test\.go
-    - example/*/*.go
   max-issues-per-linter: 0
   max-same-issues: 0
-  exclude-dirs:
-    - example
-  exclude-rules:
-    # Test
-    - path: _test\.go
-      text: "Using the variable on range scope `tt` in function literal"
-      linters:
-        - scopelint
-    - path: _test\.go
-      linters:
-        - unused
-        - structcheck
-        - forcetypeassert
-    - path: introspection/type.go
-      linters:
-        - structcheck # These types fits IntrospectionQuery
-    - path: config/config.go
-      text: "`Query` is unused" # used in main.go
-      linters:
-        - structcheck
-    - path: graphqljson/graphql.go
-      text: "`Extensions` is unused" # used in line 48
-      linters:
-        - structcheck
-    - path: graphqljson/graphql.go
-      text: "append to slice `frontier` with non-zero initialized length" # used in config/config.go
-      linters:
-        - makezero
-    - path: client/client_test.go
-      text: "should not use built-in type string as key for value; define your own type to avoid collisions"
-      linters:
-        - staticcheck
-    - path: client/client_test.go
-      linters:
-        - revive
+  fix: true
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - Standard
+        - Default
+        - Prefix(github.com/builtbystack/erp/server)
+  exclusions:
+    generated: lax
+    paths:
+      - .*_gen\.go$
+      - third_party$
+      - builtin$
+      - examples$
