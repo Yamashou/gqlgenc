@@ -34,7 +34,7 @@ type GQLGencConfig struct {
 	UsedOnlyModels *bool                      `yaml:"usedModelsOnly,omitempty"`
 }
 
-var cfgFilenames = []string{".gqlgenc.yml", "gqlgenc.yml", "gqlgenc.yaml"}
+var cfgFilenames = []string{".gqlgenc.yml", "gqlgenc.yml", ".gqlgenc.yaml", "gqlgenc.yaml"}
 
 // LoadConfigFromDefaultLocations looks for a config file in the specified directory, and all parent directories
 // walking up the tree. The closest config file will be returned.
@@ -128,7 +128,7 @@ func LoadConfig(filename string) (*Config, error) {
 	}
 
 	// https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/codegen/config/config.go#L120
-	files := gqlgenconfig.StringList{}
+	schemaFiles := gqlgenconfig.StringList{}
 	for _, f := range cfg.GQLGenConfig.SchemaFilename {
 		var matches []string
 
@@ -162,13 +162,13 @@ func LoadConfig(filename string) (*Config, error) {
 		}
 
 		for _, m := range matches {
-			if !files.Has(m) {
-				files = append(files, m)
+			if !schemaFiles.Has(m) {
+				schemaFiles = append(schemaFiles, m)
 			}
 		}
 	}
-	if len(files) > 0 {
-		cfg.GQLGenConfig.SchemaFilename = files
+	if len(schemaFiles) > 0 {
+		cfg.GQLGenConfig.SchemaFilename = schemaFiles
 	}
 
 	sources := make([]*ast.Source, 0, len(cfg.GQLGenConfig.SchemaFilename))

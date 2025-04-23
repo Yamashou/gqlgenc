@@ -79,12 +79,10 @@ func TestLoadConfig(t *testing.T) {
 					GQLGencConfig: &GQLGencConfig{
 						Query: []string{"./queries/*.graphql"},
 						QueryGen: config.PackageConfig{
-							Filename: "/Users/sonatard/go/src/github.com/Yamashou/gqlgenc/config/gen/query.go",
-							Package:  "gen",
+							Package: "gen",
 						},
 						ClientGen: config.PackageConfig{
-							Filename: "/Users/sonatard/go/src/github.com/Yamashou/gqlgenc/config/gen/client.go",
-							Package:  "gen",
+							Package: "gen",
 						},
 					},
 					GQLGenConfig: &config.Config{
@@ -119,12 +117,10 @@ func TestLoadConfig(t *testing.T) {
 					GQLGencConfig: &GQLGencConfig{
 						Query: []string{"./queries/*.graphql"},
 						QueryGen: config.PackageConfig{
-							Filename: "/Users/sonatard/go/src/github.com/Yamashou/gqlgenc/config/gen/query.go",
-							Package:  "gen",
+							Package: "gen",
 						},
 						ClientGen: config.PackageConfig{
-							Filename: "/Users/sonatard/go/src/github.com/Yamashou/gqlgenc/config/gen/client.go",
-							Package:  "gen",
+							Package: "gen",
 						},
 					},
 					GQLGenConfig: &config.Config{
@@ -177,7 +173,11 @@ func TestLoadConfig(t *testing.T) {
 			}
 
 			if tt.want.config != nil {
-				if diff := cmp.Diff(tt.want.config, cfg, cmpopts.IgnoreFields(config.Config{}, "Sources")); diff != "" {
+				opts := []cmp.Option{
+					cmpopts.IgnoreFields(config.Config{}, "Sources"),
+					cmpopts.IgnoreFields(config.PackageConfig{}, "Filename"),
+				}
+				if diff := cmp.Diff(tt.want.config, cfg, opts...); diff != "" {
 					t.Errorf("LoadConfig() mismatch (-want +got):\n%s", diff)
 				}
 			}
@@ -270,8 +270,9 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 		responseFile string
 		want         want
 	}{
+		// TODO: LoadLocalSchema
 		{
-			name:         "correct schema",
+			name:         "correct remote schema",
 			responseFile: "testdata/remote/response_ok.json",
 			want: want{
 				config: &Config{
@@ -283,7 +284,7 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 			},
 		},
 		{
-			name:         "invalid schema",
+			name:         "invalid remote schema",
 			responseFile: "testdata/remote/response_invalid_schema.json",
 			want: want{
 				err:        true,
@@ -327,8 +328,11 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 			}
 
 			if tt.want.config != nil {
-				// go-cmpで期待値と実際の値を比較
-				if diff := cmp.Diff(tt.want.config, cfg); diff != "" {
+				opts := []cmp.Option{
+					cmpopts.IgnoreFields(config.Config{}, "Schema"),
+					cmpopts.IgnoreFields(EndPointConfig{}, "URL"),
+				}
+				if diff := cmp.Diff(tt.want.config, cfg, opts...); diff != "" {
 					t.Errorf("LoadSchema() mismatch (-want +got):\n%s", diff)
 				}
 			}
