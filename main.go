@@ -29,7 +29,7 @@ func main() {
 }
 
 func run() error {
-	cfgFile, err := config.FindConfigFile(".")
+	cfgFile, err := config.FindConfigFile(".", []string{".gqlgenc.yml", "gqlgenc.yml", ".gqlgenc.yaml", "gqlgenc.yaml"})
 	if err != nil {
 		return err
 	}

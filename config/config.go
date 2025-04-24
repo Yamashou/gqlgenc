@@ -45,8 +45,8 @@ func Load(configFilename string) (*Config, error) {
 		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
 	var cfg Config
-	decoder := yaml.NewDecoder(bytes.NewReader([]byte(os.ExpandEnv(string(configContent)))), yaml.DisallowUnknownField())
-	if err := decoder.Decode(&cfg); err != nil {
+	yamlDecoder := yaml.NewDecoder(bytes.NewReader([]byte(os.ExpandEnv(string(configContent)))), yaml.DisallowUnknownField())
+	if err := yamlDecoder.Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
 
@@ -78,19 +78,18 @@ func Load(configFilename string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	cfg.GQLGenConfig.Sources = sources
-
 	if cfg.GQLGenConfig.Federation.Version != 0 {
 		fedPlugin, err := federation.New(cfg.GQLGenConfig.Federation.Version, cfg.GQLGenConfig)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create federation plugin: %w", err)
 		}
-		if sources, err := fedPlugin.InjectSourcesEarly(); err == nil {
-			cfg.GQLGenConfig.Sources = append(cfg.GQLGenConfig.Sources, sources...)
-		} else {
+		federationSources, err := fedPlugin.InjectSourcesEarly()
+		if err != nil {
 			return nil, fmt.Errorf("failed to inject federation directives: %w", err)
 		}
+		sources = append(sources, federationSources...)
 	}
+	cfg.GQLGenConfig.Sources = sources
 
 	// gqlgen must be followings parameters
 	cfg.GQLGenConfig.Directives = make(map[string]gqlgenconfig.DirectiveConfig)
@@ -136,13 +135,11 @@ func (c *Config) Init(ctx context.Context) error {
 func (c *Config) loadSchema(ctx context.Context) error {
 	// TODO: SchemaFilenameをconfigに指定しなかった場合のtest
 	if c.GQLGenConfig.SchemaFilename != nil {
-		err := c.GQLGenConfig.LoadSchema()
-		if err != nil {
+		if err := c.GQLGenConfig.LoadSchema(); err != nil {
 			return fmt.Errorf("load local schema failed: %w", err)
 		}
 	} else {
-		err := c.loadRemoteSchema(ctx)
-		if err != nil {
+		if err := c.loadRemoteSchema(ctx); err != nil {
 			return fmt.Errorf("load remote schema failed: %w", err)
 		}
 	}

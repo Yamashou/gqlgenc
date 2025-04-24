@@ -14,7 +14,7 @@ import (
 
 // FindConfigFile searches for the config file in this directory and all parents up the tree
 // looking for the closest match
-func FindConfigFile(path string) (string, error) {
+func FindConfigFile(path string, cfgFilenames []string) (string, error) {
 	var err error
 	var dir string
 	if path == "." {
@@ -27,11 +27,11 @@ func FindConfigFile(path string) (string, error) {
 		return "", fmt.Errorf("unable to get directory \"%s\" to findCfg: %w", dir, err)
 	}
 
-	cfg := findConfigInDir(dir)
+	cfg := findConfigInDir(dir, cfgFilenames)
 
 	for cfg == "" && dir != filepath.Dir(dir) {
 		dir = filepath.Dir(dir)
-		cfg = findConfigInDir(dir)
+		cfg = findConfigInDir(dir, cfgFilenames)
 	}
 
 	if cfg == "" {
@@ -41,9 +41,7 @@ func FindConfigFile(path string) (string, error) {
 	return cfg, nil
 }
 
-var cfgFilenames = []string{".gqlgenc.yml", "gqlgenc.yml", ".gqlgenc.yaml", "gqlgenc.yaml"}
-
-func findConfigInDir(dir string) string {
+func findConfigInDir(dir string, cfgFilenames []string) string {
 	for _, cfgName := range cfgFilenames {
 		path := filepath.Join(dir, cfgName)
 		if _, err := os.Stat(path); err == nil {
@@ -65,7 +63,6 @@ func schemaFilenames(schemaFilenameGlobs gqlgenconfig.StringList) (gqlgenconfig.
 	allSchemaFilenames := make(map[string]struct{})
 	for _, schemaFilenameGlob := range schemaFilenameGlobs {
 		var schemaFilenames []string
-
 		if strings.Contains(schemaFilenameGlob, "**") {
 			// for ** we want to override default globbing patterns and walk all
 			// subdirectories to match schema files.
