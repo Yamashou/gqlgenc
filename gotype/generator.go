@@ -14,11 +14,6 @@ import (
 	"golang.org/x/text/language"
 )
 
-type StructSource struct {
-	Name string
-	Type types.Type
-}
-
 // Generator generate Go goType from GraphQL goType
 type Generator struct {
 	config        *config.Config
@@ -26,7 +21,7 @@ type Generator struct {
 	StructSources []*StructSource
 }
 
-func NewSourceGenerator(cfg *config.Config) *Generator {
+func NewGenerator(cfg *config.Config) *Generator {
 	return &Generator{
 		config:        cfg,
 		binder:        cfg.GQLGenConfig.NewBinder(),
@@ -309,11 +304,6 @@ func structSourcesMapByTypeName(sources []*StructSource) map[string]*StructSourc
 
 func layerTypeName(base, thisField string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
-}
-
-type Argument struct {
-	Variable string
-	Type     types.Type
 }
 
 type ResponseField struct {

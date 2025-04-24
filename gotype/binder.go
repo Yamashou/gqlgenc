@@ -10,18 +10,18 @@ import (
 	"github.com/Yamashou/gqlgenc/v3/config"
 )
 
-// TemplateSource binds GraphQL Types to Go Types.
-type TemplateSource struct {
-	schema          *ast.Schema
-	queryDocument   *ast.QueryDocument
-	sourceGenerator *Generator
+// Binder binds GraphQL Types to Go Types.
+type Binder struct {
+	schema        *ast.Schema
+	queryDocument *ast.QueryDocument
+	generator     *Generator
 }
 
-func NewBinder(cfg *config.Config, queryDocument *ast.QueryDocument) *TemplateSource {
-	return &TemplateSource{
-		schema:          cfg.GQLGenConfig.Schema,
-		queryDocument:   queryDocument,
-		sourceGenerator: NewSourceGenerator(cfg),
+func NewBinder(cfg *config.Config, queryDocument *ast.QueryDocument) *Binder {
+	return &Binder{
+		schema:        cfg.GQLGenConfig.Schema,
+		queryDocument: queryDocument,
+		generator:     NewGenerator(cfg),
 	}
 }
 
@@ -30,10 +30,10 @@ type Fragment struct {
 	Type types.Type
 }
 
-func (s *TemplateSource) Fragments() ([]*Fragment, error) {
+func (s *Binder) Fragments() ([]*Fragment, error) {
 	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
 	for _, fragment := range s.queryDocument.Fragments {
-		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, fragment.Name)
+		responseFields := s.generator.NewResponseFields(fragment.SelectionSet, fragment.Name)
 		fragment := &Fragment{
 			Name: fragment.Name,
 			Type: responseFields.StructType(),
@@ -45,25 +45,7 @@ func (s *TemplateSource) Fragments() ([]*Fragment, error) {
 	return fragments, nil
 }
 
-type Operation struct {
-	Name                string
-	VariableDefinitions ast.VariableDefinitionList
-	Operation           string
-	Args                []*Argument
-	OperationResponse   *OperationResponse
-}
-
-func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*Argument, operationResponse *OperationResponse) *Operation {
-	return &Operation{
-		Name:                operation.Name,
-		VariableDefinitions: operation.VariableDefinitions,
-		Operation:           queryString(queryDocument),
-		Args:                args,
-		OperationResponse:   operationResponse,
-	}
-}
-
-func (s *TemplateSource) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, error) {
+func (s *Binder) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, error) {
 	operations := make([]*Operation, 0, len(s.queryDocument.Operations))
 
 	queryDocumentsMap := queryDocumentMapByOperationName(queryDocuments)
@@ -80,15 +62,10 @@ func (s *TemplateSource) Operations(queryDocuments []*ast.QueryDocument) ([]*Ope
 	return operations, nil
 }
 
-type OperationResponse struct {
-	Name string
-	Type types.Type
-}
-
-func (s *TemplateSource) OperationResponses() ([]*OperationResponse, error) {
+func (s *Binder) OperationResponses() ([]*OperationResponse, error) {
 	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
 	for _, operation := range s.queryDocument.Operations {
-		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
+		responseFields := s.generator.NewResponseFields(operation.SelectionSet, operation.Name)
 		operationResponse = append(operationResponse, &OperationResponse{
 			Name: operation.Name,
 			Type: responseFields.StructType(),
@@ -98,23 +75,23 @@ func (s *TemplateSource) OperationResponses() ([]*OperationResponse, error) {
 	return operationResponse, nil
 }
 
-func (s *TemplateSource) ResponseSubTypes() []*StructSource {
-	return s.sourceGenerator.StructSources
+func (s *Binder) ResponseSubTypes() []*StructSource {
+	return s.generator.StructSources
 }
 
-func (s *TemplateSource) operationArgsMapByOperationName() map[string][]*Argument {
+func (s *Binder) operationArgsMapByOperationName() map[string][]*Argument {
 	operationArgsMap := make(map[string][]*Argument)
 	for _, operation := range s.queryDocument.Operations {
-		operationArgsMap[operation.Name] = s.sourceGenerator.OperationArguments(operation.VariableDefinitions)
+		operationArgsMap[operation.Name] = s.generator.OperationArguments(operation.VariableDefinitions)
 	}
 
 	return operationArgsMap
 }
 
-func (s *TemplateSource) operationResponseMapByOperationName() map[string]*OperationResponse {
+func (s *Binder) operationResponseMapByOperationName() map[string]*OperationResponse {
 	operationResponseMap := make(map[string]*OperationResponse)
 	for _, operation := range s.queryDocument.Operations {
-		operationResponseMap[operation.Name] = s.sourceGenerator.OperationResponse(operation.SelectionSet[0])
+		operationResponseMap[operation.Name] = s.generator.OperationResponse(operation.SelectionSet[0])
 	}
 
 	return operationResponseMap
