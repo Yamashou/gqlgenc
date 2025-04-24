@@ -1,21 +1,25 @@
+// Fragment
 {{- range $name, $element := .Fragment }}
 type  {{ .Name | go  }} {{ .Type | ref }}
 
 {{ getterFunc (.Name|go) .Type }}
 {{- end }}
 
+// Structs
 {{- range $name, $element := .StructSources }}
 type {{ .Name }} {{ .Type | ref }}
 
 {{ getterFunc .Name .Type }}
 {{- end}}
 
+// OperationResponse
 {{- range $name, $element := .OperationResponse }}
 type  {{ .Name | go  }} {{ .Type | ref }}
 
 {{ getterFunc (.Name|go) .Type }}
 {{- end }}
 
+// Operation
 {{- range $model := .Operation}}
 const {{ $model.Name|go }}Document = `{{ $model.Operation }}`
 {{- end}}
