@@ -21,14 +21,31 @@ func main() {
 		return
 	}
 
-	cfg, err := config.LoadConfigFromDefaultLocations(".")
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
-		os.Exit(2)
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
 	}
 
-	if err := gen.Generate(context.Background(), cfg); err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%+v\n", err.Error())
-		os.Exit(4)
+}
+
+func run() error {
+	cfgFile, err := config.FindConfigFile(".")
+	if err != nil {
+		return err
 	}
+
+	cfg, err := config.Load(cfgFile)
+	if err != nil {
+		return err
+	}
+
+	ctx := context.Background()
+	if err := cfg.Init(ctx); err != nil {
+		return fmt.Errorf("failed to init: %w", err)
+	}
+
+	if err := gen.Generate(cfg); err != nil {
+		return err
+	}
+	return nil
 }

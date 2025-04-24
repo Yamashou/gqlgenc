@@ -1,64 +1,18 @@
 package gen
 
 import (
-	"context"
 	"fmt"
-	"slices"
-	"strings"
-	"syscall"
-
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/plugin"
-	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/Yamashou/gqlgenc/v3/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/generator"
 	"github.com/Yamashou/gqlgenc/v3/modelgen"
 	"github.com/Yamashou/gqlgenc/v3/querygen"
 	"github.com/Yamashou/gqlgenc/v3/queryparser"
-	"github.com/vektah/gqlparser/v2/ast"
+	"syscall"
 )
 
-func Generate(ctx context.Context, cfg *config.Config) error {
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Config
-	if cfg.GQLGenConfig.Model.IsDefined() {
-		_ = syscall.Unlink(cfg.GQLGenConfig.Model.Filename)
-	}
-	if cfg.GQLGencConfig.QueryGen.IsDefined() {
-		_ = syscall.Unlink(cfg.GQLGencConfig.QueryGen.Filename)
-	}
-	if cfg.GQLGencConfig.ClientGen.IsDefined() {
-		_ = syscall.Unlink(cfg.GQLGencConfig.ClientGen.Filename)
-	}
-
-	if cfg.GQLGenConfig.Federation.Version != 0 {
-		fedPlugin, err := federation.New(cfg.GQLGenConfig.Federation.Version, cfg.GQLGenConfig)
-		if err != nil {
-			return fmt.Errorf("failed to create federation plugin: %w", err)
-		}
-		if sources, err := fedPlugin.InjectSourcesEarly(); err == nil {
-			cfg.GQLGenConfig.Sources = append(cfg.GQLGenConfig.Sources, sources...)
-		} else {
-			return fmt.Errorf("failed to inject federation directives: %w", err)
-		}
-	}
-
-	if err := cfg.LoadSchema(ctx); err != nil {
-		return fmt.Errorf("failed to load schema: %w", err)
-	}
-
-	if err := cfg.GQLGenConfig.Init(); err != nil {
-		return fmt.Errorf("generating core failed: %w", err)
-	}
-
-	// sort Implements to ensure a deterministic output
-	for _, implements := range cfg.GQLGenConfig.Schema.Implements {
-		slices.SortFunc(implements, func(a, b *ast.Definition) int {
-			return strings.Compare(a.Name, b.Name)
-		})
-	}
-
+func Generate(cfg *config.Config) error {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Load Query
 	querySources, err := queryparser.LoadQuerySources(cfg.GQLGencConfig.Query)
@@ -79,13 +33,12 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// modelgen
 	// before querygen and clientgen because modelgen fills cfg.GQLGenConfig.Models.
-	var modelGen plugin.Plugin
 	if cfg.GQLGenConfig.Model.IsDefined() {
-		modelGen = modelgen.New(cfg, operationQueryDocuments)
-	}
-	if mut, ok := modelGen.(plugin.ConfigMutator); ok {
-		err := mut.MutateConfig(cfg.GQLGenConfig)
-		if err != nil {
+		// remove generate file
+		_ = syscall.Unlink(cfg.GQLGenConfig.Model.Filename)
+
+		modelGen := modelgen.New(cfg, operationQueryDocuments)
+		if err := modelGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", modelGen.Name(), err)
 		}
 	}
@@ -125,26 +78,26 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins
-	var gqlgencPlugins []plugin.Plugin
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
+		// remove generate file
+		_ = syscall.Unlink(cfg.GQLGencConfig.QueryGen.Filename)
+
 		queryGen := querygen.New(cfg, fragments, operations, operationResponses, structSources)
-		gqlgencPlugins = append(gqlgencPlugins, queryGen)
+		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
+			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)
+		}
 	}
 
 	// clientgen
 	if cfg.GQLGencConfig.ClientGen.IsDefined() {
-		clientGen := clientgen.New(cfg, operations)
-		gqlgencPlugins = append(gqlgencPlugins, clientGen)
-	}
+		// remove generate file
+		_ = syscall.Unlink(cfg.GQLGencConfig.ClientGen.Filename)
 
-	for _, gqlgencPlugin := range gqlgencPlugins {
-		if mut, ok := gqlgencPlugin.(plugin.ConfigMutator); ok {
-			err := mut.MutateConfig(cfg.GQLGenConfig)
-			if err != nil {
-				return fmt.Errorf("%s failed: %w", gqlgencPlugin.Name(), err)
-			}
+		clientGen := clientgen.New(cfg, operations)
+		if err := clientGen.MutateConfig(cfg.GQLGenConfig); err != nil {
+			return fmt.Errorf("%s failed: %w", clientGen.Name(), err)
 		}
 	}
 

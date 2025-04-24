@@ -95,6 +95,7 @@ func TestLoadConfig(t *testing.T) {
 						},
 						Model: config.PackageConfig{
 							Filename: "./gen/models_gen.go",
+							Package:  "gen",
 						},
 						Federation: config.PackageConfig{
 							Filename: "generated.go",
@@ -133,6 +134,7 @@ func TestLoadConfig(t *testing.T) {
 						},
 						Model: config.PackageConfig{
 							Filename: "./gen/models_gen.go",
+							Package:  "gen",
 						},
 						Federation: config.PackageConfig{
 							Filename: "generated.go",
@@ -154,7 +156,7 @@ func TestLoadConfig(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
-			cfg, err := LoadConfig(tt.file)
+			cfg, err := Load(tt.file)
 
 			if tt.want.err {
 				if err == nil {
@@ -195,7 +197,7 @@ func TestLoadConfigWindows(t *testing.T) {
 	// Glob filenames test for Windows
 	t.Run("globbed filenames on Windows", func(t *testing.T) {
 		t.Parallel()
-		cfg, err := LoadConfig("testdata/cfg/glob.yml")
+		cfg, err := Load("testdata/cfg/glob.yml")
 		if err != nil {
 			t.Errorf("LoadConfig() error = %v, want nil", err)
 			return
@@ -213,7 +215,7 @@ func TestLoadConfigWindows(t *testing.T) {
 	// Unwalkable path test for Windows
 	t.Run("unwalkable path on Windows", func(t *testing.T) {
 		t.Parallel()
-		_, err := LoadConfig("testdata/cfg/unwalkable.yml")
+		_, err := Load("testdata/cfg/unwalkable.yml")
 		want := "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified."
 		if err == nil || err.Error() != want {
 			t.Errorf("LoadConfig() error = %v, want %v", err, want)
@@ -231,7 +233,7 @@ func TestLoadConfigNonWindows(t *testing.T) {
 	// Glob filenames test for non-Windows
 	t.Run("globbed filenames on non-Windows", func(t *testing.T) {
 		t.Parallel()
-		cfg, err := LoadConfig("testdata/cfg/glob.yml")
+		cfg, err := Load("testdata/cfg/glob.yml")
 		if err != nil {
 			t.Errorf("LoadConfig() error = %v, want nil", err)
 			return
@@ -249,7 +251,7 @@ func TestLoadConfigNonWindows(t *testing.T) {
 	// Unwalkable path test for non-Windows
 	t.Run("unwalkable path on non-Windows", func(t *testing.T) {
 		t.Parallel()
-		_, err := LoadConfig("testdata/cfg/unwalkable.yml")
+		_, err := Load("testdata/cfg/unwalkable.yml")
 		want := "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory"
 		if err == nil || err.Error() != want {
 			t.Errorf("LoadConfig() error = %v, want %v", err, want)
@@ -310,7 +312,7 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 				},
 			}
 
-			err := cfg.LoadSchema(context.Background())
+			err := cfg.loadSchema(context.Background())
 			if tt.want.err {
 				if err == nil {
 					t.Errorf("LoadSchema() error = nil, want error")

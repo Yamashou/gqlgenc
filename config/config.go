@@ -4,19 +4,17 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"net/http"
-	"os"
-	"path/filepath"
-	"regexp"
-	"strings"
-
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/Yamashou/gqlgenc/v3/client"
 	"github.com/Yamashou/gqlgenc/v3/introspection"
 	"github.com/goccy/go-yaml"
-	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/validator"
+	"net/http"
+	"os"
+	"slices"
+	"strings"
 )
 
 // Config extends the gqlgen basic config
@@ -34,91 +32,28 @@ type GQLGencConfig struct {
 	UsedOnlyModels *bool                      `yaml:"usedModelsOnly,omitempty"`
 }
 
-var cfgFilenames = []string{".gqlgenc.yml", "gqlgenc.yml", ".gqlgenc.yaml", "gqlgenc.yaml"}
-
-// LoadConfigFromDefaultLocations looks for a config file in the specified directory, and all parent directories
-// walking up the tree. The closest config file will be returned.
-func LoadConfigFromDefaultLocations(dir string) (*Config, error) {
-	cfgFile, err := findCfg(dir)
-	if err != nil {
-		return nil, fmt.Errorf("not found Config. Config could not be found. Please make sure the name of the file is correct. want={.gqlgenc.yml, gqlgenc.yml, gqlgenc.yaml}, got=%s: %w", dir, err)
-	}
-
-	return LoadConfig(cfgFile)
-}
-
 // EndPointConfig are the allowed options for the 'endpoint' config
 type EndPointConfig struct {
 	URL     string            `yaml:"url"`
 	Headers map[string]string `yaml:"headers,omitempty"`
 }
 
-// findCfg searches for the config file in this directory and all parents up the tree
-// looking for the closest match
-func findCfg(path string) (string, error) {
-	var err error
-	var dir string
-	if path == "." {
-		dir, err = os.Getwd()
-	} else {
-		dir = path
-		_, err = os.Stat(dir)
-	}
-	if err != nil {
-		return "", fmt.Errorf("unable to get directory \"%s\" to findCfg: %w", dir, err)
-	}
-
-	cfg := findCfgInDir(dir)
-
-	for cfg == "" && dir != filepath.Dir(dir) {
-		dir = filepath.Dir(dir)
-		cfg = findCfgInDir(dir)
-	}
-
-	if cfg == "" {
-		return "", os.ErrNotExist
-	}
-
-	return cfg, nil
-}
-
-func findCfgInDir(dir string) string {
-	for _, cfgName := range cfgFilenames {
-		path := filepath.Join(dir, cfgName)
-		if _, err := os.Stat(path); err == nil {
-			return path
-		}
-	}
-
-	return ""
-}
-
-var path2regex = strings.NewReplacer(
-	`.`, `\.`,
-	`*`, `.+`,
-	`\`, `[\\/]`,
-	`/`, `[\\/]`,
-)
-
-// LoadConfig loads and parses the config gqlgenc config
-func LoadConfig(filename string) (*Config, error) {
-	b, err := os.ReadFile(filename)
+// Load loads and parses the config gqlgenc config
+func Load(configFilename string) (*Config, error) {
+	configContent, err := os.ReadFile(configFilename)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
-	confContent := []byte(os.ExpandEnv(string(b)))
-	decoder := yaml.NewDecoder(bytes.NewReader(confContent), yaml.DisallowUnknownField())
-
 	var cfg Config
+	decoder := yaml.NewDecoder(bytes.NewReader([]byte(os.ExpandEnv(string(configContent)))), yaml.DisallowUnknownField())
 	if err := decoder.Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
-	// gqlgen must be Directives nd Exec
-	cfg.GQLGenConfig.Directives = make(map[string]gqlgenconfig.DirectiveConfig)
-	cfg.GQLGenConfig.Exec = gqlgenconfig.ExecConfig{Filename: "generated.go"}
-	cfg.GQLGenConfig.Resolver = gqlgenconfig.ResolverConfig{Filename: "generated.go"}
-	cfg.GQLGenConfig.Federation = gqlgenconfig.PackageConfig{Filename: "generated.go"}
 
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// gqlgen
+
+	// validation
 	if cfg.GQLGenConfig.SchemaFilename != nil && cfg.GQLGencConfig.Endpoint != nil {
 		return nil, fmt.Errorf("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
@@ -127,106 +62,95 @@ func LoadConfig(filename string) (*Config, error) {
 		return nil, fmt.Errorf("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
+	if err := cfg.GQLGenConfig.Model.Check(); err != nil {
+		return nil, fmt.Errorf("model: %w", err)
+	}
+
+	// Fill gqlgen config fields
 	// https://github.com/99designs/gqlgen/blob/3a31a752df764738b1f6e99408df3b169d514784/codegen/config/config.go#L120
-	schemaFiles := gqlgenconfig.StringList{}
-	for _, f := range cfg.GQLGenConfig.SchemaFilename {
-		var matches []string
-
-		// for ** we want to override default globbing patterns and walk all
-		// subdirectories to match schema files.
-		if strings.Contains(f, "**") {
-			pathParts := strings.SplitN(f, "**", 2)
-			rest := strings.TrimPrefix(strings.TrimPrefix(pathParts[1], `\`), `/`)
-			// turn the rest of the glob into a regex, anchored only at the end because ** allows
-			// for any number of dirs in between and walk will let us match against the full path name
-			globRe := regexp.MustCompile(path2regex.Replace(rest) + `$`)
-
-			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
-
-				if globRe.MatchString(strings.TrimPrefix(path, pathParts[0])) {
-					matches = append(matches, path)
-				}
-
-				return nil
-			}); err != nil {
-				return nil, fmt.Errorf("failed to walk schema at root %s: %w", pathParts[0], err)
-			}
-		} else {
-			matches, err = filepath.Glob(f)
-			if err != nil {
-				return nil, fmt.Errorf("failed to glob schema filename %s: %w", f, err)
-			}
-		}
-
-		for _, m := range matches {
-			if !schemaFiles.Has(m) {
-				schemaFiles = append(schemaFiles, m)
-			}
-		}
+	schemaFilename, err := schemaFilenames(cfg.GQLGenConfig.SchemaFilename)
+	if err != nil {
+		return nil, err
 	}
-	if len(schemaFiles) > 0 {
-		cfg.GQLGenConfig.SchemaFilename = schemaFiles
-	}
+	cfg.GQLGenConfig.SchemaFilename = schemaFilename
 
-	sources := make([]*ast.Source, 0, len(cfg.GQLGenConfig.SchemaFilename))
-	for _, filename := range cfg.GQLGenConfig.SchemaFilename {
-		filename = filepath.ToSlash(filename)
-		var err error
-		var schemaRaw []byte
-		schemaRaw, err = os.ReadFile(filename)
-		if err != nil {
-			return nil, fmt.Errorf("unable to open schema: %w", err)
-		}
-
-		sources = append(sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
+	sources, err := schemaFileSources(cfg.GQLGenConfig.SchemaFilename)
+	if err != nil {
+		return nil, err
 	}
 	cfg.GQLGenConfig.Sources = sources
 
+	if cfg.GQLGenConfig.Federation.Version != 0 {
+		fedPlugin, err := federation.New(cfg.GQLGenConfig.Federation.Version, cfg.GQLGenConfig)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create federation plugin: %w", err)
+		}
+		if sources, err := fedPlugin.InjectSourcesEarly(); err == nil {
+			cfg.GQLGenConfig.Sources = append(cfg.GQLGenConfig.Sources, sources...)
+		} else {
+			return nil, fmt.Errorf("failed to inject federation directives: %w", err)
+		}
+	}
+
+	// gqlgen must be followings parameters
+	cfg.GQLGenConfig.Directives = make(map[string]gqlgenconfig.DirectiveConfig)
+	cfg.GQLGenConfig.Exec = gqlgenconfig.ExecConfig{Filename: "generated.go"}
+	cfg.GQLGenConfig.Resolver = gqlgenconfig.ResolverConfig{Filename: "generated.go"}
+	cfg.GQLGenConfig.Federation = gqlgenconfig.PackageConfig{Filename: "generated.go"}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// gqlgenc
+
+	// validation
 	if err := cfg.GQLGencConfig.QueryGen.Check(); err != nil {
-		return nil, fmt.Errorf("gen-query: %w", err)
+		return nil, fmt.Errorf("querygen: %w", err)
 	}
 
 	if err := cfg.GQLGencConfig.ClientGen.Check(); err != nil {
-		return nil, fmt.Errorf("gen-client: %w", err)
+		return nil, fmt.Errorf("clientgen: %w", err)
 	}
+
 	return &cfg, nil
 }
 
-// LoadSchema load and parses the schema from a local file or a remote server
-func (c *Config) LoadSchema(ctx context.Context) error {
-	var schema *ast.Schema
-	if c.GQLGenConfig.SchemaFilename != nil {
-		s, err := c.loadLocalSchema()
-		if err != nil {
-			return fmt.Errorf("load local schema failed: %w", err)
-		}
-		schema = s
-	} else {
-		s, err := c.loadRemoteSchema(ctx)
-		if err != nil {
-			return fmt.Errorf("load remote schema failed: %w", err)
-		}
-
-		schema = s
+func (c *Config) Init(ctx context.Context) error {
+	if err := c.loadSchema(ctx); err != nil {
+		return fmt.Errorf("failed to load schema: %w", err)
 	}
 
-	if schema.Query == nil {
-		schema.Query = &ast.Definition{
-			Kind: ast.Object,
-			Name: "Query",
-		}
-		schema.Types["Query"] = schema.Query
+	if err := c.GQLGenConfig.Init(); err != nil {
+		return fmt.Errorf("generating core failed: %w", err)
 	}
 
-	c.GQLGenConfig.Schema = schema
+	// sort Implements to ensure a deterministic output
+	for _, implements := range c.GQLGenConfig.Schema.Implements {
+		slices.SortFunc(implements, func(a, b *ast.Definition) int {
+			return strings.Compare(a.Name, b.Name)
+		})
+	}
 
 	return nil
 }
 
-func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
+// loadSchema load and parses the schema from a local file or a remote server
+func (c *Config) loadSchema(ctx context.Context) error {
+	// TODO: SchemaFilenameをconfigに指定しなかった場合のtest
+	if c.GQLGenConfig.SchemaFilename != nil {
+		err := c.GQLGenConfig.LoadSchema()
+		if err != nil {
+			return fmt.Errorf("load local schema failed: %w", err)
+		}
+	} else {
+		err := c.loadRemoteSchema(ctx)
+		if err != nil {
+			return fmt.Errorf("load remote schema failed: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) loadRemoteSchema(ctx context.Context) error {
 	header := make(http.Header, len(c.GQLGencConfig.Endpoint.Headers))
 	for key, value := range c.GQLGencConfig.Endpoint.Headers {
 		header[key] = []string{value}
@@ -240,22 +164,23 @@ func (c *Config) loadRemoteSchema(ctx context.Context) (*ast.Schema, error) {
 
 	var res introspection.Query
 	if err := gqlgencClient.Post(ctx, "Query", introspection.Introspection, nil, &res); err != nil {
-		return nil, fmt.Errorf("introspection query failed: %w", err)
+		return fmt.Errorf("introspection query failed: %w", err)
 	}
 
 	schema, err := validator.ValidateSchemaDocument(introspection.ParseIntrospectionQuery(c.GQLGencConfig.Endpoint.URL, res))
 	if err != nil {
-		return nil, fmt.Errorf("validation error: %w", err)
+		return fmt.Errorf("validation error: %w", err)
 	}
 
-	return schema, nil
-}
-
-func (c *Config) loadLocalSchema() (*ast.Schema, error) {
-	schema, err := gqlparser.LoadSchema(c.GQLGenConfig.Sources...)
-	if err != nil {
-		return nil, fmt.Errorf("loadLocalSchema: %w", err)
+	if schema.Query == nil {
+		schema.Query = &ast.Definition{
+			Kind: ast.Object,
+			Name: "Query",
+		}
+		schema.Types["Query"] = schema.Query
 	}
 
-	return schema, nil
+	c.GQLGenConfig.Schema = schema
+
+	return nil
 }
