@@ -40,6 +40,13 @@ type StructSource struct {
 	Type types.Type
 }
 
+func NewStructSource(name string, typ types.Type) *StructSource {
+	return &StructSource{
+		Name: name,
+		Type: typ,
+	}
+}
+
 // GetterFunc returns a function that generates getter methods for types.
 // targetPkgPath specifies the target package path and omits package qualifiers for types belonging to the same package.
 func GetterFunc(targetPkgPath string) func(name string, t types.Type) string {

@@ -125,20 +125,14 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			//   }
 			// }
 			// The fragments UserProfile and UserOrders will be processed and merged
+			// TODO: ここは何をしている？
 			r.StructSources = mergedStructSources(r.StructSources, generator.preMergedStructSources, generator.postMergedStructSources)
 
 			// Adds the current struct to StructSources
 			// For example, in "profile { bio avatar }", this would add a User_Profile struct
 			structType := generator.currentResponseFieldList.StructType()
-			r.StructSources = append(r.StructSources, &StructSource{
-				Name: typeName,
-				Type: structType,
-			})
-			baseType = types.NewNamed(
-				types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), typeName, nil),
-				structType,
-				nil,
-			)
+			r.StructSources = appendStructSources(r.StructSources, NewStructSource(typeName, structType))
+			baseType = types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 		default:
 			// here is bug
 			panic("not match type")
@@ -185,10 +179,10 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 		)
 
 		var typ types.Type = baseType
+		// TODO: 他でこれをみなくていいのか？
 		if r.config.GQLGenConfig.StructFieldsAlwaysPointers {
 			typ = types.NewPointer(baseType)
 		}
-
 		return &ResponseField{
 			Name:             selection.Name,
 			Type:             typ,
@@ -232,16 +226,8 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			//   ...PremiumUserDetails
 			// }
 			structType := allFields.StructType()
-			r.StructSources = append(r.StructSources, &StructSource{
-				Name: name,
-				Type: structType,
-			})
-			typ := types.NewNamed(
-				types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil),
-				structType,
-				nil,
-			)
-
+			r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
+			typ := types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil), structType, nil)
 			return &ResponseField{
 				Name:             selection.TypeCondition,
 				Type:             typ,
@@ -253,16 +239,8 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 		// if there is no fragment spread
 		// Creates a simple struct for inline fragment without nested fragment spreads
 		structType := fieldsResponseFields.StructType()
-		r.StructSources = append(r.StructSources, &StructSource{
-			Name: name,
-			Type: structType,
-		})
-		typ := types.NewNamed(
-			types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil),
-			structType,
-			nil,
-		)
-
+		r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
+		typ := types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil), structType, nil)
 		return &ResponseField{
 			Name:             selection.TypeCondition,
 			Type:             typ,
@@ -307,6 +285,10 @@ func (r *Generator) goType(typeName string) types.Type {
 	}
 
 	return goType
+}
+
+func appendStructSources(sources []*StructSource, appends ...*StructSource) []*StructSource {
+	return append(sources, appends...)
 }
 
 // mergedStructSources combines different sets of struct sources, handling duplicates.
