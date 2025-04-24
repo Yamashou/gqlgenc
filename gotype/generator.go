@@ -16,8 +16,66 @@ import (
 
 // Generator generate Go goType from GraphQL goType
 type Generator struct {
-	config        *config.Config
-	binder        *gqlgenconfig.Binder
+	config *config.Config
+	binder *gqlgenconfig.Binder
+	// StructSources holds all the struct types that will be generated from GraphQL schema
+	// It contains struct information from:
+	// 1. Regular object fields with nested selection sets - these are fields that contain
+	//    sub-selections (not scalar fields). For example, in this query:
+	//    query {
+	//      user {       # object field
+	//        name       # scalar field
+	//        profile {  # nested object field with selection set
+	//          bio      # scalar field inside nested object
+	//        }
+	//      }
+	//    }
+	//    Both "user" and "profile" are object fields with selection sets, and each will
+	//    generate a separate struct (User and User_Profile)
+	// 2. Fragment spreads
+	// 3. Inline fragments
+	// 4. Merged fields from multiple fragments - when multiple fragments are used in the same query
+	//    and their fields need to be combined into a single struct. For example:
+	//    query {
+	//      user {
+	//        id
+	//        ...UserProfile      # Fragment 1
+	//        ...UserPreferences  # Fragment 2
+	//      }
+	//    }
+	//
+	//    fragment UserProfile on User {
+	//      name
+	//      email
+	//    }
+	//
+	//    fragment UserPreferences on User {
+	//      email           # Note this field appears in both fragments
+	//      preferences {
+	//        theme
+	//        notifications
+	//      }
+	//    }
+	//
+	//    In this case, all fields from both fragments are merged into a single User struct,
+	//    with duplicate fields (like 'email') handled appropriately. The resulting struct
+	//    would contain: id, name, email, and preferences fields.
+	//
+	// Example GraphQL query:
+	// query {
+	//   user {
+	//     id
+	//     name
+	//     profile {  1. # Will generate User_Profile struct
+	//       bio
+	//       avatar
+	//     }
+	//     ...UserOrders  # 2. Will generate UserOrders struct and merge fields
+	//     ... on PremiumUser {  # 3. Will generate User_PremiumUser struct
+	//       subscriptionLevel
+	//     }
+	//   }
+	// }
 	StructSources []*StructSource
 }
 
@@ -58,9 +116,19 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			// if there is a fragment in child fields, merge it with the current field
 			generator := newStructGenerator(fieldsResponseFields)
 
+			// Merges existing struct sources with the ones from fragment processing
+			// For example, if we have:
+			// query {
+			//   user {
+			//     ...UserProfile
+			//     ...UserOrders
+			//   }
+			// }
+			// The fragments UserProfile and UserOrders will be processed and merged
 			r.StructSources = mergedStructSources(r.StructSources, generator.preMergedStructSources, generator.postMergedStructSources)
 
-			// append current struct
+			// Adds the current struct to StructSources
+			// For example, in "profile { bio avatar }", this would add a User_Profile struct
 			structType := generator.currentResponseFieldList.StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
 				Name: typeName,
@@ -103,6 +171,12 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 
 	case *ast.FragmentSpread:
 		// This structure is not used in templates but is used to determine Fragment in ast.Field.
+		// Processes fragment spreads like "...UserFragment" in:
+		// query {
+		//   user {
+		//     ...UserFragment
+		//   }
+		// }
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, layerTypeName(typeName, templates.ToGo(selection.Name)))
 		baseType := types.NewNamed(
 			types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil),
@@ -124,6 +198,14 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 
 	case *ast.InlineFragment:
 		// InlineFragment has child elements, so create a struct type here
+		// Processes inline fragments like "... on PremiumUser { subscriptionLevel }" in:
+		// query {
+		//   user {
+		//     ... on PremiumUser {
+		//       subscriptionLevel
+		//     }
+		//   }
+		// }
 		name := layerTypeName(typeName, templates.ToGo(selection.TypeCondition))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
 
@@ -143,6 +225,12 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			allFields = append(allFields, fragmentFields...)
 
 			// generate struct
+			// Creates a combined struct for inline fragment with nested fragment spreads
+			// For example:
+			// ... on PremiumUser {
+			//   subscriptionLevel
+			//   ...PremiumUserDetails
+			// }
 			structType := allFields.StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
 				Name: name,
@@ -163,6 +251,7 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			}
 		}
 		// if there is no fragment spread
+		// Creates a simple struct for inline fragment without nested fragment spreads
 		structType := fieldsResponseFields.StructType()
 		r.StructSources = append(r.StructSources, &StructSource{
 			Name: name,
@@ -220,6 +309,20 @@ func (r *Generator) goType(typeName string) types.Type {
 	return goType
 }
 
+// mergedStructSources combines different sets of struct sources, handling duplicates.
+// This is especially important when processing fragments that may overlap.
+//
+// Example of merging:
+// When we have a query with multiple fragments:
+//
+//	query {
+//	  user {
+//	    ...UserProfile  # Has 'name' and 'email'
+//	    ...UserAccount  # Has 'email' and 'accountType'
+//	  }
+//	}
+//
+// The merged struct will have fields: 'name', 'email', and 'accountType'
 func mergedStructSources(sources, preMergedStructSources, postMergedStructSources []*StructSource) []*StructSource {
 	preMergedStructSourcesMap := structSourcesMapByTypeName(preMergedStructSources)
 	res := make([]*StructSource, 0)
@@ -238,6 +341,8 @@ func mergedStructSources(sources, preMergedStructSources, postMergedStructSource
 	return res
 }
 
+// hasFragmentSpread checks if any field in the ResponseFieldList is a fragment spread.
+// Used to determine if special fragment handling is needed.
 func hasFragmentSpread(fields ResponseFieldList) bool {
 	for _, field := range fields {
 		if field.IsFragmentSpread {
@@ -247,6 +352,8 @@ func hasFragmentSpread(fields ResponseFieldList) bool {
 	return false
 }
 
+// collectFragmentFields extracts all fields from fragment spreads in the ResponseFieldList.
+// This is used when merging fragments into a parent struct.
 func collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
 	var fragmentFields ResponseFieldList
 	for _, field := range fields {
@@ -257,6 +364,27 @@ func collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
 	return fragmentFields
 }
 
+// mergeFieldsRecursively combines fields from source and target ResponseFieldLists,
+// handling nested fields properly.
+//
+// This is crucial for handling complex GraphQL fragments:
+//
+//	fragment UserWithProfile on User {
+//	  id
+//	  profile {
+//	    bio
+//	  }
+//	}
+//
+//	fragment UserWithDetailedProfile on User {
+//	  profile {
+//	    avatar
+//	    links
+//	  }
+//	}
+//
+// When both fragments are used together, the 'profile' field needs
+// to include all sub-fields: bio, avatar, and links.
 func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMerged, postMerged []*StructSource) (ResponseFieldList, []*StructSource, []*StructSource) {
 	responseFieldList := make(ResponseFieldList, 0)
 	targetFieldsMap := targetFields.mapByName()
@@ -302,6 +430,18 @@ func structSourcesMapByTypeName(sources []*StructSource) map[string]*StructSourc
 	return res
 }
 
+// layerTypeName creates a qualified name for nested types.
+// For example, if we have a query with nested fields:
+//
+//	user {
+//	  profile {
+//	    settings {
+//	      notifications
+//	    }
+//	  }
+//	}
+//
+// This would generate names like User_Profile and User_Profile_Settings
 func layerTypeName(base, thisField string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
 }
@@ -331,6 +471,19 @@ func (rs ResponseFieldList) IsFragmentSpread() bool {
 	return rs[0].IsFragmentSpread
 }
 
+// StructType creates a Go struct type from the ResponseFieldList.
+// This is used to generate the final struct definitions for GraphQL objects.
+//
+// For example, with this GraphQL:
+//
+//	user {
+//	  id
+//	  name
+//	  email
+//	}
+//
+// It would create a struct with fields for id, name, and email,
+// including appropriate JSON and GraphQL tags.
 func (rs ResponseFieldList) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
@@ -372,6 +525,8 @@ func (rs ResponseFieldList) sortByName() ResponseFieldList {
 	return rs
 }
 
+// StructGenerator manages the creation of Go struct types from GraphQL selections.
+// It handles the complexity of merging fields from different fragments.
 type StructGenerator struct {
 	// Create fields based on this ResponseFieldList
 	currentResponseFieldList ResponseFieldList
@@ -381,6 +536,30 @@ type StructGenerator struct {
 	postMergedStructSources []*StructSource
 }
 
+// newStructGenerator creates a new StructGenerator instance that handles
+// the transformation of GraphQL selections to Go structs.
+//
+// Example of structure generation for a query with fragments:
+//
+//	query {
+//	  user {
+//	    id
+//	    ...UserProfile
+//	    ...UserPreferences
+//	  }
+//	}
+//
+//	fragment UserProfile on User {
+//	  name
+//	  email
+//	}
+//
+//	fragment UserPreferences on User {
+//	  theme
+//	  notifications
+//	}
+//
+// The resulting struct would have all fields: id, name, email, theme, notifications
 func newStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 	currentFields := make(ResponseFieldList, 0)
 	fragmentChildrenFields := make(ResponseFieldList, 0)
