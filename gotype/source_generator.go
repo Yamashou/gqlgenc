@@ -1,4 +1,4 @@
-package generator
+package gotype
 
 import (
 	"fmt"
@@ -13,125 +13,6 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
-
-type Argument struct {
-	Variable string
-	Type     types.Type
-}
-
-type ResponseField struct {
-	Name             string
-	IsFragmentSpread bool
-	IsInlineFragment bool
-	Type             types.Type
-	Tags             []string
-	ResponseFields   ResponseFieldList
-}
-
-func (r ResponseField) FieldTypeString() string {
-	fullFieldType := r.Type.String()
-	parts := strings.Split(fullFieldType, ".")
-	return parts[len(parts)-1]
-}
-
-type ResponseFieldList []*ResponseField
-
-func (rs ResponseFieldList) IsFragmentSpread() bool {
-	if len(rs) != 1 {
-		return false
-	}
-
-	return rs[0].IsFragmentSpread
-}
-
-func (rs ResponseFieldList) StructType() *types.Struct {
-	vars := make([]*types.Var, 0)
-	structTags := make([]string, 0)
-	for _, field := range rs {
-		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
-		structTags = append(structTags, strings.Join(field.Tags, " "))
-	}
-	return types.NewStruct(vars, structTags)
-}
-
-func (rs ResponseFieldList) IsFragment() bool {
-	if len(rs) != 1 {
-		return false
-	}
-
-	return rs[0].IsInlineFragment || rs[0].IsFragmentSpread
-}
-
-func (rs ResponseFieldList) IsBasicType() bool {
-	return len(rs) == 0
-}
-
-func (rs ResponseFieldList) IsStructType() bool {
-	return len(rs) > 0 && !rs.IsFragment()
-}
-
-func (rs ResponseFieldList) MapByName() map[string]*ResponseField {
-	res := make(map[string]*ResponseField)
-	for _, field := range rs {
-		res[field.Name] = field
-	}
-	return res
-}
-
-func (rs ResponseFieldList) SortByName() ResponseFieldList {
-	slices.SortFunc(rs, func(a, b *ResponseField) int {
-		return strings.Compare(a.Name, b.Name)
-	})
-	return rs
-}
-
-type StructGenerator struct {
-	// Create fields based on this ResponseFieldList
-	currentResponseFieldList ResponseFieldList
-	// Struct sources that will no longer be created due to merging
-	preMergedStructSources []*StructSource
-	// Struct sources that will be created due to merging
-	postMergedStructSources []*StructSource
-}
-
-func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
-	currentFields := make(ResponseFieldList, 0)
-	fragmentChildrenFields := make(ResponseFieldList, 0)
-	for _, field := range responseFieldList {
-		if field.IsFragmentSpread {
-			fragmentChildrenFields = append(fragmentChildrenFields, field.ResponseFields...)
-		} else {
-			currentFields = append(currentFields, field)
-		}
-	}
-
-	preMergedStructSources := make([]*StructSource, 0)
-
-	for _, field := range responseFieldList {
-		if field.IsFragmentSpread {
-			preMergedStructSources = append(preMergedStructSources, &StructSource{
-				Name: field.FieldTypeString(),
-				Type: field.ResponseFields.StructType(),
-			})
-		}
-	}
-
-	currentFields, preMergedStructSources, postMergedStructSources := mergeFieldsRecursively(currentFields, fragmentChildrenFields, preMergedStructSources, nil)
-	return &StructGenerator{
-		currentResponseFieldList: currentFields,
-		preMergedStructSources:   preMergedStructSources,
-		postMergedStructSources:  postMergedStructSources,
-	}
-}
-
-func (g *StructGenerator) GetCurrentResponseFieldList() ResponseFieldList {
-	return g.currentResponseFieldList
-}
-
-type StructSource struct {
-	Name string
-	Type types.Type
-}
 
 type SourceGenerator struct {
 	config        *config.Config
@@ -423,4 +304,123 @@ func structSourcesMapByTypeName(sources []*StructSource) map[string]*StructSourc
 
 func layerTypeName(base, thisField string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
+}
+
+type Argument struct {
+	Variable string
+	Type     types.Type
+}
+
+type ResponseField struct {
+	Name             string
+	IsFragmentSpread bool
+	IsInlineFragment bool
+	Type             types.Type
+	Tags             []string
+	ResponseFields   ResponseFieldList
+}
+
+func (r ResponseField) FieldTypeString() string {
+	fullFieldType := r.Type.String()
+	parts := strings.Split(fullFieldType, ".")
+	return parts[len(parts)-1]
+}
+
+type ResponseFieldList []*ResponseField
+
+func (rs ResponseFieldList) IsFragmentSpread() bool {
+	if len(rs) != 1 {
+		return false
+	}
+
+	return rs[0].IsFragmentSpread
+}
+
+func (rs ResponseFieldList) StructType() *types.Struct {
+	vars := make([]*types.Var, 0)
+	structTags := make([]string, 0)
+	for _, field := range rs {
+		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
+		structTags = append(structTags, strings.Join(field.Tags, " "))
+	}
+	return types.NewStruct(vars, structTags)
+}
+
+func (rs ResponseFieldList) IsFragment() bool {
+	if len(rs) != 1 {
+		return false
+	}
+
+	return rs[0].IsInlineFragment || rs[0].IsFragmentSpread
+}
+
+func (rs ResponseFieldList) IsBasicType() bool {
+	return len(rs) == 0
+}
+
+func (rs ResponseFieldList) IsStructType() bool {
+	return len(rs) > 0 && !rs.IsFragment()
+}
+
+func (rs ResponseFieldList) MapByName() map[string]*ResponseField {
+	res := make(map[string]*ResponseField)
+	for _, field := range rs {
+		res[field.Name] = field
+	}
+	return res
+}
+
+func (rs ResponseFieldList) SortByName() ResponseFieldList {
+	slices.SortFunc(rs, func(a, b *ResponseField) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+	return rs
+}
+
+type StructGenerator struct {
+	// Create fields based on this ResponseFieldList
+	currentResponseFieldList ResponseFieldList
+	// Struct sources that will no longer be created due to merging
+	preMergedStructSources []*StructSource
+	// Struct sources that will be created due to merging
+	postMergedStructSources []*StructSource
+}
+
+func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
+	currentFields := make(ResponseFieldList, 0)
+	fragmentChildrenFields := make(ResponseFieldList, 0)
+	for _, field := range responseFieldList {
+		if field.IsFragmentSpread {
+			fragmentChildrenFields = append(fragmentChildrenFields, field.ResponseFields...)
+		} else {
+			currentFields = append(currentFields, field)
+		}
+	}
+
+	preMergedStructSources := make([]*StructSource, 0)
+
+	for _, field := range responseFieldList {
+		if field.IsFragmentSpread {
+			preMergedStructSources = append(preMergedStructSources, &StructSource{
+				Name: field.FieldTypeString(),
+				Type: field.ResponseFields.StructType(),
+			})
+		}
+	}
+
+	currentFields, preMergedStructSources, postMergedStructSources := mergeFieldsRecursively(currentFields, fragmentChildrenFields, preMergedStructSources, nil)
+	return &StructGenerator{
+		currentResponseFieldList: currentFields,
+		preMergedStructSources:   preMergedStructSources,
+		postMergedStructSources:  postMergedStructSources,
+	}
+}
+
+func (g *StructGenerator) GetCurrentResponseFieldList() ResponseFieldList {
+	return g.currentResponseFieldList
+}
+
+type StructSource struct {
+	Name string
+	Type types.Type
 }

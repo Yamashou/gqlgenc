@@ -6,13 +6,13 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/generator"
+	"github.com/Yamashou/gqlgenc/v3/gotype"
 )
 
 //go:embed template.gotpl
 var template string
 
-func RenderTemplate(cfg *config.Config, operations []*generator.Operation) error {
+func RenderTemplate(cfg *config.Config, operations []*gotype.Operation) error {
 	if err := templates.Render(templates.Options{
 		PackageName: cfg.GQLGencConfig.ClientGen.Package,
 		Filename:    cfg.GQLGencConfig.ClientGen.Filename,

@@ -6,7 +6,7 @@ import (
 	"github.com/99designs/gqlgen/codegen/templates"
 
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/generator"
+	"github.com/Yamashou/gqlgenc/v3/gotype"
 	"github.com/Yamashou/gqlgenc/v3/plugins/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/modelgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/querygen"
@@ -43,10 +43,10 @@ func Run(cfg *config.Config) error {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// generating source
 	// must generate source after modelgen
-	source := generator.NewSource(cfg, queryDocument)
+	goTypeBinder := gotype.NewBinder(cfg, queryDocument)
 
 	// Fragment
-	fragments, err := source.Fragments()
+	fragments, err := goTypeBinder.Fragments()
 	if err != nil {
 		return fmt.Errorf("generating fragment failed: %w", err)
 	}
@@ -55,7 +55,7 @@ func Run(cfg *config.Config) error {
 	}
 
 	// Operation Response
-	operationResponses, err := source.OperationResponses()
+	operationResponses, err := goTypeBinder.OperationResponses()
 	if err != nil {
 		return fmt.Errorf("generating operation response failed: %w", err)
 	}
@@ -65,13 +65,13 @@ func Run(cfg *config.Config) error {
 	}
 
 	// Operation
-	operations, err := source.Operations(operationQueryDocuments)
+	operations, err := goTypeBinder.Operations(operationQueryDocuments)
 	if err != nil {
 		return fmt.Errorf("generating operation failed: %w", err)
 	}
 
 	// Struct Source TODO: なにこれ？
-	structSources := source.ResponseSubTypes()
+	structSources := goTypeBinder.ResponseSubTypes()
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins

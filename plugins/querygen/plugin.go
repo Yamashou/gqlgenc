@@ -6,7 +6,7 @@ import (
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/generator"
+	"github.com/Yamashou/gqlgenc/v3/gotype"
 	"golang.org/x/tools/imports"
 )
 
@@ -14,13 +14,13 @@ var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
 	cfg                *config.Config
-	fragments          []*generator.Fragment
-	operations         []*generator.Operation
-	operationResponses []*generator.OperationResponse
-	structSources      []*generator.StructSource
+	fragments          []*gotype.Fragment
+	operations         []*gotype.Operation
+	operationResponses []*gotype.OperationResponse
+	structSources      []*gotype.StructSource
 }
 
-func New(cfg *config.Config, fragments []*generator.Fragment, operations []*generator.Operation, operationResponses []*generator.OperationResponse, structSources []*generator.StructSource) *Plugin {
+func New(cfg *config.Config, fragments []*gotype.Fragment, operations []*gotype.Operation, operationResponses []*gotype.OperationResponse, structSources []*gotype.StructSource) *Plugin {
 	return &Plugin{
 		cfg:                cfg,
 		fragments:          fragments,
