@@ -10,15 +10,15 @@ import (
 	"github.com/Yamashou/gqlgenc/v3/config"
 )
 
-// Binder binds GraphQL Types to Go Types.
-type Binder struct {
+// TemplateSource binds GraphQL Types to Go Types.
+type TemplateSource struct {
 	schema          *ast.Schema
 	queryDocument   *ast.QueryDocument
-	sourceGenerator *SourceGenerator
+	sourceGenerator *Generator
 }
 
-func NewBinder(cfg *config.Config, queryDocument *ast.QueryDocument) *Binder {
-	return &Binder{
+func NewBinder(cfg *config.Config, queryDocument *ast.QueryDocument) *TemplateSource {
+	return &TemplateSource{
 		schema:          cfg.GQLGenConfig.Schema,
 		queryDocument:   queryDocument,
 		sourceGenerator: NewSourceGenerator(cfg),
@@ -30,7 +30,7 @@ type Fragment struct {
 	Type types.Type
 }
 
-func (s *Binder) Fragments() ([]*Fragment, error) {
+func (s *TemplateSource) Fragments() ([]*Fragment, error) {
 	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
 	for _, fragment := range s.queryDocument.Fragments {
 		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, fragment.Name)
@@ -63,7 +63,7 @@ func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDo
 	}
 }
 
-func (s *Binder) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, error) {
+func (s *TemplateSource) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, error) {
 	operations := make([]*Operation, 0, len(s.queryDocument.Operations))
 
 	queryDocumentsMap := queryDocumentMapByOperationName(queryDocuments)
@@ -85,7 +85,7 @@ type OperationResponse struct {
 	Type types.Type
 }
 
-func (s *Binder) OperationResponses() ([]*OperationResponse, error) {
+func (s *TemplateSource) OperationResponses() ([]*OperationResponse, error) {
 	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
 	for _, operation := range s.queryDocument.Operations {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
@@ -98,11 +98,11 @@ func (s *Binder) OperationResponses() ([]*OperationResponse, error) {
 	return operationResponse, nil
 }
 
-func (s *Binder) ResponseSubTypes() []*StructSource {
+func (s *TemplateSource) ResponseSubTypes() []*StructSource {
 	return s.sourceGenerator.StructSources
 }
 
-func (s *Binder) operationArgsMapByOperationName() map[string][]*Argument {
+func (s *TemplateSource) operationArgsMapByOperationName() map[string][]*Argument {
 	operationArgsMap := make(map[string][]*Argument)
 	for _, operation := range s.queryDocument.Operations {
 		operationArgsMap[operation.Name] = s.sourceGenerator.OperationArguments(operation.VariableDefinitions)
@@ -111,7 +111,7 @@ func (s *Binder) operationArgsMapByOperationName() map[string][]*Argument {
 	return operationArgsMap
 }
 
-func (s *Binder) operationResponseMapByOperationName() map[string]*OperationResponse {
+func (s *TemplateSource) operationResponseMapByOperationName() map[string]*OperationResponse {
 	operationResponseMap := make(map[string]*OperationResponse)
 	for _, operation := range s.queryDocument.Operations {
 		operationResponseMap[operation.Name] = s.sourceGenerator.OperationResponse(operation.SelectionSet[0])

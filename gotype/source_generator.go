@@ -14,30 +14,36 @@ import (
 	"golang.org/x/text/language"
 )
 
-type SourceGenerator struct {
+type StructSource struct {
+	Name string
+	Type types.Type
+}
+
+// Generator generate Go goType from GraphQL goType
+type Generator struct {
 	config        *config.Config
 	binder        *gqlgenconfig.Binder
 	StructSources []*StructSource
 }
 
-func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
-	return &SourceGenerator{
+func NewSourceGenerator(cfg *config.Config) *Generator {
+	return &Generator{
 		config:        cfg,
 		binder:        cfg.GQLGenConfig.NewBinder(),
 		StructSources: []*StructSource{},
 	}
 }
 
-func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, typeName string) ResponseFieldList {
+func (r *Generator) NewResponseFields(selectionSet ast.SelectionSet, typeName string) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
 	for _, selection := range selectionSet {
-		responseFields = append(responseFields, r.NewResponseField(selection, typeName))
+		responseFields = append(responseFields, r.newResponseField(selection, typeName))
 	}
 
 	return responseFields
 }
 
-func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
+func (r *Generator) newResponseField(selection ast.Selection, typeName string) *ResponseField {
 	var isOptional bool
 	switch selection := selection.(type) {
 	case *ast.Field:
@@ -48,20 +54,19 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 
 		var baseType types.Type
 		switch {
-		case fieldsResponseFields.IsBasicType():
-			baseType = r.Type(selection.Definition.Type.Name())
-		case fieldsResponseFields.IsFragment():
+		case fieldsResponseFields.isBasicType():
+			baseType = r.goType(selection.Definition.Type.Name())
+		case fieldsResponseFields.isFragment():
 			// if a child field is fragment, this field type became fragment.
 			baseType = fieldsResponseFields[0].Type
-		case fieldsResponseFields.IsStructType():
+		case fieldsResponseFields.isStructType():
 			// if there is a fragment in child fields, merge it with the current field
-			generator := NewStructGenerator(fieldsResponseFields)
+			generator := newStructGenerator(fieldsResponseFields)
 
-			// restruct struct sources
-			r.StructSources = MergedStructSources(r.StructSources, generator.preMergedStructSources, generator.postMergedStructSources)
+			r.StructSources = mergedStructSources(r.StructSources, generator.preMergedStructSources, generator.postMergedStructSources)
 
 			// append current struct
-			structType := generator.GetCurrentResponseFieldList().StructType()
+			structType := generator.currentResponseFieldList.StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
 				Name: typeName,
 				Type: structType,
@@ -159,7 +164,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 				Type:             typ,
 				IsInlineFragment: true,
 				Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
-				ResponseFields:   allFields.SortByName(),
+				ResponseFields:   allFields.sortByName(),
 			}
 		}
 		// if there is no fragment spread
@@ -179,48 +184,48 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			Type:             typ,
 			IsInlineFragment: true,
 			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
-			ResponseFields:   fieldsResponseFields.SortByName(),
+			ResponseFields:   fieldsResponseFields.sortByName(),
 		}
 	}
 
 	panic("unexpected selection type")
 }
 
-func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*Argument {
+func (r *Generator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*Argument {
 	argumentTypes := make([]*Argument, 0, len(variableDefinitions))
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &Argument{
 			Variable: v.Variable,
-			Type:     r.binder.CopyModifiersFromAst(v.Type, r.Type(v.Type.Name())),
+			Type:     r.binder.CopyModifiersFromAst(v.Type, r.goType(v.Type.Name())),
 		})
 	}
 
 	return argumentTypes
 }
 
-func (r *SourceGenerator) OperationResponse(selection ast.Selection) *OperationResponse {
+func (r *Generator) OperationResponse(selection ast.Selection) *OperationResponse {
 	switch v := selection.(type) {
 	case *ast.Field:
 		return &OperationResponse{
 			Name: v.Definition.Type.Name(),
-			Type: r.binder.CopyModifiersFromAst(v.Definition.Type, r.Type(v.Definition.Type.Name())),
+			Type: r.binder.CopyModifiersFromAst(v.Definition.Type, r.goType(v.Definition.Type.Name())),
 		}
 	}
 	return nil
 }
 
-// The typeName passed as an argument to Type must be the name of the type derived from the parsed result,
+// The typeName passed as an argument to goType must be the name of the type derived from the parsed result,
 // such as from a selection.
-func (r *SourceGenerator) Type(typeName string) types.Type {
+func (r *Generator) goType(typeName string) types.Type {
 	goType, err := r.binder.FindTypeFromName(r.config.GQLGenConfig.Models[typeName].Model[0])
 	if err != nil {
-		panic(fmt.Sprintf("%+v", err))
+		panic(fmt.Sprintf("%v", err))
 	}
 
 	return goType
 }
 
-func MergedStructSources(sources, preMergedStructSources, postMergedStructSources []*StructSource) []*StructSource {
+func mergedStructSources(sources, preMergedStructSources, postMergedStructSources []*StructSource) []*StructSource {
 	preMergedStructSourcesMap := structSourcesMapByTypeName(preMergedStructSources)
 	res := make([]*StructSource, 0)
 	// remove pre-merged struct
@@ -259,28 +264,28 @@ func collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
 
 func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMerged, postMerged []*StructSource) (ResponseFieldList, []*StructSource, []*StructSource) {
 	responseFieldList := make(ResponseFieldList, 0)
-	targetFieldsMap := targetFields.MapByName()
+	targetFieldsMap := targetFields.mapByName()
 	newPreMerged := preMerged
 	newPostMerged := postMerged
 
 	for _, sourceField := range sourceFields {
 		if targetField, ok := targetFieldsMap[sourceField.Name]; ok {
-			if targetField.ResponseFields.IsBasicType() {
+			if targetField.ResponseFields.isBasicType() {
 				continue
 			}
 			newPreMerged = append(newPreMerged, &StructSource{
-				Name: sourceField.FieldTypeString(),
+				Name: sourceField.fieldTypeString(),
 				Type: sourceField.ResponseFields.StructType(),
 			})
 			newPreMerged = append(newPreMerged, &StructSource{
-				Name: targetField.FieldTypeString(),
+				Name: targetField.fieldTypeString(),
 				Type: targetField.ResponseFields.StructType(),
 			})
 
 			targetField.ResponseFields, newPreMerged, newPostMerged = mergeFieldsRecursively(targetField.ResponseFields, sourceField.ResponseFields, newPreMerged, newPostMerged)
 
 			newPostMerged = append(newPostMerged, &StructSource{
-				Name: targetField.FieldTypeString(),
+				Name: targetField.fieldTypeString(),
 				Type: targetField.ResponseFields.StructType(),
 			})
 		} else {
@@ -290,7 +295,7 @@ func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMer
 	for _, field := range targetFieldsMap {
 		responseFieldList = append(responseFieldList, field)
 	}
-	responseFieldList = responseFieldList.SortByName()
+	responseFieldList = responseFieldList.sortByName()
 	return responseFieldList, newPreMerged, newPostMerged
 }
 
@@ -320,7 +325,7 @@ type ResponseField struct {
 	ResponseFields   ResponseFieldList
 }
 
-func (r ResponseField) FieldTypeString() string {
+func (r ResponseField) fieldTypeString() string {
 	fullFieldType := r.Type.String()
 	parts := strings.Split(fullFieldType, ".")
 	return parts[len(parts)-1]
@@ -346,7 +351,7 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 	return types.NewStruct(vars, structTags)
 }
 
-func (rs ResponseFieldList) IsFragment() bool {
+func (rs ResponseFieldList) isFragment() bool {
 	if len(rs) != 1 {
 		return false
 	}
@@ -354,15 +359,15 @@ func (rs ResponseFieldList) IsFragment() bool {
 	return rs[0].IsInlineFragment || rs[0].IsFragmentSpread
 }
 
-func (rs ResponseFieldList) IsBasicType() bool {
+func (rs ResponseFieldList) isBasicType() bool {
 	return len(rs) == 0
 }
 
-func (rs ResponseFieldList) IsStructType() bool {
-	return len(rs) > 0 && !rs.IsFragment()
+func (rs ResponseFieldList) isStructType() bool {
+	return len(rs) > 0 && !rs.isFragment()
 }
 
-func (rs ResponseFieldList) MapByName() map[string]*ResponseField {
+func (rs ResponseFieldList) mapByName() map[string]*ResponseField {
 	res := make(map[string]*ResponseField)
 	for _, field := range rs {
 		res[field.Name] = field
@@ -370,7 +375,7 @@ func (rs ResponseFieldList) MapByName() map[string]*ResponseField {
 	return res
 }
 
-func (rs ResponseFieldList) SortByName() ResponseFieldList {
+func (rs ResponseFieldList) sortByName() ResponseFieldList {
 	slices.SortFunc(rs, func(a, b *ResponseField) int {
 		return strings.Compare(a.Name, b.Name)
 	})
@@ -386,7 +391,7 @@ type StructGenerator struct {
 	postMergedStructSources []*StructSource
 }
 
-func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
+func newStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 	currentFields := make(ResponseFieldList, 0)
 	fragmentChildrenFields := make(ResponseFieldList, 0)
 	for _, field := range responseFieldList {
@@ -402,7 +407,7 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 	for _, field := range responseFieldList {
 		if field.IsFragmentSpread {
 			preMergedStructSources = append(preMergedStructSources, &StructSource{
-				Name: field.FieldTypeString(),
+				Name: field.fieldTypeString(),
 				Type: field.ResponseFields.StructType(),
 			})
 		}
@@ -414,13 +419,4 @@ func NewStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 		preMergedStructSources:   preMergedStructSources,
 		postMergedStructSources:  postMergedStructSources,
 	}
-}
-
-func (g *StructGenerator) GetCurrentResponseFieldList() ResponseFieldList {
-	return g.currentResponseFieldList
-}
-
-type StructSource struct {
-	Name string
-	Type types.Type
 }
