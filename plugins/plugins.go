@@ -9,7 +9,6 @@ import (
 	"github.com/Yamashou/gqlgenc/v3/plugins/modelgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/querygen"
 	"github.com/Yamashou/gqlgenc/v3/queryparser"
-	"syscall"
 )
 
 func Run(cfg *config.Config) error {
@@ -34,9 +33,6 @@ func Run(cfg *config.Config) error {
 	// modelgen
 	// before querygen and clientgen because modelgen fills cfg.GQLGenConfig.Models.
 	if cfg.GQLGenConfig.Model.IsDefined() {
-		// remove generate file
-		_ = syscall.Unlink(cfg.GQLGenConfig.Model.Filename)
-
 		modelGen := modelgen.New(cfg, operationQueryDocuments)
 		if err := modelGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", modelGen.Name(), err)
@@ -81,9 +77,6 @@ func Run(cfg *config.Config) error {
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
-		// remove generate file
-		_ = syscall.Unlink(cfg.GQLGencConfig.QueryGen.Filename)
-
 		queryGen := querygen.New(cfg, fragments, operations, operationResponses, structSources)
 		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)
@@ -92,9 +85,6 @@ func Run(cfg *config.Config) error {
 
 	// clientgen
 	if cfg.GQLGencConfig.ClientGen.IsDefined() {
-		// remove generate file
-		_ = syscall.Unlink(cfg.GQLGencConfig.ClientGen.Filename)
-
 		clientGen := clientgen.New(cfg, operations)
 		if err := clientGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", clientGen.Name(), err)

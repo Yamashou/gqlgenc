@@ -4,10 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/Yamashou/gqlgenc/v3/plugins"
 	"os"
 
 	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/plugins"
 )
 
 const version = "3.0.0"

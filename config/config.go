@@ -15,6 +15,7 @@ import (
 	"os"
 	"slices"
 	"strings"
+	"syscall"
 )
 
 // Config extends the gqlgen basic config
@@ -50,9 +51,6 @@ func Load(configFilename string) (*Config, error) {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
 
-	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// gqlgen
-
 	// validation
 	if cfg.GQLGenConfig.SchemaFilename != nil && cfg.GQLGencConfig.Endpoint != nil {
 		return nil, fmt.Errorf("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
@@ -62,6 +60,14 @@ func Load(configFilename string) (*Config, error) {
 		return nil, fmt.Errorf("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
+	if cfg.GQLGencConfig.ClientGen.IsDefined() && !cfg.GQLGencConfig.QueryGen.IsDefined() {
+		return nil, fmt.Errorf("'clientgen' is set, 'querygen' must be set")
+	}
+
+	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// gqlgen
+
+	// check
 	if err := cfg.GQLGenConfig.Model.Check(); err != nil {
 		return nil, fmt.Errorf("model: %w", err)
 	}
@@ -115,6 +121,18 @@ func Load(configFilename string) (*Config, error) {
 func (c *Config) Init(ctx context.Context) error {
 	if err := c.loadSchema(ctx); err != nil {
 		return fmt.Errorf("failed to load schema: %w", err)
+	}
+
+	// delete exist gen file
+	if c.GQLGenConfig.Model.IsDefined() {
+		// model gen file must be remoted before cfg.Init()
+		_ = syscall.Unlink(c.GQLGenConfig.Model.Filename)
+	}
+	if c.GQLGencConfig.QueryGen.IsDefined() {
+		_ = syscall.Unlink(c.GQLGencConfig.QueryGen.Filename)
+	}
+	if c.GQLGencConfig.ClientGen.IsDefined() {
+		_ = syscall.Unlink(c.GQLGencConfig.ClientGen.Filename)
 	}
 
 	if err := c.GQLGenConfig.Init(); err != nil {
