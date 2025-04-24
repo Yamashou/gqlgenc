@@ -1,18 +1,18 @@
-package gen
+package plugins
 
 import (
 	"fmt"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/Yamashou/gqlgenc/v3/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/generator"
-	"github.com/Yamashou/gqlgenc/v3/modelgen"
-	"github.com/Yamashou/gqlgenc/v3/querygen"
+	"github.com/Yamashou/gqlgenc/v3/plugins/clientgen"
+	"github.com/Yamashou/gqlgenc/v3/plugins/modelgen"
+	"github.com/Yamashou/gqlgenc/v3/plugins/querygen"
 	"github.com/Yamashou/gqlgenc/v3/queryparser"
 	"syscall"
 )
 
-func Generate(cfg *config.Config) error {
+func Run(cfg *config.Config) error {
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Load Query
 	querySources, err := queryparser.LoadQuerySources(cfg.GQLGencConfig.Query)

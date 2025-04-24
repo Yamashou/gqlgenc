@@ -4,10 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/Yamashou/gqlgenc/v3/plugins"
 	"os"
 
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/gen"
 )
 
 const version = "3.0.0"
@@ -44,7 +44,7 @@ func run() error {
 		return fmt.Errorf("failed to init: %w", err)
 	}
 
-	if err := gen.Generate(cfg); err != nil {
+	if err := plugins.Run(cfg); err != nil {
 		return err
 	}
 	return nil
