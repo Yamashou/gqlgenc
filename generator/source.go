@@ -6,6 +6,8 @@ import (
 
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
+
+	"github.com/Yamashou/gqlgenc/v3/config"
 )
 
 type Source struct {
@@ -14,11 +16,11 @@ type Source struct {
 	sourceGenerator *SourceGenerator
 }
 
-func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGenerator *SourceGenerator) *Source {
+func NewSource(cfg *config.Config, queryDocument *ast.QueryDocument) *Source {
 	return &Source{
-		schema:          schema,
+		schema:          cfg.GQLGenConfig.Schema,
 		queryDocument:   queryDocument,
-		sourceGenerator: sourceGenerator,
+		sourceGenerator: NewSourceGenerator(cfg),
 	}
 }
 

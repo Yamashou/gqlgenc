@@ -195,7 +195,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 			panic("not match type")
 		}
 
-		// GraphQLの定義がオプショナルのはtypeのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
 		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
@@ -222,7 +221,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		}
 
 	case *ast.FragmentSpread:
-		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
+		// This structure is not used in templates but is used to determine Fragment in ast.Field.
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, layerTypeName(typeName, templates.ToGo(selection.Name)))
 		baseType := types.NewNamed(
 			types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil),
@@ -243,7 +242,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		}
 
 	case *ast.InlineFragment:
-		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
 		// InlineFragment has child elements, so create a struct type here
 		name := layerTypeName(typeName, templates.ToGo(selection.TypeCondition))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
@@ -251,10 +249,8 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		hasFragmentSpread := hasFragmentSpread(fieldsResponseFields)
 		fragmentFields := collectFragmentFields(fieldsResponseFields)
 
-		// フラグメントスプレッドがある場合
 		// if there is a fragment spread
 		if hasFragmentSpread {
-			// フラグメントからの全フィールドを集めます
 			// collect all fields from fragment
 			allFields := make(ResponseFieldList, 0)
 			for _, field := range fieldsResponseFields {
@@ -262,11 +258,9 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 					allFields = append(allFields, field)
 				}
 			}
-			// フラグメントのフィールドを追加
 			// append fragment fields
 			allFields = append(allFields, fragmentFields...)
 
-			// 構造体を生成
 			// generate struct
 			structType := allFields.StructType()
 			r.StructSources = append(r.StructSources, &StructSource{
@@ -287,7 +281,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 				ResponseFields:   allFields.SortByName(),
 			}
 		}
-		// フラグメントスプレッドがない場合
 		// if there is no fragment spread
 		structType := fieldsResponseFields.StructType()
 		r.StructSources = append(r.StructSources, &StructSource{

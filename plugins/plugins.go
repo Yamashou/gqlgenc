@@ -2,7 +2,9 @@ package plugins
 
 import (
 	"fmt"
+
 	"github.com/99designs/gqlgen/codegen/templates"
+
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/generator"
 	"github.com/Yamashou/gqlgenc/v3/plugins/clientgen"
@@ -31,7 +33,6 @@ func Run(cfg *config.Config) error {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// modelgen
-	// before querygen and clientgen because modelgen fills cfg.GQLGenConfig.Models.
 	if cfg.GQLGenConfig.Model.IsDefined() {
 		modelGen := modelgen.New(cfg, operationQueryDocuments)
 		if err := modelGen.MutateConfig(cfg.GQLGenConfig); err != nil {
@@ -41,8 +42,8 @@ func Run(cfg *config.Config) error {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// generating source
-	sourceGenerator := generator.NewSourceGenerator(cfg)
-	source := generator.NewSource(cfg.GQLGenConfig.Schema, queryDocument, sourceGenerator)
+	// must generate source after modelgen
+	source := generator.NewSource(cfg, queryDocument)
 
 	// Fragment
 	fragments, err := source.Fragments()
