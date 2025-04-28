@@ -12,24 +12,24 @@ func createTestStruct(fields []*types.Var, tags []string) *types.Struct {
 func TestMergeFieldsRecursively(t *testing.T) {
 	tests := []struct {
 		name               string
-		targetFields       ResponseFieldList
-		sourceFields       ResponseFieldList
+		targetFields       Fields
+		sourceFields       Fields
 		preMerged          []*QueryType
 		postMerged         []*QueryType
-		expectedFields     ResponseFieldList
+		expectedFields     Fields
 		expectedPreMerged  []*QueryType
 		expectedPostMerged []*QueryType
 	}{
 		{
 			name: "Basic merge case",
-			targetFields: ResponseFieldList{
+			targetFields: Fields{
 				{
 					Name: "field1",
 					Type: types.Typ[types.String],
 					Tags: []string{`json:"field1"`},
 				},
 			},
-			sourceFields: ResponseFieldList{
+			sourceFields: Fields{
 				{
 					Name: "field2",
 					Type: types.Typ[types.Int],
@@ -38,7 +38,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 			},
 			preMerged:  []*QueryType{},
 			postMerged: []*QueryType{},
-			expectedFields: ResponseFieldList{
+			expectedFields: Fields{
 				{
 					Name: "field1",
 					Type: types.Typ[types.String],
@@ -55,7 +55,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 		},
 		{
 			name: "Merge case with complex query including fragments",
-			targetFields: ResponseFieldList{
+			targetFields: Fields{
 				{
 					Name: "id",
 					Type: types.Typ[types.String],
@@ -72,7 +72,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 						nil,
 					)),
 					Tags: []string{`json:"profile"`},
-					ResponseFields: ResponseFieldList{
+					ResponseFields: Fields{
 						{
 							Name: "id",
 							Type: types.Typ[types.String],
@@ -89,7 +89,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 							)),
 							Tags:             []string{`json:"ProfileFragment"`},
 							IsFragmentSpread: true,
-							ResponseFields: ResponseFieldList{
+							ResponseFields: Fields{
 								{
 									Name: "name",
 									Type: types.Typ[types.String],
@@ -100,7 +100,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 					},
 				},
 			},
-			sourceFields: ResponseFieldList{
+			sourceFields: Fields{
 				{
 					Name: "profile",
 					Type: types.NewPointer(types.NewNamed(
@@ -112,7 +112,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 						nil,
 					)),
 					Tags: []string{`json:"profile"`},
-					ResponseFields: ResponseFieldList{
+					ResponseFields: Fields{
 						{
 							Name: "name",
 							Type: types.Typ[types.String],
@@ -123,7 +123,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 			},
 			preMerged:  []*QueryType{},
 			postMerged: []*QueryType{},
-			expectedFields: ResponseFieldList{
+			expectedFields: Fields{
 				{
 					Name: "id",
 					Type: types.Typ[types.String],
@@ -140,7 +140,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 						nil,
 					)),
 					Tags: []string{`json:"profile"`},
-					ResponseFields: ResponseFieldList{
+					ResponseFields: Fields{
 						{
 							Name: "id",
 							Type: types.Typ[types.String],
@@ -157,7 +157,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 							)),
 							Tags:             []string{`json:"ProfileFragment"`},
 							IsFragmentSpread: true,
-							ResponseFields: ResponseFieldList{
+							ResponseFields: Fields{
 								{
 									Name: "name",
 									Type: types.Typ[types.String],
@@ -233,132 +233,5 @@ func TestMergeFieldsRecursively(t *testing.T) {
 				}
 			}
 		})
-	}
-}
-
-func TestFragmentSpreadExpansionInInlineFragment(t *testing.T) {
-	// このテストでは、フラグメントスプレッドがあるインラインフラグメントで
-	// `hasFragmentSpread` と `collectFragmentFields` 関数が正しく動作することを確認します
-	//
-	// This test verifies that `hasFragmentSpread` and `collectFragmentFields` functions
-	// work correctly when handling fragment spreads in inline fragments.
-
-	// テストデータを作成
-	// Create test data
-	// フラグメントスプレッドを含むフィールドのセット
-	// A set of fields containing fragment spreads
-	responseFields := ResponseFieldList{
-		{
-			Name: "languages",
-			Type: types.NewPointer(types.NewNamed(
-				types.NewTypeName(0, nil, "LanguagesConnection", nil),
-				types.NewStruct(nil, nil),
-				nil,
-			)),
-			Tags: []string{`json:"languages,omitempty" graphql:"languages"`},
-		},
-		{
-			Name:             "RepositoryFragment",
-			Type:             types.NewPointer(types.NewNamed(types.NewTypeName(0, nil, "RepositoryFragment", nil), types.NewStruct(nil, nil), nil)),
-			IsFragmentSpread: true,
-			ResponseFields: ResponseFieldList{
-				{
-					Name: "id",
-					Type: types.Typ[types.String],
-					Tags: []string{`json:"id" graphql:"id"`},
-				},
-				{
-					Name: "name",
-					Type: types.Typ[types.String],
-					Tags: []string{`json:"name" graphql:"name"`},
-				},
-			},
-		},
-	}
-
-	// フラグメントスプレッドの存在を確認
-	// Verify the existence of fragment spreads
-	hasFragmentSpread := hasFragmentSpread(responseFields)
-	if !hasFragmentSpread {
-		t.Errorf("Expected hasFragmentSpread to return true when a fragment spread is present")
-	}
-
-	// フラグメントフィールドの収集をテスト
-	// Test the collection of fragment fields
-	fragmentFields := collectFragmentFields(responseFields)
-	if len(fragmentFields) != 2 {
-		t.Errorf("Expected 2 fields from fragment spread, got %d", len(fragmentFields))
-	}
-
-	// フィールド名を検証
-	// Validate field names
-	foundID := false
-	foundName := false
-
-	for _, field := range fragmentFields {
-		switch field.Name {
-		case "id":
-			foundID = true
-		case "name":
-			foundName = true
-		}
-	}
-
-	if !foundID {
-		t.Errorf("Expected to find 'id' field from fragment")
-	}
-	if !foundName {
-		t.Errorf("Expected to find 'name' field from fragment")
-	}
-
-	// 実際のフラグメントスプレッド展開処理をテスト
-	// Test the actual fragment spread expansion process
-	// フラグメントスプレッドを含むフィールドから、すべてのフィールドを集める
-	// Collect all fields from fields containing fragment spreads
-	allFields := make(ResponseFieldList, 0)
-	for _, field := range responseFields {
-		if !field.IsFragmentSpread {
-			allFields = append(allFields, field)
-		}
-	}
-	// フラグメントのフィールドを追加
-	// Add fields from fragments
-	allFields = append(allFields, fragmentFields...)
-
-	// フィールドの数を検証
-	// Validate the number of fields
-	if len(allFields) != 3 { // languages + id + name
-		t.Errorf("Expected 3 fields after expansion, got %d", len(allFields))
-	}
-
-	// フィールド名を検証
-	// Validate field names
-	foundLanguages := false
-	foundID = false
-	foundName = false
-
-	for _, field := range allFields {
-		switch field.Name {
-		case "languages":
-			foundLanguages = true
-		case "id":
-			foundID = true
-		case "name":
-			foundName = true
-		case "RepositoryFragment":
-			// このフィールドは展開されるため、ここには存在しないはず
-			// This field should not exist after expansion
-			t.Errorf("RepositoryFragment field should not exist after expansion")
-		}
-	}
-
-	if !foundLanguages {
-		t.Errorf("Expected to find 'languages' field")
-	}
-	if !foundID {
-		t.Errorf("Expected to find 'id' field from fragment")
-	}
-	if !foundName {
-		t.Errorf("Expected to find 'name' field from fragment")
 	}
 }

@@ -13,22 +13,27 @@ type Operation struct {
 	VariableDefinitions ast.VariableDefinitionList
 	Operation           string
 	Args                []*OperationArgument
-	OperationResponse   *OperationResponse
 }
 
-func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*OperationArgument, operationResponse *OperationResponse) *Operation {
+func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*OperationArgument) *Operation {
 	return &Operation{
 		Name:                operation.Name,
 		VariableDefinitions: operation.VariableDefinitions,
 		Operation:           queryString(queryDocument),
 		Args:                args,
-		OperationResponse:   operationResponse,
 	}
 }
 
 type OperationArgument struct {
 	Variable string
 	Type     types.Type
+}
+
+func NewOperationArgument(variable string, t types.Type) *OperationArgument {
+	return &OperationArgument{
+		Variable: variable,
+		Type:     t,
+	}
 }
 
 type OperationResponse struct {

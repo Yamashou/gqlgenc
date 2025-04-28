@@ -88,100 +88,72 @@ func NewGoTypeGenerator(cfg *config.Config) *GoTypeGenerator {
 	}
 }
 
+func (r *GoTypeGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
+	operationArguments := make([]*OperationArgument, 0, len(variableDefinitions))
+	for _, v := range variableDefinitions {
+		t := r.binder.CopyModifiersFromAst(v.Type, r.goType(v.Type.Name()))
+		operationArgument := NewOperationArgument(v.Variable, t)
+		operationArguments = append(operationArguments, operationArgument)
+	}
+
+	return operationArguments
+}
 func (r *GoTypeGenerator) OperationResponse(selectionSet ast.SelectionSet, typeName string) *OperationResponse {
-	responseFields := r.newResponseFields(selectionSet, typeName)
+	responseFields := r.newFields(selectionSet, typeName)
 	return NewOperationResponse(typeName, responseFields.StructType())
 }
 
-func (r *GoTypeGenerator) OperationResponseBySelection(selection ast.Selection) *OperationResponse {
-	switch v := selection.(type) {
-	case *ast.Field:
-		return NewOperationResponse(v.Definition.Type.Name(), r.binder.CopyModifiersFromAst(v.Definition.Type, r.goType(v.Definition.Type.Name())))
-	}
-	return nil
+func (r *GoTypeGenerator) Fragment(fragmentSelectionSet ast.SelectionSet, fragmentTypeName string) *Fragment {
+	fragmentTypeFields := r.newFields(fragmentSelectionSet, fragmentTypeName)
+	return NewFragment(fragmentTypeName, fragmentTypeFields.StructType())
 }
 
-func (r *GoTypeGenerator) Fragment(selectionSet ast.SelectionSet, typeName string) *Fragment {
-	responseFields := r.newResponseFields(selectionSet, typeName)
-	return NewFragment(typeName, responseFields.StructType())
-}
-
-func (r *GoTypeGenerator) newResponseFields(selectionSet ast.SelectionSet, typeName string) ResponseFieldList {
-	responseFields := make(ResponseFieldList, 0, len(selectionSet))
+func (r *GoTypeGenerator) newFields(selectionSet ast.SelectionSet, typeName string) Fields {
+	fields := make(Fields, 0, len(selectionSet))
 	for _, selection := range selectionSet {
-		responseFields = append(responseFields, r.newResponseField(selection, typeName))
+		fields = append(fields, r.newField(selection, typeName))
 	}
 
-	return responseFields
+	return fields
 }
 
-func (r *GoTypeGenerator) newResponseField(selection ast.Selection, typeName string) *ResponseField {
-	var isOptional bool
+func (r *GoTypeGenerator) newField(selection ast.Selection, typeName string) *Field {
 	switch selection := selection.(type) {
 	case *ast.Field:
 		typeName = layerTypeName(typeName, templates.ToGo(selection.Alias))
-		fieldsResponseFields := r.newResponseFields(selection.SelectionSet, typeName)
-
-		isOptional = !selection.Definition.Type.NonNull
+		fields := r.newFields(selection.SelectionSet, typeName)
 
 		var baseType types.Type
 		switch {
-		case fieldsResponseFields.isBasicType():
+		case fields.isBasicType():
 			baseType = r.goType(selection.Definition.Type.Name())
-		case fieldsResponseFields.isFragment():
+		case fields.isFragment():
 			// if a child field is fragment, this field type became fragment.
-			baseType = fieldsResponseFields[0].Type
-		case fieldsResponseFields.isStructType():
-			// if there is a fragment in child fields, merge it with the current field
-			generator := newStructGenerator(fieldsResponseFields)
-
-			// Merges existing struct sources with the ones from fragment processing
-			// For example, if we have:
-			// query {
-			//   user {
-			//     ...UserProfile
-			//     ...UserOrders
-			//   }
-			// }
-			// The fragments UserProfile and UserOrders will be processed and merged
-			// TODO: ここは何をしている？
-			r.QueryTypes = mergedQueryTypes(r.QueryTypes, generator.preMergedStructSources, generator.postMergedStructSources)
+			baseType = fields[0].Type
+		case fields.isQueryType():
+			generator := newQueryTypeGen(fields)
+			r.QueryTypes = mergedQueryTypes(r.QueryTypes, generator.preMergedQueryTypes, generator.postMergedQueryTypes)
 
 			// Adds the current struct to StructSources
 			// For example, in "profile { bio avatar }", this would add a User_Profile struct
-			structType := generator.currentResponseFieldList.StructType()
+			structType := generator.currentFields.StructType()
 			r.QueryTypes = appendStructSources(r.QueryTypes, NewQueryType(typeName, structType))
 			baseType = types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 		default:
 			// here is bug
 			panic("not match type")
 		}
-
 		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
-
-		// json tag
-		jsonTag := fmt.Sprintf(`json:"%s`, selection.Alias)
-		if isOptional {
-			if r.config.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *r.config.GQLGenConfig.EnableModelJsonOmitemptyTag {
-				jsonTag += `,omitempty`
-			}
-			if r.config.GQLGenConfig.EnableModelJsonOmitzeroTag != nil && *r.config.GQLGenConfig.EnableModelJsonOmitzeroTag {
-				jsonTag += `,omitzero`
-			}
-		}
-		jsonTag += `"`
-
-		// graphql tag
+		// tags
+		jsonTag := r.jsonTag(selection.Alias, selection.Definition.Type.NonNull)
 		graphqlTag := fmt.Sprintf(`graphql:"%s"`, selection.Alias)
-
-		return &ResponseField{
+		return &Field{
 			Name:           selection.Alias,
 			Type:           typ,
 			Tags:           []string{jsonTag, graphqlTag},
-			ResponseFields: fieldsResponseFields,
+			ResponseFields: fields,
 		}
-
 	case *ast.FragmentSpread:
 		// This structure is not used in templates but is used to determine Fragment in ast.Field.
 		// Processes fragment spreads like "...UserFragment" in:
@@ -190,14 +162,10 @@ func (r *GoTypeGenerator) newResponseField(selection ast.Selection, typeName str
 		//     ...UserFragment
 		//   }
 		// }
-		fieldsResponseFields := r.newResponseFields(selection.Definition.SelectionSet, layerTypeName(typeName, templates.ToGo(selection.Name)))
-		baseType := types.NewNamed(
-			types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil),
-			fieldsResponseFields.StructType(),
-			nil,
-		)
-
-		return &ResponseField{
+		fragmentName := templates.ToGo(selection.Name)
+		fieldsResponseFields := r.newFields(selection.Definition.SelectionSet, layerTypeName(typeName, fragmentName))
+		baseType := types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), fragmentName, nil), fieldsResponseFields.StructType(), nil)
+		return &Field{
 			Name:             selection.Name,
 			Type:             baseType,
 			IsFragmentSpread: true,
@@ -215,7 +183,7 @@ func (r *GoTypeGenerator) newResponseField(selection ast.Selection, typeName str
 		//   }
 		// }
 		name := layerTypeName(typeName, templates.ToGo(selection.TypeCondition))
-		fieldsResponseFields := r.newResponseFields(selection.SelectionSet, name)
+		fieldsResponseFields := r.newFields(selection.SelectionSet, name)
 
 		//hasFragmentSpread := hasFragmentSpread(fieldsResponseFields)
 		//fragmentFields := collectFragmentFields(fieldsResponseFields)
@@ -253,9 +221,10 @@ func (r *GoTypeGenerator) newResponseField(selection ast.Selection, typeName str
 		// if there is no fragment spread
 		// Creates a simple struct for inline fragment without nested fragment spreads
 		structType := fieldsResponseFields.StructType()
-		// r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
+		// 今の所なくてよさそう
+		// r.QueryTypes = appendStructSources(r.QueryTypes, NewQueryType(name, structType))
 		typ := types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil), structType, nil)
-		return &ResponseField{
+		return &Field{
 			Name:             selection.TypeCondition,
 			Type:             typ,
 			IsInlineFragment: true,
@@ -267,16 +236,20 @@ func (r *GoTypeGenerator) newResponseField(selection ast.Selection, typeName str
 	panic("unexpected selection type")
 }
 
-func (r *GoTypeGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
-	argumentTypes := make([]*OperationArgument, 0, len(variableDefinitions))
-	for _, v := range variableDefinitions {
-		argumentTypes = append(argumentTypes, &OperationArgument{
-			Variable: v.Variable,
-			Type:     r.binder.CopyModifiersFromAst(v.Type, r.goType(v.Type.Name())),
-		})
+// such as from a selection.
+func (r *GoTypeGenerator) jsonTag(typeName string, nonNull bool) string {
+	// json tag
+	jsonTag := fmt.Sprintf(`json:"%s`, typeName)
+	if !nonNull {
+		if r.config.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *r.config.GQLGenConfig.EnableModelJsonOmitemptyTag {
+			jsonTag += `,omitempty`
+		}
+		if r.config.GQLGenConfig.EnableModelJsonOmitzeroTag != nil && *r.config.GQLGenConfig.EnableModelJsonOmitzeroTag {
+			jsonTag += `,omitzero`
+		}
 	}
-
-	return argumentTypes
+	jsonTag += `"`
+	return jsonTag
 }
 
 // The typeName passed as an argument to goType must be the name of the type derived from the parsed result,
@@ -308,16 +281,16 @@ func appendStructSources(sources []*QueryType, appends ...*QueryType) []*QueryTy
 //	}
 //
 // The merged struct will have fields: 'name', 'email', and 'accountType'
-func mergedQueryTypes(sources, preMergedStructSources, postMergedStructSources []*QueryType) []*QueryType {
+func mergedQueryTypes(queryTypes, preMergedStructSources, postMergedStructSources []*QueryType) []*QueryType {
 	preMergedStructSourcesMap := structSourcesMapByTypeName(preMergedStructSources)
 	res := make([]*QueryType, 0)
 	// remove pre-merged struct
-	for _, source := range sources {
+	for _, queryType := range queryTypes {
 		// when name is same, remove it
-		if _, ok := preMergedStructSourcesMap[source.Name]; ok {
+		if _, ok := preMergedStructSourcesMap[queryType.Name]; ok {
 			continue
 		}
-		res = append(res, source)
+		res = append(res, queryType)
 	}
 
 	// append post-merged struct
@@ -326,27 +299,15 @@ func mergedQueryTypes(sources, preMergedStructSources, postMergedStructSources [
 	return res
 }
 
-// hasFragmentSpread checks if any field in the ResponseFieldList is a fragment spread.
+// hasFragmentSpread checks if any field in the Fields is a fragment spread.
 // Used to determine if special fragment handling is needed.
-func hasFragmentSpread(fields ResponseFieldList) bool {
+func hasFragmentSpread(fields Fields) bool {
 	for _, field := range fields {
 		if field.IsFragmentSpread {
 			return true
 		}
 	}
 	return false
-}
-
-// collectFragmentFields extracts all fields from fragment spreads in the ResponseFieldList.
-// This is used when merging fragments into a parent struct.
-func collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
-	var fragmentFields ResponseFieldList
-	for _, field := range fields {
-		if field.IsFragmentSpread {
-			fragmentFields = append(fragmentFields, field.ResponseFields...)
-		}
-	}
-	return fragmentFields
 }
 
 // mergeFieldsRecursively combines fields from source and target ResponseFieldLists,
@@ -370,8 +331,8 @@ func collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
 //
 // When both fragments are used together, the 'profile' field needs
 // to include all sub-fields: bio, avatar, and links.
-func mergeFieldsRecursively(targetFields, sourceFields ResponseFieldList, preMerged, postMerged []*QueryType) (ResponseFieldList, []*QueryType, []*QueryType) {
-	responseFieldList := make(ResponseFieldList, 0)
+func mergeFieldsRecursively(targetFields, sourceFields Fields, preMerged, postMerged []*QueryType) (Fields, []*QueryType, []*QueryType) {
+	responseFieldList := make(Fields, 0)
 	targetFieldsMap := targetFields.mapByName()
 	newPreMerged := preMerged
 	newPostMerged := postMerged
@@ -431,32 +392,32 @@ func layerTypeName(base, thisField string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
 }
 
-type ResponseField struct {
+type Field struct {
 	Name             string
 	IsFragmentSpread bool
 	IsInlineFragment bool
 	Type             types.Type
 	Tags             []string
-	ResponseFields   ResponseFieldList
+	ResponseFields   Fields
 }
 
-func (r ResponseField) fieldTypeString() string {
+func (r Field) fieldTypeString() string {
 	fullFieldType := r.Type.String()
 	parts := strings.Split(fullFieldType, ".")
 	return parts[len(parts)-1]
 }
 
-type ResponseFieldList []*ResponseField
+type Fields []*Field
 
-func (rs ResponseFieldList) UniqueByName() ResponseFieldList {
-	responseFieldMapByName := make(map[string]*ResponseField, len(rs))
+func (rs Fields) UniqueByName() Fields {
+	responseFieldMapByName := make(map[string]*Field, len(rs))
 	for _, field := range rs {
 		responseFieldMapByName[field.Name] = field
 	}
 	return slices.Collect(maps.Values(responseFieldMapByName))
 }
 
-func (rs ResponseFieldList) IsFragmentSpread() bool {
+func (rs Fields) IsFragmentSpread() bool {
 	if len(rs) != 1 {
 		return false
 	}
@@ -464,7 +425,7 @@ func (rs ResponseFieldList) IsFragmentSpread() bool {
 	return rs[0].IsFragmentSpread
 }
 
-// StructType creates a Go struct type from the ResponseFieldList.
+// StructType creates a Go struct type from the Fields.
 // This is used to generate the final struct definitions for GraphQL objects.
 //
 // For example, with this GraphQL:
@@ -477,7 +438,7 @@ func (rs ResponseFieldList) IsFragmentSpread() bool {
 //
 // It would create a struct with fields for id, name, and email,
 // including appropriate JSON and GraphQL tags.
-func (rs ResponseFieldList) StructType() *types.Struct {
+func (rs Fields) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
 	for _, field := range rs.UniqueByName() {
@@ -487,7 +448,7 @@ func (rs ResponseFieldList) StructType() *types.Struct {
 	return types.NewStruct(vars, structTags)
 }
 
-func (rs ResponseFieldList) isFragment() bool {
+func (rs Fields) isFragment() bool {
 	if len(rs) != 1 {
 		return false
 	}
@@ -495,41 +456,41 @@ func (rs ResponseFieldList) isFragment() bool {
 	return rs[0].IsInlineFragment || rs[0].IsFragmentSpread
 }
 
-func (rs ResponseFieldList) isBasicType() bool {
+func (rs Fields) isBasicType() bool {
 	return len(rs) == 0
 }
 
-func (rs ResponseFieldList) isStructType() bool {
+func (rs Fields) isQueryType() bool {
 	return len(rs) > 0 && !rs.isFragment()
 }
 
-func (rs ResponseFieldList) mapByName() map[string]*ResponseField {
-	res := make(map[string]*ResponseField)
+func (rs Fields) mapByName() map[string]*Field {
+	res := make(map[string]*Field)
 	for _, field := range rs {
 		res[field.Name] = field
 	}
 	return res
 }
 
-func (rs ResponseFieldList) sortByName() ResponseFieldList {
-	slices.SortFunc(rs, func(a, b *ResponseField) int {
+func (rs Fields) sortByName() Fields {
+	slices.SortFunc(rs, func(a, b *Field) int {
 		return strings.Compare(a.Name, b.Name)
 	})
 	return rs
 }
 
-// StructGenerator manages the creation of Go struct types from GraphQL selections.
+// QueryTypeGenerator manages the creation of Go struct types from GraphQL selections.
 // It handles the complexity of merging fields from different fragments.
-type StructGenerator struct {
-	// Create fields based on this ResponseFieldList
-	currentResponseFieldList ResponseFieldList
+type QueryTypeGenerator struct {
+	// Create fields based on this Fields
+	currentFields Fields
 	// Struct sources that will no longer be created due to merging
-	preMergedStructSources []*QueryType
+	preMergedQueryTypes []*QueryType
 	// Struct sources that will be created due to merging
-	postMergedStructSources []*QueryType
+	postMergedQueryTypes []*QueryType
 }
 
-// newStructGenerator creates a new StructGenerator instance that handles
+// newQueryTypeGen creates a new QueryTypeGenerator instance that handles
 // the transformation of GraphQL selections to Go structs.
 //
 // Example of structure generation for a query with fragments:
@@ -553,9 +514,9 @@ type StructGenerator struct {
 //	}
 //
 // The resulting struct would have all fields: id, name, email, theme, notifications
-func newStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
-	currentFields := make(ResponseFieldList, 0)
-	fragmentChildrenFields := make(ResponseFieldList, 0)
+func newQueryTypeGen(responseFieldList Fields) *QueryTypeGenerator {
+	currentFields := make(Fields, 0)
+	fragmentChildrenFields := make(Fields, 0)
 	for _, field := range responseFieldList {
 		if field.IsFragmentSpread {
 			fragmentChildrenFields = append(fragmentChildrenFields, field.ResponseFields...)
@@ -576,9 +537,9 @@ func newStructGenerator(responseFieldList ResponseFieldList) *StructGenerator {
 	}
 
 	currentFields, preMergedStructSources, postMergedStructSources := mergeFieldsRecursively(currentFields, fragmentChildrenFields, preMergedStructSources, nil)
-	return &StructGenerator{
-		currentResponseFieldList: currentFields,
-		preMergedStructSources:   preMergedStructSources,
-		postMergedStructSources:  postMergedStructSources,
+	return &QueryTypeGenerator{
+		currentFields:        currentFields,
+		preMergedQueryTypes:  preMergedStructSources,
+		postMergedQueryTypes: postMergedStructSources,
 	}
 }

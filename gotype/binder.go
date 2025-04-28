@@ -28,13 +28,11 @@ func (s *Binder) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, 
 
 	queryDocumentsMap := queryDocumentMapByOperationName(queryDocuments)
 	operationArgsMap := s.operationArgsMapByOperationName()
-	operationResponseMapByOperationName := s.operationResponseMapByOperationName()
 
 	for _, operation := range s.queryDocument.Operations {
 		queryDocument := queryDocumentsMap[operation.Name]
 		args := operationArgsMap[operation.Name]
-		operationResponse := operationResponseMapByOperationName[operation.Name]
-		operations = append(operations, NewOperation(operation, queryDocument, args, operationResponse))
+		operations = append(operations, NewOperation(operation, queryDocument, args))
 	}
 
 	return operations, nil
@@ -71,15 +69,6 @@ func (s *Binder) operationArgsMapByOperationName() map[string][]*OperationArgume
 	}
 
 	return operationArgsMap
-}
-
-func (s *Binder) operationResponseMapByOperationName() map[string]*OperationResponse {
-	operationResponseMap := make(map[string]*OperationResponse)
-	for _, operation := range s.queryDocument.Operations {
-		operationResponseMap[operation.Name] = s.goTypeGenerator.OperationResponseBySelection(operation.SelectionSet[0])
-	}
-
-	return operationResponseMap
 }
 
 func queryDocumentMapByOperationName(queryDocuments []*ast.QueryDocument) map[string]*ast.QueryDocument {

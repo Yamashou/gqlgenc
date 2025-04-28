@@ -1,20 +1,21 @@
 // Fragment
-{{- range $name, $element := .Fragments }}
-type  {{ .Name | go  }} {{ .Type | ref }}
+{{- range $fragment := .Fragments }}
+type  {{ $fragment.Name | go  }} {{ $fragment.Type | ref }}
 
 {{- end }}
 
-// NestedQuery
-{{- range $name, $element := .StructSources }}
-type {{ .Name }} {{ .Type | ref }}
+// QueryTypes
+{{- range $queryType := .QueryTypes }}
+type {{ $queryType.Name }} {{ $queryType.Type | ref }}
 
+{{ getterFunc (.Name|go) .Type }}
 {{- end}}
 
 // OperationResponse
-{{- range $name, $element := .OperationResponses }}
-type  {{ .Name | go  }} {{ .Type | ref }}
+{{- range $operationResponse := .OperationResponses }}
+type  {{ $operationResponse.Name | go  }} {{ $operationResponse.Type | ref }}
 
-{{ getterFunc (.Name|go) .Type }}
+{{ getterFunc ($operationResponse.Name|go) $operationResponse.Type }}
 {{- end }}
 
 // Operation
