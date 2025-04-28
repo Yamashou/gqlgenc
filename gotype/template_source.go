@@ -12,11 +12,11 @@ type Operation struct {
 	Name                string
 	VariableDefinitions ast.VariableDefinitionList
 	Operation           string
-	Args                []*Argument
+	Args                []*OperationArgument
 	OperationResponse   *OperationResponse
 }
 
-func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*Argument, operationResponse *OperationResponse) *Operation {
+func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*OperationArgument, operationResponse *OperationResponse) *Operation {
 	return &Operation{
 		Name:                operation.Name,
 		VariableDefinitions: operation.VariableDefinitions,
@@ -26,7 +26,7 @@ func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDo
 	}
 }
 
-type Argument struct {
+type OperationArgument struct {
 	Variable string
 	Type     types.Type
 }

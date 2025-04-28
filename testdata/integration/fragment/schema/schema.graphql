@@ -9,4 +9,10 @@ type Query {
 type User {
   id: ID!
   name: String!
+  profile: Profile!
+}
+
+type Profile {
+  id: ID!
+  age: Int!
 }

@@ -4,28 +4,14 @@ package domain
 
 // Fragment
 type UserFragment1 struct {
-	Name string "json:\"name\" graphql:\"name\""
+	Name    string                "json:\"name\" graphql:\"name\""
+	Profile UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
 }
-
-func (t *UserFragment1) GetName() string {
-	if t == nil {
-		t = &UserFragment1{}
-	}
-	return t.Name
-}
-
 type UserFragment2 struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
-func (t *UserFragment2) GetName() string {
-	if t == nil {
-		t = &UserFragment2{}
-	}
-	return t.Name
-}
-
-// Structs
+// NestedQuery
 
 // OperationResponse
 type UserOperation struct {
@@ -43,6 +29,9 @@ func (t *UserOperation) GetUser() *UserOperation_User {
 const UserOperationDocument = `query UserOperation {
 	user {
 		name
+		profile {
+			age
+		}
 		... UserFragment1
 		... UserFragment2
 	}
@@ -50,6 +39,9 @@ const UserOperationDocument = `query UserOperation {
 fragment UserFragment1 on User {
 	name
 	name
+	profile {
+		age
+	}
 }
 fragment UserFragment2 on User {
 	name

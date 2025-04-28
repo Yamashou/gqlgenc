@@ -5,10 +5,15 @@ package domain
 // Fragment
 type UserFragment1 struct {
 	Name string "json:\"name\" graphql:\"name\""
+	Profile userFragment1_Profile "json:\"profile\" graphql:\"profile\""
 }
 
 type UserFragment2 struct {
 	Name string "json:\"name\" graphql:\"name\""
+}
+
+type userFragment1_Profile struct {
+	Age int "json:\"age\""
 }
 
 // Structs
@@ -26,6 +31,9 @@ type UserOperation struct {
 const UserOperationDocument = `query UserOperation {
 	user {
 		name
+		profile {
+			age
+		}
 		... UserFragment1
 		... UserFragment2
 	}
@@ -33,9 +41,18 @@ const UserOperationDocument = `query UserOperation {
 fragment UserFragment1 on User {
 	name
 	name
+	profile {
+		age
+	}
 }
 fragment UserFragment2 on User {
 	name
+}
+	user {
+		name
+		... UserFragment1
+		... UserFragment2
+	}
 }
 `
 

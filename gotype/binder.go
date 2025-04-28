@@ -79,8 +79,8 @@ func (s *Binder) ResponseSubTypes() []*StructSource {
 	return s.generator.StructSources
 }
 
-func (s *Binder) operationArgsMapByOperationName() map[string][]*Argument {
-	operationArgsMap := make(map[string][]*Argument)
+func (s *Binder) operationArgsMapByOperationName() map[string][]*OperationArgument {
+	operationArgsMap := make(map[string][]*OperationArgument)
 	for _, operation := range s.queryDocument.Operations {
 		operationArgsMap[operation.Name] = s.generator.OperationArguments(operation.VariableDefinitions)
 	}

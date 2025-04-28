@@ -2,14 +2,12 @@
 {{- range $name, $element := .Fragment }}
 type  {{ .Name | go  }} {{ .Type | ref }}
 
-{{ getterFunc (.Name|go) .Type }}
 {{- end }}
 
-// Structs
+// NestedQuery
 {{- range $name, $element := .StructSources }}
 type {{ .Name }} {{ .Type | ref }}
 
-{{ getterFunc .Name .Type }}
 {{- end}}
 
 // OperationResponse

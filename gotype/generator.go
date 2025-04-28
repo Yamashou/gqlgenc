@@ -249,10 +249,10 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 	panic("unexpected selection type")
 }
 
-func (r *Generator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*Argument {
-	argumentTypes := make([]*Argument, 0, len(variableDefinitions))
+func (r *Generator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
+	argumentTypes := make([]*OperationArgument, 0, len(variableDefinitions))
 	for _, v := range variableDefinitions {
-		argumentTypes = append(argumentTypes, &Argument{
+		argumentTypes = append(argumentTypes, &OperationArgument{
 			Variable: v.Variable,
 			Type:     r.binder.CopyModifiersFromAst(v.Type, r.goType(v.Type.Name())),
 		})
