@@ -127,12 +127,12 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			// }
 			// The fragments UserProfile and UserOrders will be processed and merged
 			// TODO: ここは何をしている？
-			r.StructSources = mergedStructSources(r.StructSources, generator.preMergedStructSources, generator.postMergedStructSources)
+			// r.StructSources = mergedStructSources(r.StructSources, generator.preMergedStructSources, generator.postMergedStructSources)
 
 			// Adds the current struct to StructSources
 			// For example, in "profile { bio avatar }", this would add a User_Profile struct
 			structType := generator.currentResponseFieldList.StructType()
-			r.StructSources = appendStructSources(r.StructSources, NewStructSource(typeName, structType))
+			// r.StructSources = appendStructSources(r.StructSources, NewStructSource(typeName, structType))
 			baseType = types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 		default:
 			// here is bug
@@ -222,7 +222,7 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			//   ...PremiumUserDetails
 			// }
 			structType := allFields.StructType()
-			r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
+			// r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
 			typ := types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil), structType, nil)
 			return &ResponseField{
 				Name:             selection.TypeCondition,
@@ -235,7 +235,7 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 		// if there is no fragment spread
 		// Creates a simple struct for inline fragment without nested fragment spreads
 		structType := fieldsResponseFields.StructType()
-		r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
+		// r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
 		typ := types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil), structType, nil)
 		return &ResponseField{
 			Name:             selection.TypeCondition,

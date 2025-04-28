@@ -33,63 +33,6 @@ func (t *UserFragment2) GetUser() *UserFragment2_User {
 }
 
 // Structs
-type UserFragment2_User struct {
-	Name string "json:\"name\" graphql:\"name\""
-}
-
-func (t *UserFragment2_User) GetName() string {
-	if t == nil {
-		t = &UserFragment2_User{}
-	}
-	return t.Name
-}
-
-type UserOperation_User_User_UserFragment2_User struct {
-	Name string "json:\"name\" graphql:\"name\""
-}
-
-func (t *UserOperation_User_User_UserFragment2_User) GetName() string {
-	if t == nil {
-		t = &UserOperation_User_User_UserFragment2_User{}
-	}
-	return t.Name
-}
-
-type UserOperation_User_User struct {
-	Name string                                     "json:\"name\" graphql:\"name\""
-	User UserOperation_User_User_UserFragment2_User "graphql:\"... on User\""
-}
-
-func (t *UserOperation_User_User) GetName() string {
-	if t == nil {
-		t = &UserOperation_User_User{}
-	}
-	return t.Name
-}
-func (t *UserOperation_User_User) GetUser() *UserOperation_User_User_UserFragment2_User {
-	if t == nil {
-		t = &UserOperation_User_User{}
-	}
-	return &t.User
-}
-
-type UserOperation_User struct {
-	User UserOperation_User_User "graphql:\"... on User\""
-	Name string                  "json:\"name\" graphql:\"name\""
-}
-
-func (t *UserOperation_User) GetUser() *UserOperation_User_User {
-	if t == nil {
-		t = &UserOperation_User{}
-	}
-	return &t.User
-}
-func (t *UserOperation_User) GetName() string {
-	if t == nil {
-		t = &UserOperation_User{}
-	}
-	return t.Name
-}
 
 // OperationResponse
 type UserOperation struct {
