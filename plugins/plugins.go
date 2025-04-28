@@ -2,11 +2,9 @@ package plugins
 
 import (
 	"fmt"
-
-	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/Yamashou/gqlgenc/v3/clientgenv2"
 
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/gotype"
 	"github.com/Yamashou/gqlgenc/v3/plugins/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/modelgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/querygen"
@@ -42,43 +40,29 @@ func Run(cfg *config.Config) error {
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// generating source
-	// must generate source after modelgen
-	goTypeBinder := gotype.NewBinder(cfg, queryDocument)
+	// テンプレートと情報ソースを元にコード生成
+	// Generate code from template and document source
+	sourceGenerator := clientgenv2.NewSourceGenerator(cfg)
+	source := clientgenv2.NewSource(cfg.GQLGenConfig.Schema, queryDocument, sourceGenerator)
 
-	// Operation Response
-	operationResponses, err := goTypeBinder.OperationResponses()
+	fragments, err := source.Fragments()
+	if err != nil {
+		return fmt.Errorf("generating fragment failed: %w", err)
+	}
+
+	operationResponses, err := source.OperationResponses()
 	if err != nil {
 		return fmt.Errorf("generating operation response failed: %w", err)
 	}
 
-	for _, operationResponse := range operationResponses {
-		cfg.GQLGenConfig.Models.Add(operationResponse.Name, fmt.Sprintf("%s.%s", cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(operationResponse.Name)))
-	}
-
-	// Operation
-	operations, err := goTypeBinder.Operations(operationQueryDocuments)
-	if err != nil {
-		return fmt.Errorf("generating operation failed: %w", err)
-	}
-
-	// Query Type
-	queryTypes := goTypeBinder.QueryTypes()
-
-	// Fragment
-	fragments, err := goTypeBinder.Fragments()
-	if err != nil {
-		return fmt.Errorf("generating fragment failed: %w", err)
-	}
-	for _, fragment := range fragments {
-		cfg.GQLGenConfig.Models.Add(fragment.Name, fmt.Sprintf("%s.%s", cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(fragment.Name)))
-	}
+	operations := source.Operations(operationQueryDocuments)
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
-		queryGen := querygen.New(cfg, operations, operationResponses, queryTypes, fragments)
+		queryGen := querygen.New(cfg, operations, operationResponses, fragments)
 		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)
 		}

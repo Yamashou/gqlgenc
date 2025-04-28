@@ -5,8 +5,9 @@ import (
 	"go/types"
 	"strings"
 
-	"github.com/99designs/gqlgen/codegen/config"
+	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -67,15 +68,13 @@ func (rs ResponseFieldList) IsStructType() bool {
 
 type SourceGenerator struct {
 	cfg    *config.Config
-	binder *config.Binder
-	client config.PackageConfig
+	binder *gqlgenconfig.Binder
 }
 
-func NewSourceGenerator(cfg *config.Config, client config.PackageConfig) *SourceGenerator {
+func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
 	return &SourceGenerator{
 		cfg:    cfg,
-		binder: cfg.NewBinder(),
-		client: client,
+		binder: cfg.GQLGenConfig.NewBinder(),
 	}
 }
 
@@ -98,7 +97,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 		var typ types.Type
 		if field.Type.Name() == "Query" || field.Type.Name() == "Mutation" {
 			var baseType types.Type
-			baseType, err := r.binder.FindType(r.client.Pkg().Path(), field.Type.Name())
+			baseType, err := r.binder.FindType(r.cfg.GQLGencConfig.ClientGen.Pkg().Path(), field.Type.Name())
 			if err != nil {
 				if !strings.Contains(err.Error(), "unable to find type") {
 					return nil, fmt.Errorf("not found type: %w", err)
@@ -106,7 +105,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 
 				// create new type
 				baseType = types.NewPointer(types.NewNamed(
-					types.NewTypeName(0, r.client.Pkg(), templates.ToGo(field.Type.Name()), nil),
+					types.NewTypeName(0, r.cfg.GQLGencConfig.ClientGen.Pkg(), templates.ToGo(field.Type.Name()), nil),
 					nil,
 					nil,
 				))
@@ -115,7 +114,7 @@ func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definiti
 			// for recursive struct field in go
 			typ = types.NewPointer(baseType)
 		} else {
-			baseType, err := r.binder.FindTypeFromName(r.cfg.Models[field.Type.Name()].Model[0])
+			baseType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[field.Type.Name()].Model[0])
 			if err != nil {
 				return nil, fmt.Errorf("not found type: %w", err)
 			}
@@ -179,7 +178,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet)
 		typ := types.NewNamed(
-			types.NewTypeName(0, r.client.Pkg(), templates.ToGo(selection.Name), nil),
+			types.NewTypeName(0, r.cfg.GQLGencConfig.ClientGen.Pkg(), templates.ToGo(selection.Name), nil),
 			fieldsResponseFields.StructType(),
 			nil,
 		)
@@ -221,7 +220,7 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 
 // Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
 func (r *SourceGenerator) Type(typeName string) types.Type {
-	goType, err := r.binder.FindTypeFromName(r.cfg.Models[typeName].Model[0])
+	goType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[typeName].Model[0])
 	if err != nil {
 		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
 		panic(fmt.Sprintf("%+v", err))

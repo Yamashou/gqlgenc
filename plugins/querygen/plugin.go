@@ -2,11 +2,11 @@ package querygen
 
 import (
 	"fmt"
+	"github.com/Yamashou/gqlgenc/v3/clientgenv2"
 
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/gotype"
 	"golang.org/x/tools/imports"
 )
 
@@ -14,19 +14,17 @@ var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
 	cfg                *config.Config
-	operations         []*gotype.Operation
-	operationResponses []*gotype.OperationResponse
-	queryTypes         []*gotype.QueryType
-	fragments          []*gotype.Fragment
+	operations         []*clientgenv2.Operation
+	operationResponses []*clientgenv2.OperationResponse
+	fragments          []*clientgenv2.Fragment
 }
 
-func New(cfg *config.Config, operations []*gotype.Operation, operationResponses []*gotype.OperationResponse, queryTypes []*gotype.QueryType, fragments []*gotype.Fragment) *Plugin {
+func New(cfg *config.Config, operations []*clientgenv2.Operation, operationResponses []*clientgenv2.OperationResponse, fragments []*clientgenv2.Fragment) *Plugin {
 	return &Plugin{
 		cfg:                cfg,
 		fragments:          fragments,
 		operations:         operations,
 		operationResponses: operationResponses,
-		queryTypes:         queryTypes,
 	}
 }
 
@@ -35,7 +33,7 @@ func (p *Plugin) Name() string {
 }
 
 func (p *Plugin) MutateConfig(_ *gqlgenconfig.Config) error {
-	if err := RenderTemplate(p.cfg, p.fragments, p.operations, p.operationResponses, p.queryTypes); err != nil {
+	if err := RenderTemplate(p.cfg, p.fragments, p.operations, p.operationResponses); err != nil {
 		return fmt.Errorf("template failed: %w", err)
 	}
 
