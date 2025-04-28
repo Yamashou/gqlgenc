@@ -199,39 +199,39 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 		name := layerTypeName(typeName, templates.ToGo(selection.TypeCondition))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
 
-		hasFragmentSpread := hasFragmentSpread(fieldsResponseFields)
-		fragmentFields := collectFragmentFields(fieldsResponseFields)
+		//hasFragmentSpread := hasFragmentSpread(fieldsResponseFields)
+		//fragmentFields := collectFragmentFields(fieldsResponseFields)
 
 		// if there is a fragment spread
-		if hasFragmentSpread {
-			// collect all fields from fragment
-			allFields := make(ResponseFieldList, 0)
-			for _, field := range fieldsResponseFields {
-				if !field.IsFragmentSpread {
-					allFields = append(allFields, field)
-				}
-			}
-			// append fragment fields
-			allFields = append(allFields, fragmentFields...)
-
-			// generate struct
-			// Creates a combined struct for inline fragment with nested fragment spreads
-			// For example:
-			// ... on PremiumUser {
-			//   subscriptionLevel
-			//   ...PremiumUserDetails
-			// }
-			structType := allFields.StructType()
-			// r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
-			typ := types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil), structType, nil)
-			return &ResponseField{
-				Name:             selection.TypeCondition,
-				Type:             typ,
-				IsInlineFragment: true,
-				Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
-				ResponseFields:   allFields.sortByName(),
-			}
-		}
+		//if hasFragmentSpread {
+		//	// collect all fields from fragment
+		//	allFields := make(ResponseFieldList, 0)
+		//	for _, field := range fieldsResponseFields {
+		//		if !field.IsFragmentSpread {
+		//			allFields = append(allFields, field)
+		//		}
+		//	}
+		//	// append fragment fields
+		//	allFields = append(allFields, fragmentFields...)
+		//
+		//	// generate struct
+		//	// Creates a combined struct for inline fragment with nested fragment spreads
+		//	// For example:
+		//	// ... on PremiumUser {
+		//	//   subscriptionLevel
+		//	//   ...PremiumUserDetails
+		//	// }
+		//	structType := allFields.StructType()
+		//	// r.StructSources = appendStructSources(r.StructSources, NewStructSource(name, structType))
+		//	typ := types.NewNamed(types.NewTypeName(0, r.config.GQLGencConfig.QueryGen.Pkg(), name, nil), structType, nil)
+		//	return &ResponseField{
+		//		Name:             selection.TypeCondition,
+		//		Type:             typ,
+		//		IsInlineFragment: true,
+		//		Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
+		//		ResponseFields:   allFields.sortByName(),
+		//	}
+		//}
 		// if there is no fragment spread
 		// Creates a simple struct for inline fragment without nested fragment spreads
 		structType := fieldsResponseFields.StructType()
