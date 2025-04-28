@@ -15,7 +15,8 @@ func (t *UserFragment1) GetName() string {
 }
 
 type UserFragment2 struct {
-	Name string "json:\"name\" graphql:\"name\""
+	Name string             "json:\"name\" graphql:\"name\""
+	User UserFragment2_User "graphql:\"... on User\""
 }
 
 func (t *UserFragment2) GetName() string {
@@ -24,51 +25,86 @@ func (t *UserFragment2) GetName() string {
 	}
 	return t.Name
 }
+func (t *UserFragment2) GetUser() *UserFragment2_User {
+	if t == nil {
+		t = &UserFragment2{}
+	}
+	return &t.User
+}
 
 // Structs
-type UserQuery_User_User struct {
+type UserFragment2_User struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
-func (t *UserQuery_User_User) GetName() string {
+func (t *UserFragment2_User) GetName() string {
 	if t == nil {
-		t = &UserQuery_User_User{}
+		t = &UserFragment2_User{}
 	}
 	return t.Name
 }
 
-type UserQuery_User struct {
-	User UserQuery_User_User "graphql:\"... on User\""
-	Name string              "json:\"name\" graphql:\"name\""
+type UserOperation_User_User_UserFragment2_User struct {
+	Name string "json:\"name\" graphql:\"name\""
 }
 
-func (t *UserQuery_User) GetUser() *UserQuery_User_User {
+func (t *UserOperation_User_User_UserFragment2_User) GetName() string {
 	if t == nil {
-		t = &UserQuery_User{}
+		t = &UserOperation_User_User_UserFragment2_User{}
+	}
+	return t.Name
+}
+
+type UserOperation_User_User struct {
+	Name string                                     "json:\"name\" graphql:\"name\""
+	User UserOperation_User_User_UserFragment2_User "graphql:\"... on User\""
+}
+
+func (t *UserOperation_User_User) GetName() string {
+	if t == nil {
+		t = &UserOperation_User_User{}
+	}
+	return t.Name
+}
+func (t *UserOperation_User_User) GetUser() *UserOperation_User_User_UserFragment2_User {
+	if t == nil {
+		t = &UserOperation_User_User{}
 	}
 	return &t.User
 }
-func (t *UserQuery_User) GetName() string {
+
+type UserOperation_User struct {
+	User UserOperation_User_User "graphql:\"... on User\""
+	Name string                  "json:\"name\" graphql:\"name\""
+}
+
+func (t *UserOperation_User) GetUser() *UserOperation_User_User {
 	if t == nil {
-		t = &UserQuery_User{}
+		t = &UserOperation_User{}
+	}
+	return &t.User
+}
+func (t *UserOperation_User) GetName() string {
+	if t == nil {
+		t = &UserOperation_User{}
 	}
 	return t.Name
 }
 
 // OperationResponse
-type UserQuery struct {
-	User UserQuery_User "json:\"user\" graphql:\"user\""
+type UserOperation struct {
+	User UserOperation_User "json:\"user\" graphql:\"user\""
 }
 
-func (t *UserQuery) GetUser() *UserQuery_User {
+func (t *UserOperation) GetUser() *UserOperation_User {
 	if t == nil {
-		t = &UserQuery{}
+		t = &UserOperation{}
 	}
 	return &t.User
 }
 
 // Operation
-const UserQueryDocument = `query UserQuery {
+const UserOperationDocument = `query UserOperation {
 	user {
 		name
 		... UserFragment1
@@ -86,9 +122,12 @@ fragment UserFragment1 on User {
 }
 fragment UserFragment2 on User {
 	name
+	... on User {
+		name
+	}
 }
 `
 
 var DocumentOperationNames = map[string]string{
-	UserQueryDocument: "UserQuery",
+	UserOperationDocument: "UserOperation",
 }

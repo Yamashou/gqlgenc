@@ -4,7 +4,6 @@ package query
 
 import (
 	"context"
-	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain"
 
 	"github.com/Yamashou/gqlgenc/v3/client"
 )
@@ -17,11 +16,11 @@ func NewClient(c *client.Client) *Client {
 	return &Client{client: c}
 }
 
-func (c *Client) UserQuery(ctx context.Context, options ...client.Option) (*domain.UserQuery, error) {
+func (c *Client) UserOperation(ctx context.Context, options ...client.Option) (*domain.UserOperation, error) {
 	vars := map[string]any{}
 
-	var res domain.UserQuery
-	if err := c.client.Post(ctx, "UserQuery", domain.UserQueryDocument, vars, &res, options...); err != nil {
+	var res domain.UserOperation
+	if err := c.client.Post(ctx, "UserOperation", domain.UserOperationDocument, vars, &res, options...); err != nil {
 		return nil, err
 	}
 

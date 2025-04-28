@@ -1,4 +1,4 @@
-query UserQuery {
+query UserOperation {
   user {
     name
     ...UserFragment1
@@ -18,4 +18,7 @@ fragment UserFragment1 on User {
 
 fragment UserFragment2 on User {
   name
+  ... on User {
+    name
+  }
 }
