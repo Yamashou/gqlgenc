@@ -179,14 +179,9 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			nil,
 		)
 
-		var typ types.Type = baseType
-		// TODO: 他でこれをみなくていいのか？
-		if r.config.GQLGenConfig.StructFieldsAlwaysPointers {
-			typ = types.NewPointer(baseType)
-		}
 		return &ResponseField{
 			Name:             selection.Name,
-			Type:             typ,
+			Type:             baseType,
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
 		}
