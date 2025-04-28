@@ -1,0 +1,12 @@
+gqlgenc:
+  query:
+    - ./query/*.graphql
+  querygen:
+    filename: ./domain/query_gen.go
+  clientgen:
+    filename: ./query/client_gen.go
+gqlgen:
+  schema:
+    - ./schema/*.graphql
+  model:
+    filename: ./domain/model_gen.go

@@ -1,0 +1,21 @@
+query UserQuery {
+  user {
+    name
+    ...UserFragment1
+    ...UserFragment2
+    ... on User {
+      name
+      ...UserFragment1
+      ...UserFragment2
+    }
+  }
+}
+
+fragment UserFragment1 on User {
+  name
+  name
+}
+
+fragment UserFragment2 on User {
+  name
+}

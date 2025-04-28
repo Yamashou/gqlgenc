@@ -3,6 +3,7 @@ package gotype
 import (
 	"fmt"
 	"go/types"
+	"maps"
 	"slices"
 	"strings"
 
@@ -147,7 +148,7 @@ func (r *Generator) newResponseField(selection ast.Selection, typeName string) *
 			if r.config.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *r.config.GQLGenConfig.EnableModelJsonOmitemptyTag {
 				jsonTag += `,omitempty`
 			}
-			if r.config.GQLGenConfig.EnableModelJsonOmitzeroTag == nil && *r.config.GQLGenConfig.EnableModelJsonOmitzeroTag {
+			if r.config.GQLGenConfig.EnableModelJsonOmitzeroTag != nil && *r.config.GQLGenConfig.EnableModelJsonOmitzeroTag {
 				jsonTag += `,omitzero`
 			}
 		}
@@ -445,6 +446,14 @@ func (r ResponseField) fieldTypeString() string {
 
 type ResponseFieldList []*ResponseField
 
+func (rs ResponseFieldList) UniqueByName() ResponseFieldList {
+	responseFieldMapByName := make(map[string]*ResponseField, len(rs))
+	for _, field := range rs {
+		responseFieldMapByName[field.Name] = field
+	}
+	return slices.Collect(maps.Values(responseFieldMapByName))
+}
+
 func (rs ResponseFieldList) IsFragmentSpread() bool {
 	if len(rs) != 1 {
 		return false
@@ -469,7 +478,7 @@ func (rs ResponseFieldList) IsFragmentSpread() bool {
 func (rs ResponseFieldList) StructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
-	for _, field := range rs {
+	for _, field := range rs.UniqueByName() {
 		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
 		structTags = append(structTags, strings.Join(field.Tags, " "))
 	}
