@@ -9,9 +9,6 @@ type UserFragment1 struct {
 
 type UserFragment2 struct {
 	Name string "json:\"name\" graphql:\"name\""
-	User struct {
-		Name string "json:\"name\""
-	}  `graphql:"... on User"`
 }
 
 // Structs
@@ -22,11 +19,6 @@ type UserOperation struct {
 		Name string "json:\"name\" graphql:\"name\""
 		UserFragment1
 		UserFragment2
-		User struct {
-			Name string "json:\"name\""
-			UserFragment1
-			UserFragment2
-		}  `graphql:"... on User"`
 	} "json:\"user\" graphql:\"user\""
 }
 
@@ -36,11 +28,6 @@ const UserOperationDocument = `query UserOperation {
 		name
 		... UserFragment1
 		... UserFragment2
-		... on User {
-			name
-			... UserFragment1
-			... UserFragment2
-		}
 	}
 }
 fragment UserFragment1 on User {
@@ -49,9 +36,6 @@ fragment UserFragment1 on User {
 }
 fragment UserFragment2 on User {
 	name
-	... on User {
-		name
-	}
 }
 `
 

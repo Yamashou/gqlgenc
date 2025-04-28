@@ -15,8 +15,7 @@ func (t *UserFragment1) GetName() string {
 }
 
 type UserFragment2 struct {
-	Name string             "json:\"name\" graphql:\"name\""
-	User UserFragment2_User "graphql:\"... on User\""
+	Name string "json:\"name\" graphql:\"name\""
 }
 
 func (t *UserFragment2) GetName() string {
@@ -24,12 +23,6 @@ func (t *UserFragment2) GetName() string {
 		t = &UserFragment2{}
 	}
 	return t.Name
-}
-func (t *UserFragment2) GetUser() *UserFragment2_User {
-	if t == nil {
-		t = &UserFragment2{}
-	}
-	return &t.User
 }
 
 // Structs
@@ -52,11 +45,6 @@ const UserOperationDocument = `query UserOperation {
 		name
 		... UserFragment1
 		... UserFragment2
-		... on User {
-			name
-			... UserFragment1
-			... UserFragment2
-		}
 	}
 }
 fragment UserFragment1 on User {
@@ -65,9 +53,6 @@ fragment UserFragment1 on User {
 }
 fragment UserFragment2 on User {
 	name
-	... on User {
-		name
-	}
 }
 `
 
