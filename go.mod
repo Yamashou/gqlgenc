@@ -6,7 +6,6 @@ require (
 	github.com/99designs/gqlgen v0.17.71
 	github.com/goccy/go-yaml v1.17.1
 	github.com/google/go-cmp v0.7.0
-	github.com/stretchr/testify v1.10.0
 	github.com/vektah/gqlparser/v2 v2.5.25
 	golang.org/x/text v0.24.0
 	golang.org/x/tools v0.32.0
@@ -172,6 +171,7 @@ require (
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.2.0 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tdakkota/asciicheck v0.4.1 // indirect
 	github.com/tetafro/godot v1.5.0 // indirect
