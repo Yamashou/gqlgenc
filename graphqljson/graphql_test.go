@@ -211,6 +211,61 @@ func TestUnmarshalGraphQL_objectPointerArray(t *testing.T) {
 	}
 }
 
+func TestUnmarshalGraphQL_multipleFragment(t *testing.T) {
+	t.Parallel()
+	type UserFragment1 struct {
+		Name string `json:"name"`
+	}
+	type UserFragment2 struct {
+		Name string `json:"name"`
+		User struct {
+			Name string `json:"name"`
+		} `graphql:"... on User"`
+	}
+	type query struct {
+		Name string `json:"name"`
+		UserFragment1
+		UserFragment2
+		User struct {
+			Name string `json:"name"`
+			UserFragment1
+			UserFragment2
+		} `graphql:"... on User"`
+	}
+	var got query
+	err := graphqljson.UnmarshalData([]byte(`{ "name": "John Doe" }`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := query{
+		Name:          "John Doe",
+		UserFragment1: UserFragment1{Name: "John Doe"},
+		UserFragment2: UserFragment2{
+			Name: "John Doe",
+			User: struct {
+				Name string `json:"name"`
+			}{Name: "John Doe"},
+		},
+		User: struct {
+			Name string `json:"name"`
+			UserFragment1
+			UserFragment2
+		}{
+			Name:          "John Doe",
+			UserFragment1: UserFragment1{Name: "John Doe"},
+			UserFragment2: UserFragment2{
+				Name: "John Doe",
+				User: struct {
+					Name string `json:"name"`
+				}{Name: "John Doe"},
+			},
+		},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
 func TestUnmarshalGraphQL_pointerWithInlineFragment(t *testing.T) {
 	t.Parallel()
 	type actor struct {
