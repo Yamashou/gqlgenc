@@ -45,15 +45,6 @@ func Run(cfg *config.Config) error {
 	// must generate source after modelgen
 	goTypeBinder := gotype.NewBinder(cfg, queryDocument)
 
-	// Fragment
-	fragments, err := goTypeBinder.Fragments()
-	if err != nil {
-		return fmt.Errorf("generating fragment failed: %w", err)
-	}
-	for _, fragment := range fragments {
-		cfg.GQLGenConfig.Models.Add(fragment.Name, fmt.Sprintf("%s.%s", cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(fragment.Name)))
-	}
-
 	// Operation Response
 	operationResponses, err := goTypeBinder.OperationResponses()
 	if err != nil {
@@ -70,15 +61,24 @@ func Run(cfg *config.Config) error {
 		return fmt.Errorf("generating operation failed: %w", err)
 	}
 
-	// Struct Source TODO: なにこれ？
-	structSources := goTypeBinder.ResponseSubTypes()
+	// Query Type
+	queryTypes := goTypeBinder.QueryTypes()
+
+	// Fragment
+	fragments, err := goTypeBinder.Fragments()
+	if err != nil {
+		return fmt.Errorf("generating fragment failed: %w", err)
+	}
+	for _, fragment := range fragments {
+		cfg.GQLGenConfig.Models.Add(fragment.Name, fmt.Sprintf("%s.%s", cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(fragment.Name)))
+	}
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
-		queryGen := querygen.New(cfg, fragments, operations, operationResponses, structSources)
+		queryGen := querygen.New(cfg, operations, operationResponses, queryTypes, fragments)
 		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)
 		}

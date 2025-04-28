@@ -35,13 +35,34 @@ type OperationResponse struct {
 	Name string
 	Type types.Type
 }
-type StructSource struct {
+
+func NewOperationResponse(name string, t types.Type) *OperationResponse {
+	return &OperationResponse{
+		Name: name,
+		Type: t,
+	}
+
+}
+
+type QueryType struct {
 	Name string
 	Type types.Type
 }
 
-func NewStructSource(name string, typ types.Type) *StructSource {
-	return &StructSource{
+func NewQueryType(name string, typ types.Type) *QueryType {
+	return &QueryType{
+		Name: name,
+		Type: typ,
+	}
+}
+
+type Fragment struct {
+	Name string
+	Type types.Type
+}
+
+func NewFragment(name string, typ types.Type) *Fragment {
+	return &Fragment{
 		Name: name,
 		Type: typ,
 	}

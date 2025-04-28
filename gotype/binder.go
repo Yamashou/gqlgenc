@@ -2,8 +2,6 @@ package gotype
 
 import (
 	"bytes"
-	"go/types"
-
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 
@@ -12,37 +10,17 @@ import (
 
 // Binder binds GraphQL Types to Go Types.
 type Binder struct {
-	schema        *ast.Schema
-	queryDocument *ast.QueryDocument
-	generator     *Generator
+	schema          *ast.Schema
+	queryDocument   *ast.QueryDocument
+	goTypeGenerator *GoTypeGenerator
 }
 
 func NewBinder(cfg *config.Config, queryDocument *ast.QueryDocument) *Binder {
 	return &Binder{
-		schema:        cfg.GQLGenConfig.Schema,
-		queryDocument: queryDocument,
-		generator:     NewGenerator(cfg),
+		schema:          cfg.GQLGenConfig.Schema,
+		queryDocument:   queryDocument,
+		goTypeGenerator: NewGoTypeGenerator(cfg),
 	}
-}
-
-type Fragment struct {
-	Name string
-	Type types.Type
-}
-
-func (s *Binder) Fragments() ([]*Fragment, error) {
-	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
-	for _, fragment := range s.queryDocument.Fragments {
-		responseFields := s.generator.NewResponseFields(fragment.SelectionSet, fragment.Name)
-		fragment := &Fragment{
-			Name: fragment.Name,
-			Type: responseFields.StructType(),
-		}
-
-		fragments = append(fragments, fragment)
-	}
-
-	return fragments, nil
 }
 
 func (s *Binder) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, error) {
@@ -63,26 +41,33 @@ func (s *Binder) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, 
 }
 
 func (s *Binder) OperationResponses() ([]*OperationResponse, error) {
-	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+	operationResponses := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
 	for _, operation := range s.queryDocument.Operations {
-		responseFields := s.generator.NewResponseFields(operation.SelectionSet, operation.Name)
-		operationResponse = append(operationResponse, &OperationResponse{
-			Name: operation.Name,
-			Type: responseFields.StructType(),
-		})
+		operationResponse := s.goTypeGenerator.OperationResponse(operation.SelectionSet, operation.Name)
+		operationResponses = append(operationResponses, operationResponse)
 	}
 
-	return operationResponse, nil
+	return operationResponses, nil
 }
 
-func (s *Binder) ResponseSubTypes() []*StructSource {
-	return s.generator.StructSources
+func (s *Binder) QueryTypes() []*QueryType {
+	return s.goTypeGenerator.QueryTypes
+}
+
+func (s *Binder) Fragments() ([]*Fragment, error) {
+	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
+	for _, fragment := range s.queryDocument.Fragments {
+		fragment := s.goTypeGenerator.Fragment(fragment.SelectionSet, fragment.Name)
+		fragments = append(fragments, fragment)
+	}
+
+	return fragments, nil
 }
 
 func (s *Binder) operationArgsMapByOperationName() map[string][]*OperationArgument {
 	operationArgsMap := make(map[string][]*OperationArgument)
 	for _, operation := range s.queryDocument.Operations {
-		operationArgsMap[operation.Name] = s.generator.OperationArguments(operation.VariableDefinitions)
+		operationArgsMap[operation.Name] = s.goTypeGenerator.OperationArguments(operation.VariableDefinitions)
 	}
 
 	return operationArgsMap
@@ -91,7 +76,7 @@ func (s *Binder) operationArgsMapByOperationName() map[string][]*OperationArgume
 func (s *Binder) operationResponseMapByOperationName() map[string]*OperationResponse {
 	operationResponseMap := make(map[string]*OperationResponse)
 	for _, operation := range s.queryDocument.Operations {
-		operationResponseMap[operation.Name] = s.generator.OperationResponse(operation.SelectionSet[0])
+		operationResponseMap[operation.Name] = s.goTypeGenerator.OperationResponseBySelection(operation.SelectionSet[0])
 	}
 
 	return operationResponseMap

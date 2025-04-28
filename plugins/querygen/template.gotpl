@@ -1,5 +1,5 @@
 // Fragment
-{{- range $name, $element := .Fragment }}
+{{- range $name, $element := .Fragments }}
 type  {{ .Name | go  }} {{ .Type | ref }}
 
 {{- end }}
@@ -11,19 +11,19 @@ type {{ .Name }} {{ .Type | ref }}
 {{- end}}
 
 // OperationResponse
-{{- range $name, $element := .OperationResponse }}
+{{- range $name, $element := .OperationResponses }}
 type  {{ .Name | go  }} {{ .Type | ref }}
 
 {{ getterFunc (.Name|go) .Type }}
 {{- end }}
 
 // Operation
-{{- range $model := .Operation}}
-const {{ $model.Name|go }}Document = `{{ $model.Operation }}`
+{{- range $operation := .Operations}}
+const {{ $operation.Name|go }}Document = `{{ $operation.Operation }}`
 {{- end}}
 
 var DocumentOperationNames = map[string]string{
-{{- range $model := .Operation}}
-    {{ $model.Name|go }}Document: "{{ $model.Name }}",
+{{- range $operation := .Operations}}
+    {{ $operation.Name|go }}Document: "{{ $operation.Name }}",
 {{- end}}
 }

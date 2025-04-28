@@ -12,6 +12,16 @@ type UserFragment2 struct {
 }
 
 // NestedQuery
+type UserFragment1_Profile struct {
+	Age int "json:\"age\" graphql:\"age\""
+}
+type UserOperation_User_Profile struct {
+	Age int "json:\"age\" graphql:\"age\""
+}
+type UserOperation_User struct {
+	Name    string                     "json:\"name\" graphql:\"name\""
+	Profile UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
+}
 
 // OperationResponse
 type UserOperation struct {

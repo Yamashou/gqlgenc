@@ -14,11 +14,11 @@ func TestMergeFieldsRecursively(t *testing.T) {
 		name               string
 		targetFields       ResponseFieldList
 		sourceFields       ResponseFieldList
-		preMerged          []*StructSource
-		postMerged         []*StructSource
+		preMerged          []*QueryType
+		postMerged         []*QueryType
 		expectedFields     ResponseFieldList
-		expectedPreMerged  []*StructSource
-		expectedPostMerged []*StructSource
+		expectedPreMerged  []*QueryType
+		expectedPostMerged []*QueryType
 	}{
 		{
 			name: "Basic merge case",
@@ -36,8 +36,8 @@ func TestMergeFieldsRecursively(t *testing.T) {
 					Tags: []string{`json:"field2"`},
 				},
 			},
-			preMerged:  []*StructSource{},
-			postMerged: []*StructSource{},
+			preMerged:  []*QueryType{},
+			postMerged: []*QueryType{},
 			expectedFields: ResponseFieldList{
 				{
 					Name: "field1",
@@ -50,8 +50,8 @@ func TestMergeFieldsRecursively(t *testing.T) {
 					Tags: []string{`json:"field2"`},
 				},
 			},
-			expectedPreMerged:  []*StructSource{},
-			expectedPostMerged: []*StructSource{},
+			expectedPreMerged:  []*QueryType{},
+			expectedPostMerged: []*QueryType{},
 		},
 		{
 			name: "Merge case with complex query including fragments",
@@ -121,8 +121,8 @@ func TestMergeFieldsRecursively(t *testing.T) {
 					},
 				},
 			},
-			preMerged:  []*StructSource{},
-			postMerged: []*StructSource{},
+			preMerged:  []*QueryType{},
+			postMerged: []*QueryType{},
 			expectedFields: ResponseFieldList{
 				{
 					Name: "id",
@@ -168,7 +168,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 					},
 				},
 			},
-			expectedPreMerged: []*StructSource{
+			expectedPreMerged: []*QueryType{
 				{
 					Name: "Nested",
 					Type: createTestStruct([]*types.Var{
@@ -182,7 +182,7 @@ func TestMergeFieldsRecursively(t *testing.T) {
 					}, []string{`json:"name"`}),
 				},
 			},
-			expectedPostMerged: []*StructSource{
+			expectedPostMerged: []*QueryType{
 				{
 					Name: "Nested",
 					Type: createTestStruct([]*types.Var{
