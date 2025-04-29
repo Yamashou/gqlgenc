@@ -2,7 +2,6 @@ package clientgenv2
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 	"go/types"
@@ -28,13 +27,8 @@ func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGener
 func (s *Source) CreateFragments() error {
 	for _, fragment := range s.queryDocument.Fragments {
 		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, fragment.Name)
-		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(fragment.Name) {
-			return fmt.Errorf("%s is duplicated", fragment.Name)
-		}
 		fragmentType := s.sourceGenerator.NewNamedType(fragment.Name, responseFields)
 		s.sourceGenerator.generatedTypes[fragmentType.String()] = fragmentType
-		// TOOD: いる？
-		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(fragment.Name, fragmentType.String())
 	}
 
 	return nil
@@ -43,9 +37,6 @@ func (s *Source) CreateFragments() error {
 func (s *Source) CreateOperationResponses() error {
 	for _, operation := range s.queryDocument.Operations {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
-		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(operation.Name) {
-			return fmt.Errorf("%s is duplicated", operation.Name)
-		}
 		operationResponseType := s.sourceGenerator.NewNamedType(operation.Name, responseFields)
 		s.sourceGenerator.generatedTypes[operationResponseType.String()] = types.NewPointer(operationResponseType)
 	}
