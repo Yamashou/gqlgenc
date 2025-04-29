@@ -12,6 +12,8 @@ type User {
   name: String!
   profile: Profile!
   optionalProfile: Profile
+  address: Address!
+  optionalAddress: Address
 }
 
 union Profile = PublicProfile | PrivateProfile
@@ -29,4 +31,20 @@ type PrivateProfile {
 enum Status {
   ACTIVE
   INACTIVE
+}
+
+interface Address {
+  street: String!
+}
+
+type PublicAddress implements Address {
+  id: ID!
+  street: String!
+  public: Boolean!
+}
+
+type PrivateAddress implements Address {
+  id: ID!
+  street: String!
+  private: Boolean!
 }

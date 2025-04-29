@@ -59,9 +59,60 @@ type userOperation_User struct {
 	} "graphql:\"... on User\""
 	UserFragment1
 	UserFragment2
+	Address         userOperation_User_Address          "json:\"address,omitempty,omitzero\" graphql:\"address\""
 	Name            string                              "json:\"name,omitempty,omitzero\" graphql:\"name\""
+	OptionalAddress *userOperation_User_OptionalAddress "json:\"optionalAddress\" graphql:\"optionalAddress\""
 	OptionalProfile *userOperation_User_OptionalProfile "json:\"optionalProfile\" graphql:\"optionalProfile\""
 	Profile         userOperation_User_Profile          "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
+}
+
+type userOperation_User_Address struct {
+	PrivateAddress struct {
+		Private bool   "json:\"private,omitempty,omitzero\" graphql:\"private\""
+		Street  string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+	} "graphql:\"... on PrivateAddress\""
+	PublicAddress struct {
+		Public bool   "json:\"public,omitempty,omitzero\" graphql:\"public\""
+		Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+	} "graphql:\"... on PublicAddress\""
+	Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+}
+
+type userOperation_User_OptionalAddress struct {
+	PrivateAddress struct {
+		Private bool   "json:\"private,omitempty,omitzero\" graphql:\"private\""
+		Street  string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+	} "graphql:\"... on PrivateAddress\""
+	PublicAddress struct {
+		Public bool   "json:\"public,omitempty,omitzero\" graphql:\"public\""
+		Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+	} "graphql:\"... on PublicAddress\""
+	Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+}
+
+func (t *userOperation_User_OptionalAddress) GetPrivateAddress() struct {
+	Private bool   "json:\"private,omitempty,omitzero\" graphql:\"private\""
+	Street  string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+} {
+	if t == nil {
+		t = &userOperation_User_OptionalAddress{}
+	}
+	return t.PrivateAddress
+}
+func (t *userOperation_User_OptionalAddress) GetPublicAddress() struct {
+	Public bool   "json:\"public,omitempty,omitzero\" graphql:\"public\""
+	Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+} {
+	if t == nil {
+		t = &userOperation_User_OptionalAddress{}
+	}
+	return t.PublicAddress
+}
+func (t *userOperation_User_OptionalAddress) GetStreet() string {
+	if t == nil {
+		t = &userOperation_User_OptionalAddress{}
+	}
+	return t.Street
 }
 
 type userOperation_User_OptionalProfile struct {
@@ -116,6 +167,28 @@ const UserOperationDocument = `query UserOperation {
 			}
 			... on PrivateProfile {
 				age
+			}
+		}
+		address {
+			street
+			... on PublicAddress {
+				street
+				public
+			}
+			... on PrivateAddress {
+				street
+				private
+			}
+		}
+		optionalAddress {
+			street
+			... on PublicAddress {
+				street
+				public
+			}
+			... on PrivateAddress {
+				street
+				private
 			}
 		}
 		... UserFragment1

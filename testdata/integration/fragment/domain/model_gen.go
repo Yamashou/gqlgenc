@@ -9,9 +9,23 @@ import (
 	"strconv"
 )
 
+type Address interface {
+	IsAddress()
+	GetStreet() string
+}
+
 type Profile interface {
 	IsProfile()
 }
+
+type PrivateAddress struct {
+	ID      string `json:"id"`
+	Street  string `json:"street"`
+	Private bool   `json:"private"`
+}
+
+func (PrivateAddress) IsAddress()             {}
+func (this PrivateAddress) GetStreet() string { return this.Street }
 
 type PrivateProfile struct {
 	ID  string `json:"id"`
@@ -19,6 +33,15 @@ type PrivateProfile struct {
 }
 
 func (PrivateProfile) IsProfile() {}
+
+type PublicAddress struct {
+	ID     string `json:"id"`
+	Street string `json:"street"`
+	Public bool   `json:"public"`
+}
+
+func (PublicAddress) IsAddress()             {}
+func (this PublicAddress) GetStreet() string { return this.Street }
 
 type PublicProfile struct {
 	ID     string `json:"id"`
@@ -35,6 +58,8 @@ type User struct {
 	Name            string  `json:"name"`
 	Profile         Profile `json:"profile"`
 	OptionalProfile Profile `json:"optionalProfile,omitempty,omitzero"`
+	Address         Address `json:"address"`
+	OptionalAddress Address `json:"optionalAddress,omitempty,omitzero"`
 }
 
 type Status string

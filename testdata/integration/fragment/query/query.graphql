@@ -17,6 +17,28 @@ query UserOperation {
         age
       }
     }
+    address {
+      street
+      ... on PublicAddress {
+        street
+        public
+      }
+      ... on PrivateAddress {
+        street
+        private
+      }
+    }
+    optionalAddress {
+      street
+      ... on PublicAddress {
+        street
+        public
+      }
+      ... on PrivateAddress {
+        street
+        private
+      }
+    }
     ...UserFragment1
     ...UserFragment2
     ... on User {
