@@ -32,7 +32,7 @@ func (s *Source) CreateFragments() error {
 			return fmt.Errorf("%s is duplicated", fragment.Name)
 		}
 		fragmentType := s.sourceGenerator.NewType(fragment.Name, responseFields)
-		s.sourceGenerator.generatedTypes[fragment.Name] = fragmentType
+		s.sourceGenerator.generatedTypes[fragmentType.String()] = fragmentType
 		// TOOD: いる？
 		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(fragment.Name, fragmentType.String())
 	}
@@ -54,11 +54,9 @@ func (s *Source) CreateOperationResponses() error {
 }
 
 func (s *Source) GeneratedTypes() []types.Type {
-	generatedTypes := maps.Values(s.sourceGenerator.generatedTypes)
-	slices.SortedFunc(generatedTypes, func(a, b types.Type) int {
-		return strings.Compare(a.String(), b.String())
+	return slices.SortedFunc(maps.Values(s.sourceGenerator.generatedTypes), func(a, b types.Type) int {
+		return strings.Compare(strings.TrimPrefix(a.String(), "*"), strings.TrimPrefix(b.String(), "*"))
 	})
-	return slices.Collect(generatedTypes)
 }
 
 // TODO: ASTでmethod作れないか

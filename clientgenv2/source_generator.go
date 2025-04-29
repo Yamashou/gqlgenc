@@ -56,12 +56,11 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		case fieldsResponseFields.IsFragmentSpread():
 			// Fragmentのフィールドはnonnull
 			baseType = r.NewType(typeName, fieldsResponseFields)
-			r.generatedTypes[typeName] = baseType
+			r.generatedTypes[baseType.String()] = baseType
 		default:
 			baseType = types.NewPointer(r.NewType(typeName, fieldsResponseFields))
-			fmt.Printf("query type: %s\n", baseType)
 			// Fragment以外のフィールドはオプショナル？ TODO: オプショナルを元のスキーマの型に従う
-			r.generatedTypes[typeName] = baseType
+			r.generatedTypes[baseType.String()] = baseType
 		}
 
 		// TODO: ここは何をやっている？

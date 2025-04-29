@@ -62,6 +62,9 @@ func Run(cfg *config.Config) error {
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
 		generatedTypes := source.GeneratedTypes()
+		for _, generatedType := range generatedTypes {
+			fmt.Println(generatedType)
+		}
 		queryGen := querygen.New(cfg, operations, generatedTypes)
 		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)
