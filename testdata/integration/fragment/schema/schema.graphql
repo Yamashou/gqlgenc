@@ -11,6 +11,7 @@ type User {
   id: ID!
   name: String!
   profile: Profile!
+  optionalProfile: Profile
 }
 
 type Profile {

@@ -5,6 +5,10 @@ query UserOperation {
       status
       age
     }
+    optionalProfile {
+      status
+      age
+    }
     ...UserFragment1
     ...UserFragment2
     ... on User {

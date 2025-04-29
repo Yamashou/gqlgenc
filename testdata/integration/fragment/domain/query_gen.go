@@ -89,8 +89,9 @@ type UserOperation_User struct {
 	} "graphql:\"... on User\""
 	*UserFragment1
 	*UserFragment2
-	Name    string                     "json:\"name\" graphql:\"name\""
-	Profile UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
+	Name            string                              "json:\"name\" graphql:\"name\""
+	OptionalProfile *UserOperation_User_OptionalProfile "json:\"optionalProfile\" graphql:\"optionalProfile\""
+	Profile         UserOperation_User_Profile          "json:\"profile\" graphql:\"profile\""
 }
 
 func (t *UserOperation_User) GetUser() struct {
@@ -120,11 +121,35 @@ func (t *UserOperation_User) GetName() string {
 	}
 	return t.Name
 }
+func (t *UserOperation_User) GetOptionalProfile() *UserOperation_User_OptionalProfile {
+	if t == nil {
+		t = &UserOperation_User{}
+	}
+	return t.OptionalProfile
+}
 func (t *UserOperation_User) GetProfile() UserOperation_User_Profile {
 	if t == nil {
 		t = &UserOperation_User{}
 	}
 	return t.Profile
+}
+
+type UserOperation_User_OptionalProfile struct {
+	Age    *int   "json:\"age\" graphql:\"age\""
+	Status Status "json:\"status\" graphql:\"status\""
+}
+
+func (t *UserOperation_User_OptionalProfile) GetAge() *int {
+	if t == nil {
+		t = &UserOperation_User_OptionalProfile{}
+	}
+	return t.Age
+}
+func (t *UserOperation_User_OptionalProfile) GetStatus() Status {
+	if t == nil {
+		t = &UserOperation_User_OptionalProfile{}
+	}
+	return t.Status
 }
 
 type UserOperation_User_Profile struct {
@@ -149,6 +174,10 @@ const UserOperationDocument = `query UserOperation {
 	user {
 		name
 		profile {
+			status
+			age
+		}
+		optionalProfile {
 			status
 			age
 		}

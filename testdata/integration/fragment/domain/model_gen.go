@@ -19,9 +19,10 @@ type Query struct {
 }
 
 type User struct {
-	ID      string  `json:"id"`
-	Name    string  `json:"name"`
-	Profile Profile `json:"profile"`
+	ID              string   `json:"id"`
+	Name            string   `json:"name"`
+	Profile         Profile  `json:"profile"`
+	OptionalProfile *Profile `json:"optionalProfile,omitempty,omitzero"`
 }
 
 type Status string
