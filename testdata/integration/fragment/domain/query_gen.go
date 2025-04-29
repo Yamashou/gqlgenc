@@ -4,10 +4,10 @@ package domain
 
 type UserFragment1 struct {
 	Name    string                 "graphql:\"... on User\""
-	Profile *UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
+	Profile *UserFragment1_Profile "json:\"name\" graphql:\"name\""
 	User    struct {
 		Name string "json:\"name\" graphql:\"name\""
-	} "json:\"name\" graphql:\"name\""
+	} "json:\"profile\" graphql:\"profile\""
 }
 
 func (t *UserFragment1) GetName() string {
@@ -65,14 +65,14 @@ func (t *UserOperation) GetUser() *UserOperation_User {
 }
 
 type UserOperation_User struct {
-	Name    string "json:\"profile\" graphql:\"profile\""
+	Name    string "graphql:\"... on User\""
 	Profile *UserOperation_User_Profile
 	User    struct {
-		Name string "json:\"name\" graphql:\"name\""
-		UserFragment2
+		Name          string
+		UserFragment2 "json:\"name\" graphql:\"name\""
 	}
-	UserFragment1 "graphql:\"... on User\""
-	UserFragment2 "json:\"name\" graphql:\"name\""
+	UserFragment1 "json:\"name\" graphql:\"name\""
+	UserFragment2 "json:\"profile\" graphql:\"profile\""
 }
 
 func (t *UserOperation_User) GetName() string {
@@ -88,8 +88,8 @@ func (t *UserOperation_User) GetProfile() *UserOperation_User_Profile {
 	return t.Profile
 }
 func (t *UserOperation_User) GetUser() struct {
-	Name string "json:\"name\" graphql:\"name\""
-	UserFragment2
+	Name          string
+	UserFragment2 "json:\"name\" graphql:\"name\""
 } {
 	if t == nil {
 		t = &UserOperation_User{}
