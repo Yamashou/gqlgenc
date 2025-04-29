@@ -9,62 +9,6 @@ import (
 	"testing"
 )
 
-// TestReturnTypeName tests the returnTypeName function with various types.
-func TestReturnTypeName(t *testing.T) {
-	tests := []struct {
-		name     string
-		t        types.Type
-		isStruct bool
-		want     string
-	}{
-		{
-			name:     "Basic",
-			t:        types.Typ[types.String],
-			isStruct: false,
-			want:     "string",
-		},
-		{
-			name:     "Pointer",
-			t:        types.NewPointer(types.Typ[types.Int]),
-			isStruct: false,
-			want:     "*int",
-		},
-		{
-			name:     "Slice",
-			t:        types.NewSlice(types.Typ[types.Float64]),
-			isStruct: false,
-			want:     "[]float64",
-		},
-		{
-			name:     "Named",
-			t:        types.NewNamed(types.NewTypeName(0, nil, "MyType", nil), nil, nil),
-			isStruct: true,
-			want:     "*MyType",
-		},
-		{
-			name:     "Interface",
-			t:        types.NewInterfaceType(nil, nil).Complete(),
-			isStruct: false,
-			want:     "any",
-		},
-		{
-			name:     "Map",
-			t:        types.NewMap(types.Typ[types.Int], types.Typ[types.Bool]),
-			isStruct: false,
-			want:     "map[int]bool",
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			output := funcReturnTypesName(test.t, "")
-			if output != test.want {
-				t.Errorf("Expected %s, but got %s", test.want, output)
-			}
-		})
-	}
-}
-
 func TestGetterFunc(t *testing.T) {
 	t.Run("Basic cases", func(t *testing.T) {
 		type args struct {
@@ -107,7 +51,7 @@ func TestGetterFunc(t *testing.T) {
 		}
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
-				getterFunc := GetterFunc("")
+				getterFunc := GetterFunc()
 				if got := getterFunc(tt.args.name, tt.args.t); got != tt.want {
 					t.Errorf("GetterFunc() = %v, want %v", got, tt.want)
 				}
@@ -224,7 +168,7 @@ func (t *ComplexUser) GetActive() bool {
 
 		for _, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
-				getterFunc := GetterFunc("")
+				getterFunc := GetterFunc()
 				got := getterFunc(tt.structName, tt.t)
 				if got != tt.want {
 					t.Errorf("GetterFunc() = %v, want %v", got, tt.want)
@@ -271,7 +215,7 @@ type Address struct {
 		userType := userObj.Type().Underlying().(*types.Struct)
 
 		// Run test
-		getterFunc := GetterFunc("samepkg")
+		getterFunc := GetterFunc()
 		got := getterFunc("User", userType)
 
 		// Expected result: Address without package qualifier
@@ -302,7 +246,7 @@ func (t *User) GetAddress() *Address {
 
 		addressNamed := addressObj.Type().(*types.Named)
 		// Specify the same package path
-		result := namedTypeString(addressNamed, "samepkg")
+		result := ref(addressNamed)
 
 		// For same package, should return type name only without package qualifier
 		if result != "Address" {
@@ -310,7 +254,7 @@ func (t *User) GetAddress() *Address {
 		}
 
 		// For different package, should include package qualifier
-		resultWithPkg := namedTypeString(addressNamed, "otherpkg")
+		resultWithPkg := ref(addressNamed)
 		if resultWithPkg != "samepkg.Address" {
 			t.Errorf("namedTypeString() for different package = %v, want %v", resultWithPkg, "samepkg.Address")
 		}
@@ -323,32 +267,32 @@ func (t *User) GetAddress() *Address {
 		profileType := types.NewNamed(profileTypeName, nil, nil)
 
 		// For same package reference, no package qualifier
-		samePkg := namedTypeString(profileType, "github.com/example/pkgb")
+		samePkg := ref(profileType)
 		if samePkg != "Profile" {
 			t.Errorf("namedTypeString() for same package = %v, want %v", samePkg, "Profile")
 		}
 
 		// For different package reference, include package qualifier
-		differentPkg := namedTypeString(profileType, "github.com/example/pkga")
+		differentPkg := ref(profileType)
 		if differentPkg != "pkgb.Profile" {
 			t.Errorf("namedTypeString() for different package = %v, want %v", differentPkg, "pkgb.Profile")
 		}
 
 		// Next check if funcReturnTypesName function works correctly
 		// No package specified
-		noPackage := funcReturnTypesName(profileType, "")
+		noPackage := ref(profileType)
 		if noPackage != "*pkgb.Profile" {
 			t.Errorf("funcReturnTypesName() without pkg path = %v, want %v", noPackage, "*pkgb.Profile")
 		}
 
 		// Same package
-		samePackageType := funcReturnTypesName(profileType, "github.com/example/pkgb")
+		samePackageType := ref(profileType)
 		if samePackageType != "*Profile" {
 			t.Errorf("funcReturnTypesName() with same pkg = %v, want %v", samePackageType, "*Profile")
 		}
 
 		// Different package
-		differentPackageType := funcReturnTypesName(profileType, "github.com/example/pkga")
+		differentPackageType := ref(profileType)
 		if differentPackageType != "*pkgb.Profile" {
 			t.Errorf("funcReturnTypesName() with different pkg = %v, want %v", differentPackageType, "*pkgb.Profile")
 		}
@@ -362,7 +306,7 @@ func (t *User) GetAddress() *Address {
 		userStruct := types.NewStruct(userStructFields, nil)
 
 		// Call GetterFunc with same package
-		getterFuncSamePkg := GetterFunc("github.com/example/pkgb")
+		getterFuncSamePkg := GetterFunc()
 		gotWithSamePkg := getterFuncSamePkg("User", userStruct)
 
 		// Expected value when package qualifier is omitted for same package
@@ -384,7 +328,7 @@ func (t *User) GetProfile() *Profile {
 		}
 
 		// Call GetterFunc with different package
-		getterFuncDiffPkg := GetterFunc("github.com/example/pkga")
+		getterFuncDiffPkg := GetterFunc()
 		gotWithDifferentPkg := getterFuncDiffPkg("User", userStruct)
 
 		// Expected value when package qualifier is included for different package

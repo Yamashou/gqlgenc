@@ -8,6 +8,7 @@ query UserOperation {
     ...UserFragment2
     ... on User {
       name
+      ...UserFragment2
     }
   }
 }
