@@ -3,13 +3,21 @@
 package domain
 
 type UserFragment1 struct {
-	Name    string "json:\"name\" graphql:\"name\""
-	Profile *UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
-	User    struct {
+	User struct {
 		Name string "json:\"name\" graphql:\"name\""
 	} "graphql:\"... on User\""
+	Name    string                 "json:\"name\" graphql:\"name\""
+	Profile *UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
 }
 
+func (t *UserFragment1) GetUser() struct {
+	Name string "json:\"name\" graphql:\"name\""
+} {
+	if t == nil {
+		t = &UserFragment1{}
+	}
+	return t.User
+}
 func (t *UserFragment1) GetName() string {
 	if t == nil {
 		t = &UserFragment1{}
@@ -21,14 +29,6 @@ func (t *UserFragment1) GetProfile() *UserFragment1_Profile {
 		t = &UserFragment1{}
 	}
 	return t.Profile
-}
-func (t *UserFragment1) GetUser() struct {
-	Name string "json:\"name\" graphql:\"name\""
-} {
-	if t == nil {
-		t = &UserFragment1{}
-	}
-	return t.User
 }
 
 type UserFragment1_Profile struct {
@@ -65,31 +65,19 @@ func (t *UserOperation) GetUser() *UserOperation_User {
 }
 
 type UserOperation_User struct {
-	Name    string
-	Profile *UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
-	User    struct {
-		Name          string  "json:\"name\" graphql:\"name\""
+	User struct {
 		UserFragment2
-	}  "graphql:\"... on User\""
+		Name string "json:\"name\" graphql:\"name\""
+	} "graphql:\"... on User\""
 	UserFragment1
 	UserFragment2
+	Name    string                      "json:\"name\" graphql:\"name\""
+	Profile *UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
 }
 
-func (t *UserOperation_User) GetName() string {
-	if t == nil {
-		t = &UserOperation_User{}
-	}
-	return t.Name
-}
-func (t *UserOperation_User) GetProfile() *UserOperation_User_Profile {
-	if t == nil {
-		t = &UserOperation_User{}
-	}
-	return t.Profile
-}
 func (t *UserOperation_User) GetUser() struct {
-	Name          string "json:\"name\" graphql:\"name\""
 	UserFragment2
+	Name string "json:\"name\" graphql:\"name\""
 } {
 	if t == nil {
 		t = &UserOperation_User{}
@@ -107,6 +95,18 @@ func (t *UserOperation_User) GetUserFragment2() UserFragment2 {
 		t = &UserOperation_User{}
 	}
 	return t.UserFragment2
+}
+func (t *UserOperation_User) GetName() string {
+	if t == nil {
+		t = &UserOperation_User{}
+	}
+	return t.Name
+}
+func (t *UserOperation_User) GetProfile() *UserOperation_User_Profile {
+	if t == nil {
+		t = &UserOperation_User{}
+	}
+	return t.Profile
 }
 
 type UserOperation_User_Profile struct {
