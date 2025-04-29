@@ -29,6 +29,7 @@ func (s *Source) CreateFragments() error {
 			return fmt.Errorf("%s is duplicated", fragment.Name)
 		}
 		fragmentType := s.sourceGenerator.NewType(fragment.Name, responseFields)
+		s.sourceGenerator.generatedTypes = append(s.sourceGenerator.generatedTypes, fragmentType)
 		// TOOD: いる？
 		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(fragment.Name, fragmentType.String())
 	}
@@ -43,28 +44,18 @@ func (s *Source) CreateOperationResponses() error {
 		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(name) {
 			return fmt.Errorf("%s is duplicated", name)
 		}
-		s.sourceGenerator.NewType(name, responseFields)
+		operationResponseType := s.sourceGenerator.NewType(name, responseFields)
+		s.sourceGenerator.generatedTypes = append(s.sourceGenerator.generatedTypes, operationResponseType)
 	}
 
 	return nil
 }
 
-func (s *Source) GeneratedTypes() []*GeneratedType {
+func (s *Source) GeneratedTypes() []types.Type {
 	return s.sourceGenerator.generatedTypes
 }
 
-type GeneratedType struct {
-	Name string
-	Type types.Type
-}
-
-func NewGeneratedType(name string, t types.Type) *GeneratedType {
-	return &GeneratedType{
-		Name: name,
-		Type: t,
-	}
-}
-
+// TODO: ASTでmethod作れないか
 type Operation struct {
 	Name                string
 	ResponseStructName  string

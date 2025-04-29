@@ -4,6 +4,7 @@ import (
 	_ "embed" // used to load template file
 	"fmt"
 	"github.com/Yamashou/gqlgenc/v3/clientgenv2"
+	"go/types"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/Yamashou/gqlgenc/v3/config"
@@ -13,7 +14,7 @@ import (
 //go:embed template.gotpl
 var template string
 
-func RenderTemplate(cfg *config.Config, operations []*clientgenv2.Operation, generatedTypes []*clientgenv2.GeneratedType) error {
+func RenderTemplate(cfg *config.Config, operations []*clientgenv2.Operation, generatedTypes []types.Type) error {
 	if err := templates.Render(templates.Options{
 		PackageName: cfg.GQLGencConfig.QueryGen.Package,
 		Filename:    cfg.GQLGencConfig.QueryGen.Filename,

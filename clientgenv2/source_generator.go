@@ -18,7 +18,7 @@ import (
 type SourceGenerator struct {
 	cfg            *config.Config
 	binder         *gqlgenconfig.Binder
-	generatedTypes []*GeneratedType
+	generatedTypes []types.Type
 }
 
 func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
@@ -54,6 +54,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 			baseType = r.Type(selection.Definition.Type.Name())
 		default:
 			baseType = r.NewType(typeName, fieldsResponseFields)
+			r.generatedTypes = append(r.generatedTypes, baseType)
 		}
 		fmt.Printf("ast.Field: %s-------------------------------------------\n", selection.Name)
 
@@ -76,8 +77,8 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 
 	case *ast.FragmentSpread:
 		fmt.Printf("ast.FragmentSpread: %s\n", selection.Name)
-		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, selection.Name)
+		// TODO: NewTypeを使う？
 		typ := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil), fieldsResponseFields.ToGoStructType(), nil)
 
 		return &ResponseField{
@@ -121,7 +122,6 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 func (r *SourceGenerator) NewType(typeName string, fieldsResponseFields ResponseFieldList) *types.Named {
 	structType := fieldsResponseFields.ToGoStructType()
 	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
-	r.generatedTypes = append(r.generatedTypes, NewGeneratedType(typeName, namedType))
 	return namedType
 }
 
