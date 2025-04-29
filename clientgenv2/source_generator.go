@@ -109,7 +109,6 @@ func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fields
 		return t
 	default:
 		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
-		// Fragment以外のフィールドはオプショナル？ TODO: オプショナルを元のスキーマの型に従う
 		r.generatedTypes[t.String()] = t
 		return t
 	}

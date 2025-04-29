@@ -50,7 +50,6 @@ func (s *Source) GeneratedTypes() []types.Type {
 	})
 }
 
-// TODO: ASTでmethod作れないか
 type Operation struct {
 	Name                string
 	ResponseStructName  string
