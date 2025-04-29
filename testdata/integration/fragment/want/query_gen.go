@@ -54,14 +54,32 @@ func (t *UserFragment2) GetName() string {
 }
 
 type UserOperation struct {
-	User *UserOperation_User "json:\"user\" graphql:\"user\""
+	OptionalUser *UserOperation_OptionalUser "json:\"optionalUser\" graphql:\"optionalUser\""
+	User         *UserOperation_User         "json:\"user\" graphql:\"user\""
 }
 
+func (t *UserOperation) GetOptionalUser() *UserOperation_OptionalUser {
+	if t == nil {
+		t = &UserOperation{}
+	}
+	return t.OptionalUser
+}
 func (t *UserOperation) GetUser() *UserOperation_User {
 	if t == nil {
 		t = &UserOperation{}
 	}
 	return t.User
+}
+
+type UserOperation_OptionalUser struct {
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+func (t *UserOperation_OptionalUser) GetName() string {
+	if t == nil {
+		t = &UserOperation_OptionalUser{}
+	}
+	return t.Name
 }
 
 type UserOperation_User struct {
@@ -140,6 +158,9 @@ const UserOperationDocument = `query UserOperation {
 			name
 			... UserFragment2
 		}
+	}
+	optionalUser {
+		name
 	}
 }
 fragment UserFragment1 on User {

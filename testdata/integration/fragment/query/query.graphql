@@ -12,6 +12,9 @@ query UserOperation {
       ...UserFragment2
     }
   }
+  optionalUser {
+    name
+  }
 }
 
 fragment UserFragment1 on User {

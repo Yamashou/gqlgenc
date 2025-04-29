@@ -4,6 +4,7 @@ schema {
 
 type Query {
   user: User!
+  optionalUser: User
 }
 
 type User {
