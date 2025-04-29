@@ -143,6 +143,14 @@ type ResponseField struct {
 	ResponseFields   ResponseFieldList
 }
 
+func (r *ResponseField) GoVar() *types.Var {
+	return types.NewField(0, nil, templates.ToGo(r.Name), r.Type, r.IsFragmentSpread)
+}
+
+func (r *ResponseField) JoinTags() string {
+	return strings.Join(r.Tags, " ")
+}
+
 type ResponseFieldList []*ResponseField
 
 func (rs ResponseFieldList) IsFragmentSpread() bool {
@@ -166,17 +174,17 @@ func (rs ResponseFieldList) IsBasicType() bool {
 }
 
 func (rs ResponseFieldList) ToGoStructType() *types.Struct {
-	vars := make([]*types.Var, 0)
-	structTags := make([]string, 0)
-	// 重複するフィールドはUniqueByNameによりGoの型から除外する。
-	for _, responseField := range rs.uniqueByName() {
-		vars = append(vars, types.NewField(0, nil, templates.ToGo(responseField.Name), responseField.Type, responseField.IsFragmentSpread))
-		structTags = append(structTags, strings.Join(responseField.Tags, " "))
+	// Goのフィールドは同名のフィールドは許されないので重複を削除する
+	responseFields := rs.uniqueByName()
+	vars := make([]*types.Var, 0, len(responseFields))
+	for _, responseField := range responseFields {
+		vars = append(vars, responseField.GoVar())
 	}
-	slices.SortFunc(vars, func(a, b *types.Var) int {
-		return strings.Compare(a.Name(), b.Name())
-	})
-	return types.NewStruct(vars, structTags)
+	tags := make([]string, 0, len(responseFields))
+	for _, responseField := range responseFields {
+		tags = append(tags, responseField.JoinTags())
+	}
+	return types.NewStruct(vars, tags)
 }
 
 func (rs ResponseFieldList) uniqueByName() ResponseFieldList {
@@ -184,5 +192,7 @@ func (rs ResponseFieldList) uniqueByName() ResponseFieldList {
 	for _, field := range rs {
 		responseFieldMapByName[field.Name] = field
 	}
-	return slices.Collect(maps.Values(responseFieldMapByName))
+	return slices.SortedFunc(maps.Values(responseFieldMapByName), func(a *ResponseField, b *ResponseField) int {
+		return strings.Compare(a.Name, b.Name)
+	})
 }

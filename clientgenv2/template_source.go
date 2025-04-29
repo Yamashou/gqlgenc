@@ -26,7 +26,7 @@ func GetterFunc() func(types.Type) string {
 
 		var buf bytes.Buffer
 		fmt.Fprintf(&buf, "type %s %s\n", typeName, ref(st))
-		for i := 0; i < st.NumFields(); i++ {
+		for i := range st.NumFields() {
 			field := st.Field(i)
 			fieldName := field.Name()
 			if fieldName == "" {
