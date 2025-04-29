@@ -4,14 +4,14 @@ package domain
 
 type UserFragment1 struct {
 	User struct {
-		Name string "json:\"name\" graphql:\"name\""
+		Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 	} "graphql:\"... on User\""
-	Name    string                "json:\"name\" graphql:\"name\""
-	Profile UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
+	Name    string                "json:\"name,omitempty,omitzero\" graphql:\"name\""
+	Profile UserFragment1_Profile "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
 }
 
 func (t *UserFragment1) GetUser() struct {
-	Name string "json:\"name\" graphql:\"name\""
+	Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 } {
 	if t == nil {
 		t = &UserFragment1{}
@@ -43,7 +43,7 @@ func (t *UserFragment1_Profile) GetAge() *int {
 }
 
 type UserFragment2 struct {
-	Name string "json:\"name\" graphql:\"name\""
+	Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 }
 
 func (t *UserFragment2) GetName() string {
@@ -55,7 +55,7 @@ func (t *UserFragment2) GetName() string {
 
 type UserOperation struct {
 	OptionalUser *UserOperation_OptionalUser "json:\"optionalUser\" graphql:\"optionalUser\""
-	User         UserOperation_User          "json:\"user\" graphql:\"user\""
+	User         UserOperation_User          "json:\"user,omitempty,omitzero\" graphql:\"user\""
 }
 
 func (t *UserOperation) GetOptionalUser() *UserOperation_OptionalUser {
@@ -72,7 +72,7 @@ func (t *UserOperation) GetUser() UserOperation_User {
 }
 
 type UserOperation_OptionalUser struct {
-	Name string "json:\"name\" graphql:\"name\""
+	Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 }
 
 func (t *UserOperation_OptionalUser) GetName() string {
@@ -85,18 +85,18 @@ func (t *UserOperation_OptionalUser) GetName() string {
 type UserOperation_User struct {
 	User struct {
 		*UserFragment2
-		Name string "json:\"name\" graphql:\"name\""
+		Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 	} "graphql:\"... on User\""
 	*UserFragment1
 	*UserFragment2
-	Name            string                              "json:\"name\" graphql:\"name\""
+	Name            string                              "json:\"name,omitempty,omitzero\" graphql:\"name\""
 	OptionalProfile *UserOperation_User_OptionalProfile "json:\"optionalProfile\" graphql:\"optionalProfile\""
-	Profile         UserOperation_User_Profile          "json:\"profile\" graphql:\"profile\""
+	Profile         UserOperation_User_Profile          "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
 }
 
 func (t *UserOperation_User) GetUser() struct {
 	*UserFragment2
-	Name string "json:\"name\" graphql:\"name\""
+	Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 } {
 	if t == nil {
 		t = &UserOperation_User{}
@@ -136,7 +136,7 @@ func (t *UserOperation_User) GetProfile() UserOperation_User_Profile {
 
 type UserOperation_User_OptionalProfile struct {
 	Age    *int   "json:\"age\" graphql:\"age\""
-	Status Status "json:\"status\" graphql:\"status\""
+	Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
 }
 
 func (t *UserOperation_User_OptionalProfile) GetAge() *int {
@@ -154,7 +154,7 @@ func (t *UserOperation_User_OptionalProfile) GetStatus() Status {
 
 type UserOperation_User_Profile struct {
 	Age    *int   "json:\"age\" graphql:\"age\""
-	Status Status "json:\"status\" graphql:\"status\""
+	Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
 }
 
 func (t *UserOperation_User_Profile) GetAge() *int {

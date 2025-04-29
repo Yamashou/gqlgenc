@@ -51,15 +51,13 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		fieldsResponseFields := r.NewResponseFields(sel.SelectionSet, typeName)
 		t := r.newFieldType(sel, typeName, fieldsResponseFields)
 
-		// TODO: omitempty, omitzero
-		tags := []string{
-			fmt.Sprintf(`json:"%s"`, sel.Alias),
-			fmt.Sprintf(`graphql:"%s"`, sel.Alias),
-		}
 		return &ResponseField{
-			Name:           sel.Name,
-			Type:           t,
-			Tags:           tags,
+			Name: sel.Name,
+			Type: t,
+			Tags: []string{
+				fmt.Sprintf(`json:"%s%s"`, sel.Alias, r.jsonOmitTag(sel)),
+				fmt.Sprintf(`graphql:"%s"`, sel.Alias),
+			},
 			ResponseFields: fieldsResponseFields,
 		}
 
@@ -85,6 +83,18 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	}
 
 	panic("unexpected selection type")
+}
+func (r *SourceGenerator) jsonOmitTag(field *ast.Field) string {
+	var jsonOmitTag string
+	if field.Definition.Type.NonNull {
+		if r.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *r.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag {
+			jsonOmitTag += `,omitempty`
+		}
+		if r.cfg.GQLGenConfig.EnableModelJsonOmitzeroTag != nil && *r.cfg.GQLGenConfig.EnableModelJsonOmitzeroTag {
+			jsonOmitTag += `,omitzero`
+		}
+	}
+	return jsonOmitTag
 }
 
 func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
