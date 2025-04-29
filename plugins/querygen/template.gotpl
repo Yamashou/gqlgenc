@@ -1,5 +1,5 @@
 {{- range $generatedType := .GeneratedTypes }}
-{{ getterFunc $generatedType }}
+{{ typeGenFunc $generatedType }}
 {{- end}}
 
 {{- range $operation := .Operations}}
