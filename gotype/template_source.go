@@ -79,7 +79,12 @@ func NewFragment(name string, typ types.Type) *Fragment {
 // targetPkgPath specifies the target package path and omits package qualifiers for types belonging to the same package.
 func GetterFunc(targetPkgPath string) func(types.Type) string {
 	return func(t types.Type) string {
-		namedType := t.(*types.Named)
+		var namedType *types.Named
+		if pointerType, ok := t.(*types.Pointer); ok {
+			namedType = pointerType.Elem().(*types.Named)
+		} else {
+			namedType = t.(*types.Named)
+		}
 		st := namedType.Underlying().(*types.Struct)
 		names := strings.Split(namedType.String(), ".")
 
