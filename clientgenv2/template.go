@@ -4,10 +4,9 @@ import (
 	"bytes"
 	_ "embed" // used to load template file
 	"fmt"
-	"go/types"
-
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/Yamashou/gqlgenc/v3/config"
+	"go/types"
 )
 
 //go:embed template.tmpl
@@ -35,7 +34,8 @@ func RenderTemplate(cfg *config.Config, operations []*Operation, generatedTypes 
 }
 
 func typeGenFunc(t types.Type) string {
-	if pointerType, ok := t.(*types.Pointer); ok {
+	pointerType, ok := t.(*types.Pointer)
+	if ok {
 		t = pointerType.Elem()
 	}
 
@@ -48,13 +48,17 @@ func typeGenFunc(t types.Type) string {
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
 		fieldName := field.Name()
-		if fieldName == "" {
-			// fieldが埋め込みの時は、Getterは不要
+		if embedded := fieldName == ""; embedded {
+			continue
+		}
+
+		if nonnull := pointerType == nil; nonnull {
 			continue
 		}
 
 		fieldTypeName := toString(field.Type())
 		fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
+
 		fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 
 		fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)

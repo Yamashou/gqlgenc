@@ -65,7 +65,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		fieldsResponseFields := r.NewResponseFields(sel.Definition.SelectionSet, sel.Name)
 		return &ResponseField{
 			Name:             sel.Name,
-			Type:             r.NewNamedType(false, sel.Name, fieldsResponseFields),
+			Type:             r.NewNamedType(true, sel.Name, fieldsResponseFields),
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
 		}
