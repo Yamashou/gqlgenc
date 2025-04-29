@@ -47,12 +47,10 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	switch selection := selection.(type) {
 	case *ast.Field:
 		typeName := layerTypeName(parentTypeName, templates.ToGo(selection.Alias))
-		fmt.Printf("ast.Field: %s %s=====================================================\n", selection.Name, typeName)
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
 		var baseType types.Type
 		switch {
 		case fieldsResponseFields.IsBasicType():
-			fmt.Printf("ast.Field isBasicType(): %s\n", selection.Name)
 			baseType = r.Type(selection.Definition.Type.Name())
 		default:
 			baseType = r.NewType(typeName, fieldsResponseFields)
@@ -70,7 +68,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		}
 
 		return &ResponseField{
-			Name:           selection.Alias,
+			Name:           selection.Name,
 			Type:           typ,
 			Tags:           tags,
 			ResponseFields: fieldsResponseFields,
@@ -80,14 +78,10 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		fmt.Printf("ast.FragmentSpread: %s\n", selection.Name)
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, selection.Name)
-		typ := types.NewNamed(
-			types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil),
-			fieldsResponseFields.ToGoStructType(),
-			nil,
-		)
+		typ := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil), fieldsResponseFields.ToGoStructType(), nil)
 
 		return &ResponseField{
-			Name:             selection.Name,
+			Name:             "", // FragmentSpreadは埋め込みにする。
 			Type:             typ,
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,

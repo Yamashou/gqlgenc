@@ -1,15 +1,7 @@
-// Fragment
-{{- range $fragment := .Fragments }}
-type  {{ $fragment.Name | go  }} {{ $fragment.Type | ref }}
-
-{{- end }}
-
-// GeneratedTypes
 {{- range $generatedType := .GeneratedTypes }}
 {{ getterFunc $generatedType.Type }}
 {{- end}}
 
-// Operation
 {{- range $operation := .Operations}}
 const {{ $operation.Name|go }}Document = `{{ $operation.Operation }}`
 {{- end}}

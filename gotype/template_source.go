@@ -79,26 +79,30 @@ func NewFragment(name string, typ types.Type) *Fragment {
 // targetPkgPath specifies the target package path and omits package qualifiers for types belonging to the same package.
 func GetterFunc(targetPkgPath string) func(types.Type) string {
 	return func(t types.Type) string {
-		namedType, ok := t.(*types.Named)
-		if !ok {
-			return ""
-		}
-		st, ok := namedType.Underlying().(*types.Struct)
-		if !ok {
-			return ""
-		}
+		namedType := t.(*types.Named)
+		st := namedType.Underlying().(*types.Struct)
 		names := strings.Split(namedType.String(), ".")
+
+		// typeName
 		typeName := names[len(names)-1]
 
 		var buf bytes.Buffer
 		fmt.Fprintf(&buf, "type %s %s\n", typeName, ref(st))
 		for i := 0; i < st.NumFields(); i++ {
 			field := st.Field(i)
+			// fieldName
 			fieldName := field.Name()
-			returnType := funcReturnTypesName(field.Type(), true, targetPkgPath)
-			fmt.Printf("return Type: %#v", returnType)
+			// 埋め込みの時は、Getterは不要
+			if fieldName == "" {
+				continue
+			}
 
-			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, returnType)
+			// fieldTypeName
+			fieldTypeName := funcReturnTypesName(field.Type(), true, targetPkgPath)
+			fmt.Printf("fieldTypeName: %#v", fieldTypeName)
+
+			// TODO: fragmentのreceiverはポインタではなく実際の型にする
+			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
 			fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 
 			needsPointer := isNamedType(field.Type())
