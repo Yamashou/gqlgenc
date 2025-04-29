@@ -126,19 +126,20 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 			return nil, fmt.Errorf("%s is duplicated", name)
 		}
 		fmt.Printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx%s %s\n", operation.Name, operation.Operation)
-		operationResponse := &OperationResponse{
-			Name: name,
-			Type: responseFields.ToGoStructType(),
-		}
-		operationResponses = append(operationResponses, operationResponse)
-		fmt.Printf("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz%v\n", operationResponse)
+		s.sourceGenerator.NewType(name, responseFields)
+		//operationResponse := &OperationResponse{
+		//	Name: name,
+		//	Type: t,
+		//}
+		// operationResponses = append(operationResponses, operationResponse)
+		// fmt.Printf("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz%v\n", operationResponse)
 	}
 
-	for _, operationResponse := range operationResponses {
-		name := operationResponse.Name
-		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(name, fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(name)))
-	}
-
+	//for _, operationResponse := range operationResponses {
+	//	name := operationResponse.Name
+	//	s.sourceGenerator.cfg.GQLGenConfig.Models.Add(name, fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(name)))
+	//}
+	//
 	return operationResponses, nil
 }
 
@@ -147,15 +148,13 @@ func (s *Source) GeneratedTypes() []*GeneratedType {
 }
 
 type GeneratedType struct {
-	Name      string
-	NamedType types.Type
-	Type      types.Type
+	Name string
+	Type types.Type
 }
 
-func NewGeneratedType(name string, namedType, structType types.Type) *GeneratedType {
+func NewGeneratedType(name string, t types.Type) *GeneratedType {
 	return &GeneratedType{
-		Name:      name,
-		NamedType: namedType,
-		Type:      structType,
+		Name: name,
+		Type: t,
 	}
 }

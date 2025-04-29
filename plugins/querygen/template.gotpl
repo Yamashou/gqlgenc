@@ -6,17 +6,8 @@ type  {{ $fragment.Name | go  }} {{ $fragment.Type | ref }}
 
 // GeneratedTypes
 {{- range $generatedType := .GeneratedTypes }}
-type {{ $generatedType.Name }} {{ $generatedType.Type | ref }}
-
-{{ getterFunc ($generatedType.Name|go) $generatedType.Type }}
+{{ getterFunc $generatedType.Type }}
 {{- end}}
-
-// OperationResponse
-{{- range $operationResponse := .OperationResponses }}
-type  {{ $operationResponse.Name | go  }} {{ $operationResponse.Type | ref }}
-
-{{ getterFunc ($operationResponse.Name|go) $operationResponse.Type }}
-{{- end }}
 
 // Operation
 {{- range $operation := .Operations}}

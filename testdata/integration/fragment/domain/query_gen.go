@@ -2,32 +2,31 @@
 
 package domain
 
-import (
-)
 // Fragment
-type  UserFragment1 struct{Name string "json:\"name\" graphql:\"name\""}
+type UserFragment1 struct {
+	Name string "json:\"name\" graphql:\"name\""
+}
 
 // GeneratedTypes
-type UserOperation_User struct{UserFragment1 UserFragment1}
+type UserOperation_User struct{ UserFragment1 UserFragment1 }
 
-func (t *struct{UserFragment1 github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain.UserFragment1}) GetUserFragment1() *UserFragment1 {
+func (t *UserOperation_User) GetUserFragment1() *UserFragment1 {
 	if t == nil {
-		t = &UserOperationUser{}
+		t = &UserOperation_User{}
 	}
 	return &t.UserFragment1
 }
 
+type UserOperation struct {
+	User UserOperation_User "json:\"user\" graphql:\"user\""
+}
 
-// OperationResponse
-type  UserOperation struct{User UserOperation_User "json:\"user\" graphql:\"user\""}
-
-func (t *struct{User github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain.UserOperation_User "json:\"user\" graphql:\"user\""}) GetUser() *UserOperation_User {
+func (t *UserOperation) GetUser() *UserOperation_User {
 	if t == nil {
 		t = &UserOperation{}
 	}
 	return &t.User
 }
-
 
 // Operation
 const UserOperationDocument = `query UserOperation {
@@ -41,5 +40,5 @@ fragment UserFragment1 on User {
 `
 
 var DocumentOperationNames = map[string]string{
-    UserOperationDocument: "UserOperation",
+	UserOperationDocument: "UserOperation",
 }

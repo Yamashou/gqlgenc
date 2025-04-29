@@ -3,7 +3,9 @@ package gotype
 import (
 	"bytes"
 	"fmt"
+	"github.com/99designs/gqlgen/codegen/templates"
 	"go/types"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -75,22 +77,29 @@ func NewFragment(name string, typ types.Type) *Fragment {
 
 // GetterFunc returns a function that generates getter methods for types.
 // targetPkgPath specifies the target package path and omits package qualifiers for types belonging to the same package.
-func GetterFunc(targetPkgPath string) func(name string, t types.Type) string {
-	return func(name string, t types.Type) string {
-		st, ok := t.(*types.Struct)
+func GetterFunc(targetPkgPath string) func(types.Type) string {
+	return func(t types.Type) string {
+		namedType, ok := t.(*types.Named)
 		if !ok {
 			return ""
 		}
+		st, ok := namedType.Underlying().(*types.Struct)
+		if !ok {
+			return ""
+		}
+		names := strings.Split(namedType.String(), ".")
+		typeName := names[len(names)-1]
 
 		var buf bytes.Buffer
+		fmt.Fprintf(&buf, "type %s %s\n", typeName, ref(st))
 		for i := 0; i < st.NumFields(); i++ {
 			field := st.Field(i)
 			fieldName := field.Name()
 			returnType := funcReturnTypesName(field.Type(), true, targetPkgPath)
 			fmt.Printf("return Type: %#v", returnType)
 
-			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", t.String(), fieldName, returnType)
-			fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", name)
+			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, returnType)
+			fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 
 			needsPointer := isNamedType(field.Type())
 			if needsPointer {
@@ -102,6 +111,20 @@ func GetterFunc(targetPkgPath string) func(name string, t types.Type) string {
 
 		return buf.String()
 	}
+}
+
+func ref(p types.Type) string {
+	typeString := templates.CurrentImports.LookupType(p)
+	// TODO(steve): figure out why this is needed
+	// otherwise inconsistent sometimes
+	// see https://github.com/99designs/gqlgen/issues/3414#issuecomment-2822856422
+	if typeString == "interface{}" {
+		return "any"
+	}
+	if typeString == "map[string]interface{}" {
+		return "map[string]any"
+	}
+	return typeString
 }
 
 // isNamedType determines if the type is a named type (such as a struct)
