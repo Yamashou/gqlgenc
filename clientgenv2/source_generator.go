@@ -2,6 +2,7 @@ package clientgenv2
 
 import (
 	"fmt"
+	"github.com/vektah/gqlparser/v2/ast"
 	"go/types"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -12,67 +13,7 @@ import (
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/vektah/gqlparser/v2/ast"
 )
-
-type Argument struct {
-	Variable string
-	Type     types.Type
-}
-
-type ResponseField struct {
-	Name             string
-	IsFragmentSpread bool
-	IsInlineFragment bool
-	Type             types.Type
-	Tags             []string
-	ResponseFields   ResponseFieldList
-}
-
-type ResponseFieldList []*ResponseField
-
-func (rs ResponseFieldList) ToGoStructType() *types.Struct {
-	vars := make([]*types.Var, 0)
-	structTags := make([]string, 0)
-	// 重複するフィールドはUniqueByNameによりGoの型から除外する。
-	for _, field := range rs.UniqueByName() {
-		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
-		structTags = append(structTags, strings.Join(field.Tags, " "))
-	}
-	return types.NewStruct(vars, structTags)
-}
-
-func (rs ResponseFieldList) UniqueByName() ResponseFieldList {
-	responseFieldMapByName := make(map[string]*ResponseField, len(rs))
-	for _, field := range rs {
-		responseFieldMapByName[field.Name] = field
-	}
-	return slices.Collect(maps.Values(responseFieldMapByName))
-}
-
-func (rs ResponseFieldList) IsFragmentSpread() bool {
-	if len(rs) != 1 {
-		return false
-	}
-
-	return rs[0].IsFragmentSpread
-}
-
-func (rs ResponseFieldList) IsInlineFragment() bool {
-	if len(rs) != 1 {
-		return false
-	}
-
-	return rs[0].IsInlineFragment
-}
-
-func (rs ResponseFieldList) IsBasicType() bool {
-	return len(rs) == 0
-}
-
-func (rs ResponseFieldList) IsStructType() bool {
-	return len(rs) > 0 && !rs.IsInlineFragment() && !rs.IsFragmentSpread()
-}
 
 type SourceGenerator struct {
 	cfg            *config.Config
@@ -169,6 +110,18 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	panic("unexpected selection type")
 }
 
+func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
+	argumentTypes := make([]*OperationArgument, 0, len(variableDefinitions))
+	for _, v := range variableDefinitions {
+		argumentTypes = append(argumentTypes, &OperationArgument{
+			Variable: v.Variable,
+			Type:     r.binder.CopyModifiersFromAst(v.Type, r.Type(v.Type.Name())),
+		})
+	}
+
+	return argumentTypes
+}
+
 // NewType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
 // コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
 func (r *SourceGenerator) NewType(typeName string, fieldsResponseFields ResponseFieldList) *types.Named {
@@ -176,18 +129,6 @@ func (r *SourceGenerator) NewType(typeName string, fieldsResponseFields Response
 	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 	r.generatedTypes = append(r.generatedTypes, NewGeneratedType(typeName, namedType))
 	return namedType
-}
-
-func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*Argument {
-	argumentTypes := make([]*Argument, 0, len(variableDefinitions))
-	for _, v := range variableDefinitions {
-		argumentTypes = append(argumentTypes, &Argument{
-			Variable: v.Variable,
-			Type:     r.binder.CopyModifiersFromAst(v.Type, r.Type(v.Type.Name())),
-		})
-	}
-
-	return argumentTypes
 }
 
 // Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
@@ -199,4 +140,54 @@ func (r *SourceGenerator) Type(typeName string) types.Type {
 	}
 
 	return goType
+}
+
+type ResponseField struct {
+	Name             string
+	IsFragmentSpread bool
+	IsInlineFragment bool
+	Type             types.Type
+	Tags             []string
+	ResponseFields   ResponseFieldList
+}
+
+type ResponseFieldList []*ResponseField
+
+func (rs ResponseFieldList) IsFragmentSpread() bool {
+	if len(rs) != 1 {
+		return false
+	}
+
+	return rs[0].IsFragmentSpread
+}
+
+func (rs ResponseFieldList) IsInlineFragment() bool {
+	if len(rs) != 1 {
+		return false
+	}
+
+	return rs[0].IsInlineFragment
+}
+
+func (rs ResponseFieldList) IsBasicType() bool {
+	return len(rs) == 0
+}
+
+func (rs ResponseFieldList) ToGoStructType() *types.Struct {
+	vars := make([]*types.Var, 0)
+	structTags := make([]string, 0)
+	// 重複するフィールドはUniqueByNameによりGoの型から除外する。
+	for _, field := range rs.uniqueByName() {
+		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
+		structTags = append(structTags, strings.Join(field.Tags, " "))
+	}
+	return types.NewStruct(vars, structTags)
+}
+
+func (rs ResponseFieldList) uniqueByName() ResponseFieldList {
+	responseFieldMapByName := make(map[string]*ResponseField, len(rs))
+	for _, field := range rs {
+		responseFieldMapByName[field.Name] = field
+	}
+	return slices.Collect(maps.Values(responseFieldMapByName))
 }
