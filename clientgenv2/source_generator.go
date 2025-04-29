@@ -55,10 +55,10 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 			baseType = r.Type(selection.Definition.Type.Name())
 		case fieldsResponseFields.IsFragmentSpread():
 			// Fragmentのフィールドはnonnull
-			baseType = r.NewType(typeName, fieldsResponseFields)
+			baseType = r.NewNamedType(typeName, fieldsResponseFields)
 			r.generatedTypes[baseType.String()] = baseType
 		default:
-			baseType = types.NewPointer(r.NewType(typeName, fieldsResponseFields))
+			baseType = types.NewPointer(r.NewNamedType(typeName, fieldsResponseFields))
 			// Fragment以外のフィールドはオプショナル？ TODO: オプショナルを元のスキーマの型に従う
 			r.generatedTypes[baseType.String()] = baseType
 		}
@@ -83,12 +83,9 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 
 	case *ast.FragmentSpread:
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, selection.Name)
-		// TODO: NewTypeを使う？
-		typ := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil), fieldsResponseFields.ToGoStructType(), nil)
-
 		return &ResponseField{
 			Name:             selection.Name,
-			Type:             typ,
+			Type:             r.NewNamedType(selection.Name, fieldsResponseFields),
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
 		}
@@ -96,7 +93,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, "")
-
 		return &ResponseField{
 			Name:             selection.TypeCondition,
 			Type:             fieldsResponseFields.ToGoStructType(),
@@ -121,9 +117,9 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 	return argumentTypes
 }
 
-// NewType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
+// NewNamedType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
 // コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
-func (r *SourceGenerator) NewType(typeName string, fieldsResponseFields ResponseFieldList) *types.Named {
+func (r *SourceGenerator) NewNamedType(typeName string, fieldsResponseFields ResponseFieldList) *types.Named {
 	structType := fieldsResponseFields.ToGoStructType()
 	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 	return namedType

@@ -31,7 +31,7 @@ func (s *Source) CreateFragments() error {
 		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(fragment.Name) {
 			return fmt.Errorf("%s is duplicated", fragment.Name)
 		}
-		fragmentType := s.sourceGenerator.NewType(fragment.Name, responseFields)
+		fragmentType := s.sourceGenerator.NewNamedType(fragment.Name, responseFields)
 		s.sourceGenerator.generatedTypes[fragmentType.String()] = fragmentType
 		// TOOD: いる？
 		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(fragment.Name, fragmentType.String())
@@ -46,7 +46,7 @@ func (s *Source) CreateOperationResponses() error {
 		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(operation.Name) {
 			return fmt.Errorf("%s is duplicated", operation.Name)
 		}
-		operationResponseType := s.sourceGenerator.NewType(operation.Name, responseFields)
+		operationResponseType := s.sourceGenerator.NewNamedType(operation.Name, responseFields)
 		s.sourceGenerator.generatedTypes[operationResponseType.String()] = types.NewPointer(operationResponseType)
 	}
 
