@@ -6,12 +6,18 @@ query UserOperation {
     }
     ...UserFragment1
     ...UserFragment2
+    ... on User {
+      name
+    }
   }
 }
 
 fragment UserFragment1 on User {
   name
   name
+  ... on User {
+    name
+  }
   profile {
     age
   }

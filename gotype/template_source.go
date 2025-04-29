@@ -102,13 +102,11 @@ func GetterFunc(targetPkgPath string) func(types.Type) string {
 				continue
 			}
 
-			if isFragment := pointerType == nil; !isFragment {
-				fieldTypeName := funcReturnTypesName(field.Type(), targetPkgPath)
-				fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
-				fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
+			fieldTypeName := funcReturnTypesName(field.Type(), targetPkgPath)
+			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
+			fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 
-				fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)
-			}
+			fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)
 		}
 
 		return buf.String()
