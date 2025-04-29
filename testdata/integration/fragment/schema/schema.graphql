@@ -15,4 +15,10 @@ type User {
 type Profile {
   id: ID!
   age: Int!
+  status: Status!
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
 }

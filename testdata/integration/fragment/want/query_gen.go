@@ -110,7 +110,8 @@ func (t *UserOperation_User) GetProfile() *UserOperation_User_Profile {
 }
 
 type UserOperation_User_Profile struct {
-	Age int "json:\"age\" graphql:\"age\""
+	Age    int    "json:\"age\" graphql:\"age\""
+	Status Status "json:\"status\" graphql:\"status\""
 }
 
 func (t *UserOperation_User_Profile) GetAge() int {
@@ -119,11 +120,18 @@ func (t *UserOperation_User_Profile) GetAge() int {
 	}
 	return t.Age
 }
+func (t *UserOperation_User_Profile) GetStatus() Status {
+	if t == nil {
+		t = &UserOperation_User_Profile{}
+	}
+	return t.Status
+}
 
 const UserOperationDocument = `query UserOperation {
 	user {
 		name
 		profile {
+			status
 			age
 		}
 		... UserFragment1
