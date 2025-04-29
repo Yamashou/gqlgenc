@@ -14,10 +14,16 @@ type User {
   optionalProfile: Profile
 }
 
-type Profile {
+union Profile = PublicProfile | PrivateProfile
+
+type PublicProfile {
+  id: ID!
+  status: Status!
+}
+
+type PrivateProfile {
   id: ID!
   age: Int
-  status: Status!
 }
 
 enum Status {

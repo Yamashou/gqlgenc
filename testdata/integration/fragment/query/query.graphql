@@ -2,12 +2,20 @@ query UserOperation {
   user {
     name
     profile {
-      status
-      age
+      ... on PublicProfile {
+        status
+      }
+      ... on PrivateProfile {
+        age
+      }
     }
     optionalProfile {
-      status
-      age
+      ... on PublicProfile {
+        status
+      }
+      ... on PrivateProfile {
+        age
+      }
     }
     ...UserFragment1
     ...UserFragment2
@@ -28,7 +36,12 @@ fragment UserFragment1 on User {
     name
   }
   profile {
-    age
+    ... on PublicProfile {
+      status
+    }
+    ... on PrivateProfile {
+      age
+    }
   }
 }
 

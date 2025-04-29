@@ -9,20 +9,32 @@ import (
 	"strconv"
 )
 
-type Profile struct {
+type Profile interface {
+	IsProfile()
+}
+
+type PrivateProfile struct {
+	ID  string `json:"id"`
+	Age *int   `json:"age,omitempty,omitzero"`
+}
+
+func (PrivateProfile) IsProfile() {}
+
+type PublicProfile struct {
 	ID     string `json:"id"`
-	Age    *int   `json:"age,omitempty,omitzero"`
 	Status Status `json:"status"`
 }
+
+func (PublicProfile) IsProfile() {}
 
 type Query struct {
 }
 
 type User struct {
-	ID              string   `json:"id"`
-	Name            string   `json:"name"`
-	Profile         Profile  `json:"profile"`
-	OptionalProfile *Profile `json:"optionalProfile,omitempty,omitzero"`
+	ID              string  `json:"id"`
+	Name            string  `json:"name"`
+	Profile         Profile `json:"profile"`
+	OptionalProfile Profile `json:"optionalProfile,omitempty,omitzero"`
 }
 
 type Status string

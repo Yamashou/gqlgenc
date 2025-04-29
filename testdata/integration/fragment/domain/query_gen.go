@@ -33,7 +33,12 @@ func (t *UserOperation) GetUser() userOperation_User {
 }
 
 type userFragment1_Profile struct {
-	Age *int "json:\"age\" graphql:\"age\""
+	PrivateProfile struct {
+		Age *int "json:\"age\" graphql:\"age\""
+	} "graphql:\"... on PrivateProfile\""
+	PublicProfile struct {
+		Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+	} "graphql:\"... on PublicProfile\""
 }
 
 type userOperation_OptionalUser struct {
@@ -60,38 +65,58 @@ type userOperation_User struct {
 }
 
 type userOperation_User_OptionalProfile struct {
-	Age    *int   "json:\"age\" graphql:\"age\""
-	Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+	PrivateProfile struct {
+		Age *int "json:\"age\" graphql:\"age\""
+	} "graphql:\"... on PrivateProfile\""
+	PublicProfile struct {
+		Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+	} "graphql:\"... on PublicProfile\""
 }
 
-func (t *userOperation_User_OptionalProfile) GetAge() *int {
+func (t *userOperation_User_OptionalProfile) GetPrivateProfile() struct {
+	Age *int "json:\"age\" graphql:\"age\""
+} {
 	if t == nil {
 		t = &userOperation_User_OptionalProfile{}
 	}
-	return t.Age
+	return t.PrivateProfile
 }
-func (t *userOperation_User_OptionalProfile) GetStatus() Status {
+func (t *userOperation_User_OptionalProfile) GetPublicProfile() struct {
+	Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+} {
 	if t == nil {
 		t = &userOperation_User_OptionalProfile{}
 	}
-	return t.Status
+	return t.PublicProfile
 }
 
 type userOperation_User_Profile struct {
-	Age    *int   "json:\"age\" graphql:\"age\""
-	Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+	PrivateProfile struct {
+		Age *int "json:\"age\" graphql:\"age\""
+	} "graphql:\"... on PrivateProfile\""
+	PublicProfile struct {
+		Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+	} "graphql:\"... on PublicProfile\""
 }
 
 const UserOperationDocument = `query UserOperation {
 	user {
 		name
 		profile {
-			status
-			age
+			... on PublicProfile {
+				status
+			}
+			... on PrivateProfile {
+				age
+			}
 		}
 		optionalProfile {
-			status
-			age
+			... on PublicProfile {
+				status
+			}
+			... on PrivateProfile {
+				age
+			}
 		}
 		... UserFragment1
 		... UserFragment2
@@ -111,7 +136,12 @@ fragment UserFragment1 on User {
 		name
 	}
 	profile {
-		age
+		... on PublicProfile {
+			status
+		}
+		... on PrivateProfile {
+			age
+		}
 	}
 }
 fragment UserFragment2 on User {
