@@ -32,7 +32,7 @@ func (p *Plugin) Name() string {
 }
 
 func (p *Plugin) MutateConfig(_ *gqlgenconfig.Config) error {
-	if err := RenderTemplate(p.cfg, p.operations, p.generatedTypes); err != nil {
+	if err := clientgenv2.RenderTemplate(p.cfg, p.operations, p.generatedTypes); err != nil {
 		return fmt.Errorf("template failed: %w", err)
 	}
 
