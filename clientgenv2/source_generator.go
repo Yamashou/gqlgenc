@@ -49,24 +49,19 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	case *ast.Field:
 		typeName := layerTypeName(parentTypeName, templates.ToGo(selection.Alias))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
-		var baseType types.Type
+		var t types.Type
 		switch {
 		case fieldsResponseFields.IsBasicType():
-			baseType = r.Type(selection.Definition.Type.Name())
+			t = r.FindType(selection.Definition.Type.Name())
 		case fieldsResponseFields.IsFragmentSpread():
 			// Fragmentのフィールドはnonnull
-			baseType = r.NewNamedType(typeName, fieldsResponseFields)
-			r.generatedTypes[baseType.String()] = baseType
+			t = r.NewNamedType(typeName, fieldsResponseFields)
+			r.generatedTypes[t.String()] = t
 		default:
-			baseType = types.NewPointer(r.NewNamedType(typeName, fieldsResponseFields))
+			t = types.NewPointer(r.NewNamedType(typeName, fieldsResponseFields))
 			// Fragment以外のフィールドはオプショナル？ TODO: オプショナルを元のスキーマの型に従う
-			r.generatedTypes[baseType.String()] = baseType
+			r.generatedTypes[t.String()] = t
 		}
-
-		// TODO: ここは何をやっている？
-		// GraphQLの定義がオプショナルのはtypeのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
-		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
-		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
 		// TODO: omitempty, omitzero
 		tags := []string{
@@ -74,9 +69,11 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
 		}
 
+		fmt.Printf("name: %s, tags: %v\n", selection.Name, tags)
+
 		return &ResponseField{
 			Name:           selection.Name,
-			Type:           typ,
+			Type:           t,
 			Tags:           tags,
 			ResponseFields: fieldsResponseFields,
 		}
@@ -93,6 +90,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, "")
+		fmt.Printf("inlineFragment name: %s\n", selection.TypeCondition)
 		return &ResponseField{
 			Name:             selection.TypeCondition,
 			Type:             fieldsResponseFields.ToGoStructType(),
@@ -110,7 +108,7 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &OperationArgument{
 			Variable: v.Variable,
-			Type:     r.binder.CopyModifiersFromAst(v.Type, r.Type(v.Type.Name())),
+			Type:     r.binder.CopyModifiersFromAst(v.Type, r.FindType(v.Type.Name())),
 		})
 	}
 
@@ -126,7 +124,7 @@ func (r *SourceGenerator) NewNamedType(typeName string, fieldsResponseFields Res
 }
 
 // Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
-func (r *SourceGenerator) Type(typeName string) types.Type {
+func (r *SourceGenerator) FindType(typeName string) types.Type {
 	goType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[typeName].Model[0])
 	if err != nil {
 		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
