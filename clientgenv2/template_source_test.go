@@ -1,4 +1,4 @@
-package gotype
+package clientgenv2
 
 import (
 	"go/ast"

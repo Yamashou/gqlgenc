@@ -65,14 +65,14 @@ func (t *UserOperation) GetUser() *UserOperation_User {
 }
 
 type UserOperation_User struct {
-	Name    string "json:\"profile\" graphql:\"profile\""
-	Profile *UserOperation_User_Profile
+	Name    string                      "json:\"name\" graphql:\"name\""
+	Profile *UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
 	User    struct {
 		Name string "json:\"name\" graphql:\"name\""
 		UserFragment2
 	}
-	UserFragment1 "graphql:\"... on User\""
-	UserFragment2 "json:\"name\" graphql:\"name\""
+	UserFragment1
+	UserFragment2 "graphql:\"... on User\""
 }
 
 func (t *UserOperation_User) GetName() string {

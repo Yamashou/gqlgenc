@@ -1,77 +1,11 @@
-package gotype
+package clientgenv2
 
 import (
 	"bytes"
 	"fmt"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/vektah/gqlparser/v2/ast"
 	"go/types"
 )
-
-type Operation struct {
-	Name                string
-	VariableDefinitions ast.VariableDefinitionList
-	Operation           string
-	Args                []*OperationArgument
-}
-
-func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*OperationArgument) *Operation {
-	return &Operation{
-		Name:                operation.Name,
-		VariableDefinitions: operation.VariableDefinitions,
-		Operation:           queryString(queryDocument),
-		Args:                args,
-	}
-}
-
-type OperationArgument struct {
-	Variable string
-	Type     types.Type
-}
-
-func NewOperationArgument(variable string, t types.Type) *OperationArgument {
-	return &OperationArgument{
-		Variable: variable,
-		Type:     t,
-	}
-}
-
-type OperationResponse struct {
-	Name string
-	Type types.Type
-}
-
-func NewOperationResponse(name string, t types.Type) *OperationResponse {
-	return &OperationResponse{
-		Name: name,
-		Type: t,
-	}
-
-}
-
-type QueryType struct {
-	Name string
-	Type types.Type
-}
-
-func NewQueryType(name string, typ types.Type) *QueryType {
-	return &QueryType{
-		Name: name,
-		Type: typ,
-	}
-}
-
-type Fragment struct {
-	Name string
-	Type types.Type
-}
-
-func NewFragment(name string, typ types.Type) *Fragment {
-	return &Fragment{
-		Name: name,
-		Type: typ,
-	}
-}
 
 // GetterFunc returns a function that generates getter methods for types.
 // targetPkgPath specifies the target package path and omits package qualifiers for types belonging to the same package.
