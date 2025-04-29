@@ -3,6 +3,10 @@ package clientgenv2
 import (
 	"fmt"
 	"go/types"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+	"maps"
+	"slices"
 	"strings"
 
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
@@ -27,35 +31,39 @@ type ResponseField struct {
 
 type ResponseFieldList []*ResponseField
 
-func (rs ResponseFieldList) StructType() *types.Struct {
+func (rs ResponseFieldList) ToGoStructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
-	for _, filed := range rs {
-		//  クエリーのフィールドの子階層がFragmentの場合、このフィールドにそのFragmentの型を追加する
-		if filed.IsFragmentSpread {
-			typ, ok := filed.ResponseFields.StructType().Underlying().(*types.Struct)
-			if !ok {
-				continue
-			}
-			for j := 0; j < typ.NumFields(); j++ {
-				vars = append(vars, typ.Field(j))
-				structTags = append(structTags, typ.Tag(j))
-			}
-		} else {
-			vars = append(vars, types.NewVar(0, nil, templates.ToGo(filed.Name), filed.Type))
-			structTags = append(structTags, strings.Join(filed.Tags, " "))
-		}
+	// 重複するフィールドはUniqueByNameによりGoの型から除外する。
+	for _, field := range rs.UniqueByName() {
+		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
+		structTags = append(structTags, strings.Join(field.Tags, " "))
 	}
-
 	return types.NewStruct(vars, structTags)
 }
 
-func (rs ResponseFieldList) IsFragment() bool {
+func (rs ResponseFieldList) UniqueByName() ResponseFieldList {
+	responseFieldMapByName := make(map[string]*ResponseField, len(rs))
+	for _, field := range rs {
+		responseFieldMapByName[field.Name] = field
+	}
+	return slices.Collect(maps.Values(responseFieldMapByName))
+}
+
+func (rs ResponseFieldList) IsFragmentSpread() bool {
 	if len(rs) != 1 {
 		return false
 	}
 
-	return rs[0].IsInlineFragment || rs[0].IsFragmentSpread
+	return rs[0].IsFragmentSpread
+}
+
+func (rs ResponseFieldList) IsInlineFragment() bool {
+	if len(rs) != 1 {
+		return false
+	}
+
+	return rs[0].IsInlineFragment
 }
 
 func (rs ResponseFieldList) IsBasicType() bool {
@@ -63,12 +71,13 @@ func (rs ResponseFieldList) IsBasicType() bool {
 }
 
 func (rs ResponseFieldList) IsStructType() bool {
-	return len(rs) > 0 && !rs.IsFragment()
+	return len(rs) > 0 && !rs.IsInlineFragment() && !rs.IsFragmentSpread()
 }
 
 type SourceGenerator struct {
-	cfg    *config.Config
-	binder *gqlgenconfig.Binder
+	cfg            *config.Config
+	binder         *gqlgenconfig.Binder
+	generatedTypes []*GeneratedType
 }
 
 func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
@@ -78,90 +87,42 @@ func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
 	}
 }
 
-func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet) ResponseFieldList {
+// parentTypeNameが空のときは親はinline fragment
+func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, parentTypeName string) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
 	for _, selection := range selectionSet {
-		responseFields = append(responseFields, r.NewResponseField(selection))
+		responseFields = append(responseFields, r.NewResponseField(selection, parentTypeName))
 	}
 
 	return responseFields
 }
 
-func (r *SourceGenerator) NewResponseFieldsByDefinition(definition *ast.Definition) (ResponseFieldList, error) {
-	fields := make(ResponseFieldList, 0, len(definition.Fields))
-	for _, field := range definition.Fields {
-		if field.Type.Name() == "__Schema" || field.Type.Name() == "__Type" {
-			continue
-		}
-
-		var typ types.Type
-		if field.Type.Name() == "Query" || field.Type.Name() == "Mutation" {
-			var baseType types.Type
-			baseType, err := r.binder.FindType(r.cfg.GQLGencConfig.ClientGen.Pkg().Path(), field.Type.Name())
-			if err != nil {
-				if !strings.Contains(err.Error(), "unable to find type") {
-					return nil, fmt.Errorf("not found type: %w", err)
-				}
-
-				// create new type
-				baseType = types.NewPointer(types.NewNamed(
-					types.NewTypeName(0, r.cfg.GQLGencConfig.ClientGen.Pkg(), templates.ToGo(field.Type.Name()), nil),
-					nil,
-					nil,
-				))
-			}
-
-			// for recursive struct field in go
-			typ = types.NewPointer(baseType)
-		} else {
-			baseType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[field.Type.Name()].Model[0])
-			if err != nil {
-				return nil, fmt.Errorf("not found type: %w", err)
-			}
-
-			typ = r.binder.CopyModifiersFromAst(field.Type, baseType)
-		}
-
-		tags := []string{
-			fmt.Sprintf(`json:"%s"`, field.Name),
-			fmt.Sprintf(`graphql:"%s"`, field.Name),
-		}
-
-		fields = append(fields, &ResponseField{
-			Name: field.Name,
-			Type: typ,
-			Tags: tags,
-		})
-	}
-
-	return fields, nil
+func layerTypeName(base, thisField string) string {
+	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
 }
 
-func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseField {
+// parentTypeNameが空のときは親はinline fragment
+func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeName string) *ResponseField {
 	switch selection := selection.(type) {
 	case *ast.Field:
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
-
+		typeName := layerTypeName(parentTypeName, templates.ToGo(selection.Alias))
+		fmt.Printf("ast.Field: %s %s=====================================================\n", selection.Name, typeName)
+		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
 		var baseType types.Type
 		switch {
 		case fieldsResponseFields.IsBasicType():
+			fmt.Printf("ast.Field isBasicType(): %s\n", selection.Name)
 			baseType = r.Type(selection.Definition.Type.Name())
-		case fieldsResponseFields.IsFragment():
-			// 子フィールドがFragmentの場合はこのFragmentがフィールドの型になる
-			// if a child field is fragment, this field type became fragment.
-			baseType = fieldsResponseFields[0].Type
-		case fieldsResponseFields.IsStructType():
-			baseType = fieldsResponseFields.StructType()
 		default:
-			// ここにきたらバグ
-			// here is bug
-			panic("not match type")
+			baseType = r.NewType(typeName, fieldsResponseFields)
 		}
+		fmt.Printf("ast.Field: %s-------------------------------------------\n", selection.Name)
 
 		// GraphQLの定義がオプショナルのはtypeのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
 		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)
 
+		// TODO: omitempty, omitzero
 		tags := []string{
 			fmt.Sprintf(`json:"%s"`, selection.Alias),
 			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
@@ -175,11 +136,12 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 		}
 
 	case *ast.FragmentSpread:
+		fmt.Printf("ast.FragmentSpread: %s\n", selection.Name)
 		// この構造体はテンプレート側で使われることはなく、ast.FieldでFragment判定するために使用する
-		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet)
+		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, selection.Name)
 		typ := types.NewNamed(
-			types.NewTypeName(0, r.cfg.GQLGencConfig.ClientGen.Pkg(), templates.ToGo(selection.Name), nil),
-			fieldsResponseFields.StructType(),
+			types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil),
+			fieldsResponseFields.ToGoStructType(),
 			nil,
 		)
 
@@ -191,12 +153,13 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 		}
 
 	case *ast.InlineFragment:
+		fmt.Printf("ast.InlineFragment\n")
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet)
+		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, "")
 
 		return &ResponseField{
 			Name:             selection.TypeCondition,
-			Type:             fieldsResponseFields.StructType(),
+			Type:             fieldsResponseFields.ToGoStructType(),
 			IsInlineFragment: true,
 			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
 			ResponseFields:   fieldsResponseFields,
@@ -204,6 +167,15 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection) *ResponseFie
 	}
 
 	panic("unexpected selection type")
+}
+
+// NewType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
+// コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
+func (r *SourceGenerator) NewType(typeName string, fieldsResponseFields ResponseFieldList) *types.Named {
+	structType := fieldsResponseFields.ToGoStructType()
+	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
+	r.generatedTypes = append(r.generatedTypes, NewGeneratedType(typeName, namedType, structType))
+	return namedType
 }
 
 func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*Argument {

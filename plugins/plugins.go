@@ -45,6 +45,7 @@ func Run(cfg *config.Config) error {
 	sourceGenerator := clientgenv2.NewSourceGenerator(cfg)
 	source := clientgenv2.NewSource(cfg.GQLGenConfig.Schema, queryDocument, sourceGenerator)
 
+	// Fragments must be before OperationResponses
 	fragments, err := source.Fragments()
 	if err != nil {
 		return fmt.Errorf("generating fragment failed: %w", err)
@@ -57,12 +58,14 @@ func Run(cfg *config.Config) error {
 
 	operations := source.Operations(operationQueryDocuments)
 
+	generatedTypes := source.GeneratedTypes()
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
-		queryGen := querygen.New(cfg, operations, operationResponses, fragments)
+		queryGen := querygen.New(cfg, operations, operationResponses, fragments, generatedTypes)
 		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)
 		}

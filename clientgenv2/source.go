@@ -32,14 +32,14 @@ type Fragment struct {
 func (s *Source) Fragments() ([]*Fragment, error) {
 	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
 	for _, fragment := range s.queryDocument.Fragments {
-		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet)
+		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, fragment.Name)
 		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(fragment.Name) {
 			return nil, fmt.Errorf("%s is duplicated", fragment.Name)
 		}
 
 		fragment := &Fragment{
 			Name: fragment.Name,
-			Type: responseFields.StructType(),
+			Type: responseFields.ToGoStructType(),
 		}
 
 		fragments = append(fragments, fragment)
@@ -47,10 +47,7 @@ func (s *Source) Fragments() ([]*Fragment, error) {
 
 	for _, fragment := range fragments {
 		name := fragment.Name
-		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(
-			name,
-			fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.ClientGen.Pkg(), templates.ToGo(name)),
-		)
+		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(name, fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(name)))
 	}
 
 	return fragments, nil
@@ -120,70 +117,45 @@ type OperationResponse struct {
 }
 
 func (s *Source) OperationResponses() ([]*OperationResponse, error) {
-	operationResponse := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+	operationResponses := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
 	for _, operation := range s.queryDocument.Operations {
-		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet)
+		fmt.Printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%s %s\n", operation.Name, operation.Operation)
+		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
 		name := operation.Name
 		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(name) {
 			return nil, fmt.Errorf("%s is duplicated", name)
 		}
-		operationResponse = append(operationResponse, &OperationResponse{
+		fmt.Printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx%s %s\n", operation.Name, operation.Operation)
+		operationResponse := &OperationResponse{
 			Name: name,
-			Type: responseFields.StructType(),
-		})
+			Type: responseFields.ToGoStructType(),
+		}
+		operationResponses = append(operationResponses, operationResponse)
+		fmt.Printf("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz%v\n", operationResponse)
 	}
 
-	for _, operationResponse := range operationResponse {
+	for _, operationResponse := range operationResponses {
 		name := operationResponse.Name
-		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(
-			name,
-			fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.ClientGen.Pkg(), templates.ToGo(name)),
-		)
+		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(name, fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(name)))
 	}
 
-	return operationResponse, nil
+	return operationResponses, nil
 }
 
-type Query struct {
-	Name string
-	Type types.Type
+func (s *Source) GeneratedTypes() []*GeneratedType {
+	return s.sourceGenerator.generatedTypes
 }
 
-func (s *Source) Query() (*Query, error) {
-	fields, err := s.sourceGenerator.NewResponseFieldsByDefinition(s.schema.Query)
-	if err != nil {
-		return nil, fmt.Errorf("generate failed for query struct type : %w", err)
+type GeneratedType struct {
+	Name      string
+	NamedType types.Type
+	Type      types.Type
+}
+
+func NewGeneratedType(name string, namedType, structType types.Type) *GeneratedType {
+	return &GeneratedType{
+		Name:      name,
+		NamedType: namedType,
+		Type:      structType,
 	}
-
-	s.sourceGenerator.cfg.GQLGenConfig.Models.Add(
-		s.schema.Query.Name,
-		fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.ClientGen.Pkg(), templates.ToGo(s.schema.Query.Name)),
-	)
-
-	return &Query{
-		Name: s.schema.Query.Name,
-		Type: fields.StructType(),
-	}, nil
-}
-
-type Mutation struct {
-	Name string
-	Type types.Type
-}
-
-func (s *Source) Mutation() (*Mutation, error) {
-	fields, err := s.sourceGenerator.NewResponseFieldsByDefinition(s.schema.Mutation)
-	if err != nil {
-		return nil, fmt.Errorf("generate failed for mutation struct type : %w", err)
-	}
-
-	s.sourceGenerator.cfg.GQLGenConfig.Models.Add(
-		s.schema.Mutation.Name,
-		fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.ClientGen.Pkg(), templates.ToGo(s.schema.Mutation.Name)),
-	)
-
-	return &Mutation{
-		Name: s.schema.Mutation.Name,
-		Type: fields.StructType(),
-	}, nil
 }

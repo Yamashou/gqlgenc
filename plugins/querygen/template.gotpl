@@ -4,11 +4,11 @@ type  {{ $fragment.Name | go  }} {{ $fragment.Type | ref }}
 
 {{- end }}
 
-// QueryTypes
-{{- range $queryType := .QueryTypes }}
-type {{ $queryType.Name }} {{ $queryType.Type | ref }}
+// GeneratedTypes
+{{- range $generatedType := .GeneratedTypes }}
+type {{ $generatedType.Name }} {{ $generatedType.Type | ref }}
 
-{{ getterFunc (.Name|go) .Type }}
+{{ getterFunc ($generatedType.Name|go) $generatedType.Type }}
 {{- end}}
 
 // OperationResponse

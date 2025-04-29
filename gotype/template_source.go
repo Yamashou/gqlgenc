@@ -87,8 +87,9 @@ func GetterFunc(targetPkgPath string) func(name string, t types.Type) string {
 			field := st.Field(i)
 			fieldName := field.Name()
 			returnType := funcReturnTypesName(field.Type(), true, targetPkgPath)
+			fmt.Printf("return Type: %#v", returnType)
 
-			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", name, fieldName, returnType)
+			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", t.String(), fieldName, returnType)
 			fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", name)
 
 			needsPointer := isNamedType(field.Type())
@@ -133,6 +134,8 @@ func funcReturnTypesName(t types.Type, isStruct bool, targetPkgPath string) stri
 		return "map[" + funcReturnTypesName(it.Key(), false, targetPkgPath) + "]" + funcReturnTypesName(it.Elem(), false, targetPkgPath)
 	case *types.Alias:
 		return funcReturnTypesName(it.Underlying(), isStruct, targetPkgPath)
+	case *types.Struct:
+		return it.String()
 	default:
 		return fmt.Sprintf("unknown(%T)", it)
 	}

@@ -2,80 +2,44 @@
 
 package domain
 
+import (
+)
 // Fragment
-type UserFragment1 struct {
-	Name    string                "json:\"name\" graphql:\"name\""
-	Profile UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
-}
-type UserFragment2 struct {
-	Name string "json:\"name\" graphql:\"name\""
-}
+type  UserFragment1 struct{Name string "json:\"name\" graphql:\"name\""}
 
-// QueryTypes
-type UserOperation_User_Profile struct {
-	Age int "json:\"age\" graphql:\"age\""
-}
+// GeneratedTypes
+type UserOperation_User struct{UserFragment1 UserFragment1}
 
-func (t *UserOperationUserProfile) GetAge() int {
-	if t == nil {
-		t = &UserOperationUserProfile{}
-	}
-	return t.Age
-}
-
-type UserOperation_User struct {
-	Name    string                     "json:\"name\" graphql:\"name\""
-	Profile UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
-}
-
-func (t *UserOperationUser) GetName() string {
+func (t *struct{UserFragment1 github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain.UserFragment1}) GetUserFragment1() *UserFragment1 {
 	if t == nil {
 		t = &UserOperationUser{}
 	}
-	return t.Name
+	return &t.UserFragment1
 }
-func (t *UserOperationUser) GetProfile() *UserOperation_User_Profile {
-	if t == nil {
-		t = &UserOperationUser{}
-	}
-	return &t.Profile
-}
+
 
 // OperationResponse
-type UserOperation struct {
-	User UserOperation_User "json:\"user\" graphql:\"user\""
-}
+type  UserOperation struct{User UserOperation_User "json:\"user\" graphql:\"user\""}
 
-func (t *UserOperation) GetUser() *UserOperation_User {
+func (t *struct{User github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain.UserOperation_User "json:\"user\" graphql:\"user\""}) GetUser() *UserOperation_User {
 	if t == nil {
 		t = &UserOperation{}
 	}
 	return &t.User
 }
 
+
 // Operation
 const UserOperationDocument = `query UserOperation {
 	user {
-		name
-		profile {
-			age
-		}
 		... UserFragment1
-		... UserFragment2
 	}
 }
 fragment UserFragment1 on User {
-	name
-	name
-	profile {
-		age
-	}
-}
-fragment UserFragment2 on User {
 	name
 }
 `
 
 var DocumentOperationNames = map[string]string{
-	UserOperationDocument: "UserOperation",
+    UserOperationDocument: "UserOperation",
 }
