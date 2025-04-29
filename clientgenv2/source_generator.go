@@ -39,8 +39,8 @@ func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, paren
 	return responseFields
 }
 
-func layerTypeName(base, thisField string) string {
-	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
+func layerTypeName(parentTypeName, fieldName string) string {
+	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(parentTypeName), fieldName)
 }
 
 // parentTypeNameが空のときは親はinline fragment
@@ -68,9 +68,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 			fmt.Sprintf(`json:"%s"`, selection.Alias),
 			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
 		}
-
-		fmt.Printf("name: %s, tags: %v\n", selection.Name, tags)
-
 		return &ResponseField{
 			Name:           selection.Name,
 			Type:           t,
@@ -90,7 +87,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, "")
-		fmt.Printf("inlineFragment name: %s\n", selection.TypeCondition)
 		return &ResponseField{
 			Name:             selection.TypeCondition,
 			Type:             fieldsResponseFields.ToGoStructType(),
