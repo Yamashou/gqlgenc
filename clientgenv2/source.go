@@ -116,31 +116,17 @@ type OperationResponse struct {
 	Type types.Type
 }
 
-func (s *Source) OperationResponses() ([]*OperationResponse, error) {
-	operationResponses := make([]*OperationResponse, 0, len(s.queryDocument.Operations))
+func (s *Source) CreateOperationResponses() error {
 	for _, operation := range s.queryDocument.Operations {
-		fmt.Printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa%s %s\n", operation.Name, operation.Operation)
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
 		name := operation.Name
 		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(name) {
-			return nil, fmt.Errorf("%s is duplicated", name)
+			return fmt.Errorf("%s is duplicated", name)
 		}
-		fmt.Printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx%s %s\n", operation.Name, operation.Operation)
 		s.sourceGenerator.NewType(name, responseFields)
-		//operationResponse := &OperationResponse{
-		//	Name: name,
-		//	Type: t,
-		//}
-		// operationResponses = append(operationResponses, operationResponse)
-		// fmt.Printf("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz%v\n", operationResponse)
 	}
 
-	//for _, operationResponse := range operationResponses {
-	//	name := operationResponse.Name
-	//	s.sourceGenerator.cfg.GQLGenConfig.Models.Add(name, fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(name)))
-	//}
-	//
-	return operationResponses, nil
+	return nil
 }
 
 func (s *Source) GeneratedTypes() []*GeneratedType {

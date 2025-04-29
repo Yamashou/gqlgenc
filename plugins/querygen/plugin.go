@@ -13,20 +13,18 @@ import (
 var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
-	cfg                *config.Config
-	operations         []*clientgenv2.Operation
-	operationResponses []*clientgenv2.OperationResponse
-	fragments          []*clientgenv2.Fragment
-	generatedTypes     []*clientgenv2.GeneratedType
+	cfg            *config.Config
+	operations     []*clientgenv2.Operation
+	fragments      []*clientgenv2.Fragment
+	generatedTypes []*clientgenv2.GeneratedType
 }
 
-func New(cfg *config.Config, operations []*clientgenv2.Operation, operationResponses []*clientgenv2.OperationResponse, fragments []*clientgenv2.Fragment, generatedTypes []*clientgenv2.GeneratedType) *Plugin {
+func New(cfg *config.Config, operations []*clientgenv2.Operation, fragments []*clientgenv2.Fragment, generatedTypes []*clientgenv2.GeneratedType) *Plugin {
 	return &Plugin{
-		cfg:                cfg,
-		fragments:          fragments,
-		operations:         operations,
-		operationResponses: operationResponses,
-		generatedTypes:     generatedTypes,
+		cfg:            cfg,
+		fragments:      fragments,
+		operations:     operations,
+		generatedTypes: generatedTypes,
 	}
 }
 
@@ -35,7 +33,7 @@ func (p *Plugin) Name() string {
 }
 
 func (p *Plugin) MutateConfig(_ *gqlgenconfig.Config) error {
-	if err := RenderTemplate(p.cfg, p.fragments, p.operations, p.operationResponses, p.generatedTypes); err != nil {
+	if err := RenderTemplate(p.cfg, p.fragments, p.operations, p.generatedTypes); err != nil {
 		return fmt.Errorf("template failed: %w", err)
 	}
 

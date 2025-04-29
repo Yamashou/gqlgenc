@@ -51,8 +51,7 @@ func Run(cfg *config.Config) error {
 		return fmt.Errorf("generating fragment failed: %w", err)
 	}
 
-	operationResponses, err := source.OperationResponses()
-	if err != nil {
+	if err := source.CreateOperationResponses(); err != nil {
 		return fmt.Errorf("generating operation response failed: %w", err)
 	}
 
@@ -65,7 +64,7 @@ func Run(cfg *config.Config) error {
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
-		queryGen := querygen.New(cfg, operations, operationResponses, fragments, generatedTypes)
+		queryGen := querygen.New(cfg, operations, fragments, generatedTypes)
 		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)
 		}
