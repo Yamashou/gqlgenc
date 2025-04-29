@@ -2,22 +2,31 @@
 
 package domain
 
-type UserOperation struct {
-	User *UserOperation_User "json:\"user\" graphql:\"user\""
+type UserFragment1 struct {
+	Name    string                 "json:\"name\" graphql:\"name\""
+	Profile *UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
 }
 
-func (t *UserOperation) GetUser() *UserOperation_User {
+type UserFragment2 struct {
+	Name string "json:\"name\" graphql:\"name\""
+}
+
+type UserOperation_User_Profile struct {
+	Age int "json:\"age\" graphql:\"age\""
+}
+
+func (t *UserOperation_User_Profile) GetAge() int {
 	if t == nil {
-		t = &UserOperation{}
+		t = &UserOperation_User_Profile{}
 	}
-	return t.User
+	return t.Age
 }
 
 type UserOperation_User struct {
-	Name    string                      "json:\"name\" graphql:\"name\""
-	Profile *UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
-	UserFragment1
-	UserFragment2
+	Name          string
+	Profile       *UserOperation_User_Profile
+	UserFragment1 "json:\"name\" graphql:\"name\""
+	UserFragment2 "json:\"profile\" graphql:\"profile\""
 }
 
 func (t *UserOperation_User) GetName() string {
@@ -45,23 +54,26 @@ func (t *UserOperation_User) GetUserFragment2() UserFragment2 {
 	return t.UserFragment2
 }
 
-type UserOperation_User_Profile struct {
+type UserOperation struct {
+	User *UserOperation_User "json:\"user\" graphql:\"user\""
+}
+
+func (t *UserOperation) GetUser() *UserOperation_User {
+	if t == nil {
+		t = &UserOperation{}
+	}
+	return t.User
+}
+
+type UserFragment1_Profile struct {
 	Age int "json:\"age\" graphql:\"age\""
 }
 
-func (t *UserOperation_User_Profile) GetAge() int {
+func (t *UserFragment1_Profile) GetAge() int {
 	if t == nil {
-		t = &UserOperation_User_Profile{}
+		t = &UserFragment1_Profile{}
 	}
 	return t.Age
-}
-
-type UserFragment1 struct {
-	Name string "json:\"name\" graphql:\"name\""
-}
-
-type UserFragment2 struct {
-	Name string "json:\"name\" graphql:\"name\""
 }
 
 const UserOperationDocument = `query UserOperation {
@@ -77,6 +89,9 @@ const UserOperationDocument = `query UserOperation {
 fragment UserFragment1 on User {
 	name
 	name
+	profile {
+		age
+	}
 }
 fragment UserFragment2 on User {
 	name

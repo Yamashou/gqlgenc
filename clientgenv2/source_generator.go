@@ -18,13 +18,14 @@ import (
 type SourceGenerator struct {
 	cfg            *config.Config
 	binder         *gqlgenconfig.Binder
-	generatedTypes []types.Type
+	generatedTypes map[string]types.Type
 }
 
 func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
 	return &SourceGenerator{
-		cfg:    cfg,
-		binder: cfg.GQLGenConfig.NewBinder(),
+		cfg:            cfg,
+		binder:         cfg.GQLGenConfig.NewBinder(),
+		generatedTypes: map[string]types.Type{},
 	}
 }
 
@@ -55,13 +56,13 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		case fieldsResponseFields.IsFragmentSpread():
 			// Fragmentのフィールドはnonnull
 			baseType = r.NewType(typeName, fieldsResponseFields)
-			r.generatedTypes = append(r.generatedTypes, baseType)
+			r.generatedTypes[typeName] = baseType
 		default:
 			baseType = types.NewPointer(r.NewType(typeName, fieldsResponseFields))
-			// Fragment以外のフィールドはオプショナル？ TODO: 元のスキーマの型に従う
-			r.generatedTypes = append(r.generatedTypes, baseType)
+			fmt.Printf("query type: %s\n", baseType)
+			// Fragment以外のフィールドはオプショナル？ TODO: オプショナルを元のスキーマの型に従う
+			r.generatedTypes[typeName] = baseType
 		}
-		fmt.Printf("ast.Field: %s-------------------------------------------\n", selection.Name)
 
 		// TODO: ここは何をやっている？
 		// GraphQLの定義がオプショナルのはtypeのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
@@ -82,7 +83,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		}
 
 	case *ast.FragmentSpread:
-		fmt.Printf("ast.FragmentSpread: %s\n", selection.Name)
 		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, selection.Name)
 		// TODO: NewTypeを使う？
 		typ := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil), fieldsResponseFields.ToGoStructType(), nil)
@@ -95,7 +95,6 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		}
 
 	case *ast.InlineFragment:
-		fmt.Printf("ast.InlineFragment\n")
 		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, "")
 

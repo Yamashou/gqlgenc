@@ -96,18 +96,14 @@ func GetterFunc(targetPkgPath string) func(types.Type) string {
 		fmt.Fprintf(&buf, "type %s %s\n", typeName, ref(st))
 		for i := 0; i < st.NumFields(); i++ {
 			field := st.Field(i)
-			// fieldName
 			fieldName := field.Name()
-			// fieldが埋め込みの時は、Getterは不要
 			if fieldName == "" {
+				// fieldが埋め込みの時は、Getterは不要
 				continue
 			}
 
-			// fieldTypeName
-			fieldTypeName := funcReturnTypesName(field.Type(), targetPkgPath)
-			fmt.Printf("fieldTypeName: %#v\n", fieldTypeName)
-
 			if isFragment := pointerType == nil; !isFragment {
+				fieldTypeName := funcReturnTypesName(field.Type(), targetPkgPath)
 				fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
 				fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 

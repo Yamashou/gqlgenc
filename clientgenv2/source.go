@@ -6,6 +6,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 	"go/types"
+	"maps"
 	"slices"
 	"strings"
 )
@@ -31,7 +32,7 @@ func (s *Source) CreateFragments() error {
 			return fmt.Errorf("%s is duplicated", fragment.Name)
 		}
 		fragmentType := s.sourceGenerator.NewType(fragment.Name, responseFields)
-		s.sourceGenerator.generatedTypes = append(s.sourceGenerator.generatedTypes, fragmentType)
+		s.sourceGenerator.generatedTypes[fragment.Name] = fragmentType
 		// TOOD: いる？
 		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(fragment.Name, fragmentType.String())
 	}
@@ -42,22 +43,22 @@ func (s *Source) CreateFragments() error {
 func (s *Source) CreateOperationResponses() error {
 	for _, operation := range s.queryDocument.Operations {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
-		name := operation.Name
-		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(name) {
-			return fmt.Errorf("%s is duplicated", name)
+		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(operation.Name) {
+			return fmt.Errorf("%s is duplicated", operation.Name)
 		}
-		operationResponseType := s.sourceGenerator.NewType(name, responseFields)
-		s.sourceGenerator.generatedTypes = append(s.sourceGenerator.generatedTypes, types.NewPointer(operationResponseType))
+		operationResponseType := s.sourceGenerator.NewType(operation.Name, responseFields)
+		s.sourceGenerator.generatedTypes[operationResponseType.String()] = types.NewPointer(operationResponseType)
 	}
 
 	return nil
 }
 
 func (s *Source) GeneratedTypes() []types.Type {
-	slices.SortFunc(s.sourceGenerator.generatedTypes, func(a, b types.Type) int {
+	generatedTypes := maps.Values(s.sourceGenerator.generatedTypes)
+	slices.SortedFunc(generatedTypes, func(a, b types.Type) int {
 		return strings.Compare(a.String(), b.String())
 	})
-	return s.sourceGenerator.generatedTypes
+	return slices.Collect(generatedTypes)
 }
 
 // TODO: ASTでmethod作れないか
