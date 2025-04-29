@@ -10,7 +10,7 @@ import (
 	"github.com/Yamashou/gqlgenc/v3/config"
 )
 
-//go:embed template.gotpl
+//go:embed template.tmpl
 var template string
 
 func RenderTemplate(cfg *config.Config, operations []*Operation, generatedTypes []types.Type) error {
