@@ -14,7 +14,8 @@ func (t *UserOperation) GetUser() *UserOperation_User {
 }
 
 type UserOperation_User struct {
-	Name string "json:\"name\" graphql:\"name\""
+	Name    string                      "json:\"name\" graphql:\"name\""
+	Profile *UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
 	UserFragment1
 	UserFragment2
 }
@@ -24,6 +25,12 @@ func (t *UserOperation_User) GetName() string {
 		t = &UserOperation_User{}
 	}
 	return t.Name
+}
+func (t *UserOperation_User) GetProfile() *UserOperation_User_Profile {
+	if t == nil {
+		t = &UserOperation_User{}
+	}
+	return t.Profile
 }
 func (t *UserOperation_User) GetUserFragment1() UserFragment1 {
 	if t == nil {
@@ -38,6 +45,17 @@ func (t *UserOperation_User) GetUserFragment2() UserFragment2 {
 	return t.UserFragment2
 }
 
+type UserOperation_User_Profile struct {
+	Age int "json:\"age\" graphql:\"age\""
+}
+
+func (t *UserOperation_User_Profile) GetAge() int {
+	if t == nil {
+		t = &UserOperation_User_Profile{}
+	}
+	return t.Age
+}
+
 type UserFragment1 struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
@@ -49,6 +67,9 @@ type UserFragment2 struct {
 const UserOperationDocument = `query UserOperation {
 	user {
 		name
+		profile {
+			age
+		}
 		... UserFragment1
 		... UserFragment2
 	}
