@@ -6,6 +6,8 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 	"go/types"
+	"slices"
+	"strings"
 )
 
 type Source struct {
@@ -52,6 +54,9 @@ func (s *Source) CreateOperationResponses() error {
 }
 
 func (s *Source) GeneratedTypes() []types.Type {
+	slices.SortFunc(s.sourceGenerator.generatedTypes, func(a, b types.Type) int {
+		return strings.Compare(a.String(), b.String())
+	})
 	return s.sourceGenerator.generatedTypes
 }
 

@@ -181,6 +181,9 @@ func (rs ResponseFieldList) ToGoStructType() *types.Struct {
 		vars = append(vars, types.NewField(0, nil, templates.ToGo(responseField.Name), responseField.Type, responseField.IsFragmentSpread))
 		structTags = append(structTags, strings.Join(responseField.Tags, " "))
 	}
+	slices.SortFunc(vars, func(a, b *types.Var) int {
+		return strings.Compare(a.Name(), b.Name())
+	})
 	return types.NewStruct(vars, structTags)
 }
 

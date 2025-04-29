@@ -1,11 +1,13 @@
 query UserOperation {
   user {
+    name
     ...UserFragment1
     ...UserFragment2
   }
 }
 
 fragment UserFragment1 on User {
+  name
   name
 }
 

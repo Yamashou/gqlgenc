@@ -2,19 +2,29 @@
 
 package domain
 
-type UserFragment1 struct {
-	Name string "json:\"name\" graphql:\"name\""
+type UserOperation struct {
+	User *UserOperation_User "json:\"user\" graphql:\"user\""
 }
 
-type UserFragment2 struct {
-	Name string "json:\"name\" graphql:\"name\""
+func (t *UserOperation) GetUser() *UserOperation_User {
+	if t == nil {
+		t = &UserOperation{}
+	}
+	return t.User
 }
 
 type UserOperation_User struct {
+	Name string "json:\"name\" graphql:\"name\""
 	UserFragment1
 	UserFragment2
 }
 
+func (t *UserOperation_User) GetName() string {
+	if t == nil {
+		t = &UserOperation_User{}
+	}
+	return t.Name
+}
 func (t *UserOperation_User) GetUserFragment1() UserFragment1 {
 	if t == nil {
 		t = &UserOperation_User{}
@@ -28,24 +38,23 @@ func (t *UserOperation_User) GetUserFragment2() UserFragment2 {
 	return t.UserFragment2
 }
 
-type UserOperation struct {
-	User *UserOperation_User "json:\"user\" graphql:\"user\""
+type UserFragment1 struct {
+	Name string "json:\"name\" graphql:\"name\""
 }
 
-func (t *UserOperation) GetUser() *UserOperation_User {
-	if t == nil {
-		t = &UserOperation{}
-	}
-	return t.User
+type UserFragment2 struct {
+	Name string "json:\"name\" graphql:\"name\""
 }
 
 const UserOperationDocument = `query UserOperation {
 	user {
+		name
 		... UserFragment1
 		... UserFragment2
 	}
 }
 fragment UserFragment1 on User {
+	name
 	name
 }
 fragment UserFragment2 on User {
