@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"go/types"
 
-	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 )
@@ -24,33 +23,18 @@ func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGener
 	}
 }
 
-type Fragment struct {
-	Name string
-	Type types.Type
-}
-
-func (s *Source) Fragments() ([]*Fragment, error) {
-	fragments := make([]*Fragment, 0, len(s.queryDocument.Fragments))
+func (s *Source) CreateFragments() error {
 	for _, fragment := range s.queryDocument.Fragments {
 		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, fragment.Name)
 		if s.sourceGenerator.cfg.GQLGenConfig.Models.Exists(fragment.Name) {
-			return nil, fmt.Errorf("%s is duplicated", fragment.Name)
+			return fmt.Errorf("%s is duplicated", fragment.Name)
 		}
-
-		fragment := &Fragment{
-			Name: fragment.Name,
-			Type: responseFields.ToGoStructType(),
-		}
-
-		fragments = append(fragments, fragment)
+		fragmentType := s.sourceGenerator.NewType(fragment.Name, responseFields)
+		// TOOD: いる？
+		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(fragment.Name, fragmentType.String())
 	}
 
-	for _, fragment := range fragments {
-		name := fragment.Name
-		s.sourceGenerator.cfg.GQLGenConfig.Models.Add(name, fmt.Sprintf("%s.%s", s.sourceGenerator.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(name)))
-	}
-
-	return fragments, nil
+	return nil
 }
 
 type Operation struct {

@@ -3,11 +3,19 @@
 package domain
 
 // Fragment
+
+// GeneratedTypes
 type UserFragment1 struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
-// GeneratedTypes
+func (t *UserFragment1) GetName() string {
+	if t == nil {
+		t = &UserFragment1{}
+	}
+	return t.Name
+}
+
 type UserOperation_User struct{ UserFragment1 UserFragment1 }
 
 func (t *UserOperation_User) GetUserFragment1() *UserFragment1 {

@@ -173,13 +173,8 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 // コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
 func (r *SourceGenerator) NewType(typeName string, fieldsResponseFields ResponseFieldList) *types.Named {
 	structType := fieldsResponseFields.ToGoStructType()
-	namedType := NewType(r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, structType)
+	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 	r.generatedTypes = append(r.generatedTypes, NewGeneratedType(typeName, namedType))
-	return namedType
-}
-
-func NewType(queryGenPkg *types.Package, typeName string, structType *types.Struct) *types.Named {
-	namedType := types.NewNamed(types.NewTypeName(0, queryGenPkg, typeName, nil), structType, nil)
 	return namedType
 }
 
