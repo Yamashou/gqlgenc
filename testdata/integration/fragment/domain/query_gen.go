@@ -6,13 +6,6 @@ type UserFragment1 struct {
 	Name string "json:\"name\" graphql:\"name\""
 }
 
-func (t *UserFragment1) GetName() string {
-	if t == nil {
-		t = &UserFragment1{}
-	}
-	return t.Name
-}
-
 type UserOperation_User struct{ UserFragment1 }
 
 type UserOperation struct {

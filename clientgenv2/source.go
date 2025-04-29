@@ -45,7 +45,7 @@ func (s *Source) CreateOperationResponses() error {
 			return fmt.Errorf("%s is duplicated", name)
 		}
 		operationResponseType := s.sourceGenerator.NewType(name, responseFields)
-		s.sourceGenerator.generatedTypes = append(s.sourceGenerator.generatedTypes, operationResponseType)
+		s.sourceGenerator.generatedTypes = append(s.sourceGenerator.generatedTypes, types.NewPointer(operationResponseType))
 	}
 
 	return nil

@@ -53,8 +53,9 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		case fieldsResponseFields.IsBasicType():
 			baseType = r.Type(selection.Definition.Type.Name())
 		default:
+			// Query Type
 			baseType = r.NewType(typeName, fieldsResponseFields)
-			r.generatedTypes = append(r.generatedTypes, baseType)
+			r.generatedTypes = append(r.generatedTypes, types.NewPointer(baseType))
 		}
 		fmt.Printf("ast.Field: %s-------------------------------------------\n", selection.Name)
 

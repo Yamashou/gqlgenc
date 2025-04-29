@@ -80,9 +80,11 @@ func NewFragment(name string, typ types.Type) *Fragment {
 func GetterFunc(targetPkgPath string) func(types.Type) string {
 	return func(t types.Type) string {
 		var namedType *types.Named
-		if pointerType, ok := t.(*types.Pointer); ok {
+		pointerType, ok := t.(*types.Pointer)
+		if ok {
 			namedType = pointerType.Elem().(*types.Named)
 		} else {
+			// FragmentのときはPointerではない
 			namedType = t.(*types.Named)
 		}
 		st := namedType.Underlying().(*types.Struct)
@@ -97,7 +99,7 @@ func GetterFunc(targetPkgPath string) func(types.Type) string {
 			field := st.Field(i)
 			// fieldName
 			fieldName := field.Name()
-			// 埋め込みの時は、Getterは不要
+			// fieldが埋め込みの時は、Getterは不要
 			if fieldName == "" {
 				continue
 			}
@@ -106,15 +108,16 @@ func GetterFunc(targetPkgPath string) func(types.Type) string {
 			fieldTypeName := funcReturnTypesName(field.Type(), true, targetPkgPath)
 			fmt.Printf("fieldTypeName: %#v", fieldTypeName)
 
-			// TODO: fragmentのreceiverはポインタではなく実際の型にする
-			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
-			fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
+			if isFragment := pointerType == nil; !isFragment {
+				fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
+				fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 
-			needsPointer := isNamedType(field.Type())
-			if needsPointer {
-				fmt.Fprintf(&buf, "\treturn &t.%s\n}\n", fieldName)
-			} else {
-				fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)
+				needsPointer := isNamedType(field.Type())
+				if needsPointer {
+					fmt.Fprintf(&buf, "\treturn &t.%s\n}\n", fieldName)
+				} else {
+					fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)
+				}
 			}
 		}
 
