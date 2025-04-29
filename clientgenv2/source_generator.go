@@ -52,13 +52,18 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		switch {
 		case fieldsResponseFields.IsBasicType():
 			baseType = r.Type(selection.Definition.Type.Name())
-		default:
-			// Query Type
+		case fieldsResponseFields.IsFragmentSpread():
+			// Fragmentのフィールドはnonnull
 			baseType = r.NewType(typeName, fieldsResponseFields)
-			r.generatedTypes = append(r.generatedTypes, types.NewPointer(baseType))
+			r.generatedTypes = append(r.generatedTypes, baseType)
+		default:
+			baseType = types.NewPointer(r.NewType(typeName, fieldsResponseFields))
+			// Fragment以外のフィールドはオプショナル？ TODO: 元のスキーマの型に従う
+			r.generatedTypes = append(r.generatedTypes, baseType)
 		}
 		fmt.Printf("ast.Field: %s-------------------------------------------\n", selection.Name)
 
+		// TODO: ここは何をやっている？
 		// GraphQLの定義がオプショナルのはtypeのポインタ型が返り、配列の定義場合はポインタのスライスの型になって返ってきます
 		// return pointer type then optional type or slice pointer then slice type of definition in GraphQL.
 		typ := r.binder.CopyModifiersFromAst(selection.Definition.Type, baseType)

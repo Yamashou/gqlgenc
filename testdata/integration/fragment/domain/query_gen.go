@@ -15,28 +15,28 @@ type UserOperation_User struct {
 	UserFragment2
 }
 
-func (t *UserOperation_User) GetUserFragment1() *UserFragment1 {
+func (t *UserOperation_User) GetUserFragment1() UserFragment1 {
 	if t == nil {
 		t = &UserOperation_User{}
 	}
-	return &t.UserFragment1
+	return t.UserFragment1
 }
-func (t *UserOperation_User) GetUserFragment2() *UserFragment2 {
+func (t *UserOperation_User) GetUserFragment2() UserFragment2 {
 	if t == nil {
 		t = &UserOperation_User{}
 	}
-	return &t.UserFragment2
+	return t.UserFragment2
 }
 
 type UserOperation struct {
-	User UserOperation_User "json:\"user\" graphql:\"user\""
+	User *UserOperation_User "json:\"user\" graphql:\"user\""
 }
 
 func (t *UserOperation) GetUser() *UserOperation_User {
 	if t == nil {
 		t = &UserOperation{}
 	}
-	return &t.User
+	return t.User
 }
 
 const UserOperationDocument = `query UserOperation {

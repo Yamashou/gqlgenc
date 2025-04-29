@@ -57,7 +57,7 @@ func TestReturnTypeName(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			output := funcReturnTypesName(test.t, test.isStruct, "")
+			output := funcReturnTypesName(test.t, "")
 			if output != test.want {
 				t.Errorf("Expected %s, but got %s", test.want, output)
 			}
@@ -336,19 +336,19 @@ func (t *User) GetAddress() *Address {
 
 		// Next check if funcReturnTypesName function works correctly
 		// No package specified
-		noPackage := funcReturnTypesName(profileType, true, "")
+		noPackage := funcReturnTypesName(profileType, "")
 		if noPackage != "*pkgb.Profile" {
 			t.Errorf("funcReturnTypesName() without pkg path = %v, want %v", noPackage, "*pkgb.Profile")
 		}
 
 		// Same package
-		samePackageType := funcReturnTypesName(profileType, true, "github.com/example/pkgb")
+		samePackageType := funcReturnTypesName(profileType, "github.com/example/pkgb")
 		if samePackageType != "*Profile" {
 			t.Errorf("funcReturnTypesName() with same pkg = %v, want %v", samePackageType, "*Profile")
 		}
 
 		// Different package
-		differentPackageType := funcReturnTypesName(profileType, true, "github.com/example/pkga")
+		differentPackageType := funcReturnTypesName(profileType, "github.com/example/pkga")
 		if differentPackageType != "*pkgb.Profile" {
 			t.Errorf("funcReturnTypesName() with different pkg = %v, want %v", differentPackageType, "*pkgb.Profile")
 		}

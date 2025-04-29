@@ -88,10 +88,9 @@ func GetterFunc(targetPkgPath string) func(types.Type) string {
 			namedType = t.(*types.Named)
 		}
 		st := namedType.Underlying().(*types.Struct)
-		names := strings.Split(namedType.String(), ".")
 
 		// typeName
-		typeName := names[len(names)-1]
+		typeName := shortTypeName(namedType)
 
 		var buf bytes.Buffer
 		fmt.Fprintf(&buf, "type %s %s\n", typeName, ref(st))
@@ -105,19 +104,14 @@ func GetterFunc(targetPkgPath string) func(types.Type) string {
 			}
 
 			// fieldTypeName
-			fieldTypeName := funcReturnTypesName(field.Type(), true, targetPkgPath)
-			fmt.Printf("fieldTypeName: %#v", fieldTypeName)
+			fieldTypeName := funcReturnTypesName(field.Type(), targetPkgPath)
+			fmt.Printf("fieldTypeName: %#v\n", fieldTypeName)
 
 			if isFragment := pointerType == nil; !isFragment {
 				fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
 				fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 
-				needsPointer := isNamedType(field.Type())
-				if needsPointer {
-					fmt.Fprintf(&buf, "\treturn &t.%s\n}\n", fieldName)
-				} else {
-					fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)
-				}
+				fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)
 			}
 		}
 
@@ -139,37 +133,33 @@ func ref(p types.Type) string {
 	return typeString
 }
 
-// isNamedType determines if the type is a named type (such as a struct)
-func isNamedType(t types.Type) bool {
-	_, ok := t.(*types.Named)
-	return ok
+func shortTypeName(t types.Type) string {
+	names := strings.Split(t.String(), ".")
+	typeName := names[len(names)-1]
+	if strings.HasPrefix(t.String(), "*") {
+		typeName = "*" + typeName
+	}
+	return typeName
 }
 
 // A new closure function that can use target package information
-// TODO: it.String()ではだめ？
-func funcReturnTypesName(t types.Type, isStruct bool, targetPkgPath string) string {
+func funcReturnTypesName(t types.Type, targetPkgPath string) string {
 	switch it := t.(type) {
 	case *types.Basic:
 		return it.String()
 	case *types.Pointer:
-		return "*" + funcReturnTypesName(it.Elem(), false, targetPkgPath)
+		return "*" + funcReturnTypesName(it.Elem(), targetPkgPath)
 	case *types.Slice:
-		return "[]" + funcReturnTypesName(it.Elem(), false, targetPkgPath)
+		return "[]" + funcReturnTypesName(it.Elem(), targetPkgPath)
 	case *types.Named:
 		// For named types, consider the package path to determine whether to include a package qualifier
-		name := namedTypeString(it, targetPkgPath)
-
-		if isStruct {
-			return "*" + name
-		}
-
-		return name
+		return namedTypeString(it, targetPkgPath)
 	case *types.Interface:
 		return "any"
 	case *types.Map:
-		return "map[" + funcReturnTypesName(it.Key(), false, targetPkgPath) + "]" + funcReturnTypesName(it.Elem(), false, targetPkgPath)
+		return "map[" + funcReturnTypesName(it.Key(), targetPkgPath) + "]" + funcReturnTypesName(it.Elem(), targetPkgPath)
 	case *types.Alias:
-		return funcReturnTypesName(it.Underlying(), isStruct, targetPkgPath)
+		return funcReturnTypesName(it.Underlying(), targetPkgPath)
 	case *types.Struct:
 		return it.String()
 	default:
@@ -179,6 +169,7 @@ func funcReturnTypesName(t types.Type, isStruct bool, targetPkgPath string) stri
 
 // namedTypeString returns the fully qualified name of a type.
 // If currentPkgPath is specified and the type belongs to the same package, the package qualifier is omitted.
+// TODO: refとの違いは？
 func namedTypeString(named *types.Named, currentPkgPath string) string {
 	// Get package information from the object
 	pkg := named.Obj().Pkg()
