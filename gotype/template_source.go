@@ -146,6 +146,7 @@ func isNamedType(t types.Type) bool {
 }
 
 // A new closure function that can use target package information
+// TODO: it.String()ではだめ？
 func funcReturnTypesName(t types.Type, isStruct bool, targetPkgPath string) string {
 	switch it := t.(type) {
 	case *types.Basic:

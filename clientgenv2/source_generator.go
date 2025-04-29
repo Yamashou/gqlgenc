@@ -83,7 +83,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		typ := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), templates.ToGo(selection.Name), nil), fieldsResponseFields.ToGoStructType(), nil)
 
 		return &ResponseField{
-			Name:             "", // FragmentSpreadは埋め込みにする。
+			Name:             selection.Name,
 			Type:             typ,
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
@@ -172,9 +172,9 @@ func (rs ResponseFieldList) ToGoStructType() *types.Struct {
 	vars := make([]*types.Var, 0)
 	structTags := make([]string, 0)
 	// 重複するフィールドはUniqueByNameによりGoの型から除外する。
-	for _, field := range rs.uniqueByName() {
-		vars = append(vars, types.NewVar(0, nil, templates.ToGo(field.Name), field.Type))
-		structTags = append(structTags, strings.Join(field.Tags, " "))
+	for _, responseField := range rs.uniqueByName() {
+		vars = append(vars, types.NewField(0, nil, templates.ToGo(responseField.Name), responseField.Type, responseField.IsFragmentSpread))
+		structTags = append(structTags, strings.Join(responseField.Tags, " "))
 	}
 	return types.NewStruct(vars, structTags)
 }
