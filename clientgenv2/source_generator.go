@@ -45,53 +45,41 @@ func layerTypeName(parentTypeName, fieldName string) string {
 
 // parentTypeNameが空のときは親はinline fragment
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeName string) *ResponseField {
-	switch selection := selection.(type) {
+	switch sel := selection.(type) {
 	case *ast.Field:
-		typeName := layerTypeName(parentTypeName, templates.ToGo(selection.Alias))
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, typeName)
-		var t types.Type
-		switch {
-		case fieldsResponseFields.IsBasicType():
-			t = r.FindType(selection.Definition.Type.Name())
-		case fieldsResponseFields.IsFragmentSpread():
-			// Fragmentのフィールドはnonnull
-			t = r.NewNamedType(typeName, fieldsResponseFields)
-			r.generatedTypes[t.String()] = t
-		default:
-			t = types.NewPointer(r.NewNamedType(typeName, fieldsResponseFields))
-			// Fragment以外のフィールドはオプショナル？ TODO: オプショナルを元のスキーマの型に従う
-			r.generatedTypes[t.String()] = t
-		}
+		typeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
+		fieldsResponseFields := r.NewResponseFields(sel.SelectionSet, typeName)
+		t := r.newFieldType(sel, typeName, fieldsResponseFields)
 
 		// TODO: omitempty, omitzero
 		tags := []string{
-			fmt.Sprintf(`json:"%s"`, selection.Alias),
-			fmt.Sprintf(`graphql:"%s"`, selection.Alias),
+			fmt.Sprintf(`json:"%s"`, sel.Alias),
+			fmt.Sprintf(`graphql:"%s"`, sel.Alias),
 		}
 		return &ResponseField{
-			Name:           selection.Name,
+			Name:           sel.Name,
 			Type:           t,
 			Tags:           tags,
 			ResponseFields: fieldsResponseFields,
 		}
 
 	case *ast.FragmentSpread:
-		fieldsResponseFields := r.NewResponseFields(selection.Definition.SelectionSet, selection.Name)
+		fieldsResponseFields := r.NewResponseFields(sel.Definition.SelectionSet, sel.Name)
 		return &ResponseField{
-			Name:             selection.Name,
-			Type:             r.NewNamedType(selection.Name, fieldsResponseFields),
+			Name:             sel.Name,
+			Type:             r.NewNamedType(false, sel.Name, fieldsResponseFields),
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
 		}
 
 	case *ast.InlineFragment:
-		// InlineFragmentは子要素をそのままstructとしてもつので、ここで、構造体の型を作成します
-		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, "")
+		// InlineFragmentは子要素をそのままstructとして持つので、NamedTypeを作らずtypes.StructをTypeフィールドに設定する。
+		fieldsResponseFields := r.NewResponseFields(sel.SelectionSet, "")
 		return &ResponseField{
-			Name:             selection.TypeCondition,
+			Name:             sel.TypeCondition,
 			Type:             fieldsResponseFields.ToGoStructType(),
 			IsInlineFragment: true,
-			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
+			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)},
 			ResponseFields:   fieldsResponseFields,
 		}
 	}
@@ -99,12 +87,30 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	panic("unexpected selection type")
 }
 
+func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
+	switch {
+	case fieldsResponseFields.IsBasicType():
+		t := r.FindType(field.Definition.Type)
+		return t
+	case fieldsResponseFields.IsFragmentSpread():
+		// Fragmentのフィールドはnonnull
+		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
+		r.generatedTypes[t.String()] = t
+		return t
+	default:
+		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
+		// Fragment以外のフィールドはオプショナル？ TODO: オプショナルを元のスキーマの型に従う
+		r.generatedTypes[t.String()] = t
+		return t
+	}
+}
+
 func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
 	argumentTypes := make([]*OperationArgument, 0, len(variableDefinitions))
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &OperationArgument{
 			Variable: v.Variable,
-			Type:     r.binder.CopyModifiersFromAst(v.Type, r.FindType(v.Type.Name())),
+			Type:     r.binder.CopyModifiersFromAst(v.Type, r.FindType(v.Type)),
 		})
 	}
 
@@ -113,21 +119,27 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 
 // NewNamedType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
 // コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
-func (r *SourceGenerator) NewNamedType(typeName string, fieldsResponseFields ResponseFieldList) *types.Named {
+func (r *SourceGenerator) NewNamedType(nonnull bool, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
 	structType := fieldsResponseFields.ToGoStructType()
 	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
-	return namedType
+	if nonnull {
+		return namedType
+	}
+	return types.NewPointer(namedType)
 }
 
 // Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
-func (r *SourceGenerator) FindType(typeName string) types.Type {
-	goType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[typeName].Model[0])
+func (r *SourceGenerator) FindType(t *ast.Type) types.Type {
+	goType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[t.Name()].Model[0])
 	if err != nil {
 		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
 		panic(fmt.Sprintf("%+v", err))
 	}
+	if t.NonNull {
+		return goType
+	}
 
-	return goType
+	return types.NewPointer(goType)
 }
 
 type ResponseField struct {

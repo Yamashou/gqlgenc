@@ -246,7 +246,7 @@ func (t *User) GetAddress() *Address {
 
 		addressNamed := addressObj.Type().(*types.Named)
 		// Specify the same package path
-		result := ref(addressNamed)
+		result := toString(addressNamed)
 
 		// For same package, should return type name only without package qualifier
 		if result != "Address" {
@@ -254,7 +254,7 @@ func (t *User) GetAddress() *Address {
 		}
 
 		// For different package, should include package qualifier
-		resultWithPkg := ref(addressNamed)
+		resultWithPkg := toString(addressNamed)
 		if resultWithPkg != "samepkg.Address" {
 			t.Errorf("namedTypeString() for different package = %v, want %v", resultWithPkg, "samepkg.Address")
 		}
@@ -267,32 +267,32 @@ func (t *User) GetAddress() *Address {
 		profileType := types.NewNamed(profileTypeName, nil, nil)
 
 		// For same package reference, no package qualifier
-		samePkg := ref(profileType)
+		samePkg := toString(profileType)
 		if samePkg != "Profile" {
 			t.Errorf("namedTypeString() for same package = %v, want %v", samePkg, "Profile")
 		}
 
 		// For different package reference, include package qualifier
-		differentPkg := ref(profileType)
+		differentPkg := toString(profileType)
 		if differentPkg != "pkgb.Profile" {
 			t.Errorf("namedTypeString() for different package = %v, want %v", differentPkg, "pkgb.Profile")
 		}
 
 		// Next check if funcReturnTypesName function works correctly
 		// No package specified
-		noPackage := ref(profileType)
+		noPackage := toString(profileType)
 		if noPackage != "*pkgb.Profile" {
 			t.Errorf("funcReturnTypesName() without pkg path = %v, want %v", noPackage, "*pkgb.Profile")
 		}
 
 		// Same package
-		samePackageType := ref(profileType)
+		samePackageType := toString(profileType)
 		if samePackageType != "*Profile" {
 			t.Errorf("funcReturnTypesName() with same pkg = %v, want %v", samePackageType, "*Profile")
 		}
 
 		// Different package
-		differentPackageType := ref(profileType)
+		differentPackageType := toString(profileType)
 		if differentPackageType != "*pkgb.Profile" {
 			t.Errorf("funcReturnTypesName() with different pkg = %v, want %v", differentPackageType, "*pkgb.Profile")
 		}

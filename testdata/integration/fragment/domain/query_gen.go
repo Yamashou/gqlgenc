@@ -6,8 +6,8 @@ type UserFragment1 struct {
 	User struct {
 		Name string "json:\"name\" graphql:\"name\""
 	} "graphql:\"... on User\""
-	Name    string                 "json:\"name\" graphql:\"name\""
-	Profile *UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
+	Name    string                "json:\"name\" graphql:\"name\""
+	Profile UserFragment1_Profile "json:\"profile\" graphql:\"profile\""
 }
 
 func (t *UserFragment1) GetUser() struct {
@@ -24,7 +24,7 @@ func (t *UserFragment1) GetName() string {
 	}
 	return t.Name
 }
-func (t *UserFragment1) GetProfile() *UserFragment1_Profile {
+func (t *UserFragment1) GetProfile() UserFragment1_Profile {
 	if t == nil {
 		t = &UserFragment1{}
 	}
@@ -32,10 +32,10 @@ func (t *UserFragment1) GetProfile() *UserFragment1_Profile {
 }
 
 type UserFragment1_Profile struct {
-	Age int "json:\"age\" graphql:\"age\""
+	Age *int "json:\"age\" graphql:\"age\""
 }
 
-func (t *UserFragment1_Profile) GetAge() int {
+func (t *UserFragment1_Profile) GetAge() *int {
 	if t == nil {
 		t = &UserFragment1_Profile{}
 	}
@@ -55,7 +55,7 @@ func (t *UserFragment2) GetName() string {
 
 type UserOperation struct {
 	OptionalUser *UserOperation_OptionalUser "json:\"optionalUser\" graphql:\"optionalUser\""
-	User         *UserOperation_User         "json:\"user\" graphql:\"user\""
+	User         UserOperation_User          "json:\"user\" graphql:\"user\""
 }
 
 func (t *UserOperation) GetOptionalUser() *UserOperation_OptionalUser {
@@ -64,7 +64,7 @@ func (t *UserOperation) GetOptionalUser() *UserOperation_OptionalUser {
 	}
 	return t.OptionalUser
 }
-func (t *UserOperation) GetUser() *UserOperation_User {
+func (t *UserOperation) GetUser() UserOperation_User {
 	if t == nil {
 		t = &UserOperation{}
 	}
@@ -84,17 +84,17 @@ func (t *UserOperation_OptionalUser) GetName() string {
 
 type UserOperation_User struct {
 	User struct {
-		UserFragment2
+		*UserFragment2
 		Name string "json:\"name\" graphql:\"name\""
 	} "graphql:\"... on User\""
-	UserFragment1
-	UserFragment2
-	Name    string                      "json:\"name\" graphql:\"name\""
-	Profile *UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
+	*UserFragment1
+	*UserFragment2
+	Name    string                     "json:\"name\" graphql:\"name\""
+	Profile UserOperation_User_Profile "json:\"profile\" graphql:\"profile\""
 }
 
 func (t *UserOperation_User) GetUser() struct {
-	UserFragment2
+	*UserFragment2
 	Name string "json:\"name\" graphql:\"name\""
 } {
 	if t == nil {
@@ -102,13 +102,13 @@ func (t *UserOperation_User) GetUser() struct {
 	}
 	return t.User
 }
-func (t *UserOperation_User) GetUserFragment1() UserFragment1 {
+func (t *UserOperation_User) GetUserFragment1() *UserFragment1 {
 	if t == nil {
 		t = &UserOperation_User{}
 	}
 	return t.UserFragment1
 }
-func (t *UserOperation_User) GetUserFragment2() UserFragment2 {
+func (t *UserOperation_User) GetUserFragment2() *UserFragment2 {
 	if t == nil {
 		t = &UserOperation_User{}
 	}
@@ -120,7 +120,7 @@ func (t *UserOperation_User) GetName() string {
 	}
 	return t.Name
 }
-func (t *UserOperation_User) GetProfile() *UserOperation_User_Profile {
+func (t *UserOperation_User) GetProfile() UserOperation_User_Profile {
 	if t == nil {
 		t = &UserOperation_User{}
 	}
@@ -128,11 +128,11 @@ func (t *UserOperation_User) GetProfile() *UserOperation_User_Profile {
 }
 
 type UserOperation_User_Profile struct {
-	Age    int    "json:\"age\" graphql:\"age\""
+	Age    *int   "json:\"age\" graphql:\"age\""
 	Status Status "json:\"status\" graphql:\"status\""
 }
 
-func (t *UserOperation_User_Profile) GetAge() int {
+func (t *UserOperation_User_Profile) GetAge() *int {
 	if t == nil {
 		t = &UserOperation_User_Profile{}
 	}

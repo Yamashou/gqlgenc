@@ -22,10 +22,10 @@ func GetterFunc() func(types.Type) string {
 		st := namedType.Underlying().(*types.Struct)
 
 		// typeName
-		typeName := ref(namedType)
+		typeName := toString(namedType)
 
 		var buf bytes.Buffer
-		fmt.Fprintf(&buf, "type %s %s\n", typeName, ref(st))
+		fmt.Fprintf(&buf, "type %s %s\n", typeName, toString(st))
 		for i := range st.NumFields() {
 			field := st.Field(i)
 			fieldName := field.Name()
@@ -34,7 +34,7 @@ func GetterFunc() func(types.Type) string {
 				continue
 			}
 
-			fieldTypeName := ref(field.Type())
+			fieldTypeName := toString(field.Type())
 			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
 			fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 
@@ -45,6 +45,6 @@ func GetterFunc() func(types.Type) string {
 	}
 }
 
-func ref(p types.Type) string {
+func toString(p types.Type) string {
 	return templates.CurrentImports.LookupType(p)
 }

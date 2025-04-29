@@ -11,7 +11,7 @@ import (
 
 type Profile struct {
 	ID     string `json:"id"`
-	Age    int    `json:"age"`
+	Age    *int   `json:"age,omitempty,omitzero"`
 	Status Status `json:"status"`
 }
 

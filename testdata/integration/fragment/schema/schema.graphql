@@ -15,7 +15,7 @@ type User {
 
 type Profile {
   id: ID!
-  age: Int!
+  age: Int
   status: Status!
 }
 
