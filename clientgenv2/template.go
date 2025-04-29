@@ -35,23 +35,18 @@ func RenderTemplate(cfg *config.Config, operations []*Operation, generatedTypes 
 }
 
 func typeGenFunc(t types.Type) string {
-	var namedType *types.Named
-	pointerType, ok := t.(*types.Pointer)
-	if ok {
-		namedType = pointerType.Elem().(*types.Named)
-	} else {
-		// FragmentのときはPointerではない
-		namedType = t.(*types.Named)
+	if pointerType, ok := t.(*types.Pointer); ok {
+		t = pointerType.Elem()
 	}
-	st := namedType.Underlying().(*types.Struct)
 
-	// typeName
+	namedType := t.(*types.Named)
+	structType := namedType.Underlying().(*types.Struct)
 	typeName := toString(namedType)
 
 	var buf bytes.Buffer
-	fmt.Fprintf(&buf, "type %s %s\n", typeName, toString(st))
-	for i := range st.NumFields() {
-		field := st.Field(i)
+	fmt.Fprintf(&buf, "type %s %s\n", typeName, toString(structType))
+	for i := range structType.NumFields() {
+		field := structType.Field(i)
 		fieldName := field.Name()
 		if fieldName == "" {
 			// fieldが埋め込みの時は、Getterは不要

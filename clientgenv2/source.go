@@ -27,7 +27,7 @@ func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGener
 func (s *Source) CreateFragments() error {
 	for _, fragment := range s.queryDocument.Fragments {
 		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, fragment.Name)
-		fragmentType := s.sourceGenerator.NewNamedType(false, fragment.Name, responseFields)
+		fragmentType := s.sourceGenerator.NewNamedType(true, fragment.Name, responseFields)
 		s.sourceGenerator.generatedTypes[fragmentType.String()] = fragmentType
 	}
 
@@ -37,7 +37,7 @@ func (s *Source) CreateFragments() error {
 func (s *Source) CreateOperationResponses() error {
 	for _, operation := range s.queryDocument.Operations {
 		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
-		operationResponseType := s.sourceGenerator.NewNamedType(true, operation.Name, responseFields)
+		operationResponseType := s.sourceGenerator.NewNamedType(false, operation.Name, responseFields)
 		s.sourceGenerator.generatedTypes[operationResponseType.String()] = operationResponseType
 	}
 
