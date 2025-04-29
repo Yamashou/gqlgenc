@@ -7,7 +7,7 @@ type UserFragment1 struct {
 		Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 	} "graphql:\"... on User\""
 	Name    string                "json:\"name,omitempty,omitzero\" graphql:\"name\""
-	Profile UserFragment1_Profile "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
+	Profile userFragment1_Profile "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
 }
 
 func (t *UserFragment1) GetUser() struct {
@@ -24,22 +24,11 @@ func (t *UserFragment1) GetName() string {
 	}
 	return t.Name
 }
-func (t *UserFragment1) GetProfile() UserFragment1_Profile {
+func (t *UserFragment1) GetProfile() userFragment1_Profile {
 	if t == nil {
 		t = &UserFragment1{}
 	}
 	return t.Profile
-}
-
-type UserFragment1_Profile struct {
-	Age *int "json:\"age\" graphql:\"age\""
-}
-
-func (t *UserFragment1_Profile) GetAge() *int {
-	if t == nil {
-		t = &UserFragment1_Profile{}
-	}
-	return t.Age
 }
 
 type UserFragment2 struct {
@@ -54,35 +43,46 @@ func (t *UserFragment2) GetName() string {
 }
 
 type UserOperation struct {
-	OptionalUser *UserOperation_OptionalUser "json:\"optionalUser\" graphql:\"optionalUser\""
-	User         UserOperation_User          "json:\"user,omitempty,omitzero\" graphql:\"user\""
+	OptionalUser *userOperation_OptionalUser "json:\"optionalUser\" graphql:\"optionalUser\""
+	User         userOperation_User          "json:\"user,omitempty,omitzero\" graphql:\"user\""
 }
 
-func (t *UserOperation) GetOptionalUser() *UserOperation_OptionalUser {
+func (t *UserOperation) GetOptionalUser() *userOperation_OptionalUser {
 	if t == nil {
 		t = &UserOperation{}
 	}
 	return t.OptionalUser
 }
-func (t *UserOperation) GetUser() UserOperation_User {
+func (t *UserOperation) GetUser() userOperation_User {
 	if t == nil {
 		t = &UserOperation{}
 	}
 	return t.User
 }
 
-type UserOperation_OptionalUser struct {
+type userFragment1_Profile struct {
+	Age *int "json:\"age\" graphql:\"age\""
+}
+
+func (t *userFragment1_Profile) GetAge() *int {
+	if t == nil {
+		t = &userFragment1_Profile{}
+	}
+	return t.Age
+}
+
+type userOperation_OptionalUser struct {
 	Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 }
 
-func (t *UserOperation_OptionalUser) GetName() string {
+func (t *userOperation_OptionalUser) GetName() string {
 	if t == nil {
-		t = &UserOperation_OptionalUser{}
+		t = &userOperation_OptionalUser{}
 	}
 	return t.Name
 }
 
-type UserOperation_User struct {
+type userOperation_User struct {
 	User struct {
 		*UserFragment2
 		Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
@@ -90,82 +90,82 @@ type UserOperation_User struct {
 	*UserFragment1
 	*UserFragment2
 	Name            string                              "json:\"name,omitempty,omitzero\" graphql:\"name\""
-	OptionalProfile *UserOperation_User_OptionalProfile "json:\"optionalProfile\" graphql:\"optionalProfile\""
-	Profile         UserOperation_User_Profile          "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
+	OptionalProfile *userOperation_User_OptionalProfile "json:\"optionalProfile\" graphql:\"optionalProfile\""
+	Profile         userOperation_User_Profile          "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
 }
 
-func (t *UserOperation_User) GetUser() struct {
+func (t *userOperation_User) GetUser() struct {
 	*UserFragment2
 	Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 } {
 	if t == nil {
-		t = &UserOperation_User{}
+		t = &userOperation_User{}
 	}
 	return t.User
 }
-func (t *UserOperation_User) GetUserFragment1() *UserFragment1 {
+func (t *userOperation_User) GetUserFragment1() *UserFragment1 {
 	if t == nil {
-		t = &UserOperation_User{}
+		t = &userOperation_User{}
 	}
 	return t.UserFragment1
 }
-func (t *UserOperation_User) GetUserFragment2() *UserFragment2 {
+func (t *userOperation_User) GetUserFragment2() *UserFragment2 {
 	if t == nil {
-		t = &UserOperation_User{}
+		t = &userOperation_User{}
 	}
 	return t.UserFragment2
 }
-func (t *UserOperation_User) GetName() string {
+func (t *userOperation_User) GetName() string {
 	if t == nil {
-		t = &UserOperation_User{}
+		t = &userOperation_User{}
 	}
 	return t.Name
 }
-func (t *UserOperation_User) GetOptionalProfile() *UserOperation_User_OptionalProfile {
+func (t *userOperation_User) GetOptionalProfile() *userOperation_User_OptionalProfile {
 	if t == nil {
-		t = &UserOperation_User{}
+		t = &userOperation_User{}
 	}
 	return t.OptionalProfile
 }
-func (t *UserOperation_User) GetProfile() UserOperation_User_Profile {
+func (t *userOperation_User) GetProfile() userOperation_User_Profile {
 	if t == nil {
-		t = &UserOperation_User{}
+		t = &userOperation_User{}
 	}
 	return t.Profile
 }
 
-type UserOperation_User_OptionalProfile struct {
+type userOperation_User_OptionalProfile struct {
 	Age    *int   "json:\"age\" graphql:\"age\""
 	Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
 }
 
-func (t *UserOperation_User_OptionalProfile) GetAge() *int {
+func (t *userOperation_User_OptionalProfile) GetAge() *int {
 	if t == nil {
-		t = &UserOperation_User_OptionalProfile{}
+		t = &userOperation_User_OptionalProfile{}
 	}
 	return t.Age
 }
-func (t *UserOperation_User_OptionalProfile) GetStatus() Status {
+func (t *userOperation_User_OptionalProfile) GetStatus() Status {
 	if t == nil {
-		t = &UserOperation_User_OptionalProfile{}
+		t = &userOperation_User_OptionalProfile{}
 	}
 	return t.Status
 }
 
-type UserOperation_User_Profile struct {
+type userOperation_User_Profile struct {
 	Age    *int   "json:\"age\" graphql:\"age\""
 	Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
 }
 
-func (t *UserOperation_User_Profile) GetAge() *int {
+func (t *userOperation_User_Profile) GetAge() *int {
 	if t == nil {
-		t = &UserOperation_User_Profile{}
+		t = &userOperation_User_Profile{}
 	}
 	return t.Age
 }
-func (t *UserOperation_User_Profile) GetStatus() Status {
+func (t *userOperation_User_Profile) GetStatus() Status {
 	if t == nil {
-		t = &UserOperation_User_Profile{}
+		t = &userOperation_User_Profile{}
 	}
 	return t.Status
 }

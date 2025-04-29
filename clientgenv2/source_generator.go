@@ -104,11 +104,13 @@ func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fields
 		return t
 	case fieldsResponseFields.IsFragmentSpread():
 		// Fragmentのフィールドはnonnull
+		// Fragmentの型は公開する。Fragmentはユーザが明示的に作成しているものであるため。
 		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
 		r.generatedTypes[t.String()] = t
 		return t
 	default:
-		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
+		// Queryのため生成した型は非公開にする。gqlgencが内部で作成したものであるため。
+		t := r.NewNamedType(field.Definition.Type.NonNull, firstLower(typeName), fieldsResponseFields)
 		r.generatedTypes[t.String()] = t
 		return t
 	}
@@ -212,4 +214,11 @@ func (rs ResponseFieldList) uniqueByName() ResponseFieldList {
 	return slices.SortedFunc(maps.Values(responseFieldMapByName), func(a *ResponseField, b *ResponseField) int {
 		return strings.Compare(a.Name, b.Name)
 	})
+}
+
+func firstLower(s string) string {
+	if s == "" {
+		return ""
+	}
+	return strings.ToLower(s[:1]) + s[1:]
 }
