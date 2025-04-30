@@ -27,9 +27,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
-
-	"github.com/99designs/gqlgen/codegen/config"
 
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -43,7 +42,7 @@ var path2regex = strings.NewReplacer(
 
 // LoadQuerySources returns gqlgen ast.Source parsed GraphQL Query files.
 func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
-	var noGlobQueryFileNames config.StringList
+	var noGlobQueryFileNames []string
 
 	preGlobbing := queryFileNames
 	for _, f := range preGlobbing {
@@ -80,7 +79,7 @@ func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 		}
 
 		for _, m := range matches {
-			if noGlobQueryFileNames.Has(m) {
+			if slices.Contains(noGlobQueryFileNames, m) {
 				continue
 			}
 

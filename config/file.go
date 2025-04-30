@@ -9,8 +9,6 @@ import (
 	"slices"
 	"strings"
 
-	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
-
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -55,7 +53,7 @@ func findConfigInDir(dir string, cfgFilenames []string) string {
 	return ""
 }
 
-func schemaFilenames(schemaFilenameGlobs gqlgenconfig.StringList) (gqlgenconfig.StringList, error) {
+func schemaFilenames(schemaFilenameGlobs []string) ([]string, error) {
 	path2regex := strings.NewReplacer(
 		`.`, `\.`,
 		`*`, `.+`,
@@ -107,7 +105,7 @@ func schemaFilenames(schemaFilenameGlobs gqlgenconfig.StringList) (gqlgenconfig.
 	return slices.Sorted(maps.Keys(allSchemaFilenames)), nil
 }
 
-func schemaFileSources(schemaFilenames gqlgenconfig.StringList) ([]*ast.Source, error) {
+func schemaFileSources(schemaFilenames []string) ([]*ast.Source, error) {
 	sources := make([]*ast.Source, 0, len(schemaFilenames))
 
 	for _, schemaFilename := range schemaFilenames {
