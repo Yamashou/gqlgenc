@@ -37,10 +37,10 @@ func TestClient_unmarshalResponse(t *testing.T) {
 	}
 
 	tests := []struct {
-		args   args
-		want   want
-		fields fields
 		name   string
+		fields fields
+		want   want
+		args   args
 	}{
 		{
 			name: "Successful response",

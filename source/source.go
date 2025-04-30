@@ -186,11 +186,11 @@ func (r *Generator) findType(t *ast.Type) types.Type {
 
 type ResponseField struct {
 	Name             string
-	IsFragmentSpread bool
-	IsInlineFragment bool
 	Type             types.Type
 	Tags             []string
 	ResponseFields   ResponseFieldList
+	IsFragmentSpread bool
+	IsInlineFragment bool
 }
 
 func (r *ResponseField) goVar() *types.Var {

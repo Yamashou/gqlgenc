@@ -56,15 +56,11 @@ linters:
       analyze-types: true
     gomoddirectives:
       replace-local: true
-    gosec:
-      excludes:
-        - G101 # G101: Ignoring "Potential hardcoded credentials" as there are many false positives
     govet:
-      disable:
-        - shadow
-        - fieldalignment
       enable-all: true
-    misspell: # Check for spelling mistakes in comments and text
+      disable:
+      - shadow
+      - fieldalignment
     nakedret:
       max-func-lines: 1
     nolintlint:
@@ -76,11 +72,11 @@ linters:
     staticcheck:
       checks:
         - all
-        - -SA1019
     unparam:
       check-exported: true
   exclusions:
-    generated: lax
+    generated: strict # ignore // Code generated .* DO NOT EDIT\.$ file
+    warn-unused: true
     presets:
       - comments
       - common-false-positives
@@ -94,11 +90,6 @@ linters:
       - linters:
           - govet
         path: graphqljson/graphql_test.go
-    paths:
-      - .*_gen\.go$
-      - third_party$
-      - builtin$
-      - examples$
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0
@@ -122,9 +113,5 @@ formatters:
         - prefix(github.com/99designs/gqlgen)
         - prefix(github.com/Yamashou/gqlgenc)
   exclusions:
-    generated: lax
-    paths:
-      - .*_gen\.go$
-      - third_party$
-      - builtin$
-      - examples$
+    generated: strict # ignore // Code generated .* DO NOT EDIT\.$ file
+    warn-unused: true

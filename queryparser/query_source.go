@@ -45,8 +45,6 @@ var path2regex = strings.NewReplacer(
 func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 	var noGlobQueryFileNames config.StringList
 
-	var err error
-
 	preGlobbing := queryFileNames
 	for _, f := range preGlobbing {
 		var matches []string
@@ -74,10 +72,11 @@ func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 				return nil, fmt.Errorf("failed to walk schema at root %s: %w", pathParts[0], err)
 			}
 		} else {
-			matches, err = filepath.Glob(f)
+			ms, err := filepath.Glob(f)
 			if err != nil {
 				return nil, fmt.Errorf("failed to glob schema filename %v: %w", f, err)
 			}
+			matches = ms
 		}
 
 		for _, m := range matches {

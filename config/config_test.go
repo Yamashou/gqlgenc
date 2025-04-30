@@ -29,9 +29,9 @@ func TestLoadConfig(t *testing.T) {
 	}
 
 	tests := []struct {
-		want want
 		name string
 		file string
+		want want
 	}{
 		{
 			name: "config does not exist",

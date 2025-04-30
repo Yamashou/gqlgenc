@@ -16,8 +16,8 @@ type Operation struct {
 }
 
 type OperationArgument struct {
-	Variable string
 	Type     types.Type
+	Variable string
 }
 
 func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*OperationArgument) *Operation {
