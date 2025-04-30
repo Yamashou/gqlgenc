@@ -60,7 +60,7 @@ func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 			// for any number of dirs in between and walk will let us match against the full path name
 			globRe := regexp.MustCompile(path2regex.Replace(rest) + `$`)
 
-			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
+			if err := filepath.Walk(pathParts[0], func(path string, _ os.FileInfo, err error) error {
 				if err != nil {
 					return fmt.Errorf("filepath.Walk(%q): %w", path, err)
 				}

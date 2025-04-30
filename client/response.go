@@ -29,8 +29,7 @@ func ParseResponse(resp *http.Response, out any) error {
 	}
 
 	errResponse := &errorResponse{}
-	isStatusCodeOK := 200 <= resp.StatusCode && resp.StatusCode <= 299
-
+	isStatusCodeOK := http.StatusOK <= resp.StatusCode && resp.StatusCode < http.StatusMultipleChoices
 	if !isStatusCodeOK {
 		errResponse.NetworkError = &httpError{
 			Code:    resp.StatusCode,

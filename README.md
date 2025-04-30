@@ -16,7 +16,9 @@ So I want to automatically generate types.
 ## Usage
 
 ```shell script
-go get -tool github.com/Yamashou/gqlgenc
+go get -tool github.com/Yamashou/gqlgenc/v3@latest
+or
+go install github.com/Yamashou/gqlgenc/v3@latest
 ```
 
 ## How to use

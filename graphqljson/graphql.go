@@ -106,7 +106,7 @@ func (d *Decoder) Decode(v any) error {
 }
 
 // decode decodes a single JSON value from d.tokenizer into d.vs.
-func (d *Decoder) decode() error { //nolint:maintidx
+func (d *Decoder) decode() error {
 	// The loop invariant is that the top of each d.vs stack
 	// is where we try to unmarshal the next JSON value we see.
 	for len(d.vs) > 0 {
@@ -294,6 +294,7 @@ func (d *Decoder) decode() error { //nolint:maintidx
 						if isGraphQLFragment(v.Type().Field(i)) || v.Type().Field(i).Anonymous {
 							// Add GraphQL fragment or embedded struct.
 							d.vs = append(d.vs, []reflect.Value{v.Field(i)})
+							//nolint:makezero // append to slice `frontier` with non-zero initialized length
 							frontier = append(frontier, v.Field(i))
 						}
 					}

@@ -21,6 +21,7 @@ type formField struct {
 func NewMultipartRequest(ctx context.Context, endpoint, operationName, query string, variables map[string]any) (*http.Request, error) {
 	multipartFilesGroups, mapping, variables := parseMultipartFiles(variables)
 	if len(multipartFilesGroups) == 0 {
+		//nolint:nilnil // return both a `nil` error and an invalid value: use a sentinel error instead
 		return nil, nil
 	}
 
@@ -88,6 +89,7 @@ func parseMultipartFiles(vars map[string]any) ([]multipartFilesGroup, map[string
 						File:  item,
 					},
 				},
+				IsMultiple: false,
 			})
 
 			i++
@@ -108,6 +110,7 @@ func parseMultipartFiles(vars map[string]any) ([]multipartFilesGroup, map[string
 						File:  *item,
 					},
 				},
+				IsMultiple: false,
 			})
 
 			i++

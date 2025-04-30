@@ -8,6 +8,7 @@ linters:
     - dupl
     - dupword # Lint to detect redundant words, disabled as unnecessary
     - errname # No need to restrict error variable names, so ignoring
+    - exhaustruct
     - funlen
     - gochecknoglobals
     - gochecknoinits
@@ -19,12 +20,14 @@ linters:
     - ireturn # Returning interfaces results in errors, but it's not a problem, so ignoring
     - lll
     - maintidx # Disabled as cyclomatic etc. are unnecessary
+    - mnd
     - musttag # Lint to require json tags, disabled as unnecessary
     - nestif
     - nlreturn
     - paralleltest
     - protogetter # Disabled because we don't use proto
     - tagliatelle # JSON tag format is not unified across external APIs and gen files, so all would need to be excluded. Too many files to exclude, so ignoring for now
+    - tagalign
     - testpackage
     - varnamelen # No need to restrict variable name length, so disabled
     - wsl
@@ -38,8 +41,8 @@ linters:
               desc: use github.com/vektah/gqlparser/v2
         gqlgencv1:
           deny:
-            - pkg: github.com/builtbystack/erp/server/src/lib/ctxvalue
-              desc: Use of ctxvalue package is prohibited in usecase package
+            - pkg: ^github.com/Yamashou/gqlgenc/$
+              desc: use github.com/Yamashou/gqlgenc/v3
     errcheck:
       exclude-functions:
         - Write
@@ -88,6 +91,9 @@ linters:
           - bodyclose
           - containedctx
         path: _test.go
+      - linters:
+          - govet
+        path: graphqljson/graphql_test.go
     paths:
       - .*_gen\.go$
       - third_party$

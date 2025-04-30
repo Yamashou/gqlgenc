@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"syscall"
 	"testing"
@@ -127,9 +128,7 @@ func Test_IntegrationTest(t *testing.T) {
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// Query and client generation
-			if err := os.Chdir(tt.testDir); err != nil {
-				t.Errorf("run() error = %v", err)
-			}
+			t.Chdir(tt.testDir)
 			if err := run(); err != nil {
 				t.Errorf("run() error = %v", err)
 			}
@@ -137,24 +136,8 @@ func Test_IntegrationTest(t *testing.T) {
 			// Compare the content of the generated file with the want file
 			actualFilePath := "domain/query_gen.go"
 			wantFilePath := tt.want.file
+			compareFiles(t, wantFilePath, actualFilePath)
 
-			// Read both files
-			actualContent, err := os.ReadFile(actualFilePath)
-			if err != nil {
-				t.Errorf("error reading file (actual file): %v", err)
-				return
-			}
-
-			wantContent, err := os.ReadFile(wantFilePath)
-			if err != nil {
-				t.Errorf("error reading file (expected file): %v", err)
-				return
-			}
-
-			// Compare file contents
-			if diff := cmp.Diff(string(wantContent), string(actualContent)); diff != "" {
-				t.Errorf("file contents differ:\n%s", diff)
-			}
 			addImport(t, "query/client_gen.go")
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -259,16 +242,16 @@ func addImport(t *testing.T, clientGenFilePath string) {
 	}
 
 	// Add new import after the package query declaration line
-	modifiedContent := append(
+	modifiedContent := slices.Concat(
 		lines[:packageLineIndex+1],
-		append(
+		slices.Concat(
 			[]string{"", "import \"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain\""},
-			lines[packageLineIndex+1:]...,
-		)...,
+			lines[packageLineIndex+1:],
+		),
 	)
 
 	// Write back to file
-	if err := os.WriteFile(clientGenFilePath, []byte(strings.Join(modifiedContent, "\n")), 0o644); err != nil {
+	if err := os.WriteFile(clientGenFilePath, []byte(strings.Join(modifiedContent, "\n")), 0o600); err != nil {
 		t.Errorf("error writing to client_gen.go: %v", err)
 	}
 }

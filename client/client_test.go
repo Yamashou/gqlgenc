@@ -346,15 +346,10 @@ func TestClient_parseResponse(t *testing.T) {
 						if len(*gotErrResp.GqlErrors) != len(*wantErrResp.GqlErrors) {
 							t.Errorf("parseResponse() GraphQL error count mismatch:\nwant: %v\n got: %v",
 								len(*wantErrResp.GqlErrors), len(*gotErrResp.GqlErrors))
-						} else {
-							// Could add more detailed comparisons if needed
 						}
 					}
-				} else {
-					// Compare other error messages
-					if tt.want.err.Error() != err.Error() {
-						t.Errorf("parseResponse() error message:\nwant: %v\n got: %v", tt.want.err, err)
-					}
+				} else if tt.want.err.Error() != err.Error() {
+					t.Errorf("parseResponse() error message:\nwant: %v\n got: %v", tt.want.err, err)
 				}
 			}
 
@@ -372,7 +367,7 @@ func TestClient_parseResponse(t *testing.T) {
 func gzipResponse(jsonBody string) *http.Response {
 	var buf bytes.Buffer
 	gzWriter := gzip.NewWriter(&buf)
-	gzWriter.Write([]byte(jsonBody))
+	_, _ = gzWriter.Write([]byte(jsonBody))
 	gzWriter.Close()
 
 	header := http.Header{}

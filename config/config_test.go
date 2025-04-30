@@ -193,11 +193,10 @@ func TestLoadConfig(t *testing.T) {
 }
 
 func TestLoadConfigWindows(t *testing.T) {
+	t.Parallel()
 	if runtime.GOOS != "windows" {
 		t.Skip("Skipping Windows-specific test on non-Windows platform")
 	}
-
-	t.Parallel()
 
 	// Glob filenames test for Windows
 	t.Run("globbed filenames on Windows", func(t *testing.T) {
@@ -235,11 +234,10 @@ func TestLoadConfigWindows(t *testing.T) {
 }
 
 func TestLoadConfigNonWindows(t *testing.T) {
+	t.Parallel()
 	if runtime.GOOS == "windows" {
 		t.Skip("Skipping non-Windows test on Windows platform")
 	}
-
-	t.Parallel()
 
 	// Glob filenames test for non-Windows
 	t.Run("globbed filenames on non-Windows", func(t *testing.T) {
@@ -383,6 +381,7 @@ type mockRemoteServer struct {
 	body []byte
 }
 
+//nolint:nonamedreturns // named return "mock" with type "*mockRemoteServer" found
 func newMockRemoteServer(t *testing.T, response any) (mock *mockRemoteServer, closeServer func()) {
 	t.Helper()
 

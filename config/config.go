@@ -187,7 +187,7 @@ func (c *Config) loadRemoteSchema(ctx context.Context) error {
 
 	transport := TransportAppend(
 		http.DefaultTransport,
-		NewHeaderTransport(func(ctx context.Context) http.Header { return header }),
+		NewHeaderTransport(func(_ context.Context) http.Header { return header }),
 	)
 	httpClient := &http.Client{Transport: transport}
 	gqlgencClient := client.NewClient(c.GQLGencConfig.Endpoint.URL, client.WithHTTPClient(httpClient))

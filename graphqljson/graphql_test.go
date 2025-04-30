@@ -356,6 +356,7 @@ func TestUnmarshalGraphQL_unexportedField(t *testing.T) {
 	t.Parallel()
 
 	type query struct {
+		//nolint:unused // This is a test.
 		foo string
 	}
 
