@@ -206,13 +206,8 @@ func (d *Decoder) decode() error {
 					continue
 				}
 
-				if v.Kind() == reflect.Ptr || v.Kind() == reflect.Slice {
-					// Set the pointer or slice to nil.
-					v.Set(reflect.Zero(v.Type()))
-				} else {
-					// For other types that cannot directly handle nil, continue to use default zero values.
-					v.Set(reflect.Zero(v.Type()))
-				}
+				// Set to zero value regardless of type
+				v.Set(reflect.Zero(v.Type()))
 			}
 
 			d.popAllVs()

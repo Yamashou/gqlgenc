@@ -132,12 +132,10 @@ func TestClient_unmarshalResponse(t *testing.T) {
 			err := unmarshalResponse(tt.args.respBody, tt.args.out)
 
 			// Error validation
-			if err == nil && tt.want.err == nil {
-				// Success if both are nil
-			} else if err == nil || tt.want.err == nil {
+			if (err == nil) != (tt.want.err == nil) {
 				// Failure if only one is nil
 				t.Errorf("unmarshalResponse() error:\nwant: %v\n got: %v", tt.want.err, err)
-			} else {
+			} else if err != nil {
 				// Special handling for GraphQL errors
 				var gqlErrs *gqlErrors
 				if errors.As(err, &gqlErrs) && errors.As(tt.want.err, &gqlErrs) {
@@ -311,12 +309,10 @@ func TestClient_parseResponse(t *testing.T) {
 			err := ParseResponse(tt.args.resp, tt.args.out)
 
 			// Error validation
-			if err == nil && tt.want.err == nil {
-				// Success if both are nil
-			} else if err == nil || tt.want.err == nil {
+			if (err == nil) != (tt.want.err == nil) {
 				// Failure if only one is nil
 				t.Errorf("parseResponse() error:\nwant: %v\n got: %v", tt.want.err, err)
-			} else {
+			} else if err != nil {
 				// For error responses, check error type
 				var gotErrResp *errorResponse
 
