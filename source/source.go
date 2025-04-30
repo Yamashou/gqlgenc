@@ -18,26 +18,26 @@ import (
 
 func NewSource(cfg *config.Config, queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) ([]types.Type, []*Operation) {
 	s := &Generator{
-		cfg:            cfg,
-		binder:         cfg.GQLGenConfig.NewBinder(),
-		generatedTypes: map[string]types.Type{},
+		cfg:     cfg,
+		binder:  cfg.GQLGenConfig.NewBinder(),
+		goTypes: map[string]types.Type{},
 	}
 
 	// createFragmentTypes must be before createOperationResponsesTypes
 	s.createFragmentTypes(queryDocument.Fragments)
 	s.createOperationResponsesTypes(queryDocument.Operations)
 
-	return s.GeneratedTypes(), s.operations(queryDocument, operationQueryDocuments)
+	return s.GoTypes(), s.operations(queryDocument, operationQueryDocuments)
 }
 
 type Generator struct {
-	cfg            *config.Config
-	binder         *gqlgenconfig.Binder
-	generatedTypes map[string]types.Type
+	cfg     *config.Config
+	binder  *gqlgenconfig.Binder
+	goTypes map[string]types.Type
 }
 
-func (r *Generator) GeneratedTypes() []types.Type {
-	return slices.SortedFunc(maps.Values(r.generatedTypes), func(a, b types.Type) int {
+func (r *Generator) GoTypes() []types.Type {
+	return slices.SortedFunc(maps.Values(r.goTypes), func(a, b types.Type) int {
 		return strings.Compare(strings.TrimPrefix(a.String(), "*"), strings.TrimPrefix(b.String(), "*"))
 	})
 }
@@ -46,7 +46,7 @@ func (r *Generator) createFragmentTypes(fragments ast.FragmentDefinitionList) {
 	for _, fragment := range fragments {
 		responseFields := r.newResponseFields(fragment.SelectionSet, fragment.Name)
 		fragmentType := r.newNamedType(true, fragment.Name, responseFields)
-		r.generatedTypes[fragmentType.String()] = fragmentType
+		r.goTypes[fragmentType.String()] = fragmentType
 	}
 }
 
@@ -54,7 +54,7 @@ func (r *Generator) createOperationResponsesTypes(operations ast.OperationList) 
 	for _, operation := range operations {
 		responseFields := r.newResponseFields(operation.SelectionSet, operation.Name)
 		operationResponseType := r.newNamedType(false, operation.Name, responseFields)
-		r.generatedTypes[operationResponseType.String()] = operationResponseType
+		r.goTypes[operationResponseType.String()] = operationResponseType
 	}
 }
 
@@ -158,8 +158,6 @@ func (r *Generator) operationArguments(variableDefinitions ast.VariableDefinitio
 	return argumentTypes
 }
 
-// newNamedType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
-// コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
 func (r *Generator) newNamedType(nonnull bool, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
 	structType := fieldsResponseFields.toGoStructType()
 	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
@@ -266,7 +264,7 @@ func (r *Generator) newFieldType(field *ast.Field, typeName string, fieldsRespon
 		// Fragmentのフィールドはnonnull
 		// Fragmentの型は公開する。Fragmentはユーザが明示的に作成しているものであるため。
 		t := r.newNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
-		r.generatedTypes[t.String()] = t
+		r.goTypes[t.String()] = t
 		return t
 	default:
 		if !r.cfg.GQLGencConfig.ExportQueryType {
@@ -274,7 +272,7 @@ func (r *Generator) newFieldType(field *ast.Field, typeName string, fieldsRespon
 			typeName = firstLower(typeName)
 		}
 		t := r.newNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
-		r.generatedTypes[t.String()] = t
+		r.goTypes[t.String()] = t
 		return t
 	}
 }

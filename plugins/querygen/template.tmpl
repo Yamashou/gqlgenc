@@ -1,5 +1,5 @@
-{{- range $generatedType := .GeneratedTypes }}
-{{ typeGenFunc $generatedType }}
+{{- range $goType:= .GoTypes }}
+{{ genCode $goType }}
 {{- end}}
 
 {{- range $operation := .Operations}}

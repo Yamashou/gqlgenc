@@ -14,16 +14,16 @@ import (
 var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
-	cfg            *config.Config
-	operations     []*source.Operation
-	generatedTypes []types.Type
+	cfg        *config.Config
+	operations []*source.Operation
+	goTypes    []types.Type
 }
 
-func New(cfg *config.Config, operations []*source.Operation, generatedTypes []types.Type) *Plugin {
+func New(cfg *config.Config, operations []*source.Operation, goTypes []types.Type) *Plugin {
 	return &Plugin{
-		cfg:            cfg,
-		operations:     operations,
-		generatedTypes: generatedTypes,
+		cfg:        cfg,
+		operations: operations,
+		goTypes:    goTypes,
 	}
 }
 
@@ -32,7 +32,7 @@ func (p *Plugin) Name() string {
 }
 
 func (p *Plugin) MutateConfig(_ *gqlgenconfig.Config) error {
-	if err := RenderTemplate(p.cfg, p.operations, p.generatedTypes); err != nil {
+	if err := RenderTemplate(p.cfg, p.operations, p.goTypes); err != nil {
 		return fmt.Errorf("template failed: %w", err)
 	}
 
