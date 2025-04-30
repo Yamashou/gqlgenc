@@ -2,17 +2,18 @@ package clientgenv2
 
 import (
 	"fmt"
-	"github.com/vektah/gqlparser/v2/ast"
 	"go/types"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 	"maps"
 	"slices"
 	"strings"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
+
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 type SourceGenerator struct {
@@ -21,12 +22,18 @@ type SourceGenerator struct {
 	generatedTypes map[string]types.Type
 }
 
-func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
-	return &SourceGenerator{
+func NewSource(cfg *config.Config, queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) ([]types.Type, []*Operation) {
+	s := &SourceGenerator{
 		cfg:            cfg,
 		binder:         cfg.GQLGenConfig.NewBinder(),
 		generatedTypes: map[string]types.Type{},
 	}
+
+	// Fragments must be before OperationResponses
+	s.createFragmentTypes(queryDocument.Fragments)
+	s.createOperationResponsesTypes(queryDocument.Operations)
+
+	return s.GeneratedTypes(), s.operations(queryDocument, operationQueryDocuments)
 }
 
 func (r *SourceGenerator) GeneratedTypes() []types.Type {
@@ -35,27 +42,27 @@ func (r *SourceGenerator) GeneratedTypes() []types.Type {
 	})
 }
 
-func (r *SourceGenerator) CreateFragmentTypes(fragments ast.FragmentDefinitionList) {
+func (r *SourceGenerator) createFragmentTypes(fragments ast.FragmentDefinitionList) {
 	for _, fragment := range fragments {
-		responseFields := r.NewResponseFields(fragment.SelectionSet, fragment.Name)
-		fragmentType := r.NewNamedType(true, fragment.Name, responseFields)
+		responseFields := r.newResponseFields(fragment.SelectionSet, fragment.Name)
+		fragmentType := r.newNamedType(true, fragment.Name, responseFields)
 		r.generatedTypes[fragmentType.String()] = fragmentType
 	}
 }
 
-func (r *SourceGenerator) CreateOperationResponsesTypes(operations ast.OperationList) {
+func (r *SourceGenerator) createOperationResponsesTypes(operations ast.OperationList) {
 	for _, operation := range operations {
-		responseFields := r.NewResponseFields(operation.SelectionSet, operation.Name)
-		operationResponseType := r.NewNamedType(false, operation.Name, responseFields)
+		responseFields := r.newResponseFields(operation.SelectionSet, operation.Name)
+		operationResponseType := r.newNamedType(false, operation.Name, responseFields)
 		r.generatedTypes[operationResponseType.String()] = operationResponseType
 	}
 }
 
 // parentTypeNameが空のときは親はinline fragment
-func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, parentTypeName string) ResponseFieldList {
+func (r *SourceGenerator) newResponseFields(selectionSet ast.SelectionSet, parentTypeName string) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
 	for _, selection := range selectionSet {
-		responseFields = append(responseFields, r.NewResponseField(selection, parentTypeName))
+		responseFields = append(responseFields, r.newResponseField(selection, parentTypeName))
 	}
 
 	return responseFields
@@ -66,11 +73,11 @@ func layerTypeName(parentTypeName, fieldName string) string {
 }
 
 // parentTypeNameが空のときは親はinline fragment
-func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeName string) *ResponseField {
+func (r *SourceGenerator) newResponseField(selection ast.Selection, parentTypeName string) *ResponseField {
 	switch sel := selection.(type) {
 	case *ast.Field:
 		typeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
-		fieldsResponseFields := r.NewResponseFields(sel.SelectionSet, typeName)
+		fieldsResponseFields := r.newResponseFields(sel.SelectionSet, typeName)
 		t := r.newFieldType(sel, typeName, fieldsResponseFields)
 
 		return &ResponseField{
@@ -84,17 +91,17 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		}
 
 	case *ast.FragmentSpread:
-		fieldsResponseFields := r.NewResponseFields(sel.Definition.SelectionSet, sel.Name)
+		fieldsResponseFields := r.newResponseFields(sel.Definition.SelectionSet, sel.Name)
 		return &ResponseField{
 			Name:             sel.Name,
-			Type:             r.NewNamedType(true, sel.Name, fieldsResponseFields),
+			Type:             r.newNamedType(true, sel.Name, fieldsResponseFields),
 			IsFragmentSpread: true,
 			ResponseFields:   fieldsResponseFields,
 		}
 
 	case *ast.InlineFragment:
 		// InlineFragmentは子要素をそのままstructとして持つので、NamedTypeを作らずtypes.StructをTypeフィールドに設定する。
-		fieldsResponseFields := r.NewResponseFields(sel.SelectionSet, "")
+		fieldsResponseFields := r.newResponseFields(sel.SelectionSet, "")
 		return &ResponseField{
 			Name:             sel.TypeCondition,
 			Type:             fieldsResponseFields.toGoStructType(),
@@ -107,15 +114,15 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	panic("unexpected selection type")
 }
 
-func (r *SourceGenerator) Operations(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) []*Operation {
+func (r *SourceGenerator) operations(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) []*Operation {
 	operationArgsMap := r.operationArgsMapByOperationName(queryDocument)
 	queryDocumentsMap := queryDocumentMapByOperationName(operationQueryDocuments)
 
 	operations := make([]*Operation, 0, len(queryDocument.Operations))
 	for _, operation := range queryDocument.Operations {
-		queryDocument := queryDocumentsMap[operation.Name]
+		operationQueryDocument := queryDocumentsMap[operation.Name]
 		args := operationArgsMap[operation.Name]
-		operations = append(operations, NewOperation(operation, queryDocument, args))
+		operations = append(operations, NewOperation(operation, operationQueryDocument, args))
 	}
 
 	return operations
@@ -151,9 +158,9 @@ func (r *SourceGenerator) operationArguments(variableDefinitions ast.VariableDef
 	return argumentTypes
 }
 
-// NewNamedType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
+// newNamedType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
 // コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
-func (r *SourceGenerator) NewNamedType(nonnull bool, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
+func (r *SourceGenerator) newNamedType(nonnull bool, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
 	structType := fieldsResponseFields.toGoStructType()
 	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 	if nonnull {
@@ -258,7 +265,7 @@ func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fields
 	case fieldsResponseFields.isFragmentSpread():
 		// Fragmentのフィールドはnonnull
 		// Fragmentの型は公開する。Fragmentはユーザが明示的に作成しているものであるため。
-		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
+		t := r.newNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
 		r.generatedTypes[t.String()] = t
 		return t
 	default:
@@ -266,7 +273,7 @@ func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fields
 			// Queryのため生成した型は非公開にする。gqlgencが内部で作成したものであるため。
 			typeName = firstLower(typeName)
 		}
-		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
+		t := r.newNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
 		r.generatedTypes[t.String()] = t
 		return t
 	}

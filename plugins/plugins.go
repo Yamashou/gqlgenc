@@ -11,7 +11,6 @@ import (
 )
 
 func Run(cfg *config.Config) error {
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Load Query
 	querySources, err := queryparser.LoadQuerySources(cfg.GQLGencConfig.Query)
 	if err != nil {
@@ -28,7 +27,6 @@ func Run(cfg *config.Config) error {
 		return fmt.Errorf(": %w", err)
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// modelgen
 	if cfg.GQLGenConfig.Model.IsDefined() {
 		modelGen := modelgen.New(cfg, operationQueryDocuments)
@@ -37,23 +35,14 @@ func Run(cfg *config.Config) error {
 		}
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// generating source
-	// テンプレートと情報ソースを元にコード生成
-	// Generate code from template and document source
-	sourceGenerator := clientgenv2.NewSourceGenerator(cfg)
-
-	// Fragments must be before OperationResponses
-	sourceGenerator.CreateFragmentTypes(queryDocument.Fragments)
-	sourceGenerator.CreateOperationResponsesTypes(queryDocument.Operations)
-	operations := sourceGenerator.Operations(queryDocument, operationQueryDocuments)
+	// generate template sources
+	generatedTypes, operations := clientgenv2.NewSource(cfg, queryDocument, operationQueryDocuments)
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
-		generatedTypes := sourceGenerator.GeneratedTypes()
 		queryGen := querygen.New(cfg, operations, generatedTypes)
 		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)
