@@ -5,9 +5,6 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/formatter"
 	"go/types"
-	"maps"
-	"slices"
-	"strings"
 )
 
 type Source struct {
@@ -23,31 +20,18 @@ func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGener
 		sourceGenerator: sourceGenerator,
 	}
 }
+func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
+	queryDocumentsMap := queryDocumentMapByOperationName(queryDocuments)
+	operationArgsMap := s.operationArgsMapByOperationName()
 
-func (s *Source) CreateFragments() error {
-	for _, fragment := range s.queryDocument.Fragments {
-		responseFields := s.sourceGenerator.NewResponseFields(fragment.SelectionSet, fragment.Name)
-		fragmentType := s.sourceGenerator.NewNamedType(true, fragment.Name, responseFields)
-		s.sourceGenerator.generatedTypes[fragmentType.String()] = fragmentType
-	}
-
-	return nil
-}
-
-func (s *Source) CreateOperationResponses() error {
+	operations := make([]*Operation, 0, len(s.queryDocument.Operations))
 	for _, operation := range s.queryDocument.Operations {
-		responseFields := s.sourceGenerator.NewResponseFields(operation.SelectionSet, operation.Name)
-		operationResponseType := s.sourceGenerator.NewNamedType(false, operation.Name, responseFields)
-		s.sourceGenerator.generatedTypes[operationResponseType.String()] = operationResponseType
+		queryDocument := queryDocumentsMap[operation.Name]
+		args := operationArgsMap[operation.Name]
+		operations = append(operations, NewOperation(operation, queryDocument, args))
 	}
 
-	return nil
-}
-
-func (s *Source) GeneratedTypes() []types.Type {
-	return slices.SortedFunc(maps.Values(s.sourceGenerator.generatedTypes), func(a, b types.Type) int {
-		return strings.Compare(strings.TrimPrefix(a.String(), "*"), strings.TrimPrefix(b.String(), "*"))
-	})
+	return operations
 }
 
 type Operation struct {
@@ -70,20 +54,6 @@ func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDo
 		Args:                args,
 		VariableDefinitions: operation.VariableDefinitions,
 	}
-}
-
-func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
-	operations := make([]*Operation, 0, len(s.queryDocument.Operations))
-
-	queryDocumentsMap := queryDocumentMapByOperationName(queryDocuments)
-	operationArgsMap := s.operationArgsMapByOperationName()
-	for _, operation := range s.queryDocument.Operations {
-		queryDocument := queryDocumentsMap[operation.Name]
-		args := operationArgsMap[operation.Name]
-		operations = append(operations, NewOperation(operation, queryDocument, args))
-	}
-
-	return operations
 }
 
 func (s *Source) operationArgsMapByOperationName() map[string][]*OperationArgument {

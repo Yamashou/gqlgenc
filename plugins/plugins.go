@@ -3,7 +3,6 @@ package plugins
 import (
 	"fmt"
 	"github.com/Yamashou/gqlgenc/v3/clientgenv2"
-
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/plugins/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/modelgen"
@@ -43,17 +42,13 @@ func Run(cfg *config.Config) error {
 	// テンプレートと情報ソースを元にコード生成
 	// Generate code from template and document source
 	sourceGenerator := clientgenv2.NewSourceGenerator(cfg)
-	source := clientgenv2.NewSource(cfg.GQLGenConfig.Schema, queryDocument, sourceGenerator)
 
 	// Fragments must be before OperationResponses
-	if err := source.CreateFragments(); err != nil {
-		return fmt.Errorf("generating fragment failed: %w", err)
-	}
+	sourceGenerator.CreateFragmentTypes(queryDocument.Fragments)
+	sourceGenerator.CreateOperationResponsesTypes(queryDocument.Operations)
 
-	if err := source.CreateOperationResponses(); err != nil {
-		return fmt.Errorf("generating operation response failed: %w", err)
-	}
-
+	// TODO: Sourceを消す
+	source := clientgenv2.NewSource(cfg.GQLGenConfig.Schema, queryDocument, sourceGenerator)
 	operations := source.Operations(operationQueryDocuments)
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -61,7 +56,7 @@ func Run(cfg *config.Config) error {
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
-		generatedTypes := source.GeneratedTypes()
+		generatedTypes := sourceGenerator.GeneratedTypes()
 		queryGen := querygen.New(cfg, operations, generatedTypes)
 		if err := queryGen.MutateConfig(cfg.GQLGenConfig); err != nil {
 			return fmt.Errorf("%s failed: %w", queryGen.Name(), err)

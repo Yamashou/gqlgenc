@@ -29,6 +29,28 @@ func NewSourceGenerator(cfg *config.Config) *SourceGenerator {
 	}
 }
 
+func (r *SourceGenerator) GeneratedTypes() []types.Type {
+	return slices.SortedFunc(maps.Values(r.generatedTypes), func(a, b types.Type) int {
+		return strings.Compare(strings.TrimPrefix(a.String(), "*"), strings.TrimPrefix(b.String(), "*"))
+	})
+}
+
+func (r *SourceGenerator) CreateFragmentTypes(fragments ast.FragmentDefinitionList) {
+	for _, fragment := range fragments {
+		responseFields := r.NewResponseFields(fragment.SelectionSet, fragment.Name)
+		fragmentType := r.NewNamedType(true, fragment.Name, responseFields)
+		r.generatedTypes[fragmentType.String()] = fragmentType
+	}
+}
+
+func (r *SourceGenerator) CreateOperationResponsesTypes(operations ast.OperationList) {
+	for _, operation := range operations {
+		responseFields := r.NewResponseFields(operation.SelectionSet, operation.Name)
+		operationResponseType := r.NewNamedType(false, operation.Name, responseFields)
+		r.generatedTypes[operationResponseType.String()] = operationResponseType
+	}
+}
+
 // parentTypeNameが空のときは親はinline fragment
 func (r *SourceGenerator) NewResponseFields(selectionSet ast.SelectionSet, parentTypeName string) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
@@ -75,7 +97,7 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 		fieldsResponseFields := r.NewResponseFields(sel.SelectionSet, "")
 		return &ResponseField{
 			Name:             sel.TypeCondition,
-			Type:             fieldsResponseFields.ToGoStructType(),
+			Type:             fieldsResponseFields.toGoStructType(),
 			IsInlineFragment: true,
 			Tags:             []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)},
 			ResponseFields:   fieldsResponseFields,
@@ -84,47 +106,13 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 
 	panic("unexpected selection type")
 }
-func (r *SourceGenerator) jsonOmitTag(field *ast.Field) string {
-	var jsonOmitTag string
-	if field.Definition.Type.NonNull {
-		if r.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *r.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag {
-			jsonOmitTag += `,omitempty`
-		}
-		if r.cfg.GQLGenConfig.EnableModelJsonOmitzeroTag != nil && *r.cfg.GQLGenConfig.EnableModelJsonOmitzeroTag {
-			jsonOmitTag += `,omitzero`
-		}
-	}
-	return jsonOmitTag
-}
-
-func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
-	switch {
-	case fieldsResponseFields.IsBasicType():
-		t := r.FindType(field.Definition.Type)
-		return t
-	case fieldsResponseFields.IsFragmentSpread():
-		// Fragmentのフィールドはnonnull
-		// Fragmentの型は公開する。Fragmentはユーザが明示的に作成しているものであるため。
-		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
-		r.generatedTypes[t.String()] = t
-		return t
-	default:
-		if !r.cfg.GQLGencConfig.ExportQueryType {
-			// Queryのため生成した型は非公開にする。gqlgencが内部で作成したものであるため。
-			typeName = firstLower(typeName)
-		}
-		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
-		r.generatedTypes[t.String()] = t
-		return t
-	}
-}
 
 func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
 	argumentTypes := make([]*OperationArgument, 0, len(variableDefinitions))
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &OperationArgument{
 			Variable: v.Variable,
-			Type:     r.binder.CopyModifiersFromAst(v.Type, r.FindType(v.Type)),
+			Type:     r.binder.CopyModifiersFromAst(v.Type, r.findType(v.Type)),
 		})
 	}
 
@@ -134,7 +122,7 @@ func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDef
 // NewNamedType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
 // コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
 func (r *SourceGenerator) NewNamedType(nonnull bool, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
-	structType := fieldsResponseFields.ToGoStructType()
+	structType := fieldsResponseFields.toGoStructType()
 	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 	if nonnull {
 		return namedType
@@ -143,7 +131,7 @@ func (r *SourceGenerator) NewNamedType(nonnull bool, typeName string, fieldsResp
 }
 
 // Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
-func (r *SourceGenerator) FindType(t *ast.Type) types.Type {
+func (r *SourceGenerator) findType(t *ast.Type) types.Type {
 	goType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[t.Name()].Model[0])
 	if err != nil {
 		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
@@ -165,17 +153,17 @@ type ResponseField struct {
 	ResponseFields   ResponseFieldList
 }
 
-func (r *ResponseField) GoVar() *types.Var {
+func (r *ResponseField) goVar() *types.Var {
 	return types.NewField(0, nil, templates.ToGo(r.Name), r.Type, r.IsFragmentSpread)
 }
 
-func (r *ResponseField) JoinTags() string {
+func (r *ResponseField) joinTags() string {
 	return strings.Join(r.Tags, " ")
 }
 
 type ResponseFieldList []*ResponseField
 
-func (rs ResponseFieldList) IsFragmentSpread() bool {
+func (rs ResponseFieldList) isFragmentSpread() bool {
 	if len(rs) != 1 {
 		return false
 	}
@@ -183,28 +171,20 @@ func (rs ResponseFieldList) IsFragmentSpread() bool {
 	return rs[0].IsFragmentSpread
 }
 
-func (rs ResponseFieldList) IsInlineFragment() bool {
-	if len(rs) != 1 {
-		return false
-	}
-
-	return rs[0].IsInlineFragment
-}
-
-func (rs ResponseFieldList) IsBasicType() bool {
+func (rs ResponseFieldList) isBasicType() bool {
 	return len(rs) == 0
 }
 
-func (rs ResponseFieldList) ToGoStructType() *types.Struct {
+func (rs ResponseFieldList) toGoStructType() *types.Struct {
 	// Goのフィールドは同名のフィールドは許されないので重複を削除する
 	responseFields := rs.uniqueByName()
 	vars := make([]*types.Var, 0, len(responseFields))
 	for _, responseField := range responseFields {
-		vars = append(vars, responseField.GoVar())
+		vars = append(vars, responseField.goVar())
 	}
 	tags := make([]string, 0, len(responseFields))
 	for _, responseField := range responseFields {
-		tags = append(tags, responseField.JoinTags())
+		tags = append(tags, responseField.joinTags())
 	}
 	return types.NewStruct(vars, tags)
 }
@@ -224,4 +204,38 @@ func firstLower(s string) string {
 		return ""
 	}
 	return strings.ToLower(s[:1]) + s[1:]
+}
+func (r *SourceGenerator) jsonOmitTag(field *ast.Field) string {
+	var jsonOmitTag string
+	if field.Definition.Type.NonNull {
+		if r.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *r.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag {
+			jsonOmitTag += `,omitempty`
+		}
+		if r.cfg.GQLGenConfig.EnableModelJsonOmitzeroTag != nil && *r.cfg.GQLGenConfig.EnableModelJsonOmitzeroTag {
+			jsonOmitTag += `,omitzero`
+		}
+	}
+	return jsonOmitTag
+}
+
+func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
+	switch {
+	case fieldsResponseFields.isBasicType():
+		t := r.findType(field.Definition.Type)
+		return t
+	case fieldsResponseFields.isFragmentSpread():
+		// Fragmentのフィールドはnonnull
+		// Fragmentの型は公開する。Fragmentはユーザが明示的に作成しているものであるため。
+		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
+		r.generatedTypes[t.String()] = t
+		return t
+	default:
+		if !r.cfg.GQLGencConfig.ExportQueryType {
+			// Queryのため生成した型は非公開にする。gqlgencが内部で作成したものであるため。
+			typeName = firstLower(typeName)
+		}
+		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
+		r.generatedTypes[t.String()] = t
+		return t
+	}
 }
