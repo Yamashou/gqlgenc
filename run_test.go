@@ -22,18 +22,6 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-// テスト用のカスタムトランスポート
-type customRoundTripper struct {
-	base http.RoundTripper
-}
-
-func (c *customRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
-	// TODO: これなしで動くようにする
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Accept", "application/json")
-	return c.base.RoundTrip(req)
-}
-
 func Test_IntegrationTest(t *testing.T) {
 	type want struct {
 		file          string
@@ -181,21 +169,12 @@ func Test_IntegrationTest(t *testing.T) {
 				listenAndServe(ctx, t, port)
 			}()
 
-			// サーバーが起動するのを少し待つ
+			// Wait for server to start
 			time.Sleep(500 * time.Millisecond)
-
-			// カスタムトランスポートでContent-Typeヘッダーを設定
-			httpClient := &http.Client{
-				Timeout: time.Second * 5,
-				Transport: &customRoundTripper{
-					base: http.DefaultTransport,
-				},
-			}
 
 			// Client
 			c := query.NewClient(client.NewClient(
 				fmt.Sprintf("http://127.0.0.1:%s/graphql", port),
-				client.WithHTTPClient(httpClient),
 			))
 
 			userOperation, err := c.UserOperation(ctx)

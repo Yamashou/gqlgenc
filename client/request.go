@@ -32,8 +32,8 @@ func NewRequest(ctx context.Context, endpoint, operationName, query string, vari
 	}
 
 	req.Header = http.Header{
-		"Content-Type": []string{"application/graphql-response+json;charset=utf-8", "application/json; charset=utf-8"},
-		"Accept":       []string{"application/graphql-response+json;charset=utf-8", "application/json; charset=utf-8"},
+		"Content-Type": []string{"application/json;charset=utf-8"},
+		"Accept":       []string{"application/graphql-response+json;charset=utf-8", "application/json;charset=utf-8"},
 	}
 
 	return req, nil
