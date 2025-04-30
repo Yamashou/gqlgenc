@@ -2,13 +2,15 @@ package querygen
 
 import (
 	"fmt"
-	"github.com/Yamashou/gqlgenc/v3/source"
 	"go/types"
+
+	"golang.org/x/tools/imports"
 
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
+
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"golang.org/x/tools/imports"
+	"github.com/Yamashou/gqlgenc/v3/source"
 )
 
 var _ plugin.ConfigMutator = &Plugin{}

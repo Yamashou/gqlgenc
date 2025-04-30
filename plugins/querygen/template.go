@@ -4,10 +4,12 @@ import (
 	"bytes"
 	_ "embed" // used to load template file
 	"fmt"
+	"go/types"
+
 	"github.com/99designs/gqlgen/codegen/templates"
+
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/source"
-	"go/types"
 )
 
 //go:embed template.tmpl

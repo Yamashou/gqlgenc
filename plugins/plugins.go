@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/plugins/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/modelgen"

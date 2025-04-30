@@ -12,7 +12,9 @@ import (
 
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+
 	"github.com/Yamashou/gqlgenc/v3/config"
+
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -127,14 +129,6 @@ func (r *Generator) operations(queryDocument *ast.QueryDocument, operationQueryD
 
 	return operations
 }
-func (r *Generator) operationArgsMapByOperationName(queryDocument *ast.QueryDocument) map[string][]*OperationArgument {
-	operationArgsMap := make(map[string][]*OperationArgument)
-	for _, operation := range queryDocument.Operations {
-		operationArgsMap[operation.Name] = r.operationArguments(operation.VariableDefinitions)
-	}
-
-	return operationArgsMap
-}
 
 func queryDocumentMapByOperationName(queryDocuments []*ast.QueryDocument) map[string]*ast.QueryDocument {
 	queryDocumentMap := make(map[string]*ast.QueryDocument)
@@ -144,6 +138,15 @@ func queryDocumentMapByOperationName(queryDocuments []*ast.QueryDocument) map[st
 	}
 
 	return queryDocumentMap
+}
+
+func (r *Generator) operationArgsMapByOperationName(queryDocument *ast.QueryDocument) map[string][]*OperationArgument {
+	operationArgsMap := make(map[string][]*OperationArgument)
+	for _, operation := range queryDocument.Operations {
+		operationArgsMap[operation.Name] = r.operationArguments(operation.VariableDefinitions)
+	}
+
+	return operationArgsMap
 }
 
 func (r *Generator) operationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
@@ -242,6 +245,7 @@ func firstLower(s string) string {
 	}
 	return strings.ToLower(s[:1]) + s[1:]
 }
+
 func (r *Generator) jsonOmitTag(field *ast.Field) string {
 	var jsonOmitTag string
 	if field.Definition.Type.NonNull {

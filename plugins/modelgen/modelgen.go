@@ -2,8 +2,10 @@ package modelgen
 
 import (
 	"github.com/99designs/gqlgen/plugin/modelgen"
+
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/queryparser"
+
 	"github.com/vektah/gqlparser/v2/ast"
 )
 

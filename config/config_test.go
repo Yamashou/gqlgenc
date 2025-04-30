@@ -10,9 +10,10 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+
+	"github.com/99designs/gqlgen/codegen/config"
 )
 
 func ptr[T any](t T) *T {

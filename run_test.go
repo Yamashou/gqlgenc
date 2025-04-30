@@ -13,13 +13,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+
 	"github.com/Yamashou/gqlgenc/v3/client"
 	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain"
 	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/query"
 	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/schema"
-	"github.com/google/go-cmp/cmp"
 )
 
 func Test_IntegrationTest(t *testing.T) {
@@ -266,9 +268,8 @@ func addImport(t *testing.T, clientGenFilePath string) {
 	)
 
 	// ファイルに書き戻す
-	if err := os.WriteFile(clientGenFilePath, []byte(strings.Join(modifiedContent, "\n")), 0644); err != nil {
+	if err := os.WriteFile(clientGenFilePath, []byte(strings.Join(modifiedContent, "\n")), 0o644); err != nil {
 		t.Errorf("client_gen.go書き込みエラー: %v", err)
 		return
 	}
-
 }

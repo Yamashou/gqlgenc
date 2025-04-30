@@ -2,14 +2,16 @@ package config
 
 import (
 	"fmt"
-	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
-	"github.com/vektah/gqlparser/v2/ast"
 	"maps"
 	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
 	"strings"
+
+	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
+
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // FindConfigFile searches for the config file in this directory and all parents up the tree
@@ -53,7 +55,7 @@ func findConfigInDir(dir string, cfgFilenames []string) string {
 }
 
 func schemaFilenames(schemaFilenameGlobs gqlgenconfig.StringList) (gqlgenconfig.StringList, error) {
-	var path2regex = strings.NewReplacer(
+	path2regex := strings.NewReplacer(
 		`.`, `\.`,
 		`*`, `.+`,
 		`\`, `[\\/]`,

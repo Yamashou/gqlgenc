@@ -4,18 +4,22 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin/federation"
-	"github.com/Yamashou/gqlgenc/v3/client"
-	"github.com/Yamashou/gqlgenc/v3/introspection"
-	"github.com/goccy/go-yaml"
-	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/vektah/gqlparser/v2/validator"
 	"net/http"
 	"os"
 	"slices"
 	"strings"
 	"syscall"
+
+	"github.com/goccy/go-yaml"
+
+	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/plugin/federation"
+
+	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/introspection"
+
+	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/validator"
 )
 
 // Config extends the gqlgen basic config

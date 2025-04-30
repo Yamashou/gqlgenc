@@ -3,10 +3,11 @@ package clientgen
 import (
 	_ "embed" // used to load template file
 	"fmt"
-	"github.com/Yamashou/gqlgenc/v3/source"
 
 	"github.com/99designs/gqlgen/codegen/templates"
+
 	"github.com/Yamashou/gqlgenc/v3/config"
+	"github.com/Yamashou/gqlgenc/v3/source"
 )
 
 //go:embed template.tmpl
