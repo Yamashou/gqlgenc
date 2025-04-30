@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -22,35 +23,36 @@ import (
 	"github.com/vektah/gqlparser/v2/validator"
 )
 
-// Config extends the gqlgen basic config
-// and represents the config file
+// and represents the config file.
 type Config struct {
 	GQLGencConfig *GQLGencConfig       `yaml:"gqlgenc"`
 	GQLGenConfig  *gqlgenconfig.Config `yaml:"gqlgen"`
 }
 
 type GQLGencConfig struct {
-	Query           []string                   `yaml:"query"`
 	QueryGen        gqlgenconfig.PackageConfig `yaml:"querygen,omitempty"`
 	ClientGen       gqlgenconfig.PackageConfig `yaml:"clientgen,omitempty"`
 	Endpoint        *EndPointConfig            `yaml:"endpoint,omitempty"`
+	Query           []string                   `yaml:"query"`
 	UsedOnlyModels  bool                       `yaml:"used_models_only,omitempty"`
 	ExportQueryType bool                       `yaml:"export_query_type,omitempty"`
 }
 
-// EndPointConfig are the allowed options for the 'endpoint' config
+// EndPointConfig are the allowed options for the 'endpoint' config.
 type EndPointConfig struct {
-	URL     string            `yaml:"url"`
 	Headers map[string]string `yaml:"headers,omitempty"`
+	URL     string            `yaml:"url"`
 }
 
-// Load loads and parses the config gqlgenc config
+// Load loads and parses the config gqlgenc config.
 func Load(configFilename string) (*Config, error) {
 	configContent, err := os.ReadFile(configFilename)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read config: %w", err)
 	}
+
 	var cfg Config
+
 	yamlDecoder := yaml.NewDecoder(bytes.NewReader([]byte(os.ExpandEnv(string(configContent)))), yaml.DisallowUnknownField())
 	if err := yamlDecoder.Decode(&cfg); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
@@ -58,15 +60,15 @@ func Load(configFilename string) (*Config, error) {
 
 	// validation
 	if cfg.GQLGenConfig.SchemaFilename != nil && cfg.GQLGencConfig.Endpoint != nil {
-		return nil, fmt.Errorf("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+		return nil, errors.New("'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
 	if cfg.GQLGenConfig.SchemaFilename == nil && cfg.GQLGencConfig.Endpoint == nil {
-		return nil, fmt.Errorf("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
+		return nil, errors.New("neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
 	}
 
 	if cfg.GQLGencConfig.ClientGen.IsDefined() && !cfg.GQLGencConfig.QueryGen.IsDefined() {
-		return nil, fmt.Errorf("'clientgen' is set, 'querygen' must be set")
+		return nil, errors.New("'clientgen' is set, 'querygen' must be set")
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,23 +85,28 @@ func Load(configFilename string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	cfg.GQLGenConfig.SchemaFilename = schemaFilename
 
 	sources, err := schemaFileSources(cfg.GQLGenConfig.SchemaFilename)
 	if err != nil {
 		return nil, err
 	}
+
 	if cfg.GQLGenConfig.Federation.Version != 0 {
 		fedPlugin, err := federation.New(cfg.GQLGenConfig.Federation.Version, cfg.GQLGenConfig)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create federation plugin: %w", err)
 		}
+
 		federationSources, err := fedPlugin.InjectSourcesEarly()
 		if err != nil {
 			return nil, fmt.Errorf("failed to inject federation directives: %w", err)
 		}
+
 		sources = append(sources, federationSources...)
 	}
+
 	cfg.GQLGenConfig.Sources = sources
 
 	// gqlgen must be followings parameters
@@ -133,9 +140,11 @@ func (c *Config) Init(ctx context.Context) error {
 		// model gen file must be remoted before cfg.Init()
 		_ = syscall.Unlink(c.GQLGenConfig.Model.Filename)
 	}
+
 	if c.GQLGencConfig.QueryGen.IsDefined() {
 		_ = syscall.Unlink(c.GQLGencConfig.QueryGen.Filename)
 	}
+
 	if c.GQLGencConfig.ClientGen.IsDefined() {
 		_ = syscall.Unlink(c.GQLGencConfig.ClientGen.Filename)
 	}
@@ -154,7 +163,7 @@ func (c *Config) Init(ctx context.Context) error {
 	return nil
 }
 
-// loadSchema load and parses the schema from a local file or a remote server
+// loadSchema load and parses the schema from a local file or a remote server.
 func (c *Config) loadSchema(ctx context.Context) error {
 	// TODO: SchemaFilenameをconfigに指定しなかった場合のtest
 	if c.GQLGenConfig.SchemaFilename != nil {
@@ -175,6 +184,7 @@ func (c *Config) loadRemoteSchema(ctx context.Context) error {
 	for key, value := range c.GQLGencConfig.Endpoint.Headers {
 		header[key] = []string{value}
 	}
+
 	transport := TransportAppend(
 		http.DefaultTransport,
 		NewHeaderTransport(func(ctx context.Context) http.Header { return header }),

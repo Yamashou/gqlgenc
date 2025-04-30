@@ -41,11 +41,12 @@ var path2regex = strings.NewReplacer(
 	`/`, `[\\/]`,
 )
 
-// LoadQuerySources returns gqlgen ast.Source parsed GraphQL Query files
+// LoadQuerySources returns gqlgen ast.Source parsed GraphQL Query files.
 func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 	var noGlobQueryFileNames config.StringList
 
 	var err error
+
 	preGlobbing := queryFileNames
 	for _, f := range preGlobbing {
 		var matches []string
@@ -61,7 +62,7 @@ func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 
 			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
 				if err != nil {
-					return fmt.Errorf("filepath.Walk(%q): %v", path, err)
+					return fmt.Errorf("filepath.Walk(%q): %w", path, err)
 				}
 
 				if globRe.MatchString(strings.TrimPrefix(path, pathParts[0])) {
@@ -89,10 +90,14 @@ func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 	}
 
 	querySources := make([]*ast.Source, 0, len(noGlobQueryFileNames))
+
 	for _, filename := range noGlobQueryFileNames {
 		filename = filepath.ToSlash(filename)
+
 		var err error
+
 		var schemaRaw []byte
+
 		schemaRaw, err = os.ReadFile(filename)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open schema: %w", err)

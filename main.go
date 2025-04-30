@@ -12,8 +12,10 @@ var versionOption = flag.Bool("version", false, "gqlgenc version")
 
 func main() {
 	flag.Parse()
+
 	if *versionOption {
 		fmt.Printf("gqlgenc v%s", version)
+
 		return
 	}
 

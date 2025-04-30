@@ -11,6 +11,7 @@ import (
 
 func New(cfg *config.Config, operationQueryDocuments []*ast.QueryDocument) *modelgen.Plugin {
 	usedTypes := queryparser.TypesFromQueryDocuments(cfg.GQLGenConfig.Schema, operationQueryDocuments)
+
 	return &modelgen.Plugin{
 		MutateHook: mutateHook(cfg, usedTypes),
 		FieldHook:  modelgen.DefaultFieldMutateHook,
@@ -22,11 +23,13 @@ func mutateHook(cfg *config.Config, usedTypes map[string]bool) func(b *modelgen.
 		// only generate used models
 		if cfg.GQLGencConfig.UsedOnlyModels {
 			var newModels []*modelgen.Object
+
 			for _, model := range build.Models {
 				if usedTypes[model.Name] {
 					newModels = append(newModels, model)
 				}
 			}
+
 			build.Models = newModels
 			build.Interfaces = nil
 		}

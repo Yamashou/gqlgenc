@@ -47,9 +47,12 @@ func genCode(t types.Type) string {
 	typeName := toString(namedType)
 
 	var buf bytes.Buffer
+
 	fmt.Fprintf(&buf, "type %s %s\n", typeName, toString(structType))
+
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
+
 		fieldName := field.Name()
 		if embedded := fieldName == ""; embedded {
 			continue

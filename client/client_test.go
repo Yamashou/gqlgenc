@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -21,23 +20,27 @@ func TestClient_unmarshalResponse(t *testing.T) {
 		ID   string `json:"id"`
 		Name string `json:"name"`
 	}
+
 	type fields struct {
 		client   *http.Client
 		endpoint string
 	}
+
 	type args struct {
-		respBody []byte
 		out      any
+		respBody []byte
 	}
+
 	type want struct {
 		data any
 		err  error
 	}
+
 	tests := []struct {
-		name   string
-		fields fields
 		args   args
 		want   want
+		fields fields
+		name   string
 	}{
 		{
 			name: "Successful response",
@@ -90,7 +93,7 @@ func TestClient_unmarshalResponse(t *testing.T) {
 			},
 			want: want{
 				data: &map[string]any{},
-				err:  fmt.Errorf(`failed to decode response "{\"data\":invalid_json}": invalid character 'i' looking for beginning of value`),
+				err:  errors.New(`failed to decode response "{\"data\":invalid_json}": invalid character 'i' looking for beginning of value`),
 			},
 		},
 		{
@@ -163,23 +166,27 @@ func TestClient_parseResponse(t *testing.T) {
 		ID   string `json:"id"`
 		Name string `json:"name"`
 	}
+
 	type fields struct {
 		client   *http.Client
 		endpoint string
 	}
+
 	type args struct {
 		resp *http.Response
 		out  any
 	}
+
 	type want struct {
 		out any
 		err error
 	}
+
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
 		want   want
+		args   args
+		fields fields
+		name   string
 	}{
 		{
 			name: "Successful response",
@@ -294,7 +301,7 @@ func TestClient_parseResponse(t *testing.T) {
 			},
 			want: want{
 				out: &map[string]any{},
-				err: fmt.Errorf(`http status is OK but failed to decode response "{\"data\":invalid_json}": invalid character 'i' looking for beginning of value`),
+				err: errors.New(`http status is OK but failed to decode response "{\"data\":invalid_json}": invalid character 'i' looking for beginning of value`),
 			},
 		},
 	}
@@ -312,6 +319,7 @@ func TestClient_parseResponse(t *testing.T) {
 			} else {
 				// For error responses, check error type
 				var gotErrResp *errorResponse
+
 				var wantErrResp *errorResponse
 
 				// Check if errors are errorResponse type
@@ -360,7 +368,7 @@ func TestClient_parseResponse(t *testing.T) {
 	}
 }
 
-// Helper function to create a gzipped HTTP response
+// Helper function to create a gzipped HTTP response.
 func gzipResponse(jsonBody string) *http.Response {
 	var buf bytes.Buffer
 	gzWriter := gzip.NewWriter(&buf)

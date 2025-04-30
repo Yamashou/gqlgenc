@@ -13,6 +13,7 @@ import (
 // QueryDocument parses and validate query sources.
 func QueryDocument(schema *ast.Schema, querySources []*ast.Source) (*ast.QueryDocument, error) {
 	var queryDocument ast.QueryDocument
+
 	for _, querySource := range querySources {
 		query, gqlerr := parser.ParseQuery(querySource)
 		if gqlerr != nil {
@@ -47,6 +48,7 @@ func isUniqueOperationName(operations ast.OperationList) error {
 
 func OperationQueryDocuments(schema *ast.Schema, operations ast.OperationList) ([]*ast.QueryDocument, error) {
 	queryDocuments := make([]*ast.QueryDocument, 0, len(operations))
+
 	for _, operation := range operations {
 		fragments := fragmentsInOperationDefinition(operation)
 
@@ -76,10 +78,12 @@ func fragmentsInOperationDefinition(operation *ast.OperationDefinition) ast.Frag
 func fragmentsUnique(fragments ast.FragmentDefinitionList) ast.FragmentDefinitionList {
 	seenFragments := make(map[string]struct{}, len(fragments))
 	uniqueFragments := make(ast.FragmentDefinitionList, 0, len(fragments))
+
 	for _, fragment := range fragments {
 		if _, ok := seenFragments[fragment.Name]; ok {
 			continue
 		}
+
 		uniqueFragments = append(uniqueFragments, fragment)
 		seenFragments[fragment.Name] = struct{}{}
 	}
@@ -89,6 +93,7 @@ func fragmentsUnique(fragments ast.FragmentDefinitionList) ast.FragmentDefinitio
 
 func fragmentsInOperationWalker(selectionSet ast.SelectionSet) ast.FragmentDefinitionList {
 	var fragments ast.FragmentDefinitionList
+
 	for _, selection := range selectionSet {
 		var selectionSet ast.SelectionSet
 		switch selection := selection.(type) {
@@ -107,7 +112,7 @@ func fragmentsInOperationWalker(selectionSet ast.SelectionSet) ast.FragmentDefin
 	return fragments
 }
 
-// TypesFromQueryDocuments returns a map of type names used in query document arguments
+// TypesFromQueryDocuments returns a map of type names used in query document arguments.
 func TypesFromQueryDocuments(schema *ast.Schema, queryDocuments []*ast.QueryDocument) map[string]bool {
 	usedTypes := make(map[string]bool)
 	processedTypes := make(map[string]bool)
@@ -163,7 +168,7 @@ func inputObjectFieldsWithCycle(def *ast.Definition, schema *ast.Schema, usedTyp
 	}
 }
 
-// typeFromTypeReference is a helper function to collect type names from type references
+// typeFromTypeReference is a helper function to collect type names from type references.
 func typeFromTypeReference(t *ast.Type, usedTypes map[string]bool) {
 	if t == nil {
 		return

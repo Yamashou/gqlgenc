@@ -14,8 +14,8 @@ import (
 )
 
 type formField struct {
-	Name  string
 	Value any
+	Name  string
 }
 
 func NewMultipartRequest(ctx context.Context, endpoint, operationName, query string, variables map[string]any) (*http.Request, error) {
@@ -41,6 +41,7 @@ func NewMultipartRequest(ctx context.Context, endpoint, operationName, query str
 			Value: mapping,
 		},
 	}
+
 	contentType, err := prepareMultipartFormBody(body, formFields, multipartFilesGroups)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare form body: %w", err)
@@ -78,7 +79,7 @@ func parseMultipartFiles(vars map[string]any) ([]multipartFilesGroup, map[string
 		case graphql.Upload:
 			iStr := strconv.Itoa(i)
 			vars[k] = nil
-			mapping[iStr] = []string{fmt.Sprintf("variables.%s", k)}
+			mapping[iStr] = []string{"variables." + k}
 
 			multipartFilesGroups = append(multipartFilesGroups, multipartFilesGroup{
 				Files: []multipartFile{
@@ -98,7 +99,7 @@ func parseMultipartFiles(vars map[string]any) ([]multipartFilesGroup, map[string
 
 			iStr := strconv.Itoa(i)
 			vars[k] = nil
-			mapping[iStr] = []string{fmt.Sprintf("variables.%s", k)}
+			mapping[iStr] = []string{"variables." + k}
 
 			multipartFilesGroups = append(multipartFilesGroups, multipartFilesGroup{
 				Files: []multipartFile{
@@ -112,6 +113,7 @@ func parseMultipartFiles(vars map[string]any) ([]multipartFilesGroup, map[string
 			i++
 		case []*graphql.Upload:
 			vars[k] = make([]struct{}, len(item))
+
 			var groupFiles []multipartFile
 
 			for itemI, itemV := range item {

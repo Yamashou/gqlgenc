@@ -40,5 +40,6 @@ func TransportAppend(roundTripper http.RoundTripper, newRoundTrippers ...func(ht
 	for _, newRoundTripper := range newRoundTrippers {
 		roundTripper = newRoundTripper(roundTripper)
 	}
+
 	return roundTripper
 }

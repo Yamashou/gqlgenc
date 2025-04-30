@@ -1,7 +1,6 @@
 package config
 
 import (
-	"context"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -22,16 +21,17 @@ func ptr[T any](t T) *T {
 
 func TestLoadConfig(t *testing.T) {
 	t.Parallel()
+
 	type want struct {
-		err        bool
-		errMessage string
 		config     *Config
+		errMessage string
+		err        bool
 	}
 
 	tests := []struct {
+		want want
 		name string
 		file string
-		want want
 	}{
 		{
 			name: "config does not exist",
@@ -154,24 +154,28 @@ func TestLoadConfig(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			cfg, err := Load(tt.file)
 
 			if tt.want.err {
 				if err == nil {
 					t.Errorf("LoadConfig() error = nil, want error")
+
 					return
 				}
+
 				if tt.want.errMessage != "" && !containsString(err.Error(), tt.want.errMessage) {
 					t.Errorf("LoadConfig() error = %v, want error containing %v", err, tt.want.errMessage)
 				}
+
 				return
 			}
 
 			if err != nil {
 				t.Errorf("LoadConfig() error = %v, want nil", err)
+
 				return
 			}
 
@@ -198,15 +202,19 @@ func TestLoadConfigWindows(t *testing.T) {
 	// Glob filenames test for Windows
 	t.Run("globbed filenames on Windows", func(t *testing.T) {
 		t.Parallel()
+
 		cfg, err := Load("testdata/cfg/glob.yml")
 		if err != nil {
 			t.Errorf("LoadConfig() error = %v, want nil", err)
+
 			return
 		}
+
 		want := `testdata\cfg\glob\bar\bar with spaces.graphql`
 		if got := cfg.GQLGenConfig.SchemaFilename[0]; got != want {
 			t.Errorf("LoadConfig() SchemaFilename[0] = %v, want %v", got, want)
 		}
+
 		want = `testdata\cfg\glob\foo\foo.graphql`
 		if got := cfg.GQLGenConfig.SchemaFilename[1]; got != want {
 			t.Errorf("LoadConfig() SchemaFilename[1] = %v, want %v", got, want)
@@ -216,8 +224,10 @@ func TestLoadConfigWindows(t *testing.T) {
 	// Unwalkable path test for Windows
 	t.Run("unwalkable path on Windows", func(t *testing.T) {
 		t.Parallel()
+
 		_, err := Load("testdata/cfg/unwalkable.yml")
 		want := "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified."
+
 		if err == nil || err.Error() != want {
 			t.Errorf("LoadConfig() error = %v, want %v", err, want)
 		}
@@ -234,15 +244,19 @@ func TestLoadConfigNonWindows(t *testing.T) {
 	// Glob filenames test for non-Windows
 	t.Run("globbed filenames on non-Windows", func(t *testing.T) {
 		t.Parallel()
+
 		cfg, err := Load("testdata/cfg/glob.yml")
 		if err != nil {
 			t.Errorf("LoadConfig() error = %v, want nil", err)
+
 			return
 		}
+
 		want := "testdata/cfg/glob/bar/bar with spaces.graphql"
 		if got := cfg.GQLGenConfig.SchemaFilename[0]; got != want {
 			t.Errorf("LoadConfig() SchemaFilename[0] = %v, want %v", got, want)
 		}
+
 		want = "testdata/cfg/glob/foo/foo.graphql"
 		if got := cfg.GQLGenConfig.SchemaFilename[1]; got != want {
 			t.Errorf("LoadConfig() SchemaFilename[1] = %v, want %v", got, want)
@@ -252,8 +266,10 @@ func TestLoadConfigNonWindows(t *testing.T) {
 	// Unwalkable path test for non-Windows
 	t.Run("unwalkable path on non-Windows", func(t *testing.T) {
 		t.Parallel()
+
 		_, err := Load("testdata/cfg/unwalkable.yml")
 		want := "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory"
+
 		if err == nil || err.Error() != want {
 			t.Errorf("\n got = %v\nwant = %v", err, want)
 		}
@@ -262,16 +278,17 @@ func TestLoadConfigNonWindows(t *testing.T) {
 
 func TestLoadConfig_LoadSchema(t *testing.T) {
 	t.Parallel()
+
 	type want struct {
-		err        bool
-		errMessage string
 		config     *Config
+		errMessage string
+		err        bool
 	}
 
 	tests := []struct {
+		want         want
 		name         string
 		responseFile string
-		want         want
 	}{
 		// TODO: LoadLocalSchema
 		{
@@ -297,7 +314,6 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -313,20 +329,24 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 				},
 			}
 
-			err := cfg.loadSchema(context.Background())
+			err := cfg.loadSchema(t.Context())
 			if tt.want.err {
 				if err == nil {
 					t.Errorf("LoadSchema() error = nil, want error")
+
 					return
 				}
+
 				if tt.want.errMessage != "" && !containsString(err.Error(), tt.want.errMessage) {
 					t.Errorf("LoadSchema() error = %v, want error containing %v", err, tt.want.errMessage)
 				}
+
 				return
 			}
 
 			if err != nil {
 				t.Errorf("LoadSchema() error = %v, want nil", err)
+
 				return
 			}
 
@@ -343,16 +363,18 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 	}
 }
 
-// containsString は文字列sがsubstringを含むかどうかを確認します
+// containsString は文字列sがsubstringを含むかどうかを確認します.
 func containsString(s, substring string) bool {
 	if len(s) < len(substring) || substring == "" {
 		return false
 	}
+
 	for i := 0; i <= len(s)-len(substring); i++ {
 		if s[i:i+len(substring)] == substring {
 			return true
 		}
 	}
+
 	return false
 }
 

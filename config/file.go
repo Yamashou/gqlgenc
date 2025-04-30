@@ -14,10 +14,10 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// FindConfigFile searches for the config file in this directory and all parents up the tree
-// looking for the closest match
+// looking for the closest match.
 func FindConfigFile(path string, cfgFilenames []string) (string, error) {
 	var err error
+
 	var dir string
 	if path == "." {
 		dir, err = os.Getwd()
@@ -25,6 +25,7 @@ func FindConfigFile(path string, cfgFilenames []string) (string, error) {
 		dir = path
 		_, err = os.Stat(dir)
 	}
+
 	if err != nil {
 		return "", fmt.Errorf("unable to get directory \"%s\" to findCfg: %w", dir, err)
 	}
@@ -63,8 +64,10 @@ func schemaFilenames(schemaFilenameGlobs gqlgenconfig.StringList) (gqlgenconfig.
 	)
 
 	allSchemaFilenames := make(map[string]struct{})
+
 	for _, schemaFilenameGlob := range schemaFilenameGlobs {
 		var schemaFilenames []string
+
 		if strings.Contains(schemaFilenameGlob, "**") {
 			// for ** we want to override default globbing patterns and walk all
 			// subdirectories to match schema files.
@@ -89,6 +92,7 @@ func schemaFilenames(schemaFilenameGlobs gqlgenconfig.StringList) (gqlgenconfig.
 			}
 		} else {
 			var err error
+
 			schemaFilenames, err = filepath.Glob(schemaFilenameGlob)
 			if err != nil {
 				return nil, fmt.Errorf("failed to glob schema filename %s: %w", schemaFilenameGlob, err)
@@ -105,10 +109,14 @@ func schemaFilenames(schemaFilenameGlobs gqlgenconfig.StringList) (gqlgenconfig.
 
 func schemaFileSources(schemaFilenames gqlgenconfig.StringList) ([]*ast.Source, error) {
 	sources := make([]*ast.Source, 0, len(schemaFilenames))
+
 	for _, schemaFilename := range schemaFilenames {
 		schemaFilename = filepath.ToSlash(schemaFilename)
+
 		var err error
+
 		var schemaRaw []byte
+
 		schemaRaw, err = os.ReadFile(schemaFilename)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open schema: %w", err)
@@ -116,5 +124,6 @@ func schemaFileSources(schemaFilenames gqlgenconfig.StringList) ([]*ast.Source, 
 
 		sources = append(sources, &ast.Source{Name: schemaFilename, Input: string(schemaRaw)})
 	}
+
 	return sources, nil
 }

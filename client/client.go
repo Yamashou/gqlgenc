@@ -8,11 +8,11 @@ import (
 )
 
 type Client struct {
-	endpoint string
 	client   *http.Client
+	endpoint string
 }
 
-// NewClient creates a new http client wrapper
+// NewClient creates a new http client wrapper.
 func NewClient(endpoint string, options ...Option) *Client {
 	client := &Client{
 		endpoint: endpoint,
@@ -21,6 +21,7 @@ func NewClient(endpoint string, options ...Option) *Client {
 	for _, option := range options {
 		option(client)
 	}
+
 	return client
 }
 

@@ -19,6 +19,7 @@ func ParseResponse(resp *http.Response, out any) error {
 		if err != nil {
 			return fmt.Errorf("failed to decode gzip: %w", err)
 		}
+
 		resp.Body = respBody
 	}
 
@@ -29,10 +30,11 @@ func ParseResponse(resp *http.Response, out any) error {
 
 	errResponse := &errorResponse{}
 	isStatusCodeOK := 200 <= resp.StatusCode && resp.StatusCode <= 299
+
 	if !isStatusCodeOK {
 		errResponse.NetworkError = &httpError{
 			Code:    resp.StatusCode,
-			Message: fmt.Sprintf("Response body %s", string(body)),
+			Message: "Response body " + string(body),
 		}
 	}
 
@@ -54,13 +56,13 @@ func ParseResponse(resp *http.Response, out any) error {
 	return nil
 }
 
-// httpError is the error when a gqlErrors cannot be parsed
+// httpError is the error when a gqlErrors cannot be parsed.
 type httpError struct {
-	Code    int    `json:"code"`
 	Message string `json:"message"`
+	Code    int    `json:"code"`
 }
 
-// gqlErrors is the struct of a standard graphql error response
+// gqlErrors is the struct of a standard graphql error response.
 type gqlErrors struct {
 	Errors gqlerror.List `json:"errors"`
 }
@@ -69,7 +71,7 @@ func (e *gqlErrors) Error() string {
 	return e.Errors.Error()
 }
 
-// errorResponse represent an handled error
+// errorResponse represent an handled error.
 type errorResponse struct {
 	// http status code is not OK
 	NetworkError *httpError `json:"networkErrors"`
@@ -77,7 +79,7 @@ type errorResponse struct {
 	GqlErrors *gqlerror.List `json:"graphqlErrors"`
 }
 
-// HasErrors returns true when at least one error is declared
+// HasErrors returns true when at least one error is declared.
 func (er *errorResponse) HasErrors() bool {
 	return er.NetworkError != nil || er.GqlErrors != nil
 }
@@ -102,6 +104,7 @@ func unmarshalResponse(respBody []byte, out any) error {
 	if err := json.Unmarshal(respBody, &resp); err != nil {
 		return fmt.Errorf("failed to decode response %q: %w", respBody, err)
 	}
+
 	if err := graphqljson.UnmarshalData(resp.Data, out); err != nil {
 		return fmt.Errorf("failed to decode response data %q: %w", resp.Data, err)
 	}
@@ -111,6 +114,7 @@ func unmarshalResponse(respBody []byte, out any) error {
 		if err := json.Unmarshal(respBody, gqlErrs); err != nil {
 			return fmt.Errorf("faild to decode response error %q: %w", respBody, err)
 		}
+
 		return gqlErrs
 	}
 

@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-// Request represents an outgoing GraphQL request
+// Request represents an outgoing GraphQL request.
 type Request struct {
 	Query         string         `json:"query"`
 	Variables     map[string]any `json:"variables,omitempty"`
@@ -21,6 +21,7 @@ func NewRequest(ctx context.Context, endpoint, operationName, query string, vari
 		Variables:     variables,
 		OperationName: operationName,
 	}
+
 	requestBody, err := json.Marshal(graphqlRequest)
 	if err != nil {
 		return nil, fmt.Errorf("encode: %w", err)

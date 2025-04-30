@@ -22,6 +22,7 @@ func TestParseIntrospectionQuery_Parse(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
+
 			defer func() {
 				if r := recover(); r != nil {
 					t.Errorf("ParseIntrospectionQuery() panicked: %v", r)
@@ -29,6 +30,7 @@ func TestParseIntrospectionQuery_Parse(t *testing.T) {
 			}()
 
 			query := readQueryResult(t, tt.filename)
+
 			ast := ParseIntrospectionQuery("test", query)
 			if ast == nil {
 				t.Error("ParseIntrospectionQuery() returned nil")
@@ -46,6 +48,7 @@ func readQueryResult(t *testing.T, filename string) Query {
 	}
 
 	query := Query{}
+
 	err = json.Unmarshal(data, &query)
 	if err != nil {
 		t.Fatalf("Error unmarshaling JSON: %v", err)

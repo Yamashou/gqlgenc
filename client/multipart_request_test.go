@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -25,24 +26,28 @@ func Test_multipartRequest(t *testing.T) {
 	defer tempFile.Close()
 
 	// Write content to the file
-	if _, err := tempFile.Write([]byte("test content")); err != nil {
+	if _, err := tempFile.WriteString("test content"); err != nil {
 		t.Fatal(err)
 	}
+
 	if _, err := tempFile.Seek(0, 0); err != nil {
 		t.Fatal(err)
 	}
 
 	// Create a second test file
 	tempFilePath2 := filepath.Join(tempDir, "test2.txt")
+
 	tempFile2, err := os.Create(tempFilePath2)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	defer tempFile2.Close()
 
-	if _, err := tempFile2.Write([]byte("another test content")); err != nil {
+	if _, err := tempFile2.WriteString("another test content"); err != nil {
 		t.Fatal(err)
 	}
+
 	if _, err := tempFile2.Seek(0, 0); err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +63,7 @@ func Test_multipartRequest(t *testing.T) {
 		}
 
 		if err := r.ParseMultipartForm(1 << 20); err != nil {
-			return fmt.Errorf("ParseMultipartForm got = %v, want nil", err)
+			return fmt.Errorf("ParseMultipartForm got = %w, want nil", err)
 		}
 
 		return nil
@@ -67,36 +72,39 @@ func Test_multipartRequest(t *testing.T) {
 	// Verify operations field exists
 	validateOperationsField := func(r *http.Request) error {
 		if r.MultipartForm.Value["operations"] == nil {
-			return fmt.Errorf("multipartForm field 'operations' not found")
+			return errors.New("multipartForm field 'operations' not found")
 		}
+
 		return nil
 	}
 
 	// Verify map field exists
 	validateMapField := func(r *http.Request) error {
 		if r.MultipartForm.Value["map"] == nil {
-			return fmt.Errorf("multipartForm field 'map' not found")
+			return errors.New("multipartForm field 'map' not found")
 		}
+
 		return nil
 	}
 
 	type args struct {
 		ctx           context.Context
+		variables     map[string]any
 		endpoint      string
 		operationName string
 		query         string
-		variables     map[string]any
 	}
+
 	tests := []struct {
-		name       string
 		args       args
+		name       string
+		validators []func(*http.Request) error
 		wantErr    bool
-		validators []func(*http.Request) error // Multiple validation functions can be specified
 	}{
 		{
 			name: "File upload request",
 			args: args{
-				ctx:           context.Background(),
+				ctx:           t.Context(),
 				endpoint:      "http://example.com/graphql",
 				operationName: "UploadFile",
 				query:         "mutation UploadFile($file: Upload!) { uploadFile(file: $file) }",
@@ -117,7 +125,7 @@ func Test_multipartRequest(t *testing.T) {
 		{
 			name: "Empty variables map case",
 			args: args{
-				ctx:           context.Background(),
+				ctx:           t.Context(),
 				endpoint:      "http://example.com/graphql",
 				operationName: "TestQuery",
 				query:         "query TestQuery { test }",
@@ -131,7 +139,7 @@ func Test_multipartRequest(t *testing.T) {
 		{
 			name: "Variables with nil pointer case",
 			args: args{
-				ctx:           context.Background(),
+				ctx:           t.Context(),
 				endpoint:      "http://example.com/graphql",
 				operationName: "UploadFile",
 				query:         "mutation UploadFile($file: Upload) { uploadFile(file: $file) }",
@@ -147,7 +155,7 @@ func Test_multipartRequest(t *testing.T) {
 		{
 			name: "Multiple files upload case",
 			args: args{
-				ctx:           context.Background(),
+				ctx:           t.Context(),
 				endpoint:      "http://example.com/graphql",
 				operationName: "UploadFiles",
 				query:         "mutation UploadFiles($files: [Upload!]!) { uploadFiles(files: $files) }",
@@ -176,6 +184,7 @@ func Test_multipartRequest(t *testing.T) {
 					if fileCount != 2 {
 						return fmt.Errorf("want 2 files, got %d", fileCount)
 					}
+
 					return nil
 				},
 			},
@@ -183,7 +192,7 @@ func Test_multipartRequest(t *testing.T) {
 		{
 			name: "Empty file array case",
 			args: args{
-				ctx:           context.Background(),
+				ctx:           t.Context(),
 				endpoint:      "http://example.com/graphql",
 				operationName: "UploadFiles",
 				query:         "mutation UploadFiles($files: [Upload!]) { uploadFiles(files: $files) }",
@@ -204,6 +213,7 @@ func Test_multipartRequest(t *testing.T) {
 					if fileCount != 0 {
 						return fmt.Errorf("want 0 files, got %d", fileCount)
 					}
+
 					return nil
 				},
 			},
@@ -215,6 +225,7 @@ func Test_multipartRequest(t *testing.T) {
 			got, err := NewMultipartRequest(tt.args.ctx, tt.args.endpoint, tt.args.operationName, tt.args.query, tt.args.variables)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("multipartRequest() error = %v, wantErr %v", err, tt.wantErr)
+
 				return
 			}
 
@@ -222,6 +233,7 @@ func Test_multipartRequest(t *testing.T) {
 				// Execute basic validation first
 				if err := validateRequest(got); err != nil {
 					t.Errorf("multipartRequest() failed basic validation: %v", err)
+
 					return
 				}
 
@@ -229,6 +241,7 @@ func Test_multipartRequest(t *testing.T) {
 				for i, validator := range tt.validators {
 					if err := validator(got); err != nil {
 						t.Errorf("multipartRequest() failed validator #%d: %v", i, err)
+
 						return
 					}
 				}
