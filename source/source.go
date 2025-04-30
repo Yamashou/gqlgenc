@@ -1,4 +1,4 @@
-package clientgenv2
+package source
 
 import (
 	"fmt"
@@ -16,33 +16,33 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-type SourceGenerator struct {
-	cfg            *config.Config
-	binder         *gqlgenconfig.Binder
-	generatedTypes map[string]types.Type
-}
-
 func NewSource(cfg *config.Config, queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) ([]types.Type, []*Operation) {
-	s := &SourceGenerator{
+	s := &Generator{
 		cfg:            cfg,
 		binder:         cfg.GQLGenConfig.NewBinder(),
 		generatedTypes: map[string]types.Type{},
 	}
 
-	// Fragments must be before OperationResponses
+	// createFragmentTypes must be before createOperationResponsesTypes
 	s.createFragmentTypes(queryDocument.Fragments)
 	s.createOperationResponsesTypes(queryDocument.Operations)
 
 	return s.GeneratedTypes(), s.operations(queryDocument, operationQueryDocuments)
 }
 
-func (r *SourceGenerator) GeneratedTypes() []types.Type {
+type Generator struct {
+	cfg            *config.Config
+	binder         *gqlgenconfig.Binder
+	generatedTypes map[string]types.Type
+}
+
+func (r *Generator) GeneratedTypes() []types.Type {
 	return slices.SortedFunc(maps.Values(r.generatedTypes), func(a, b types.Type) int {
 		return strings.Compare(strings.TrimPrefix(a.String(), "*"), strings.TrimPrefix(b.String(), "*"))
 	})
 }
 
-func (r *SourceGenerator) createFragmentTypes(fragments ast.FragmentDefinitionList) {
+func (r *Generator) createFragmentTypes(fragments ast.FragmentDefinitionList) {
 	for _, fragment := range fragments {
 		responseFields := r.newResponseFields(fragment.SelectionSet, fragment.Name)
 		fragmentType := r.newNamedType(true, fragment.Name, responseFields)
@@ -50,7 +50,7 @@ func (r *SourceGenerator) createFragmentTypes(fragments ast.FragmentDefinitionLi
 	}
 }
 
-func (r *SourceGenerator) createOperationResponsesTypes(operations ast.OperationList) {
+func (r *Generator) createOperationResponsesTypes(operations ast.OperationList) {
 	for _, operation := range operations {
 		responseFields := r.newResponseFields(operation.SelectionSet, operation.Name)
 		operationResponseType := r.newNamedType(false, operation.Name, responseFields)
@@ -59,7 +59,7 @@ func (r *SourceGenerator) createOperationResponsesTypes(operations ast.Operation
 }
 
 // parentTypeNameが空のときは親はinline fragment
-func (r *SourceGenerator) newResponseFields(selectionSet ast.SelectionSet, parentTypeName string) ResponseFieldList {
+func (r *Generator) newResponseFields(selectionSet ast.SelectionSet, parentTypeName string) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
 	for _, selection := range selectionSet {
 		responseFields = append(responseFields, r.newResponseField(selection, parentTypeName))
@@ -73,7 +73,7 @@ func layerTypeName(parentTypeName, fieldName string) string {
 }
 
 // parentTypeNameが空のときは親はinline fragment
-func (r *SourceGenerator) newResponseField(selection ast.Selection, parentTypeName string) *ResponseField {
+func (r *Generator) newResponseField(selection ast.Selection, parentTypeName string) *ResponseField {
 	switch sel := selection.(type) {
 	case *ast.Field:
 		typeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
@@ -114,7 +114,7 @@ func (r *SourceGenerator) newResponseField(selection ast.Selection, parentTypeNa
 	panic("unexpected selection type")
 }
 
-func (r *SourceGenerator) operations(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) []*Operation {
+func (r *Generator) operations(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) []*Operation {
 	operationArgsMap := r.operationArgsMapByOperationName(queryDocument)
 	queryDocumentsMap := queryDocumentMapByOperationName(operationQueryDocuments)
 
@@ -127,7 +127,7 @@ func (r *SourceGenerator) operations(queryDocument *ast.QueryDocument, operation
 
 	return operations
 }
-func (r *SourceGenerator) operationArgsMapByOperationName(queryDocument *ast.QueryDocument) map[string][]*OperationArgument {
+func (r *Generator) operationArgsMapByOperationName(queryDocument *ast.QueryDocument) map[string][]*OperationArgument {
 	operationArgsMap := make(map[string][]*OperationArgument)
 	for _, operation := range queryDocument.Operations {
 		operationArgsMap[operation.Name] = r.operationArguments(operation.VariableDefinitions)
@@ -146,7 +146,7 @@ func queryDocumentMapByOperationName(queryDocuments []*ast.QueryDocument) map[st
 	return queryDocumentMap
 }
 
-func (r *SourceGenerator) operationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
+func (r *Generator) operationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
 	argumentTypes := make([]*OperationArgument, 0, len(variableDefinitions))
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &OperationArgument{
@@ -160,7 +160,7 @@ func (r *SourceGenerator) operationArguments(variableDefinitions ast.VariableDef
 
 // newNamedType は、GraphQLに対応する存在型がなく、gqlgenc独自の型を作成する。
 // コード生成するために作成時にgeneratedTypesに保存しておき、Templateに渡す。
-func (r *SourceGenerator) newNamedType(nonnull bool, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
+func (r *Generator) newNamedType(nonnull bool, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
 	structType := fieldsResponseFields.toGoStructType()
 	namedType := types.NewNamed(types.NewTypeName(0, r.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
 	if nonnull {
@@ -170,7 +170,7 @@ func (r *SourceGenerator) newNamedType(nonnull bool, typeName string, fieldsResp
 }
 
 // Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
-func (r *SourceGenerator) findType(t *ast.Type) types.Type {
+func (r *Generator) findType(t *ast.Type) types.Type {
 	goType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[t.Name()].Model[0])
 	if err != nil {
 		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
@@ -244,7 +244,7 @@ func firstLower(s string) string {
 	}
 	return strings.ToLower(s[:1]) + s[1:]
 }
-func (r *SourceGenerator) jsonOmitTag(field *ast.Field) string {
+func (r *Generator) jsonOmitTag(field *ast.Field) string {
 	var jsonOmitTag string
 	if field.Definition.Type.NonNull {
 		if r.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *r.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag {
@@ -257,7 +257,7 @@ func (r *SourceGenerator) jsonOmitTag(field *ast.Field) string {
 	return jsonOmitTag
 }
 
-func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
+func (r *Generator) newFieldType(field *ast.Field, typeName string, fieldsResponseFields ResponseFieldList) types.Type {
 	switch {
 	case fieldsResponseFields.isBasicType():
 		t := r.findType(field.Definition.Type)

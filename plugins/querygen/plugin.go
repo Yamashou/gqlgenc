@@ -2,7 +2,7 @@ package querygen
 
 import (
 	"fmt"
-	"github.com/Yamashou/gqlgenc/v3/clientgenv2"
+	"github.com/Yamashou/gqlgenc/v3/source"
 	"go/types"
 
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
@@ -15,11 +15,11 @@ var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
 	cfg            *config.Config
-	operations     []*clientgenv2.Operation
+	operations     []*source.Operation
 	generatedTypes []types.Type
 }
 
-func New(cfg *config.Config, operations []*clientgenv2.Operation, generatedTypes []types.Type) *Plugin {
+func New(cfg *config.Config, operations []*source.Operation, generatedTypes []types.Type) *Plugin {
 	return &Plugin{
 		cfg:            cfg,
 		operations:     operations,

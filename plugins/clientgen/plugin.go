@@ -2,7 +2,7 @@ package clientgen
 
 import (
 	"fmt"
-	"github.com/Yamashou/gqlgenc/v3/clientgenv2"
+	"github.com/Yamashou/gqlgenc/v3/source"
 
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
@@ -14,10 +14,10 @@ var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
 	cfg        *config.Config
-	operations []*clientgenv2.Operation
+	operations []*source.Operation
 }
 
-func New(cfg *config.Config, operations []*clientgenv2.Operation) *Plugin {
+func New(cfg *config.Config, operations []*source.Operation) *Plugin {
 	return &Plugin{
 		cfg:        cfg,
 		operations: operations,

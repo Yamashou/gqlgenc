@@ -2,12 +2,12 @@ package plugins
 
 import (
 	"fmt"
-	"github.com/Yamashou/gqlgenc/v3/clientgenv2"
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/plugins/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/modelgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/querygen"
 	"github.com/Yamashou/gqlgenc/v3/queryparser"
+	"github.com/Yamashou/gqlgenc/v3/source"
 )
 
 func Run(cfg *config.Config) error {
@@ -36,7 +36,7 @@ func Run(cfg *config.Config) error {
 	}
 
 	// generate template sources
-	generatedTypes, operations := clientgenv2.NewSource(cfg, queryDocument, operationQueryDocuments)
+	generatedTypes, operations := source.NewSource(cfg, queryDocument, operationQueryDocuments)
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins

@@ -3,7 +3,7 @@ package clientgen
 import (
 	_ "embed" // used to load template file
 	"fmt"
-	"github.com/Yamashou/gqlgenc/v3/clientgenv2"
+	"github.com/Yamashou/gqlgenc/v3/source"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/Yamashou/gqlgenc/v3/config"
@@ -12,7 +12,7 @@ import (
 //go:embed template.tmpl
 var template string
 
-func RenderTemplate(cfg *config.Config, operations []*clientgenv2.Operation) error {
+func RenderTemplate(cfg *config.Config, operations []*source.Operation) error {
 	if err := templates.Render(templates.Options{
 		PackageName: cfg.GQLGencConfig.ClientGen.Package,
 		Filename:    cfg.GQLGencConfig.ClientGen.Filename,
