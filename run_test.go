@@ -181,7 +181,7 @@ func Test_IntegrationTest(t *testing.T) {
 
 			userOperation, err := c.UserOperation(ctx)
 			if err != nil {
-				t.Errorf("リクエスト失敗: %v", err)
+				t.Errorf("Request failed: %v", err)
 			}
 
 			if diff := cmp.Diff(tt.want.userOperation, userOperation); diff != "" {
@@ -234,13 +234,13 @@ func addImport(t *testing.T, clientGenFilePath string) {
 	// Add new import statement to client_gen.go file
 	content, err := os.ReadFile(clientGenFilePath)
 	if err != nil {
-		t.Errorf("読み込みエラー: %v", err)
+		t.Errorf("Error reading file: %v", err)
 		return
 	}
 
 	lines := strings.Split(string(content), "\n")
 	if len(lines) < 1 {
-		t.Errorf("ファイルが不正な形式です")
+		t.Errorf("File has invalid format")
 		return
 	}
 

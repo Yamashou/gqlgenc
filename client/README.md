@@ -1,9 +1,9 @@
 # client
 
 ## Remove MarshalJSON function
-clientはclient.MarshalJSONに相当するものはありません。代わりに json.Marshal を使用します。
-そのためenumの型には必ずjson.Marshalerの実装が必要になります。
-gqlgen v1.17.71以降では、enumの型にjson.Marshalerのコードが生成されます。
+The client does not have an equivalent to client.MarshalJSON. Instead, use json.Marshal.
+Therefore, enum types must have a json.Marshaler implementation.
+In gqlgen v1.17.71 and later, json.Marshaler code is generated for enum types.
 ```go
 func (e *EnumValue) UnmarshalJSON(b []byte) error {
        s, err := strconv.Unquote(string(b))
@@ -24,22 +24,22 @@ func (e EnumValue) MarshalJSON() ([]byte, error) {
   - https://github.com/99designs/gqlgen/pull/3663
 
 ## Support omitzero
-Go 1.24に導入されたomitzeroに対応しました。
-Go公式ではomitemptyではなくomitzeroが推奨されています。
+We now support omitzero introduced in Go 1.24.
+Go officially recommends omitzero instead of omitempty.
 https://pkg.go.dev/github.com/go-json-experiment/json#example-package-OmitFields
-gqlgenでomitzeroを設定するにはi `gqlgen.yaml` 以下の設定をしてください。
+To set omitzero in gqlgen, use the following configuration in `gqlgen.yaml`:
 ```yaml
 enable_model_json_omitzero_tag: true
-# omitemptyを無効にしたい場合はfalseにしてください。
+# If you want to disable omitempty, set to false.
 enable_model_json_omitempty_tag: false
 ```
 
 - Reference
  - https://github.com/99designs/gqlgen/pull/3659
 
-## nullとundefinedの区別がつけられるようになりました
-APIによっては、nullとundefinedで振る舞いが異なる場合があります。
-以下のようにnullとundefinedを区別できるようになりました。
+## Now able to distinguish between null and undefined
+Some APIs behave differently for null and undefined.
+You can now distinguish between null and undefined as follows:
 
 - json: `{}` means undefined, no effect to name
 ```go
@@ -48,15 +48,15 @@ input := UserUpdateInput{
 }
 ```
 
-- json: `{"name":null}` meanas null, set empty string to  name
+- json: `{"name":null}` means null, set empty string to name
 ```go
 input := UserUpdateInput{
 		Name:         graphql.OmittableOf[string](null),
 }
 ```
 
-Omittable型は `gqlgen.yaml` `nullable_input_omittable: ture` にすることで生成されます。またomitするためには `enable_model_json_omitzero_tag: true` にしてomitzeroタグを付与してください。
-undefined時にomitするためには、gqlgen v1.17.71以降を利用してください。Omittable型にIsZeroメソッドが追加されました。
+The Omittable type is generated when `nullable_input_omittable: true` is set in `gqlgen.yaml`. To omit, please set `enable_model_json_omitzero_tag: true` to add the omitzero tag.
+To omit when undefined, use gqlgen v1.17.71 or later. The IsZero method has been added to the Omittable type.
 
 ```yaml
 nullable_input_omittable: true

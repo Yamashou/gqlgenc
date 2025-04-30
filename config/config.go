@@ -165,7 +165,7 @@ func (c *Config) Init(ctx context.Context) error {
 
 // loadSchema load and parses the schema from a local file or a remote server.
 func (c *Config) loadSchema(ctx context.Context) error {
-	// TODO: SchemaFilenameをconfigに指定しなかった場合のtest
+	// TODO: Add test for when SchemaFilename is not specified in config
 	if c.GQLGenConfig.SchemaFilename != nil {
 		if err := c.GQLGenConfig.LoadSchema(); err != nil {
 			return fmt.Errorf("load local schema failed: %w", err)
