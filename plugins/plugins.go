@@ -48,8 +48,8 @@ func Run(cfg *config.Config) error {
 	sourceGenerator.CreateOperationResponsesTypes(queryDocument.Operations)
 
 	// TODO: Sourceを消す
-	source := clientgenv2.NewSource(cfg.GQLGenConfig.Schema, queryDocument, sourceGenerator)
-	operations := source.Operations(operationQueryDocuments)
+	source := clientgenv2.NewSource(sourceGenerator)
+	operations := source.Operations(queryDocument, operationQueryDocuments)
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins

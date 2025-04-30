@@ -8,24 +8,20 @@ import (
 )
 
 type Source struct {
-	schema          *ast.Schema
-	queryDocument   *ast.QueryDocument
 	sourceGenerator *SourceGenerator
 }
 
-func NewSource(schema *ast.Schema, queryDocument *ast.QueryDocument, sourceGenerator *SourceGenerator) *Source {
+func NewSource(sourceGenerator *SourceGenerator) *Source {
 	return &Source{
-		schema:          schema,
-		queryDocument:   queryDocument,
 		sourceGenerator: sourceGenerator,
 	}
 }
-func (s *Source) Operations(queryDocuments []*ast.QueryDocument) []*Operation {
-	queryDocumentsMap := queryDocumentMapByOperationName(queryDocuments)
-	operationArgsMap := s.operationArgsMapByOperationName()
+func (s *Source) Operations(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) []*Operation {
+	operationArgsMap := s.operationArgsMapByOperationName(queryDocument)
+	queryDocumentsMap := queryDocumentMapByOperationName(operationQueryDocuments)
 
-	operations := make([]*Operation, 0, len(s.queryDocument.Operations))
-	for _, operation := range s.queryDocument.Operations {
+	operations := make([]*Operation, 0, len(queryDocument.Operations))
+	for _, operation := range queryDocument.Operations {
 		queryDocument := queryDocumentsMap[operation.Name]
 		args := operationArgsMap[operation.Name]
 		operations = append(operations, NewOperation(operation, queryDocument, args))
@@ -56,9 +52,9 @@ func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDo
 	}
 }
 
-func (s *Source) operationArgsMapByOperationName() map[string][]*OperationArgument {
+func (s *Source) operationArgsMapByOperationName(queryDocument *ast.QueryDocument) map[string][]*OperationArgument {
 	operationArgsMap := make(map[string][]*OperationArgument)
-	for _, operation := range s.queryDocument.Operations {
+	for _, operation := range queryDocument.Operations {
 		operationArgsMap[operation.Name] = s.sourceGenerator.OperationArguments(operation.VariableDefinitions)
 	}
 

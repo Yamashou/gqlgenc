@@ -183,7 +183,7 @@ func Test_IntegrationTest(t *testing.T) {
 			}
 
 			if diff := cmp.Diff(tt.want.userOperation, userOperation); diff != "" {
-				t.Errorf("UserOperation() mismatch (-want +got):\n%s", diff)
+				t.Errorf("IntegrationTest mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
