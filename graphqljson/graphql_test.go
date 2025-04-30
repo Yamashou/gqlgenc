@@ -745,7 +745,7 @@ func (n *Number) UnmarshalGQL(v any) error {
 	case "TWO":
 		*n = NumberTwo
 	default:
-		return fmt.Errorf("Number not found Type: %d", n)
+		return fmt.Errorf("number not found Type: %d", n)
 	}
 
 	return nil

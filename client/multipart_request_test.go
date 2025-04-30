@@ -59,11 +59,11 @@ func Test_multipartRequest(t *testing.T) {
 		}
 
 		if !strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
-			return fmt.Errorf("Content-Type got = %v, want to contain %v", r.Header.Get("Content-Type"), "multipart/form-data")
+			return fmt.Errorf("content-Type got = %v, want to contain %v", r.Header.Get("Content-Type"), "multipart/form-data")
 		}
 
 		if err := r.ParseMultipartForm(1 << 20); err != nil {
-			return fmt.Errorf("ParseMultipartForm got = %w, want nil", err)
+			return fmt.Errorf("parseMultipartForm got = %w, want nil", err)
 		}
 
 		return nil

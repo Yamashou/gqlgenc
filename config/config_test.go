@@ -161,20 +161,20 @@ func TestLoadConfig(t *testing.T) {
 
 			if tt.want.err {
 				if err == nil {
-					t.Errorf("LoadConfig() error = nil, want error")
+					t.Errorf("loadConfig() error = nil, want error")
 
 					return
 				}
 
 				if tt.want.errMessage != "" && !containsString(err.Error(), tt.want.errMessage) {
-					t.Errorf("LoadConfig() error = %v, want error containing %v", err, tt.want.errMessage)
+					t.Errorf("loadConfig() error = %v, want error containing %v", err, tt.want.errMessage)
 				}
 
 				return
 			}
 
 			if err != nil {
-				t.Errorf("LoadConfig() error = %v, want nil", err)
+				t.Errorf("loadConfig() error = %v, want nil", err)
 
 				return
 			}
@@ -185,7 +185,7 @@ func TestLoadConfig(t *testing.T) {
 					cmpopts.IgnoreFields(config.PackageConfig{}, "Filename"),
 				}
 				if diff := cmp.Diff(tt.want.config, cfg, opts...); diff != "" {
-					t.Errorf("LoadConfig() mismatch (-want +got):\n%s", diff)
+					t.Errorf("loadConfig() mismatch (-want +got):\n%s", diff)
 				}
 			}
 		})
@@ -205,19 +205,19 @@ func TestLoadConfigWindows(t *testing.T) {
 
 		cfg, err := Load("testdata/cfg/glob.yml")
 		if err != nil {
-			t.Errorf("LoadConfig() error = %v, want nil", err)
+			t.Errorf("loadConfig() error = %v, want nil", err)
 
 			return
 		}
 
 		want := `testdata\cfg\glob\bar\bar with spaces.graphql`
 		if got := cfg.GQLGenConfig.SchemaFilename[0]; got != want {
-			t.Errorf("LoadConfig() SchemaFilename[0] = %v, want %v", got, want)
+			t.Errorf("loadConfig() schemaFilename[0] = %v, want %v", got, want)
 		}
 
 		want = `testdata\cfg\glob\foo\foo.graphql`
 		if got := cfg.GQLGenConfig.SchemaFilename[1]; got != want {
-			t.Errorf("LoadConfig() SchemaFilename[1] = %v, want %v", got, want)
+			t.Errorf("loadConfig() schemaFilename[1] = %v, want %v", got, want)
 		}
 	})
 
@@ -229,7 +229,7 @@ func TestLoadConfigWindows(t *testing.T) {
 		want := "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified."
 
 		if err == nil || err.Error() != want {
-			t.Errorf("LoadConfig() error = %v, want %v", err, want)
+			t.Errorf("loadConfig() error = %v, want %v", err, want)
 		}
 	})
 }
@@ -247,19 +247,19 @@ func TestLoadConfigNonWindows(t *testing.T) {
 
 		cfg, err := Load("testdata/cfg/glob.yml")
 		if err != nil {
-			t.Errorf("LoadConfig() error = %v, want nil", err)
+			t.Errorf("loadConfig() error = %v, want nil", err)
 
 			return
 		}
 
 		want := "testdata/cfg/glob/bar/bar with spaces.graphql"
 		if got := cfg.GQLGenConfig.SchemaFilename[0]; got != want {
-			t.Errorf("LoadConfig() SchemaFilename[0] = %v, want %v", got, want)
+			t.Errorf("loadConfig() schemaFilename[0] = %v, want %v", got, want)
 		}
 
 		want = "testdata/cfg/glob/foo/foo.graphql"
 		if got := cfg.GQLGenConfig.SchemaFilename[1]; got != want {
-			t.Errorf("LoadConfig() SchemaFilename[1] = %v, want %v", got, want)
+			t.Errorf("loadConfig() schemaFilename[1] = %v, want %v", got, want)
 		}
 	})
 
@@ -332,20 +332,20 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 			err := cfg.loadSchema(t.Context())
 			if tt.want.err {
 				if err == nil {
-					t.Errorf("LoadSchema() error = nil, want error")
+					t.Errorf("loadSchema() error = nil, want error")
 
 					return
 				}
 
 				if tt.want.errMessage != "" && !containsString(err.Error(), tt.want.errMessage) {
-					t.Errorf("LoadSchema() error = %v, want error containing %v", err, tt.want.errMessage)
+					t.Errorf("loadSchema() error = %v, want error containing %v", err, tt.want.errMessage)
 				}
 
 				return
 			}
 
 			if err != nil {
-				t.Errorf("LoadSchema() error = %v, want nil", err)
+				t.Errorf("loadSchema() error = %v, want nil", err)
 
 				return
 			}
@@ -356,7 +356,7 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 					cmpopts.IgnoreFields(EndPointConfig{}, "URL"),
 				}
 				if diff := cmp.Diff(tt.want.config, cfg, opts...); diff != "" {
-					t.Errorf("LoadSchema() mismatch (-want +got):\n%s", diff)
+					t.Errorf("loadSchema() mismatch (-want +got):\n%s", diff)
 				}
 			}
 		})
@@ -391,7 +391,7 @@ func newMockRemoteServer(t *testing.T, response any) (mock *mockRemoteServer, cl
 			var err error
 			mock.body, err = io.ReadAll(req.Body)
 			if err != nil {
-				t.Errorf("Failed to read request body: %v", err)
+				t.Errorf("failed to read request body: %v", err)
 			}
 
 			var responseBody []byte
@@ -403,13 +403,13 @@ func newMockRemoteServer(t *testing.T, response any) (mock *mockRemoteServer, cl
 			default:
 				responseBody, err = json.Marshal(response)
 				if err != nil {
-					t.Errorf("Failed to marshal response: %v", err)
+					t.Errorf("failed to marshal response: %v", err)
 				}
 			}
 
 			_, err = writer.Write(responseBody)
 			if err != nil {
-				t.Errorf("Failed to write response: %v", err)
+				t.Errorf("failed to write response: %v", err)
 			}
 		})),
 	}
@@ -424,7 +424,7 @@ func (f responseFromFile) load(t *testing.T) []byte {
 
 	content, err := os.ReadFile(string(f))
 	if err != nil {
-		t.Errorf("Failed to read file %s: %v", string(f), err)
+		t.Errorf("failed to read file %s: %v", string(f), err)
 	}
 
 	return content

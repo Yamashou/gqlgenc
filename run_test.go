@@ -141,19 +141,19 @@ func Test_IntegrationTest(t *testing.T) {
 			// Read both files
 			actualContent, err := os.ReadFile(actualFilePath)
 			if err != nil {
-				t.Errorf("Error reading file (actual file): %v", err)
+				t.Errorf("error reading file (actual file): %v", err)
 				return
 			}
 
 			wantContent, err := os.ReadFile(wantFilePath)
 			if err != nil {
-				t.Errorf("Error reading file (expected file): %v", err)
+				t.Errorf("error reading file (expected file): %v", err)
 				return
 			}
 
 			// Compare file contents
 			if diff := cmp.Diff(string(wantContent), string(actualContent)); diff != "" {
-				t.Errorf("File contents differ:\n%s", diff)
+				t.Errorf("file contents differ:\n%s", diff)
 			}
 			addImport(t, "query/client_gen.go")
 
@@ -181,11 +181,11 @@ func Test_IntegrationTest(t *testing.T) {
 
 			userOperation, err := c.UserOperation(ctx)
 			if err != nil {
-				t.Errorf("Request failed: %v", err)
+				t.Errorf("request failed: %v", err)
 			}
 
 			if diff := cmp.Diff(tt.want.userOperation, userOperation); diff != "" {
-				t.Errorf("IntegrationTest mismatch (-want +got):\n%s", diff)
+				t.Errorf("integrationTest mismatch (-want +got):\n%s", diff)
 			}
 		})
 	}
@@ -203,7 +203,7 @@ func listenAndServe(ctx context.Context, t *testing.T, port string) {
 	go func() {
 		defer stop() // If stop is not executed at the end of this function, ListenAndServer() will continue to block at <-ctx.Done() when there is an error
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			t.Errorf("Instance error: %v", err)
+			t.Errorf("instance error: %v", err)
 		}
 	}()
 	// Blocks. Unblocks when ctx.Done() is closed.
@@ -234,13 +234,13 @@ func addImport(t *testing.T, clientGenFilePath string) {
 	// Add new import statement to client_gen.go file
 	content, err := os.ReadFile(clientGenFilePath)
 	if err != nil {
-		t.Errorf("Error reading file: %v", err)
+		t.Errorf("error reading file: %v", err)
 		return
 	}
 
 	lines := strings.Split(string(content), "\n")
 	if len(lines) < 1 {
-		t.Errorf("File has invalid format")
+		t.Errorf("file has invalid format")
 		return
 	}
 
@@ -269,7 +269,7 @@ func addImport(t *testing.T, clientGenFilePath string) {
 
 	// Write back to file
 	if err := os.WriteFile(clientGenFilePath, []byte(strings.Join(modifiedContent, "\n")), 0o644); err != nil {
-		t.Errorf("Error writing to client_gen.go: %v", err)
+		t.Errorf("error writing to client_gen.go: %v", err)
 	}
 }
 
@@ -279,17 +279,17 @@ func compareFiles(t *testing.T, wantFile, generatedFile string) {
 	// Compare file contents
 	want, err := os.ReadFile(wantFile)
 	if err != nil {
-		t.Errorf("Error reading file (expected file): %v", err)
+		t.Errorf("error reading file (expected file): %v", err)
 		return
 	}
 
 	generated, err := os.ReadFile(generatedFile)
 	if err != nil {
-		t.Errorf("Error reading file (actual file): %v", err)
+		t.Errorf("error reading file (actual file): %v", err)
 		return
 	}
 
 	if diff := cmp.Diff(string(want), string(generated)); diff != "" {
-		t.Errorf("File contents differ:\n%s", diff)
+		t.Errorf("file contents differ:\n%s", diff)
 	}
 }

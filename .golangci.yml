@@ -28,6 +28,7 @@ linters:
     - testpackage
     - varnamelen # No need to restrict variable name length, so disabled
     - wsl
+    - err113 # enable to define dynamic error variables
   settings:
     depguard: # The file judgment is made against the absolute path, so you always need to put ** at the beginning.
       rules:
@@ -82,6 +83,11 @@ linters:
       - common-false-positives
       - legacy
       - std-error-handling
+    rules:
+      - linters:
+          - bodyclose
+          - containedctx
+        path: _test.go
     paths:
       - .*_gen\.go$
       - third_party$

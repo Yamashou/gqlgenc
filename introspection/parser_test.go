@@ -25,7 +25,7 @@ func TestParseIntrospectionQuery_Parse(t *testing.T) {
 
 			defer func() {
 				if r := recover(); r != nil {
-					t.Errorf("ParseIntrospectionQuery() panicked: %v", r)
+					t.Errorf("parseIntrospectionQuery() panicked: %v", r)
 				}
 			}()
 
