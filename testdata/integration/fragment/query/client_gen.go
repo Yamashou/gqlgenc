@@ -2,6 +2,8 @@
 
 package query
 
+import "github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain"
+
 import (
 	"context"
 
