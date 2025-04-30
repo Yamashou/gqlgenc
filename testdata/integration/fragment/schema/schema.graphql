@@ -1,19 +1,21 @@
+directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 schema {
   query: Query
 }
 
 type Query {
-  user: User!
-  optionalUser: User
+  user: User! @goField(forceResolver: true)
+  optionalUser: User @goField(forceResolver: true)
 }
 
 type User {
   id: ID!
   name: String!
-  profile: Profile!
-  optionalProfile: Profile
-  address: Address!
-  optionalAddress: Address
+  profile: Profile! @goField(forceResolver: true)
+  optionalProfile: Profile @goField(forceResolver: true)
+  address: Address! @goField(forceResolver: true)
+  optionalAddress: Address @goField(forceResolver: true)
 }
 
 union Profile = PublicProfile | PrivateProfile

@@ -6,22 +6,59 @@ package schema
 
 import (
 	"context"
-	"fmt"
-
 	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain"
 )
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context) (*domain.User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+	return &domain.User{
+		ID:   "1",
+		Name: "John Doe",
+	}, nil
 }
 
 // OptionalUser is the resolver for the optionalUser field.
 func (r *queryResolver) OptionalUser(ctx context.Context) (*domain.User, error) {
-	panic(fmt.Errorf("not implemented: OptionalUser - optionalUser"))
+	return &domain.User{
+		ID:   "2",
+		Name: "Sam Smith",
+	}, nil
+}
+
+// Profile is the resolver for the profile field.
+func (r *userResolver) Profile(ctx context.Context, obj *domain.User) (domain.Profile, error) {
+	age := 30
+	return &domain.PrivateProfile{
+		Age: &age,
+	}, nil
+}
+
+// OptionalProfile is the resolver for the optionalProfile field.
+func (r *userResolver) OptionalProfile(ctx context.Context, obj *domain.User) (domain.Profile, error) {
+	return &domain.PublicProfile{
+		Status: domain.StatusActive,
+	}, nil
+}
+
+// Address is the resolver for the address field.
+func (r *userResolver) Address(ctx context.Context, obj *domain.User) (domain.Address, error) {
+	return &domain.PrivateAddress{
+		Street: "123 Main St",
+	}, nil
+}
+
+// OptionalAddress is the resolver for the optionalAddress field.
+func (r *userResolver) OptionalAddress(ctx context.Context, obj *domain.User) (domain.Address, error) {
+	return &domain.PublicAddress{
+		Street: "456 Elm St",
+	}, nil
 }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// User returns UserResolver implementation.
+func (r *Resolver) User() UserResolver { return &userResolver{r} }
+
 type queryResolver struct{ *Resolver }
+type userResolver struct{ *Resolver }

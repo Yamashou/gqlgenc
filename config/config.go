@@ -26,11 +26,12 @@ type Config struct {
 }
 
 type GQLGencConfig struct {
-	Query          []string                   `yaml:"query"`
-	QueryGen       gqlgenconfig.PackageConfig `yaml:"querygen,omitempty"`
-	ClientGen      gqlgenconfig.PackageConfig `yaml:"clientgen,omitempty"`
-	Endpoint       *EndPointConfig            `yaml:"endpoint,omitempty"`
-	UsedOnlyModels *bool                      `yaml:"usedModelsOnly,omitempty"`
+	Query           []string                   `yaml:"query"`
+	QueryGen        gqlgenconfig.PackageConfig `yaml:"querygen,omitempty"`
+	ClientGen       gqlgenconfig.PackageConfig `yaml:"clientgen,omitempty"`
+	Endpoint        *EndPointConfig            `yaml:"endpoint,omitempty"`
+	UsedOnlyModels  bool                       `yaml:"used_models_only,omitempty"`
+	ExportQueryType bool                       `yaml:"export_query_type,omitempty"`
 }
 
 // EndPointConfig are the allowed options for the 'endpoint' config

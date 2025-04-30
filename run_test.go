@@ -4,10 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/query"
-	"github.com/vektah/gqlparser/v2/ast"
 	"net"
 	"net/http"
 	"os"
@@ -21,9 +17,22 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/Yamashou/gqlgenc/v3/client"
 	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain"
+	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/query"
 	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/schema"
 	"github.com/google/go-cmp/cmp"
 )
+
+// テスト用のカスタムトランスポート
+type customRoundTripper struct {
+	base http.RoundTripper
+}
+
+func (c *customRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	// TODO: これなしで動くようにする
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+	return c.base.RoundTrip(req)
+}
 
 func Test_IntegrationTest(t *testing.T) {
 	type want struct {
@@ -40,6 +49,81 @@ func Test_IntegrationTest(t *testing.T) {
 			testDir: "testdata/integration/fragment/",
 			want: want{
 				file: "./want/query_gen.go.txt",
+				userOperation: &domain.UserOperation{
+					OptionalUser: &domain.UserOperation_OptionalUser{
+						Name: "Sam Smith",
+					},
+					User: domain.UserOperation_User{
+						User: struct {
+							domain.UserFragment2
+							Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
+						}{
+							UserFragment2: domain.UserFragment2{Name: "John Doe"},
+							Name:          "John Doe",
+						},
+						UserFragment1: domain.UserFragment1{
+							User: struct {
+								Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
+							}{
+								Name: "John Doe",
+							},
+							Name: "John Doe",
+							Profile: domain.UserFragment1_Profile{
+								PrivateProfile: struct {
+									Age *int "json:\"age\" graphql:\"age\""
+								}{
+									Age: func() *int { i := 30; return &i }(),
+								},
+							},
+						},
+						UserFragment2: domain.UserFragment2{Name: "John Doe"},
+						Name:          "John Doe",
+						Address: domain.UserOperation_User_Address{
+							Street: "123 Main St",
+							PrivateAddress: struct {
+								Private bool   "json:\"private,omitempty,omitzero\" graphql:\"private\""
+								Street  string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+							}{
+								Street: "123 Main St",
+							},
+							PublicAddress: struct {
+								Public bool   "json:\"public,omitempty,omitzero\" graphql:\"public\""
+								Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+							}{
+								Street: "123 Main St",
+							},
+						},
+						Profile: domain.UserOperation_User_Profile{
+							PrivateProfile: struct {
+								Age *int "json:\"age\" graphql:\"age\""
+							}{
+								Age: func() *int { i := 30; return &i }(),
+							},
+						},
+						OptionalProfile: &domain.UserOperation_User_OptionalProfile{
+							PublicProfile: struct {
+								Status domain.Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+							}{
+								Status: domain.StatusActive,
+							},
+						},
+						OptionalAddress: &domain.UserOperation_User_OptionalAddress{
+							Street: "456 Elm St",
+							PrivateAddress: struct {
+								Private bool   "json:\"private,omitempty,omitzero\" graphql:\"private\""
+								Street  string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+							}{
+								Street: "456 Elm St",
+							},
+							PublicAddress: struct {
+								Public bool   "json:\"public,omitempty,omitzero\" graphql:\"public\""
+								Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
+							}{
+								Street: "456 Elm St",
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -90,31 +174,33 @@ func Test_IntegrationTest(t *testing.T) {
 			// Server
 			es := schema.NewExecutableSchema(schema.Config{Resolvers: &schema.Resolver{}})
 			srv := handler.New(es)
-			srv.AddTransport(transport.Websocket{
-				KeepAlivePingInterval: 10 * time.Second,
-			})
-			srv.AddTransport(transport.Options{})
-			srv.AddTransport(transport.GET{})
 			srv.AddTransport(transport.POST{})
-			srv.AddTransport(transport.MultipartForm{})
-
-			srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
-
-			srv.Use(extension.Introspection{})
-			srv.Use(extension.AutomaticPersistedQuery{
-				Cache: lru.New[string](100),
-			})
 			http.Handle("/graphql", srv)
 			port := "8080"
 			go func() {
 				listenAndServe(ctx, t, port)
 			}()
 
+			// サーバーが起動するのを少し待つ
+			time.Sleep(500 * time.Millisecond)
+
+			// カスタムトランスポートでContent-Typeヘッダーを設定
+			httpClient := &http.Client{
+				Timeout: time.Second * 5,
+				Transport: &customRoundTripper{
+					base: http.DefaultTransport,
+				},
+			}
+
 			// Client
-			c := query.NewClient(client.NewClient(fmt.Sprintf("http://127.0.0.1:%s/graphql", port)))
+			c := query.NewClient(client.NewClient(
+				fmt.Sprintf("http://127.0.0.1:%s/graphql", port),
+				client.WithHTTPClient(httpClient),
+			))
+
 			userOperation, err := c.UserOperation(ctx)
 			if err != nil {
-				t.Errorf("failed to post request: %v", err)
+				t.Errorf("リクエスト失敗: %v", err)
 			}
 
 			if diff := cmp.Diff(tt.want.userOperation, userOperation); diff != "" {

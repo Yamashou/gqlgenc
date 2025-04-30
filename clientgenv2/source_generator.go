@@ -109,8 +109,11 @@ func (r *SourceGenerator) newFieldType(field *ast.Field, typeName string, fields
 		r.generatedTypes[t.String()] = t
 		return t
 	default:
-		// Queryのため生成した型は非公開にする。gqlgencが内部で作成したものであるため。
-		t := r.NewNamedType(field.Definition.Type.NonNull, firstLower(typeName), fieldsResponseFields)
+		if !r.cfg.GQLGencConfig.ExportQueryType {
+			// Queryのため生成した型は非公開にする。gqlgencが内部で作成したものであるため。
+			typeName = firstLower(typeName)
+		}
+		t := r.NewNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
 		r.generatedTypes[t.String()] = t
 		return t
 	}

@@ -7,7 +7,16 @@ type UserFragment1 struct {
 		Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 	} "graphql:\"... on User\""
 	Name    string                "json:\"name,omitempty,omitzero\" graphql:\"name\""
-	Profile userFragment1_Profile "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
+	Profile UserFragment1_Profile "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
+}
+
+type UserFragment1_Profile struct {
+	PrivateProfile struct {
+		Age *int "json:\"age\" graphql:\"age\""
+	} "graphql:\"... on PrivateProfile\""
+	PublicProfile struct {
+		Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+	} "graphql:\"... on PublicProfile\""
 }
 
 type UserFragment2 struct {
@@ -15,58 +24,49 @@ type UserFragment2 struct {
 }
 
 type UserOperation struct {
-	OptionalUser *userOperation_OptionalUser "json:\"optionalUser\" graphql:\"optionalUser\""
-	User         userOperation_User          "json:\"user,omitempty,omitzero\" graphql:\"user\""
+	OptionalUser *UserOperation_OptionalUser "json:\"optionalUser\" graphql:\"optionalUser\""
+	User         UserOperation_User          "json:\"user,omitempty,omitzero\" graphql:\"user\""
 }
 
-func (t *UserOperation) GetOptionalUser() *userOperation_OptionalUser {
+func (t *UserOperation) GetOptionalUser() *UserOperation_OptionalUser {
 	if t == nil {
 		t = &UserOperation{}
 	}
 	return t.OptionalUser
 }
-func (t *UserOperation) GetUser() userOperation_User {
+func (t *UserOperation) GetUser() UserOperation_User {
 	if t == nil {
 		t = &UserOperation{}
 	}
 	return t.User
 }
 
-type userFragment1_Profile struct {
-	PrivateProfile struct {
-		Age *int "json:\"age\" graphql:\"age\""
-	} "graphql:\"... on PrivateProfile\""
-	PublicProfile struct {
-		Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
-	} "graphql:\"... on PublicProfile\""
-}
-
-type userOperation_OptionalUser struct {
+type UserOperation_OptionalUser struct {
 	Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 }
 
-func (t *userOperation_OptionalUser) GetName() string {
+func (t *UserOperation_OptionalUser) GetName() string {
 	if t == nil {
-		t = &userOperation_OptionalUser{}
+		t = &UserOperation_OptionalUser{}
 	}
 	return t.Name
 }
 
-type userOperation_User struct {
+type UserOperation_User struct {
 	User struct {
 		UserFragment2
 		Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
 	} "graphql:\"... on User\""
 	UserFragment1
 	UserFragment2
-	Address         userOperation_User_Address          "json:\"address,omitempty,omitzero\" graphql:\"address\""
+	Address         UserOperation_User_Address          "json:\"address,omitempty,omitzero\" graphql:\"address\""
 	Name            string                              "json:\"name,omitempty,omitzero\" graphql:\"name\""
-	OptionalAddress *userOperation_User_OptionalAddress "json:\"optionalAddress\" graphql:\"optionalAddress\""
-	OptionalProfile *userOperation_User_OptionalProfile "json:\"optionalProfile\" graphql:\"optionalProfile\""
-	Profile         userOperation_User_Profile          "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
+	OptionalAddress *UserOperation_User_OptionalAddress "json:\"optionalAddress\" graphql:\"optionalAddress\""
+	OptionalProfile *UserOperation_User_OptionalProfile "json:\"optionalProfile\" graphql:\"optionalProfile\""
+	Profile         UserOperation_User_Profile          "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
 }
 
-type userOperation_User_Address struct {
+type UserOperation_User_Address struct {
 	PrivateAddress struct {
 		Private bool   "json:\"private,omitempty,omitzero\" graphql:\"private\""
 		Street  string "json:\"street,omitempty,omitzero\" graphql:\"street\""
@@ -78,7 +78,7 @@ type userOperation_User_Address struct {
 	Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
 }
 
-type userOperation_User_OptionalAddress struct {
+type UserOperation_User_OptionalAddress struct {
 	PrivateAddress struct {
 		Private bool   "json:\"private,omitempty,omitzero\" graphql:\"private\""
 		Street  string "json:\"street,omitempty,omitzero\" graphql:\"street\""
@@ -90,32 +90,32 @@ type userOperation_User_OptionalAddress struct {
 	Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
 }
 
-func (t *userOperation_User_OptionalAddress) GetPrivateAddress() struct {
+func (t *UserOperation_User_OptionalAddress) GetPrivateAddress() struct {
 	Private bool   "json:\"private,omitempty,omitzero\" graphql:\"private\""
 	Street  string "json:\"street,omitempty,omitzero\" graphql:\"street\""
 } {
 	if t == nil {
-		t = &userOperation_User_OptionalAddress{}
+		t = &UserOperation_User_OptionalAddress{}
 	}
 	return t.PrivateAddress
 }
-func (t *userOperation_User_OptionalAddress) GetPublicAddress() struct {
+func (t *UserOperation_User_OptionalAddress) GetPublicAddress() struct {
 	Public bool   "json:\"public,omitempty,omitzero\" graphql:\"public\""
 	Street string "json:\"street,omitempty,omitzero\" graphql:\"street\""
 } {
 	if t == nil {
-		t = &userOperation_User_OptionalAddress{}
+		t = &UserOperation_User_OptionalAddress{}
 	}
 	return t.PublicAddress
 }
-func (t *userOperation_User_OptionalAddress) GetStreet() string {
+func (t *UserOperation_User_OptionalAddress) GetStreet() string {
 	if t == nil {
-		t = &userOperation_User_OptionalAddress{}
+		t = &UserOperation_User_OptionalAddress{}
 	}
 	return t.Street
 }
 
-type userOperation_User_OptionalProfile struct {
+type UserOperation_User_OptionalProfile struct {
 	PrivateProfile struct {
 		Age *int "json:\"age\" graphql:\"age\""
 	} "graphql:\"... on PrivateProfile\""
@@ -124,24 +124,24 @@ type userOperation_User_OptionalProfile struct {
 	} "graphql:\"... on PublicProfile\""
 }
 
-func (t *userOperation_User_OptionalProfile) GetPrivateProfile() struct {
+func (t *UserOperation_User_OptionalProfile) GetPrivateProfile() struct {
 	Age *int "json:\"age\" graphql:\"age\""
 } {
 	if t == nil {
-		t = &userOperation_User_OptionalProfile{}
+		t = &UserOperation_User_OptionalProfile{}
 	}
 	return t.PrivateProfile
 }
-func (t *userOperation_User_OptionalProfile) GetPublicProfile() struct {
+func (t *UserOperation_User_OptionalProfile) GetPublicProfile() struct {
 	Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
 } {
 	if t == nil {
-		t = &userOperation_User_OptionalProfile{}
+		t = &UserOperation_User_OptionalProfile{}
 	}
 	return t.PublicProfile
 }
 
-type userOperation_User_Profile struct {
+type UserOperation_User_Profile struct {
 	PrivateProfile struct {
 		Age *int "json:\"age\" graphql:\"age\""
 	} "graphql:\"... on PrivateProfile\""
