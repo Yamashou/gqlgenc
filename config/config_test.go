@@ -363,7 +363,7 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 	}
 }
 
-// containsString は文字列sがsubstringを含むかどうかを確認します.
+// containsString checks if string s contains substring.
 func containsString(s, substring string) bool {
 	if len(s) < len(substring) || substring == "" {
 		return false

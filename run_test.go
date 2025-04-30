@@ -141,19 +141,19 @@ func Test_IntegrationTest(t *testing.T) {
 			// Read both files
 			actualContent, err := os.ReadFile(actualFilePath)
 			if err != nil {
-				t.Errorf("ファイル読み込みエラー（実際のファイル）: %v", err)
+				t.Errorf("Error reading file (actual file): %v", err)
 				return
 			}
 
 			wantContent, err := os.ReadFile(wantFilePath)
 			if err != nil {
-				t.Errorf("ファイル読み込みエラー（期待されるファイル）: %v", err)
+				t.Errorf("Error reading file (expected file): %v", err)
 				return
 			}
 
-			// ファイルの内容を比較
+			// Compare file contents
 			if diff := cmp.Diff(string(wantContent), string(actualContent)); diff != "" {
-				t.Errorf("ファイルの内容が異なります:\n%s", diff)
+				t.Errorf("File contents differ:\n%s", diff)
 			}
 			addImport(t, "query/client_gen.go")
 
@@ -196,24 +196,24 @@ func listenAndServe(ctx context.Context, t *testing.T, port string) {
 	addr := net.JoinHostPort("", port)
 	srv := server(addr)
 	// Graceful Shutdown
-	// 引数で指定したSignalを受け取る or stop関数を実行するとctx.Done()をCloseする
+	// Receives the signal specified by argument or closes ctx.Done() when the stop function is executed
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGTERM, os.Interrupt, os.Kill)
 
 	// Start
 	go func() {
-		defer stop() // この関数の最後でstopを実行しないと、ListenAndServer()がエラーのときに<-ctx.Done()でブロックし続けてしまう
+		defer stop() // If stop is not executed at the end of this function, ListenAndServer() will continue to block at <-ctx.Done() when there is an error
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			t.Errorf("Instance error: %v", err)
 		}
 	}()
-	// ブロックする。ctx.Done()をCloseするとブロックを解除する。
+	// Blocks. Unblocks when ctx.Done() is closed.
 	<-ctx.Done()
 
-	// Shutdown処理
-	// Shutdownが10秒で終わらなかったら強制終了する
+	// Shutdown process
+	// Force termination if Shutdown does not complete in 10 seconds
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	// Shutdownは、ListenAndServerがエラーの時も実行されるが、そのときShutdownはerrをnilで返すため問題ない。
+	// Shutdown is also executed when ListenAndServer has an error, but in that case Shutdown returns nil for err, so there is no problem.
 	if err := srv.Shutdown(ctx); err != nil {
 		t.Errorf("shutdown error: %v", err)
 	}
@@ -231,7 +231,7 @@ func server(addr string) *http.Server {
 
 func addImport(t *testing.T, clientGenFilePath string) {
 	t.Helper()
-	// client_gen.goファイルに新しいimport文を追加
+	// Add new import statement to client_gen.go file
 	content, err := os.ReadFile(clientGenFilePath)
 	if err != nil {
 		t.Errorf("読み込みエラー: %v", err)
@@ -244,7 +244,7 @@ func addImport(t *testing.T, clientGenFilePath string) {
 		return
 	}
 
-	// package query宣言の行を探す
+	// Find the line with package query declaration
 	packageLineIndex := -1
 	for i, line := range lines {
 		if strings.HasPrefix(line, "package ") {
@@ -254,11 +254,11 @@ func addImport(t *testing.T, clientGenFilePath string) {
 	}
 
 	if packageLineIndex == -1 {
-		t.Errorf("package query宣言が見つかりません")
+		t.Errorf("package query declaration not found")
 		return
 	}
 
-	// package query宣言の次の行に新しいimportを追加
+	// Add new import after the package query declaration line
 	modifiedContent := append(
 		lines[:packageLineIndex+1],
 		append(
@@ -267,9 +267,29 @@ func addImport(t *testing.T, clientGenFilePath string) {
 		)...,
 	)
 
-	// ファイルに書き戻す
+	// Write back to file
 	if err := os.WriteFile(clientGenFilePath, []byte(strings.Join(modifiedContent, "\n")), 0o644); err != nil {
-		t.Errorf("client_gen.go書き込みエラー: %v", err)
+		t.Errorf("Error writing to client_gen.go: %v", err)
+	}
+}
+
+func compareFiles(t *testing.T, wantFile, generatedFile string) {
+	t.Helper()
+
+	// Compare file contents
+	want, err := os.ReadFile(wantFile)
+	if err != nil {
+		t.Errorf("Error reading file (expected file): %v", err)
 		return
+	}
+
+	generated, err := os.ReadFile(generatedFile)
+	if err != nil {
+		t.Errorf("Error reading file (actual file): %v", err)
+		return
+	}
+
+	if diff := cmp.Diff(string(want), string(generated)); diff != "" {
+		t.Errorf("File contents differ:\n%s", diff)
 	}
 }
