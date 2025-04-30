@@ -9,7 +9,7 @@ import (
 
 type Operation struct {
 	Name                string
-	Operation           string
+	Document            string
 	Args                []*OperationArgument
 	VariableDefinitions ast.VariableDefinitionList
 }
@@ -22,13 +22,13 @@ type OperationArgument struct {
 func NewOperation(operation *ast.OperationDefinition, queryDocument *ast.QueryDocument, args []*OperationArgument) *Operation {
 	return &Operation{
 		Name:                operation.Name,
-		Operation:           queryString(queryDocument),
+		Document:            formattedDocument(queryDocument),
 		Args:                args,
 		VariableDefinitions: operation.VariableDefinitions,
 	}
 }
 
-func queryString(queryDocument *ast.QueryDocument) string {
+func formattedDocument(queryDocument *ast.QueryDocument) string {
 	var buf bytes.Buffer
 	astFormatter := formatter.NewFormatter(&buf)
 	astFormatter.FormatQueryDocument(queryDocument)
