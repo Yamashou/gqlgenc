@@ -107,12 +107,44 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, parentTypeNa
 	panic("unexpected selection type")
 }
 
-func (r *SourceGenerator) OperationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
+func (r *SourceGenerator) Operations(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryDocument) []*Operation {
+	operationArgsMap := r.operationArgsMapByOperationName(queryDocument)
+	queryDocumentsMap := queryDocumentMapByOperationName(operationQueryDocuments)
+
+	operations := make([]*Operation, 0, len(queryDocument.Operations))
+	for _, operation := range queryDocument.Operations {
+		queryDocument := queryDocumentsMap[operation.Name]
+		args := operationArgsMap[operation.Name]
+		operations = append(operations, NewOperation(operation, queryDocument, args))
+	}
+
+	return operations
+}
+func (r *SourceGenerator) operationArgsMapByOperationName(queryDocument *ast.QueryDocument) map[string][]*OperationArgument {
+	operationArgsMap := make(map[string][]*OperationArgument)
+	for _, operation := range queryDocument.Operations {
+		operationArgsMap[operation.Name] = r.operationArguments(operation.VariableDefinitions)
+	}
+
+	return operationArgsMap
+}
+
+func queryDocumentMapByOperationName(queryDocuments []*ast.QueryDocument) map[string]*ast.QueryDocument {
+	queryDocumentMap := make(map[string]*ast.QueryDocument)
+	for _, queryDocument := range queryDocuments {
+		operation := queryDocument.Operations[0]
+		queryDocumentMap[operation.Name] = queryDocument
+	}
+
+	return queryDocumentMap
+}
+
+func (r *SourceGenerator) operationArguments(variableDefinitions ast.VariableDefinitionList) []*OperationArgument {
 	argumentTypes := make([]*OperationArgument, 0, len(variableDefinitions))
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &OperationArgument{
 			Variable: v.Variable,
-			Type:     r.binder.CopyModifiersFromAst(v.Type, r.findType(v.Type)),
+			Type:     r.findType(v.Type),
 		})
 	}
 

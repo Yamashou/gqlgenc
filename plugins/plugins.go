@@ -46,10 +46,7 @@ func Run(cfg *config.Config) error {
 	// Fragments must be before OperationResponses
 	sourceGenerator.CreateFragmentTypes(queryDocument.Fragments)
 	sourceGenerator.CreateOperationResponsesTypes(queryDocument.Operations)
-
-	// TODO: Sourceを消す
-	source := clientgenv2.NewSource(sourceGenerator)
-	operations := source.Operations(queryDocument, operationQueryDocuments)
+	operations := sourceGenerator.Operations(queryDocument, operationQueryDocuments)
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins
