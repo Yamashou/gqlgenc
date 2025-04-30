@@ -61,7 +61,7 @@ func LoadQuerySources(queryFileNames []string) ([]*ast.Source, error) {
 
 			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
 				if err != nil {
-					return err
+					return fmt.Errorf("filepath.Walk(%q): %v", path, err)
 				}
 
 				if globRe.MatchString(strings.TrimPrefix(path, pathParts[0])) {

@@ -11,12 +11,12 @@ import (
 func run() error {
 	cfgFile, err := config.FindConfigFile(".", []string{".gqlgenc.yml", "gqlgenc.yml", ".gqlgenc.yaml", "gqlgenc.yaml"})
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to find config file: %w", err)
 	}
 
 	cfg, err := config.Load(cfgFile)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to load config file: %w", err)
 	}
 
 	ctx := context.Background()
@@ -25,7 +25,7 @@ func run() error {
 	}
 
 	if err := plugins.Run(cfg); err != nil {
-		return err
+		return fmt.Errorf("failed to run plugins: %w", err)
 	}
 	return nil
 }

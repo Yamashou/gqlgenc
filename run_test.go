@@ -134,11 +134,11 @@ func Test_IntegrationTest(t *testing.T) {
 				t.Errorf("run() error = %v", err)
 			}
 
-			// 生成されたファイルとwantファイルの内容を比較
+			// Compare the content of the generated file with the want file
 			actualFilePath := "domain/query_gen.go"
 			wantFilePath := tt.want.file
 
-			// 両方のファイルを読み込む
+			// Read both files
 			actualContent, err := os.ReadFile(actualFilePath)
 			if err != nil {
 				t.Errorf("ファイル読み込みエラー（実際のファイル）: %v", err)

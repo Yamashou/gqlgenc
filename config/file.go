@@ -76,7 +76,7 @@ func schemaFilenames(schemaFilenameGlobs gqlgenconfig.StringList) (gqlgenconfig.
 
 			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
 				if err != nil {
-					return err
+					return fmt.Errorf("%w", err)
 				}
 
 				if globRe.MatchString(strings.TrimPrefix(path, pathParts[0])) {

@@ -50,7 +50,7 @@ func Test_multipartRequest(t *testing.T) {
 	// Common function to validate basic request properties
 	validateRequest := func(r *http.Request) error {
 		if r.Method != http.MethodPost {
-			return fmt.Errorf("Method got = %v, want %v", r.Method, http.MethodPost)
+			return fmt.Errorf("method got = %v want %v", r.Method, http.MethodPost)
 		}
 
 		if !strings.Contains(r.Header.Get("Content-Type"), "multipart/form-data") {
@@ -58,7 +58,7 @@ func Test_multipartRequest(t *testing.T) {
 		}
 
 		if err := r.ParseMultipartForm(1 << 20); err != nil {
-			return err
+			return fmt.Errorf("ParseMultipartForm got = %v, want nil", err)
 		}
 
 		return nil

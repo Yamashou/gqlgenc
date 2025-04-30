@@ -60,7 +60,7 @@ func (r *Generator) createOperationResponsesTypes(operations ast.OperationList) 
 	}
 }
 
-// parentTypeNameが空のときは親はinline fragment
+// When parentTypeName is empty, the parent is an inline fragment
 func (r *Generator) newResponseFields(selectionSet ast.SelectionSet, parentTypeName string) ResponseFieldList {
 	responseFields := make(ResponseFieldList, 0, len(selectionSet))
 	for _, selection := range selectionSet {
@@ -74,7 +74,7 @@ func layerTypeName(parentTypeName, fieldName string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(parentTypeName), fieldName)
 }
 
-// parentTypeNameが空のときは親はinline fragment
+// When parentTypeName is empty, the parent is an inline fragment
 func (r *Generator) newResponseField(selection ast.Selection, parentTypeName string) *ResponseField {
 	switch sel := selection.(type) {
 	case *ast.Field:
@@ -102,7 +102,7 @@ func (r *Generator) newResponseField(selection ast.Selection, parentTypeName str
 		}
 
 	case *ast.InlineFragment:
-		// InlineFragmentは子要素をそのままstructとして持つので、NamedTypeを作らずtypes.StructをTypeフィールドに設定する。
+		// InlineFragment keeps child elements directly as a struct, so we set types.Struct to the Type field instead of creating a NamedType.
 		fieldsResponseFields := r.newResponseFields(sel.SelectionSet, "")
 		return &ResponseField{
 			Name:             sel.TypeCondition,
@@ -170,11 +170,11 @@ func (r *Generator) newNamedType(nonnull bool, typeName string, fieldsResponseFi
 	return types.NewPointer(namedType)
 }
 
-// Typeの引数に渡すtypeNameは解析した結果からselectionなどから求めた型の名前を渡さなければいけない
+// The typeName passed to the Type argument must be the type name derived from the analysis result, such as from selections
 func (r *Generator) findType(t *ast.Type) types.Type {
 	goType, err := r.binder.FindTypeFromName(r.cfg.GQLGenConfig.Models[t.Name()].Model[0])
 	if err != nil {
-		// 実装として正しいtypeNameを渡していれば必ず見つかるはずなのでpanic
+		// If we pass the correct typeName as per implementation, it should always be found, so we panic if not
 		panic(fmt.Sprintf("%+v", err))
 	}
 	if t.NonNull {
@@ -216,7 +216,7 @@ func (rs ResponseFieldList) isBasicType() bool {
 }
 
 func (rs ResponseFieldList) toGoStructType() *types.Struct {
-	// Goのフィールドは同名のフィールドは許されないので重複を削除する
+	// Go fields do not allow fields with the same name, so we remove duplicates
 	responseFields := rs.uniqueByName()
 	vars := make([]*types.Var, 0, len(responseFields))
 	for _, responseField := range responseFields {
@@ -265,14 +265,14 @@ func (r *Generator) newFieldType(field *ast.Field, typeName string, fieldsRespon
 		t := r.findType(field.Definition.Type)
 		return t
 	case fieldsResponseFields.isFragmentSpread():
-		// Fragmentのフィールドはnonnull
-		// Fragmentの型は公開する。Fragmentはユーザが明示的に作成しているものであるため。
+		// Fragment fields are nonnull
+		// Export Fragment types. Fragments are explicitly created by users.
 		t := r.newNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)
 		r.goTypes[t.String()] = t
 		return t
 	default:
 		if !r.cfg.GQLGencConfig.ExportQueryType {
-			// Queryのため生成した型は非公開にする。gqlgencが内部で作成したものであるため。
+			// Make types generated for Query private. These are created internally by gqlgenc.
 			typeName = firstLower(typeName)
 		}
 		t := r.newNamedType(field.Definition.Type.NonNull, typeName, fieldsResponseFields)

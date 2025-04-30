@@ -255,7 +255,7 @@ func TestLoadConfigNonWindows(t *testing.T) {
 		_, err := Load("testdata/cfg/unwalkable.yml")
 		want := "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory"
 		if err == nil || err.Error() != want {
-			t.Errorf("LoadConfig() error = %v, want %v", err, want)
+			t.Errorf("\n got = %v\nwant = %v", err, want)
 		}
 	})
 }
