@@ -75,6 +75,7 @@ func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Sele
 	}
 	panic("unexpected selection type")
 }
+
 func (g *GoTypeGenerator) newTypeKindAndGoType(parentTypeName string, sel *graphql.Field) (TypeKind, gotypes.Type) {
 	fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
 	fields := g.newFields(fieldTypeName, sel.SelectionSet)
@@ -153,7 +154,6 @@ const (
 	InlineFragment TypeKind = "InlineFragment"
 )
 
-// TODO: シンプルなtypes.Typeに置き換えられないか？
 type Field struct {
 	Name     string
 	Type     gotypes.Type
