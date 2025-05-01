@@ -81,7 +81,7 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 		var t gotypes.Type
 		switch fieldKind {
 		case BasicType:
-			t = g.findGoTypeName(goType.Name, goType.NonNull)
+			t = g.findGoTypeName(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
 		case OtherType:
 			if !g.cfg.GQLGencConfig.ExportQueryType {
 				// default: query type is not exported
