@@ -43,24 +43,6 @@ func (r *Field) joinTags() string {
 	return strings.Join(r.Tags, " ")
 }
 
-type GoType struct {
-	Name    string
-	NonNull bool
-	goType  *types.Struct
-}
-
-func NewGoType(name string, nonNull bool, goType *types.Struct) *GoType {
-	return &GoType{
-		Name:    name,
-		NonNull: nonNull,
-		goType:  goType,
-	}
-}
-
-func NewGoTypeByFields(name string, nonNull bool, fields Fields) *GoType {
-	return NewGoType(name, nonNull, fields.goStructType())
-}
-
 type Fields []*Field
 
 func (fs Fields) FieldKind() FieldKind {

@@ -47,20 +47,14 @@ func (g *Generator) goTypes() []gotypes.Type {
 
 func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
 	for _, operation := range operations {
-		t, _ := g.newType(operation.Name, operation.Name, false, operation.SelectionSet)
+		t, _ := g.newType(operation.Name, operation.SelectionSet)
 		g.newGoNamedTypeByGoType(false, operation.Name, t)
 	}
 }
 
-func (g *Generator) newType(name string, parentTypeName string, nonNull bool, selectionSet graphql.SelectionSet) (gotypes.Type, FieldKind) {
+func (g *Generator) newType(parentTypeName string, selectionSet graphql.SelectionSet) (gotypes.Type, FieldKind) {
 	fields := g.newFields(selectionSet, parentTypeName)
-	return NewGoTypeByFields(name, nonNull, g.newFields(selectionSet, parentTypeName)).goType, fields.FieldKind()
-}
-
-// TODO: GoType消せないか検討
-func (g *Generator) newGoType(name string, parentTypeName string, nonNull bool, selectionSet graphql.SelectionSet) (*GoType, FieldKind) {
-	fields := g.newFields(selectionSet, parentTypeName)
-	return NewGoTypeByFields(name, nonNull, fields), fields.FieldKind()
+	return fields.goStructType(), fields.FieldKind()
 }
 
 // When parentTypeName is empty, the parent is an inline fragment
@@ -78,7 +72,7 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 	switch sel := selection.(type) {
 	case *graphql.Field:
 		fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
-		goType, fieldKind := g.newType(sel.Definition.Type.Name(), fieldTypeName, sel.Definition.Type.NonNull, sel.SelectionSet)
+		goType, fieldKind := g.newType(fieldTypeName, sel.SelectionSet)
 		var t gotypes.Type
 		switch fieldKind {
 		case BasicType:
@@ -93,11 +87,11 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 		tags := []string{fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)), fmt.Sprintf(`graphql:"%s"`, sel.Alias)}
 		return NewField(sel.Name, t, tags, fieldKind)
 	case *graphql.FragmentSpread:
-		structType, _ := g.newType(sel.Name, sel.Name, true, sel.Definition.SelectionSet)
+		structType, _ := g.newType(sel.Name, sel.Definition.SelectionSet)
 		namedType := g.newGoNamedTypeByGoType(true, sel.Name, structType)
 		return NewField(sel.Name, namedType, []string{}, FragmentSpread)
 	case *graphql.InlineFragment:
-		structType, _ := g.newType(sel.TypeCondition, "", true, sel.SelectionSet)
+		structType, _ := g.newType("", sel.SelectionSet)
 		return NewField(sel.TypeCondition, structType, []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}, InlineFragment)
 	}
 	panic("unexpected selection type")
