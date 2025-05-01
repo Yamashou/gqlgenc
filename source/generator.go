@@ -51,6 +51,10 @@ func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
 		g.newGoNamedTypeByGoType(false, operation.Name, goType.goType)
 	}
 }
+func (g *Generator) newType(field *graphql.Field, parentTypeName string) gotypes.Type {
+	goType := NewGoTypeByFields(g.newFields(field.SelectionSet, parentTypeName))
+	return g.findOrNewGoType(field, parentTypeName, goType)
+}
 
 // TODO: GoType消せないか検討
 func (g *Generator) newGoType(selectionSet graphql.SelectionSet, parentTypeName string) *GoType {
@@ -74,7 +78,7 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 		typeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
 		goType := g.newGoType(sel.SelectionSet, typeName)
 		// TODO: findOrNewにできる?
-		t := g.findGoTypeByGoType(sel, typeName, goType)
+		t := g.findOrNewGoType(sel, typeName, goType)
 		tags := []string{
 			fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)),
 			fmt.Sprintf(`graphql:"%s"`, sel.Alias),
@@ -156,12 +160,13 @@ func (g *Generator) newGoNamedTypeByGoType(nonnull bool, typeName string, t goty
 	return namedType
 }
 
-// TODO: findOrNewにできる?
-func (g *Generator) findGoTypeByGoType(field *graphql.Field, fieldTypeName string, goType *GoType) gotypes.Type {
+func (g *Generator) findOrNewGoType(field *graphql.Field, fieldTypeName string, goType *GoType) gotypes.Type {
 	switch {
 	case goType.isBasicType:
 		t := g.findGoType(field.Definition.Type)
 		return t
+	case goType.isInlineFragment:
+		return goType.goType
 	case goType.isFragmentSpread:
 		// Fragment fields are nonnull
 		// Export Fragment types. Fragments are explicitly created by users.
