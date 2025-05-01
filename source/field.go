@@ -37,46 +37,26 @@ func (r *Field) joinTags() string {
 }
 
 type GoType struct {
-	Name             string
-	NonNull          bool
-	isFragmentSpread bool
-	isInlineFragment bool
-	isBasicType      bool
-	goType           *types.Struct
+	Name        string
+	NonNull     bool
+	isBasicType bool
+	goType      *types.Struct
 }
 
-func NewGoType(name string, nonNull, isFragmentSpread, isInlineFragment bool, isBasicType bool, goType *types.Struct) *GoType {
+func NewGoType(name string, nonNull bool, isBasicType bool, goType *types.Struct) *GoType {
 	return &GoType{
-		Name:             name,
-		NonNull:          nonNull,
-		isFragmentSpread: isFragmentSpread,
-		isInlineFragment: isInlineFragment,
-		isBasicType:      isBasicType,
-		goType:           goType,
+		Name:        name,
+		NonNull:     nonNull,
+		isBasicType: isBasicType,
+		goType:      goType,
 	}
 }
 
 func NewGoTypeByFields(name string, nonNull bool, fields Fields) *GoType {
-	return NewGoType(name, nonNull, fields.isFragmentSpread(), fields.isInlineFragment(), fields.isBasicType(), fields.goTypeType())
+	return NewGoType(name, nonNull, fields.isBasicType(), fields.goTypeType())
 }
 
 type Fields []*Field
-
-func (fs Fields) isFragmentSpread() bool {
-	if len(fs) != 1 {
-		return false
-	}
-
-	return fs[0].IsFragmentSpread
-}
-
-func (fs Fields) isInlineFragment() bool {
-	if len(fs) != 1 {
-		return false
-	}
-
-	return fs[0].IsInlineFragment
-}
 
 func (fs Fields) isBasicType() bool {
 	return len(fs) == 0
