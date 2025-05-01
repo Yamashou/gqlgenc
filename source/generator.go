@@ -47,8 +47,8 @@ func (g *Generator) goTypes() []gotypes.Type {
 
 func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
 	for _, operation := range operations {
-		goType, _ := g.newGoType(operation.Name, operation.Name, false, operation.SelectionSet)
-		g.newGoNamedTypeByGoType(false, operation.Name, goType.goType)
+		t := g.newType(operation.Name, operation.Name, false, operation.SelectionSet)
+		g.newGoNamedTypeByGoType(false, operation.Name, t)
 	}
 }
 
