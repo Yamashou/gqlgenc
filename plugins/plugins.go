@@ -36,12 +36,12 @@ func Run(cfg *config.Config) error {
 		}
 	}
 
-	// generate template sources
-	goTypes := source.NewGenerator(cfg).CreateTypesByOperations(queryDocument.Operations)
-	operations := source.NewOperationGenerator(cfg).Operations(queryDocument, operationQueryDocuments)
-
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins
+
+	// generate template sources
+	operations := source.NewOperationGenerator(cfg).Operations(queryDocument, operationQueryDocuments)
+	goTypes := source.NewGoTypesGenerator(cfg).CreateTypesByOperations(queryDocument.Operations)
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {

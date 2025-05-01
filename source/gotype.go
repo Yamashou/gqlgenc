@@ -24,7 +24,7 @@ type Generator struct {
 	types  map[string]gotypes.Type
 }
 
-func NewGenerator(cfg *config.Config) *Generator {
+func NewGoTypesGenerator(cfg *config.Config) *Generator {
 	return &Generator{
 		cfg:    cfg,
 		binder: cfg.GQLGenConfig.NewBinder(),
