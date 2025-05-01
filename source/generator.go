@@ -20,9 +20,9 @@ import (
 
 func NewGoTypesAndOperations(cfg *config.Config, queryDocument *graphql.QueryDocument, operationQueryDocuments []*graphql.QueryDocument) ([]gotypes.Type, []*Operation) {
 	g := newGenerator(cfg)
-	g.createTypesByOperations(queryDocument.Operations)
+	og := newOperationGenerator(cfg)
 
-	return g.goTypes(), g.operations(queryDocument, operationQueryDocuments)
+	return g.createTypesByOperations(queryDocument.Operations), og.operations(queryDocument, operationQueryDocuments)
 }
 
 type Generator struct {
@@ -45,11 +45,12 @@ func (g *Generator) goTypes() []gotypes.Type {
 	})
 }
 
-func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
+func (g *Generator) createTypesByOperations(operations graphql.OperationList) []gotypes.Type {
 	for _, operation := range operations {
 		t := g.newFields(operation.Name, operation.SelectionSet).goStructType()
 		g.newGoNamedTypeByGoType(operation.Name, false, t)
 	}
+	return g.goTypes()
 }
 
 // When parentTypeName is empty, the parent is an inline fragment
@@ -99,51 +100,6 @@ func (g *Generator) newFieldKindAndGoType(parentTypeName string, sel *graphql.Fi
 
 func layerTypeName(parentTypeName, fieldName string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(parentTypeName), fieldName)
-}
-
-func (g *Generator) operations(queryDocument *graphql.QueryDocument, operationQueryDocuments []*graphql.QueryDocument) []*Operation {
-	operationArgsMap := g.operationArgsMapByOperationName(queryDocument)
-	queryDocumentsMap := queryDocumentMapByOperationName(operationQueryDocuments)
-
-	operations := make([]*Operation, 0, len(queryDocument.Operations))
-	for _, operation := range queryDocument.Operations {
-		operationQueryDocument := queryDocumentsMap[operation.Name]
-		args := operationArgsMap[operation.Name]
-		operations = append(operations, NewOperation(operation, operationQueryDocument, args))
-	}
-
-	return operations
-}
-
-func queryDocumentMapByOperationName(queryDocuments []*graphql.QueryDocument) map[string]*graphql.QueryDocument {
-	queryDocumentMap := make(map[string]*graphql.QueryDocument)
-	for _, queryDocument := range queryDocuments {
-		operation := queryDocument.Operations[0]
-		queryDocumentMap[operation.Name] = queryDocument
-	}
-
-	return queryDocumentMap
-}
-
-func (g *Generator) operationArgsMapByOperationName(queryDocument *graphql.QueryDocument) map[string][]*OperationArgument {
-	operationArgsMap := make(map[string][]*OperationArgument)
-	for _, operation := range queryDocument.Operations {
-		operationArgsMap[operation.Name] = g.operationArguments(operation.VariableDefinitions)
-	}
-
-	return operationArgsMap
-}
-
-func (g *Generator) operationArguments(variableDefinitions graphql.VariableDefinitionList) []*OperationArgument {
-	argumentTypes := make([]*OperationArgument, 0, len(variableDefinitions))
-	for _, v := range variableDefinitions {
-		argumentTypes = append(argumentTypes, &OperationArgument{
-			Variable: v.Variable,
-			Type:     g.findGoTypeName(v.Type.Name(), v.Type.NonNull),
-		})
-	}
-
-	return argumentTypes
 }
 
 func (g *Generator) newGoNamedTypeByGoType(typeName string, nonnull bool, t gotypes.Type) gotypes.Type {
