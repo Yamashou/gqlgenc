@@ -59,6 +59,7 @@ func (g *GoTypeGenerator) newFields(parentTypeName string, selectionSet graphql.
 
 // When parentTypeName is empty, the parent is an inline fragment
 func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Selection) *Field {
+	// TODO: Name or Alias
 	switch sel := selection.(type) {
 	case *graphql.Field:
 		typeKind, t := g.newTypeKindAndGoType(parentTypeName, sel)
