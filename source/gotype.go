@@ -146,3 +146,66 @@ func firstLower(s string) string {
 	}
 	return strings.ToLower(s[:1]) + s[1:]
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+// Field
+
+type FieldKind string
+
+const (
+	BasicType      FieldKind = "BasicType"
+	FragmentSpread FieldKind = "FragmentSpread"
+	InlineFragment FieldKind = "InlineFragment"
+	OtherType      FieldKind = "OtherType"
+)
+
+// TODO: シンプルなtypes.Typeに置き換えられないか？
+type Field struct {
+	Name      string
+	Type      gotypes.Type
+	Tags      []string
+	FieldKind FieldKind
+}
+
+func NewField(fieldKind FieldKind, fieldType gotypes.Type, name string, tags []string) *Field {
+	return &Field{
+		Name:      name,
+		Type:      fieldType,
+		Tags:      tags,
+		FieldKind: fieldKind,
+	}
+}
+
+func (r *Field) goVar() *gotypes.Var {
+	return gotypes.NewField(0, nil, templates.ToGo(r.Name), r.Type, r.FieldKind == FragmentSpread)
+}
+
+func (r *Field) joinTags() string {
+	return strings.Join(r.Tags, " ")
+}
+
+type Fields []*Field
+
+func (fs Fields) goStructType() *gotypes.Struct {
+	// Go fields do not allow fields with the same name, so we remove duplicates
+	fields := fs.uniqueByName()
+	vars := make([]*gotypes.Var, 0, len(fields))
+	for _, field := range fields {
+		vars = append(vars, field.goVar())
+	}
+	tags := make([]string, 0, len(fields))
+	for _, field := range fields {
+		tags = append(tags, field.joinTags())
+	}
+	return gotypes.NewStruct(vars, tags)
+}
+
+func (fs Fields) uniqueByName() Fields {
+	fieldMapByName := make(map[string]*Field, len(fs))
+	for _, field := range fs {
+		fieldMapByName[field.Name] = field
+	}
+	return slices.SortedFunc(maps.Values(fieldMapByName), func(a *Field, b *Field) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+}
