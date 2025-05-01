@@ -73,7 +73,7 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 	case *graphql.Field:
 		typeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
 		goType := g.newGoType(sel.SelectionSet, typeName)
-		t := g.findOrNewGoType(sel, typeName, goType)
+		t := g.findOrNewGoType(sel.Definition.Type, typeName, goType)
 		tags := []string{
 			fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)),
 			fmt.Sprintf(`graphql:"%s"`, sel.Alias),
@@ -155,24 +155,24 @@ func (g *Generator) newGoNamedTypeByGoType(nonnull bool, typeName string, t goty
 	return namedType
 }
 
-func (g *Generator) findOrNewGoType(field *graphql.Field, fieldTypeName string, goType *GoType) gotypes.Type {
+func (g *Generator) findOrNewGoType(t *graphql.Type, fieldTypeName string, goType *GoType) gotypes.Type {
 	switch {
 	case goType.isBasicType:
-		t := g.findGoType(field.Definition.Type)
+		t := g.findGoType(t)
 		return t
 	case goType.isInlineFragment:
 		return goType.goType
 	case goType.isFragmentSpread:
 		// Fragment fields are nonnull
 		// Export Fragment types. Fragments are explicitly created by users.
-		t := g.newGoNamedTypeByGoType(field.Definition.Type.NonNull, fieldTypeName, goType.goType)
+		t := g.newGoNamedTypeByGoType(t.NonNull, fieldTypeName, goType.goType)
 		return t
 	default:
 		if !g.cfg.GQLGencConfig.ExportQueryType {
 			// default: query type is not exported
 			fieldTypeName = firstLower(fieldTypeName)
 		}
-		t := g.newGoNamedTypeByGoType(field.Definition.Type.NonNull, fieldTypeName, goType.goType)
+		t := g.newGoNamedTypeByGoType(t.NonNull, fieldTypeName, goType.goType)
 		return t
 	}
 }
