@@ -155,11 +155,11 @@ func Test_IntegrationTest(t *testing.T) {
 			}()
 
 			// Wait for server to start
-			time.Sleep(500 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 
 			// Client
 			c := query.NewClient(client.NewClient(
-				fmt.Sprintf("http://127.0.0.1:%s/graphql", port),
+				fmt.Sprintf("http://localhost:%s/graphql", port),
 			))
 
 			userOperation, err := c.UserOperation(ctx)
