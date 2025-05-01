@@ -66,21 +66,7 @@ func (g *Generator) newFields(parentTypeName string, selectionSet graphql.Select
 func (g *Generator) newField(parentTypeName string, selection graphql.Selection) *Field {
 	switch sel := selection.(type) {
 	case *graphql.Field:
-		fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
-		fields := g.newFields(fieldTypeName, sel.SelectionSet)
-		var fieldKind FieldKind
-		var t gotypes.Type
-		if len(fields) == 0 {
-			fieldKind = BasicType
-			t = g.findGoTypeName(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
-		} else {
-			fieldKind = OtherType
-			if !g.cfg.GQLGencConfig.ExportQueryType {
-				// default: query type is not exported
-				fieldTypeName = firstLower(fieldTypeName)
-			}
-			t = g.newGoNamedTypeByGoType(fieldTypeName, sel.Definition.Type.NonNull, fields.goStructType())
-		}
+		fieldKind, t := g.newFieldKindAndGoType(parentTypeName, sel)
 		tags := []string{fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)), fmt.Sprintf(`graphql:"%s"`, sel.Alias)}
 		return NewField(fieldKind, t, sel.Name, tags)
 	case *graphql.FragmentSpread:
@@ -89,9 +75,26 @@ func (g *Generator) newField(parentTypeName string, selection graphql.Selection)
 		return NewField(FragmentSpread, namedType, sel.Name, []string{})
 	case *graphql.InlineFragment:
 		structType := g.newFields("", sel.SelectionSet).goStructType()
-		return NewField(InlineFragment, structType, sel.TypeCondition, []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)})
+		tags := []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}
+		return NewField(InlineFragment, structType, sel.TypeCondition, tags)
 	}
 	panic("unexpected selection type")
+}
+func (g *Generator) newFieldKindAndGoType(parentTypeName string, sel *graphql.Field) (FieldKind, gotypes.Type) {
+	fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
+	fields := g.newFields(fieldTypeName, sel.SelectionSet)
+
+	if len(fields) == 0 {
+		t := g.findGoTypeName(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
+		return BasicType, t
+	}
+
+	if !g.cfg.GQLGencConfig.ExportQueryType {
+		// default: query type is not exported
+		fieldTypeName = firstLower(fieldTypeName)
+	}
+	t := g.newGoNamedTypeByGoType(fieldTypeName, sel.Definition.Type.NonNull, fields.goStructType())
+	return OtherType, t
 }
 
 func layerTypeName(parentTypeName, fieldName string) string {
