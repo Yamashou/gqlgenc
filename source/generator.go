@@ -20,9 +20,7 @@ import (
 
 func NewGoTypesAndOperations(cfg *config.Config, queryDocument *graphql.QueryDocument, operationQueryDocuments []*graphql.QueryDocument) ([]gotypes.Type, []*Operation) {
 	g := newGenerator(cfg)
-	// createFragmentTypes must be before createOperationResponsesTypes
-	g.createFragmentTypes(queryDocument.Fragments)
-	g.createOperationResponsesTypes(queryDocument.Operations)
+	g.createTypesByOperations(queryDocument.Operations)
 
 	return g.goTypes(), g.operations(queryDocument, operationQueryDocuments)
 }
@@ -47,19 +45,10 @@ func (g *Generator) goTypes() []gotypes.Type {
 	})
 }
 
-func (g *Generator) createFragmentTypes(fragments graphql.FragmentDefinitionList) {
-	for _, fragment := range fragments {
-		fields := g.newFields(fragment.SelectionSet, fragment.Name)
-		fragmentType := g.newGoNamedTypeByFields(true, fragment.Name, fields)
-		g.types[fragmentType.String()] = fragmentType
-	}
-}
-
-func (g *Generator) createOperationResponsesTypes(operations graphql.OperationList) {
+func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
 	for _, operation := range operations {
 		fields := g.newFields(operation.SelectionSet, operation.Name)
-		operationResponseType := g.newGoNamedTypeByFields(false, operation.Name, fields)
-		g.types[operationResponseType.String()] = operationResponseType
+		g.newGoNamedTypeByFields(false, operation.Name, fields)
 	}
 }
 
@@ -88,6 +77,7 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 	case *graphql.FragmentSpread:
 		fields := g.newFields(sel.Definition.SelectionSet, sel.Name)
 		t := g.newGoNamedTypeByFields(true, sel.Name, fields)
+		// TODO: ここだけg.typesに追加してなかった
 		return NewField(sel.Name, t, []string{}, fields, true, false)
 	case *graphql.InlineFragment:
 		// InlineFragment keeps child elements directly as a struct, so we set types.Struct to the Type field instead of creating a NamedType.
@@ -148,12 +138,14 @@ func (g *Generator) operationArguments(variableDefinitions graphql.VariableDefin
 }
 
 func (g *Generator) newGoNamedTypeByFields(nonnull bool, typeName string, fields Fields) gotypes.Type {
-	structType := fields.goStructType()
-	namedType := gotypes.NewNamed(gotypes.NewTypeName(0, g.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), structType, nil)
-	if nonnull {
-		return namedType
+	var namedType gotypes.Type
+	namedType = gotypes.NewNamed(gotypes.NewTypeName(0, g.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), fields.goStructType(), nil)
+	if !nonnull {
+		namedType = gotypes.NewPointer(namedType)
 	}
-	return gotypes.NewPointer(namedType)
+	// new type set to g.types
+	g.types[namedType.String()] = namedType
+	return namedType
 }
 
 func (g *Generator) findGoTypeByFields(field *graphql.Field, fieldTypeName string, fieldFields Fields) gotypes.Type {
@@ -165,15 +157,13 @@ func (g *Generator) findGoTypeByFields(field *graphql.Field, fieldTypeName strin
 		// Fragment fields are nonnull
 		// Export Fragment types. Fragments are explicitly created by users.
 		t := g.newGoNamedTypeByFields(field.Definition.Type.NonNull, fieldTypeName, fieldFields)
-		g.types[t.String()] = t
 		return t
 	default:
 		if !g.cfg.GQLGencConfig.ExportQueryType {
-			// Make types generated for Query private. These are created internally by gqlgenc.
+			// default: query type is not exported
 			fieldTypeName = firstLower(fieldTypeName)
 		}
 		t := g.newGoNamedTypeByFields(field.Definition.Type.NonNull, fieldTypeName, fieldFields)
-		g.types[t.String()] = t
 		return t
 	}
 }
@@ -185,11 +175,11 @@ func (g *Generator) findGoType(t *graphql.Type) gotypes.Type {
 		// If we pass the correct typeName as per implementation, it should always be found, so we panic if not
 		panic(fmt.Sprintf("%+v", err))
 	}
-	if t.NonNull {
-		return goType
+	if !t.NonNull {
+		goType = gotypes.NewPointer(goType)
 	}
 
-	return gotypes.NewPointer(goType)
+	return goType
 }
 
 func (g *Generator) jsonOmitTag(field *graphql.Field) string {
