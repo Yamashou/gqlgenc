@@ -74,7 +74,17 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 		// Basic type or query type
 		fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
 		goType := g.newGoType(sel.Definition.Type.Name(), fieldTypeName, sel.Definition.Type.NonNull, sel.SelectionSet)
-		t := g.findOrNewGoType(fieldTypeName, goType)
+		var t gotypes.Type
+		switch {
+		case goType.isBasicType:
+			t = g.findGoTypeName(goType.Name, goType.NonNull)
+		default:
+			if !g.cfg.GQLGencConfig.ExportQueryType {
+				// default: query type is not exported
+				fieldTypeName = firstLower(fieldTypeName)
+			}
+			t = g.newGoNamedTypeByGoType(goType.NonNull, fieldTypeName, goType.goType)
+		}
 		tags := []string{
 			fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)),
 			fmt.Sprintf(`graphql:"%s"`, sel.Alias),
@@ -153,21 +163,6 @@ func (g *Generator) newGoNamedTypeByGoType(nonnull bool, typeName string, t goty
 	// new type set to g.types
 	g.types[namedType.String()] = namedType
 	return namedType
-}
-
-func (g *Generator) findOrNewGoType(fieldTypeName string, goType *GoType) gotypes.Type {
-	switch {
-	case goType.isBasicType:
-		t := g.findGoTypeName(goType.Name, goType.NonNull)
-		return t
-	default:
-		if !g.cfg.GQLGencConfig.ExportQueryType {
-			// default: query type is not exported
-			fieldTypeName = firstLower(fieldTypeName)
-		}
-		t := g.newGoNamedTypeByGoType(goType.NonNull, fieldTypeName, goType.goType)
-		return t
-	}
 }
 
 // The typeName passed to the Type argument must be the type name derived from the analysis result, such as from selections
