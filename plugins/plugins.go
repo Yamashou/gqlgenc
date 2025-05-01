@@ -37,7 +37,8 @@ func Run(cfg *config.Config) error {
 	}
 
 	// generate template sources
-	goTypes, operations := source.NewGoTypesAndOperations(cfg, queryDocument, operationQueryDocuments)
+	goTypes := source.NewGenerator(cfg).CreateTypesByOperations(queryDocument.Operations)
+	operations := source.NewOperationGenerator(cfg).Operations(queryDocument, operationQueryDocuments)
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// gqlgenc Plugins

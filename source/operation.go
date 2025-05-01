@@ -16,18 +16,16 @@ import (
 type OperationGenerator struct {
 	cfg    *config.Config
 	binder *gqlgenconfig.Binder
-	types  map[string]gotypes.Type
 }
 
-func newOperationGenerator(cfg *config.Config) *OperationGenerator {
+func NewOperationGenerator(cfg *config.Config) *OperationGenerator {
 	return &OperationGenerator{
 		cfg:    cfg,
 		binder: cfg.GQLGenConfig.NewBinder(),
-		types:  map[string]gotypes.Type{},
 	}
 }
 
-func (g *OperationGenerator) operations(queryDocument *graphql.QueryDocument, operationQueryDocuments []*graphql.QueryDocument) []*Operation {
+func (g *OperationGenerator) Operations(queryDocument *graphql.QueryDocument, operationQueryDocuments []*graphql.QueryDocument) []*Operation {
 	operationArgsMap := g.operationArgsMapByOperationName(queryDocument)
 	queryDocumentsMap := queryDocumentMapByOperationName(operationQueryDocuments)
 

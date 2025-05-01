@@ -18,20 +18,13 @@ import (
 	graphql "github.com/vektah/gqlparser/v2/ast"
 )
 
-func NewGoTypesAndOperations(cfg *config.Config, queryDocument *graphql.QueryDocument, operationQueryDocuments []*graphql.QueryDocument) ([]gotypes.Type, []*Operation) {
-	g := newGenerator(cfg)
-	og := newOperationGenerator(cfg)
-
-	return g.createTypesByOperations(queryDocument.Operations), og.operations(queryDocument, operationQueryDocuments)
-}
-
 type Generator struct {
 	cfg    *config.Config
 	binder *gqlgenconfig.Binder
 	types  map[string]gotypes.Type
 }
 
-func newGenerator(cfg *config.Config) *Generator {
+func NewGenerator(cfg *config.Config) *Generator {
 	return &Generator{
 		cfg:    cfg,
 		binder: cfg.GQLGenConfig.NewBinder(),
@@ -39,18 +32,19 @@ func newGenerator(cfg *config.Config) *Generator {
 	}
 }
 
-func (g *Generator) goTypes() []gotypes.Type {
-	return slices.SortedFunc(maps.Values(g.types), func(a, b gotypes.Type) int {
-		return strings.Compare(strings.TrimPrefix(a.String(), "*"), strings.TrimPrefix(b.String(), "*"))
-	})
-}
-
-func (g *Generator) createTypesByOperations(operations graphql.OperationList) []gotypes.Type {
+func (g *Generator) CreateTypesByOperations(operations graphql.OperationList) []gotypes.Type {
 	for _, operation := range operations {
 		t := g.newFields(operation.Name, operation.SelectionSet).goStructType()
 		g.newGoNamedTypeByGoType(operation.Name, false, t)
 	}
+
 	return g.goTypes()
+}
+
+func (g *Generator) goTypes() []gotypes.Type {
+	return slices.SortedFunc(maps.Values(g.types), func(a, b gotypes.Type) int {
+		return strings.Compare(strings.TrimPrefix(a.String(), "*"), strings.TrimPrefix(b.String(), "*"))
+	})
 }
 
 // When parentTypeName is empty, the parent is an inline fragment
@@ -98,10 +92,6 @@ func (g *Generator) newFieldKindAndGoType(parentTypeName string, sel *graphql.Fi
 	return OtherType, t
 }
 
-func layerTypeName(parentTypeName, fieldName string) string {
-	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(parentTypeName), fieldName)
-}
-
 func (g *Generator) newGoNamedTypeByGoType(typeName string, nonnull bool, t gotypes.Type) gotypes.Type {
 	var namedType gotypes.Type
 	namedType = gotypes.NewNamed(gotypes.NewTypeName(0, g.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), t, nil)
@@ -138,6 +128,10 @@ func (g *Generator) jsonOmitTag(field *graphql.Field) string {
 		}
 	}
 	return jsonOmitTag
+}
+
+func layerTypeName(parentTypeName, fieldName string) string {
+	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(parentTypeName), fieldName)
 }
 
 func firstLower(s string) string {
