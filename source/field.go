@@ -37,14 +37,18 @@ func (r *Field) joinTags() string {
 }
 
 type GoType struct {
+	Name             string
+	NonNull          bool
 	isFragmentSpread bool
 	isInlineFragment bool
 	isBasicType      bool
 	goType           *types.Struct
 }
 
-func NewGoType(isFragmentSpread, isInlineFragment bool, isBasicType bool, goType *types.Struct) *GoType {
+func NewGoType(name string, nonNull, isFragmentSpread, isInlineFragment bool, isBasicType bool, goType *types.Struct) *GoType {
 	return &GoType{
+		Name:             name,
+		NonNull:          nonNull,
 		isFragmentSpread: isFragmentSpread,
 		isInlineFragment: isInlineFragment,
 		isBasicType:      isBasicType,
@@ -52,8 +56,8 @@ func NewGoType(isFragmentSpread, isInlineFragment bool, isBasicType bool, goType
 	}
 }
 
-func NewGoTypeByFields(fields Fields) *GoType {
-	return NewGoType(fields.isFragmentSpread(), fields.isInlineFragment(), fields.isBasicType(), fields.goTypeType())
+func NewGoTypeByFields(name string, nonNull bool, fields Fields) *GoType {
+	return NewGoType(name, nonNull, fields.isFragmentSpread(), fields.isInlineFragment(), fields.isBasicType(), fields.goTypeType())
 }
 
 type Fields []*Field

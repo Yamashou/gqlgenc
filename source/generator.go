@@ -47,14 +47,14 @@ func (g *Generator) goTypes() []gotypes.Type {
 
 func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
 	for _, operation := range operations {
-		goType := g.newGoType(operation.SelectionSet, operation.Name)
+		goType := g.newGoType(operation.Name, false, operation.SelectionSet, operation.Name)
 		g.newGoNamedTypeByGoType(false, operation.Name, goType.goType)
 	}
 }
 
 // TODO: GoType消せないか検討
-func (g *Generator) newGoType(selectionSet graphql.SelectionSet, parentTypeName string) *GoType {
-	return NewGoTypeByFields(g.newFields(selectionSet, parentTypeName))
+func (g *Generator) newGoType(name string, nonNull bool, selectionSet graphql.SelectionSet, parentTypeName string) *GoType {
+	return NewGoTypeByFields(name, nonNull, g.newFields(selectionSet, parentTypeName))
 }
 
 // When parentTypeName is empty, the parent is an inline fragment
@@ -72,7 +72,7 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 	switch sel := selection.(type) {
 	case *graphql.Field:
 		typeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
-		goType := g.newGoType(sel.SelectionSet, typeName)
+		goType := g.newGoType(typeName, sel.Definition.Type.NonNull, sel.SelectionSet, typeName)
 		t := g.findOrNewGoType(sel.Definition.Type, typeName, goType)
 		tags := []string{
 			fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)),
@@ -80,13 +80,13 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 		}
 		return NewField(sel.Name, t, tags, false, false)
 	case *graphql.FragmentSpread:
-		goType := g.newGoType(sel.Definition.SelectionSet, sel.Name)
+		goType := g.newGoType(sel.Name, true, sel.Definition.SelectionSet, sel.Name)
 		// When FragmentSpread, create named type
 		// TODO: findOrNewにできる?
 		t := g.newGoNamedTypeByGoType(true, sel.Name, goType.goType)
 		return NewField(sel.Name, t, []string{}, true, false)
 	case *graphql.InlineFragment:
-		goType := g.newGoType(sel.SelectionSet, "")
+		goType := g.newGoType(sel.TypeCondition, true, sel.SelectionSet, "")
 		// When InlineFragment, not create named type
 		t := goType.goType
 		tags := []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}
@@ -137,7 +137,7 @@ func (g *Generator) operationArguments(variableDefinitions graphql.VariableDefin
 	for _, v := range variableDefinitions {
 		argumentTypes = append(argumentTypes, &OperationArgument{
 			Variable: v.Variable,
-			Type:     g.findGoType(v.Type),
+			Type:     g.findGoTypeName(v.Type.Name(), v.Type.NonNull),
 		})
 	}
 
@@ -158,7 +158,7 @@ func (g *Generator) newGoNamedTypeByGoType(nonnull bool, typeName string, t goty
 func (g *Generator) findOrNewGoType(t *graphql.Type, fieldTypeName string, goType *GoType) gotypes.Type {
 	switch {
 	case goType.isBasicType:
-		t := g.findGoType(t)
+		t := g.findGoTypeName(t.Name(), t.NonNull)
 		return t
 	case goType.isInlineFragment:
 		return goType.goType
@@ -178,13 +178,13 @@ func (g *Generator) findOrNewGoType(t *graphql.Type, fieldTypeName string, goTyp
 }
 
 // The typeName passed to the Type argument must be the type name derived from the analysis result, such as from selections
-func (g *Generator) findGoType(t *graphql.Type) gotypes.Type {
-	goType, err := g.binder.FindTypeFromName(g.cfg.GQLGenConfig.Models[t.Name()].Model[0])
+func (g *Generator) findGoTypeName(typeName string, nonNull bool) gotypes.Type {
+	goType, err := g.binder.FindTypeFromName(g.cfg.GQLGenConfig.Models[typeName].Model[0])
 	if err != nil {
 		// If we pass the correct typeName as per implementation, it should always be found, so we panic if not
 		panic(fmt.Sprintf("%+v", err))
 	}
-	if !t.NonNull {
+	if !nonNull {
 		goType = gotypes.NewPointer(goType)
 	}
 
