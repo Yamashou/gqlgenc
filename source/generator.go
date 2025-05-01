@@ -48,7 +48,7 @@ func (g *Generator) goTypes() []gotypes.Type {
 func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
 	for _, operation := range operations {
 		t := g.newFields(operation.Name, operation.SelectionSet).goStructType()
-		g.newGoNamedTypeByGoType(false, operation.Name, t)
+		g.newGoNamedTypeByGoType(operation.Name, false, t)
 	}
 }
 
@@ -70,27 +70,26 @@ func (g *Generator) newField(parentTypeName string, selection graphql.Selection)
 		fields := g.newFields(fieldTypeName, sel.SelectionSet)
 		var fieldKind FieldKind
 		var t gotypes.Type
-		switch len(fields) {
-		case 0:
+		if len(fields) == 0 {
 			fieldKind = BasicType
 			t = g.findGoTypeName(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
-		default:
+		} else {
 			fieldKind = OtherType
 			if !g.cfg.GQLGencConfig.ExportQueryType {
 				// default: query type is not exported
 				fieldTypeName = firstLower(fieldTypeName)
 			}
-			t = g.newGoNamedTypeByGoType(sel.Definition.Type.NonNull, fieldTypeName, fields.goStructType())
+			t = g.newGoNamedTypeByGoType(fieldTypeName, sel.Definition.Type.NonNull, fields.goStructType())
 		}
 		tags := []string{fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)), fmt.Sprintf(`graphql:"%s"`, sel.Alias)}
-		return NewField(sel.Name, t, tags, fieldKind)
+		return NewField(fieldKind, t, sel.Name, tags)
 	case *graphql.FragmentSpread:
 		structType := g.newFields(sel.Name, sel.Definition.SelectionSet).goStructType()
-		namedType := g.newGoNamedTypeByGoType(true, sel.Name, structType)
-		return NewField(sel.Name, namedType, []string{}, FragmentSpread)
+		namedType := g.newGoNamedTypeByGoType(sel.Name, true, structType)
+		return NewField(FragmentSpread, namedType, sel.Name, []string{})
 	case *graphql.InlineFragment:
 		structType := g.newFields("", sel.SelectionSet).goStructType()
-		return NewField(sel.TypeCondition, structType, []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}, InlineFragment)
+		return NewField(InlineFragment, structType, sel.TypeCondition, []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)})
 	}
 	panic("unexpected selection type")
 }
@@ -144,7 +143,7 @@ func (g *Generator) operationArguments(variableDefinitions graphql.VariableDefin
 	return argumentTypes
 }
 
-func (g *Generator) newGoNamedTypeByGoType(nonnull bool, typeName string, t gotypes.Type) gotypes.Type {
+func (g *Generator) newGoNamedTypeByGoType(typeName string, nonnull bool, t gotypes.Type) gotypes.Type {
 	var namedType gotypes.Type
 	namedType = gotypes.NewNamed(gotypes.NewTypeName(0, g.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), t, nil)
 	if !nonnull {

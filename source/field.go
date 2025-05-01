@@ -26,7 +26,7 @@ type Field struct {
 	FieldKind FieldKind
 }
 
-func NewField(name string, fieldType types.Type, tags []string, fieldKind FieldKind) *Field {
+func NewField(fieldKind FieldKind, fieldType types.Type, name string, tags []string) *Field {
 	return &Field{
 		Name:      name,
 		Type:      fieldType,
