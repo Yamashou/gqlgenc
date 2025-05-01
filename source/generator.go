@@ -82,13 +82,16 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 	case *graphql.FragmentSpread:
 		goType := g.newGoType(sel.Name, sel.Name, true, sel.Definition.SelectionSet)
 		// When FragmentSpread, create named type
-		// TODO: findOrNewにできる?
+		// TODO: findOrNewにするとエラー
+		//t := g.findOrNewGoType("", goType)
 		t := g.newGoNamedTypeByGoType(true, sel.Name, goType.goType)
 		return NewField(sel.Name, t, []string{}, true, false)
 	case *graphql.InlineFragment:
 		goType := g.newGoType(sel.TypeCondition, "", true, sel.SelectionSet)
 		// When InlineFragment, not create named type
+		// TODO: findOrNewにするとエラー
 		t := goType.goType
+		// t := g.findOrNewGoType("", goType)
 		tags := []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}
 		return NewField(sel.TypeCondition, t, tags, false, true)
 	}
