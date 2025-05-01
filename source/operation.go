@@ -25,7 +25,7 @@ func NewOperationGenerator(cfg *config.Config) *OperationGenerator {
 	}
 }
 
-func (g *OperationGenerator) Operations(queryDocument *graphql.QueryDocument, operationQueryDocuments []*graphql.QueryDocument) []*Operation {
+func (g *OperationGenerator) CreateOperations(queryDocument *graphql.QueryDocument, operationQueryDocuments []*graphql.QueryDocument) []*Operation {
 	operationArgsMap := g.operationArgsMapByOperationName(queryDocument)
 	queryDocumentsMap := queryDocumentMapByOperationName(operationQueryDocuments)
 
@@ -33,7 +33,7 @@ func (g *OperationGenerator) Operations(queryDocument *graphql.QueryDocument, op
 	for _, operation := range queryDocument.Operations {
 		operationQueryDocument := queryDocumentsMap[operation.Name]
 		args := operationArgsMap[operation.Name]
-		operations = append(operations, NewOperation(operation, operationQueryDocument, args))
+		operations = append(operations, newOperation(operation, operationQueryDocument, args))
 	}
 
 	return operations
@@ -95,7 +95,7 @@ type OperationArgument struct {
 	Variable string
 }
 
-func NewOperation(operation *graphql.OperationDefinition, queryDocument *graphql.QueryDocument, args []*OperationArgument) *Operation {
+func newOperation(operation *graphql.OperationDefinition, queryDocument *graphql.QueryDocument, args []*OperationArgument) *Operation {
 	return &Operation{
 		Name:                operation.Name,
 		Document:            formattedDocument(queryDocument),

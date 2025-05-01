@@ -32,7 +32,7 @@ func NewGoTypesGenerator(cfg *config.Config) *Generator {
 	}
 }
 
-func (g *Generator) CreateTypesByOperations(operations graphql.OperationList) []gotypes.Type {
+func (g *Generator) CreateGoTypes(operations graphql.OperationList) []gotypes.Type {
 	for _, operation := range operations {
 		t := g.newFields(operation.Name, operation.SelectionSet).goStructType()
 		g.newGoNamedTypeByGoType(operation.Name, false, t)
@@ -63,15 +63,15 @@ func (g *Generator) newField(parentTypeName string, selection graphql.Selection)
 	case *graphql.Field:
 		fieldKind, t := g.newFieldKindAndGoType(parentTypeName, sel)
 		tags := []string{fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)), fmt.Sprintf(`graphql:"%s"`, sel.Alias)}
-		return NewField(fieldKind, t, sel.Name, tags)
+		return newField(fieldKind, t, sel.Name, tags)
 	case *graphql.FragmentSpread:
 		structType := g.newFields(sel.Name, sel.Definition.SelectionSet).goStructType()
 		namedType := g.newGoNamedTypeByGoType(sel.Name, true, structType)
-		return NewField(FragmentSpread, namedType, sel.Name, []string{})
+		return newField(FragmentSpread, namedType, sel.Name, []string{})
 	case *graphql.InlineFragment:
 		structType := g.newFields("", sel.SelectionSet).goStructType()
 		tags := []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}
-		return NewField(InlineFragment, structType, sel.TypeCondition, tags)
+		return newField(InlineFragment, structType, sel.TypeCondition, tags)
 	}
 	panic("unexpected selection type")
 }
@@ -161,7 +161,7 @@ type Field struct {
 	FieldKind FieldKind
 }
 
-func NewField(fieldKind FieldKind, fieldType gotypes.Type, name string, tags []string) *Field {
+func newField(fieldKind FieldKind, fieldType gotypes.Type, name string, tags []string) *Field {
 	return &Field{
 		Name:      name,
 		Type:      fieldType,
