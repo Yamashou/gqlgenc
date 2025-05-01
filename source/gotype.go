@@ -35,7 +35,7 @@ func NewGoTypeGenerator(cfg *config.Config) *GoTypeGenerator {
 func (g *GoTypeGenerator) CreateGoTypes(operations graphql.OperationList) []gotypes.Type {
 	for _, operation := range operations {
 		t := g.newFields(operation.Name, operation.SelectionSet).goStructType()
-		g.newGoNamedTypeByGoType(operation.Name, false, t)
+		g.newGoNamedType(operation.Name, false, t)
 	}
 
 	return g.goTypes()
@@ -66,7 +66,7 @@ func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Sele
 		return newField(fieldKind, t, sel.Name, tags)
 	case *graphql.FragmentSpread:
 		structType := g.newFields(sel.Name, sel.Definition.SelectionSet).goStructType()
-		namedType := g.newGoNamedTypeByGoType(sel.Name, true, structType)
+		namedType := g.newGoNamedType(sel.Name, true, structType)
 		return newField(FragmentSpread, namedType, sel.Name, []string{})
 	case *graphql.InlineFragment:
 		structType := g.newFields("", sel.SelectionSet).goStructType()
@@ -80,7 +80,7 @@ func (g *GoTypeGenerator) newFieldKindAndGoType(parentTypeName string, sel *grap
 	fields := g.newFields(fieldTypeName, sel.SelectionSet)
 
 	if len(fields) == 0 {
-		t := g.findGoTypeName(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
+		t := g.findGoType(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
 		return BasicType, t
 	}
 
@@ -88,11 +88,11 @@ func (g *GoTypeGenerator) newFieldKindAndGoType(parentTypeName string, sel *grap
 		// default: query type is not exported
 		fieldTypeName = firstLower(fieldTypeName)
 	}
-	t := g.newGoNamedTypeByGoType(fieldTypeName, sel.Definition.Type.NonNull, fields.goStructType())
+	t := g.newGoNamedType(fieldTypeName, sel.Definition.Type.NonNull, fields.goStructType())
 	return OtherType, t
 }
 
-func (g *GoTypeGenerator) newGoNamedTypeByGoType(typeName string, nonnull bool, t gotypes.Type) gotypes.Type {
+func (g *GoTypeGenerator) newGoNamedType(typeName string, nonnull bool, t gotypes.Type) gotypes.Type {
 	var namedType gotypes.Type
 	namedType = gotypes.NewNamed(gotypes.NewTypeName(0, g.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), t, nil)
 	if !nonnull {
@@ -104,7 +104,7 @@ func (g *GoTypeGenerator) newGoNamedTypeByGoType(typeName string, nonnull bool, 
 }
 
 // The typeName passed to the Type argument must be the type name derived from the analysis result, such as from selections
-func (g *GoTypeGenerator) findGoTypeName(typeName string, nonNull bool) gotypes.Type {
+func (g *GoTypeGenerator) findGoType(typeName string, nonNull bool) gotypes.Type {
 	goType, err := g.binder.FindTypeFromName(g.cfg.GQLGenConfig.Models[typeName].Model[0])
 	if err != nil {
 		// If we pass the correct typeName as per implementation, it should always be found, so we panic if not
