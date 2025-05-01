@@ -81,7 +81,7 @@ func (g *GoTypeGenerator) newFieldKindAndGoType(parentTypeName string, sel *grap
 
 	if len(fields) == 0 {
 		t := g.findGoType(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
-		return BasicType, t
+		return Scalar, t
 	}
 
 	if !g.cfg.GQLGencConfig.ExportQueryType {
@@ -89,7 +89,7 @@ func (g *GoTypeGenerator) newFieldKindAndGoType(parentTypeName string, sel *grap
 		fieldTypeName = firstLower(fieldTypeName)
 	}
 	t := g.newGoNamedType(fieldTypeName, sel.Definition.Type.NonNull, fields.goStructType())
-	return OtherType, t
+	return Object, t
 }
 
 func (g *GoTypeGenerator) newGoNamedType(typeName string, nonnull bool, t gotypes.Type) gotypes.Type {
@@ -147,10 +147,10 @@ func firstLower(s string) string {
 type FieldKind string
 
 const (
-	BasicType      FieldKind = "BasicType"
+	Scalar         FieldKind = "Scalar"
+	Object         FieldKind = "Object"
 	FragmentSpread FieldKind = "FragmentSpread"
 	InlineFragment FieldKind = "InlineFragment"
-	OtherType      FieldKind = "OtherType"
 )
 
 // TODO: シンプルなtypes.Typeに置き換えられないか？
