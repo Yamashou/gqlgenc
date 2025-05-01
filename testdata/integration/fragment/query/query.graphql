@@ -1,7 +1,16 @@
 query UserOperation {
   user {
     name
+    name2: name
     profile {
+      ... on PublicProfile {
+        status
+      }
+      ... on PrivateProfile {
+        age
+      }
+    }
+    profile2: profile {
       ... on PublicProfile {
         status
       }

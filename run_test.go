@@ -69,6 +69,7 @@ func Test_IntegrationTest(t *testing.T) {
 						},
 						UserFragment2: domain.UserFragment2{Name: "John Doe"},
 						Name:          "John Doe",
+						Name2:         "John Doe",
 						Address: domain.UserOperation_User_Address{
 							Street: "123 Main St",
 							PrivateAddress: struct {
@@ -85,6 +86,13 @@ func Test_IntegrationTest(t *testing.T) {
 							},
 						},
 						Profile: domain.UserOperation_User_Profile{
+							PrivateProfile: struct {
+								Age *int "json:\"age\" graphql:\"age\""
+							}{
+								Age: func() *int { i := 30; return &i }(),
+							},
+						},
+						Profile2: domain.UserOperation_User_Profile2{
 							PrivateProfile: struct {
 								Age *int "json:\"age\" graphql:\"age\""
 							}{

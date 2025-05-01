@@ -61,9 +61,11 @@ type UserOperation_User struct {
 	UserFragment2
 	Address         UserOperation_User_Address          "json:\"address,omitempty,omitzero\" graphql:\"address\""
 	Name            string                              "json:\"name,omitempty,omitzero\" graphql:\"name\""
+	Name2           string                              "json:\"name2,omitempty,omitzero\" graphql:\"name2\""
 	OptionalAddress *UserOperation_User_OptionalAddress "json:\"optionalAddress\" graphql:\"optionalAddress\""
 	OptionalProfile *UserOperation_User_OptionalProfile "json:\"optionalProfile\" graphql:\"optionalProfile\""
 	Profile         UserOperation_User_Profile          "json:\"profile,omitempty,omitzero\" graphql:\"profile\""
+	Profile2        UserOperation_User_Profile2         "json:\"profile2,omitempty,omitzero\" graphql:\"profile2\""
 }
 
 type UserOperation_User_Address struct {
@@ -150,10 +152,28 @@ type UserOperation_User_Profile struct {
 	} "graphql:\"... on PublicProfile\""
 }
 
+type UserOperation_User_Profile2 struct {
+	PrivateProfile struct {
+		Age *int "json:\"age\" graphql:\"age\""
+	} "graphql:\"... on PrivateProfile\""
+	PublicProfile struct {
+		Status Status "json:\"status,omitempty,omitzero\" graphql:\"status\""
+	} "graphql:\"... on PublicProfile\""
+}
+
 const UserOperationDocument = `query UserOperation {
 	user {
 		name
+		name2: name
 		profile {
+			... on PublicProfile {
+				status
+			}
+			... on PrivateProfile {
+				age
+			}
+		}
+		profile2: profile {
 			... on PublicProfile {
 				status
 			}

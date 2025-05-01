@@ -64,7 +64,7 @@ func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Sele
 	case *graphql.Field:
 		typeKind, t := g.newTypeKindAndGoType(parentTypeName, sel)
 		tags := []string{fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)), fmt.Sprintf(`graphql:"%s"`, sel.Alias)}
-		return newField(typeKind, t, sel.Name, tags)
+		return newField(typeKind, t, sel.Alias, tags)
 	case *graphql.FragmentSpread:
 		structType := g.newFields(sel.Name, sel.Definition.SelectionSet).goStructType()
 		namedType := g.newGoNamedType(sel.Name, true, structType)
