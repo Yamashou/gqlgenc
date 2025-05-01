@@ -18,21 +18,21 @@ import (
 	graphql "github.com/vektah/gqlparser/v2/ast"
 )
 
-type Generator struct {
+type GoTypeGenerator struct {
 	cfg    *config.Config
 	binder *gqlgenconfig.Binder
 	types  map[string]gotypes.Type
 }
 
-func NewGoTypesGenerator(cfg *config.Config) *Generator {
-	return &Generator{
+func NewGoTypeGenerator(cfg *config.Config) *GoTypeGenerator {
+	return &GoTypeGenerator{
 		cfg:    cfg,
 		binder: cfg.GQLGenConfig.NewBinder(),
 		types:  map[string]gotypes.Type{},
 	}
 }
 
-func (g *Generator) CreateGoTypes(operations graphql.OperationList) []gotypes.Type {
+func (g *GoTypeGenerator) CreateGoTypes(operations graphql.OperationList) []gotypes.Type {
 	for _, operation := range operations {
 		t := g.newFields(operation.Name, operation.SelectionSet).goStructType()
 		g.newGoNamedTypeByGoType(operation.Name, false, t)
@@ -41,14 +41,14 @@ func (g *Generator) CreateGoTypes(operations graphql.OperationList) []gotypes.Ty
 	return g.goTypes()
 }
 
-func (g *Generator) goTypes() []gotypes.Type {
+func (g *GoTypeGenerator) goTypes() []gotypes.Type {
 	return slices.SortedFunc(maps.Values(g.types), func(a, b gotypes.Type) int {
 		return strings.Compare(strings.TrimPrefix(a.String(), "*"), strings.TrimPrefix(b.String(), "*"))
 	})
 }
 
 // When parentTypeName is empty, the parent is an inline fragment
-func (g *Generator) newFields(parentTypeName string, selectionSet graphql.SelectionSet) Fields {
+func (g *GoTypeGenerator) newFields(parentTypeName string, selectionSet graphql.SelectionSet) Fields {
 	fields := make(Fields, 0, len(selectionSet))
 	for _, selection := range selectionSet {
 		fields = append(fields, g.newField(parentTypeName, selection))
@@ -58,7 +58,7 @@ func (g *Generator) newFields(parentTypeName string, selectionSet graphql.Select
 }
 
 // When parentTypeName is empty, the parent is an inline fragment
-func (g *Generator) newField(parentTypeName string, selection graphql.Selection) *Field {
+func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Selection) *Field {
 	switch sel := selection.(type) {
 	case *graphql.Field:
 		fieldKind, t := g.newFieldKindAndGoType(parentTypeName, sel)
@@ -75,7 +75,7 @@ func (g *Generator) newField(parentTypeName string, selection graphql.Selection)
 	}
 	panic("unexpected selection type")
 }
-func (g *Generator) newFieldKindAndGoType(parentTypeName string, sel *graphql.Field) (FieldKind, gotypes.Type) {
+func (g *GoTypeGenerator) newFieldKindAndGoType(parentTypeName string, sel *graphql.Field) (FieldKind, gotypes.Type) {
 	fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
 	fields := g.newFields(fieldTypeName, sel.SelectionSet)
 
@@ -92,7 +92,7 @@ func (g *Generator) newFieldKindAndGoType(parentTypeName string, sel *graphql.Fi
 	return OtherType, t
 }
 
-func (g *Generator) newGoNamedTypeByGoType(typeName string, nonnull bool, t gotypes.Type) gotypes.Type {
+func (g *GoTypeGenerator) newGoNamedTypeByGoType(typeName string, nonnull bool, t gotypes.Type) gotypes.Type {
 	var namedType gotypes.Type
 	namedType = gotypes.NewNamed(gotypes.NewTypeName(0, g.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), t, nil)
 	if !nonnull {
@@ -104,7 +104,7 @@ func (g *Generator) newGoNamedTypeByGoType(typeName string, nonnull bool, t goty
 }
 
 // The typeName passed to the Type argument must be the type name derived from the analysis result, such as from selections
-func (g *Generator) findGoTypeName(typeName string, nonNull bool) gotypes.Type {
+func (g *GoTypeGenerator) findGoTypeName(typeName string, nonNull bool) gotypes.Type {
 	goType, err := g.binder.FindTypeFromName(g.cfg.GQLGenConfig.Models[typeName].Model[0])
 	if err != nil {
 		// If we pass the correct typeName as per implementation, it should always be found, so we panic if not
@@ -117,7 +117,7 @@ func (g *Generator) findGoTypeName(typeName string, nonNull bool) gotypes.Type {
 	return goType
 }
 
-func (g *Generator) jsonOmitTag(field *graphql.Field) string {
+func (g *GoTypeGenerator) jsonOmitTag(field *graphql.Field) string {
 	var jsonOmitTag string
 	if field.Definition.Type.NonNull {
 		if g.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag != nil && *g.cfg.GQLGenConfig.EnableModelJsonOmitemptyTag {

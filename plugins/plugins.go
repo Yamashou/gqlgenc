@@ -41,7 +41,7 @@ func Run(cfg *config.Config) error {
 
 	// generate template sources
 	operations := source.NewOperationGenerator(cfg).CreateOperations(queryDocument, operationQueryDocuments)
-	goTypes := source.NewGoTypesGenerator(cfg).CreateGoTypes(queryDocument.Operations)
+	goTypes := source.NewGoTypeGenerator(cfg).CreateGoTypes(queryDocument.Operations)
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
