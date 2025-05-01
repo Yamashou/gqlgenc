@@ -56,14 +56,14 @@ func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
 func (g *Generator) newFields(parentTypeName string, selectionSet graphql.SelectionSet) Fields {
 	fields := make(Fields, 0, len(selectionSet))
 	for _, selection := range selectionSet {
-		fields = append(fields, g.newField(selection, parentTypeName))
+		fields = append(fields, g.newField(parentTypeName, selection))
 	}
 
 	return fields
 }
 
 // When parentTypeName is empty, the parent is an inline fragment
-func (g *Generator) newField(selection graphql.Selection, parentTypeName string) *Field {
+func (g *Generator) newField(parentTypeName string, selection graphql.Selection) *Field {
 	switch sel := selection.(type) {
 	case *graphql.Field:
 		fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
