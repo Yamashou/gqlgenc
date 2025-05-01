@@ -77,13 +77,13 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 	case *graphql.FragmentSpread:
 		fields := g.newFields(sel.Definition.SelectionSet, sel.Name)
 		t := g.newGoNamedTypeByFields(true, sel.Name, fields)
-		// TODO: ここだけg.typesに追加してなかった
 		return NewField(sel.Name, t, []string{}, fields, true, false)
 	case *graphql.InlineFragment:
 		// InlineFragment keeps child elements directly as a struct, so we set types.Struct to the Type field instead of creating a NamedType.
 		fields := g.newFields(sel.SelectionSet, "")
 		t := fields.goStructType()
-		return NewField(sel.TypeCondition, t, []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}, fields, false, true)
+		tags := []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}
+		return NewField(sel.TypeCondition, t, tags, fields, false, true)
 	}
 	panic("unexpected selection type")
 }
