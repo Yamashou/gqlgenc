@@ -45,13 +45,6 @@ func (r *Field) joinTags() string {
 
 type Fields []*Field
 
-func (fs Fields) FieldKind() FieldKind {
-	if len(fs) == 0 {
-		return BasicType
-	}
-	return OtherType
-}
-
 func (fs Fields) goStructType() *types.Struct {
 	// Go fields do not allow fields with the same name, so we remove duplicates
 	fields := fs.uniqueByName()
