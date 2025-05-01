@@ -38,6 +38,24 @@ func (r *Field) joinTags() string {
 	return strings.Join(r.Tags, " ")
 }
 
+type GoStruct struct {
+	isFragmentSpread bool
+	isBasicType      bool
+	goType           *types.Struct
+}
+
+func NewGoStruct(isFragmentSpread bool, isBasicType bool, goType *types.Struct) *GoStruct {
+	return &GoStruct{
+		isFragmentSpread: isFragmentSpread,
+		isBasicType:      isBasicType,
+		goType:           goType,
+	}
+}
+
+func NewGoStructByFields(fields Fields) *GoStruct {
+	return NewGoStruct(fields.isFragmentSpread(), fields.isBasicType(), fields.goStructType())
+}
+
 type Fields []*Field
 
 func (fs Fields) isFragmentSpread() bool {
