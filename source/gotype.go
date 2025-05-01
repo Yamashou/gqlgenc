@@ -61,9 +61,9 @@ func (g *GoTypeGenerator) newFields(parentTypeName string, selectionSet graphql.
 func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Selection) *Field {
 	switch sel := selection.(type) {
 	case *graphql.Field:
-		fieldKind, t := g.newFieldKindAndGoType(parentTypeName, sel)
+		typeKind, t := g.newTypeKindAndGoType(parentTypeName, sel)
 		tags := []string{fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)), fmt.Sprintf(`graphql:"%s"`, sel.Alias)}
-		return newField(fieldKind, t, sel.Name, tags)
+		return newField(typeKind, t, sel.Name, tags)
 	case *graphql.FragmentSpread:
 		structType := g.newFields(sel.Name, sel.Definition.SelectionSet).goStructType()
 		namedType := g.newGoNamedType(sel.Name, true, structType)
@@ -75,7 +75,7 @@ func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Sele
 	}
 	panic("unexpected selection type")
 }
-func (g *GoTypeGenerator) newFieldKindAndGoType(parentTypeName string, sel *graphql.Field) (FieldKind, gotypes.Type) {
+func (g *GoTypeGenerator) newTypeKindAndGoType(parentTypeName string, sel *graphql.Field) (TypeKind, gotypes.Type) {
 	fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
 	fields := g.newFields(fieldTypeName, sel.SelectionSet)
 
@@ -144,34 +144,34 @@ func firstLower(s string) string {
 //////////////////////////////////////////////////////////////////////////////////////////////////
 // Field
 
-type FieldKind string
+type TypeKind string
 
 const (
-	Scalar         FieldKind = "Scalar"
-	Object         FieldKind = "Object"
-	FragmentSpread FieldKind = "FragmentSpread"
-	InlineFragment FieldKind = "InlineFragment"
+	Scalar         TypeKind = "Scalar"
+	Object         TypeKind = "Object"
+	FragmentSpread TypeKind = "FragmentSpread"
+	InlineFragment TypeKind = "InlineFragment"
 )
 
 // TODO: シンプルなtypes.Typeに置き換えられないか？
 type Field struct {
-	Name      string
-	Type      gotypes.Type
-	Tags      []string
-	FieldKind FieldKind
+	Name     string
+	Type     gotypes.Type
+	Tags     []string
+	TypeKind TypeKind
 }
 
-func newField(fieldKind FieldKind, fieldType gotypes.Type, name string, tags []string) *Field {
+func newField(typeKind TypeKind, fieldType gotypes.Type, name string, tags []string) *Field {
 	return &Field{
-		Name:      name,
-		Type:      fieldType,
-		Tags:      tags,
-		FieldKind: fieldKind,
+		Name:     name,
+		Type:     fieldType,
+		Tags:     tags,
+		TypeKind: typeKind,
 	}
 }
 
 func (r *Field) goVar() *gotypes.Var {
-	return gotypes.NewField(0, nil, templates.ToGo(r.Name), r.Type, r.FieldKind == FragmentSpread)
+	return gotypes.NewField(0, nil, templates.ToGo(r.Name), r.Type, r.TypeKind == FragmentSpread)
 }
 
 func (r *Field) joinTags() string {
