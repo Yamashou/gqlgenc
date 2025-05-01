@@ -14,17 +14,15 @@ type Field struct {
 	Name             string
 	Type             types.Type
 	Tags             []string
-	Fields           Fields
 	IsFragmentSpread bool
 	IsInlineFragment bool
 }
 
-func NewField(name string, fieldType types.Type, tags []string, fields Fields, isFragmentSpread bool, isInlineFragment bool) *Field {
+func NewField(name string, fieldType types.Type, tags []string, isFragmentSpread bool, isInlineFragment bool) *Field {
 	return &Field{
 		Name:             name,
 		Type:             fieldType,
 		Tags:             tags,
-		Fields:           fields,
 		IsFragmentSpread: isFragmentSpread,
 		IsInlineFragment: isInlineFragment,
 	}
@@ -38,22 +36,22 @@ func (r *Field) joinTags() string {
 	return strings.Join(r.Tags, " ")
 }
 
-type GoStruct struct {
+type GoType struct {
 	isFragmentSpread bool
 	isBasicType      bool
 	goType           *types.Struct
 }
 
-func NewGoStruct(isFragmentSpread bool, isBasicType bool, goType *types.Struct) *GoStruct {
-	return &GoStruct{
+func NewGoType(isFragmentSpread bool, isBasicType bool, goType *types.Struct) *GoType {
+	return &GoType{
 		isFragmentSpread: isFragmentSpread,
 		isBasicType:      isBasicType,
 		goType:           goType,
 	}
 }
 
-func NewGoStructByFields(fields Fields) *GoStruct {
-	return NewGoStruct(fields.isFragmentSpread(), fields.isBasicType(), fields.goStructType())
+func NewGoTypeByFields(fields Fields) *GoType {
+	return NewGoType(fields.isFragmentSpread(), fields.isBasicType(), fields.goTypeType())
 }
 
 type Fields []*Field
@@ -70,7 +68,7 @@ func (fs Fields) isBasicType() bool {
 	return len(fs) == 0
 }
 
-func (fs Fields) goStructType() *types.Struct {
+func (fs Fields) goTypeType() *types.Struct {
 	// Go fields do not allow fields with the same name, so we remove duplicates
 	fields := fs.uniqueByName()
 	vars := make([]*types.Var, 0, len(fields))

@@ -47,9 +47,14 @@ func (g *Generator) goTypes() []gotypes.Type {
 
 func (g *Generator) createTypesByOperations(operations graphql.OperationList) {
 	for _, operation := range operations {
-		fields := g.newFields(operation.SelectionSet, operation.Name)
-		g.newGoNamedTypeByFields(false, operation.Name, NewGoStructByFields(fields))
+		goType := g.newGoType(operation.SelectionSet, operation.Name)
+		g.newGoNamedTypeByGoType(false, operation.Name, goType.goType)
 	}
+}
+
+// TODO: GoType消せないか検討
+func (g *Generator) newGoType(selectionSet graphql.SelectionSet, parentTypeName string) *GoType {
+	return NewGoTypeByFields(g.newFields(selectionSet, parentTypeName))
 }
 
 // When parentTypeName is empty, the parent is an inline fragment
@@ -67,23 +72,26 @@ func (g *Generator) newField(selection graphql.Selection, parentTypeName string)
 	switch sel := selection.(type) {
 	case *graphql.Field:
 		typeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
-		fields := g.newFields(sel.SelectionSet, typeName)
-		t := g.findGoTypeByFields(sel, typeName, NewGoStructByFields(fields))
+		goType := g.newGoType(sel.SelectionSet, typeName)
+		// TODO: findOrNewにできる?
+		t := g.findGoTypeByGoType(sel, typeName, goType)
 		tags := []string{
 			fmt.Sprintf(`json:"%s%s"`, sel.Alias, g.jsonOmitTag(sel)),
 			fmt.Sprintf(`graphql:"%s"`, sel.Alias),
 		}
-		return NewField(sel.Name, t, tags, fields, false, false)
+		return NewField(sel.Name, t, tags, false, false)
 	case *graphql.FragmentSpread:
-		fields := g.newFields(sel.Definition.SelectionSet, sel.Name)
-		t := g.newGoNamedTypeByFields(true, sel.Name, NewGoStructByFields(fields))
-		return NewField(sel.Name, t, []string{}, fields, true, false)
+		goType := g.newGoType(sel.Definition.SelectionSet, sel.Name)
+		// When FragmentSpread, create named type
+		// TODO: findOrNewにできる?
+		t := g.newGoNamedTypeByGoType(true, sel.Name, goType.goType)
+		return NewField(sel.Name, t, []string{}, true, false)
 	case *graphql.InlineFragment:
-		// InlineFragment keeps child elements directly as a struct, so we set types.Struct to the Type field instead of creating a NamedType.
-		fields := g.newFields(sel.SelectionSet, "")
-		t := fields.goStructType()
+		goType := g.newGoType(sel.SelectionSet, "")
+		// When InlineFragment, not create named type
+		t := goType.goType
 		tags := []string{fmt.Sprintf(`graphql:"... on %s"`, sel.TypeCondition)}
-		return NewField(sel.TypeCondition, t, tags, fields, false, true)
+		return NewField(sel.TypeCondition, t, tags, false, true)
 	}
 	panic("unexpected selection type")
 }
@@ -137,9 +145,9 @@ func (g *Generator) operationArguments(variableDefinitions graphql.VariableDefin
 	return argumentTypes
 }
 
-func (g *Generator) newGoNamedTypeByFields(nonnull bool, typeName string, goStruct *GoStruct) gotypes.Type {
+func (g *Generator) newGoNamedTypeByGoType(nonnull bool, typeName string, t gotypes.Type) gotypes.Type {
 	var namedType gotypes.Type
-	namedType = gotypes.NewNamed(gotypes.NewTypeName(0, g.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), goStruct.goType, nil)
+	namedType = gotypes.NewNamed(gotypes.NewTypeName(0, g.cfg.GQLGencConfig.QueryGen.Pkg(), typeName, nil), t, nil)
 	if !nonnull {
 		namedType = gotypes.NewPointer(namedType)
 	}
@@ -148,22 +156,23 @@ func (g *Generator) newGoNamedTypeByFields(nonnull bool, typeName string, goStru
 	return namedType
 }
 
-func (g *Generator) findGoTypeByFields(field *graphql.Field, fieldTypeName string, goStruct *GoStruct) gotypes.Type {
+// TODO: findOrNewにできる?
+func (g *Generator) findGoTypeByGoType(field *graphql.Field, fieldTypeName string, goType *GoType) gotypes.Type {
 	switch {
-	case goStruct.isBasicType:
+	case goType.isBasicType:
 		t := g.findGoType(field.Definition.Type)
 		return t
-	case goStruct.isFragmentSpread:
+	case goType.isFragmentSpread:
 		// Fragment fields are nonnull
 		// Export Fragment types. Fragments are explicitly created by users.
-		t := g.newGoNamedTypeByFields(field.Definition.Type.NonNull, fieldTypeName, goStruct)
+		t := g.newGoNamedTypeByGoType(field.Definition.Type.NonNull, fieldTypeName, goType.goType)
 		return t
 	default:
 		if !g.cfg.GQLGencConfig.ExportQueryType {
 			// default: query type is not exported
 			fieldTypeName = firstLower(fieldTypeName)
 		}
-		t := g.newGoNamedTypeByFields(field.Definition.Type.NonNull, fieldTypeName, goStruct)
+		t := g.newGoNamedTypeByGoType(field.Definition.Type.NonNull, fieldTypeName, goType.goType)
 		return t
 	}
 }
