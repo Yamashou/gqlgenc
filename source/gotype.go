@@ -126,12 +126,19 @@ func (g *GoTypeGenerator) jsonOmitTag(field *graphql.Field) string {
 func fieldTypeName(parentTypeName, fieldName string, exportQueryType bool) string {
 	if exportQueryType {
 		fmt.Printf("fieldTypeName: %s %s\n", parentTypeName, fieldName)
-		fmt.Printf("toGo: %s %s\n", templates.ToGo(parentTypeName), templates.ToGo(fieldName))
-		return fmt.Sprintf("%s_%s", templates.ToGo(parentTypeName), templates.ToGo(fieldName))
+		fmt.Printf("toGo: %s %s\n", parentTypeName, templates.ToGo(fieldName))
+		return fmt.Sprintf("%s_%s", parentTypeName, templates.ToGo(fieldName))
 	}
 
 	// default: query type is not exported
-	return fmt.Sprintf("%s_%s", templates.ToGoPrivate(parentTypeName), templates.ToGo(fieldName))
+	return fmt.Sprintf("%s_%s", firstLower(parentTypeName), templates.ToGo(fieldName))
+}
+
+func firstLower(s string) string {
+	if s == "" {
+		return ""
+	}
+	return strings.ToLower(s[:1]) + s[1:]
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
