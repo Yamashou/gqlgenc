@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain"
+	"github.com/Yamashou/gqlgenc/v3/testdata/integration/basic/domain"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )

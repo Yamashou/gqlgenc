@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"slices"
 	"strings"
 	"syscall"
@@ -20,9 +21,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 
 	"github.com/Yamashou/gqlgenc/v3/client"
-	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain"
-	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/query"
-	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/schema"
+	"github.com/Yamashou/gqlgenc/v3/testdata/integration/basic/domain"
+	"github.com/Yamashou/gqlgenc/v3/testdata/integration/basic/query"
+	"github.com/Yamashou/gqlgenc/v3/testdata/integration/basic/schema"
 )
 
 func Test_IntegrationTest(t *testing.T) {
@@ -37,7 +38,7 @@ func Test_IntegrationTest(t *testing.T) {
 	}{
 		{
 			name:    "fragment test",
-			testDir: "testdata/integration/fragment/",
+			testDir: "testdata/integration/basic/",
 			want: want{
 				file: "./want/query_gen.go.txt",
 				userOperation: &domain.UserOperation{
@@ -146,7 +147,7 @@ func Test_IntegrationTest(t *testing.T) {
 			wantFilePath := tt.want.file
 			compareFiles(t, wantFilePath, actualFilePath)
 
-			addImport(t, "query/client_gen.go")
+			addImport(t, tt.testDir, "query/client_gen.go")
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// send request test
@@ -220,7 +221,7 @@ func server(addr string) *http.Server {
 	}
 }
 
-func addImport(t *testing.T, clientGenFilePath string) {
+func addImport(t *testing.T, testDir, clientGenFilePath string) {
 	t.Helper()
 	// Add new import statement to client_gen.go file
 	content, err := os.ReadFile(clientGenFilePath)
@@ -250,10 +251,11 @@ func addImport(t *testing.T, clientGenFilePath string) {
 	}
 
 	// Add new import after the package query declaration line
+	importPath := filepath.Join("github.com/Yamashou/gqlgenc/v3/", testDir, "domain")
 	modifiedContent := slices.Concat(
 		lines[:packageLineIndex+1],
 		slices.Concat(
-			[]string{"", "import \"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain\""},
+			[]string{"", fmt.Sprintf(`import "%s"`, importPath)},
 			lines[packageLineIndex+1:],
 		),
 	)

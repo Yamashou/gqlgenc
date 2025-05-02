@@ -45,25 +45,21 @@ func genCode(t types.Type) string {
 	if ok {
 		t = pointerType.Elem()
 	}
-	namedType := t.(*types.Named)                        //nolint:forcetypeassert // if *types.Named, then panic
-	structType := namedType.Underlying().(*types.Struct) //nolint:forcetypeassert // if *types.Named, then panic
+	namedType := t.(*types.Named)                        //nolint:forcetypeassert // if not *types.Named, then panic
+	structType := namedType.Underlying().(*types.Struct) //nolint:forcetypeassert // if not *types.Struct, then panic
 	typeName := toString(namedType)
 
 	var buf bytes.Buffer
 	fmt.Fprintf(&buf, "type %s %s\n", typeName, toString(structType))
+	if nonnull := pointerType == nil; nonnull {
+		return buf.String()
+	}
+
 	for i := range structType.NumFields() {
 		field := structType.Field(i)
-
 		fieldName := field.Name()
-		if embedded := fieldName == ""; embedded {
-			continue
-		}
-
-		if nonnull := pointerType == nil; nonnull {
-			continue
-		}
-
 		fieldTypeName := toString(field.Type())
+
 		fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
 		fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
 		fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)

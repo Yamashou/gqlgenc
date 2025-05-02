@@ -6,7 +6,8 @@ package schema
 
 import (
 	"context"
-	"github.com/Yamashou/gqlgenc/v3/testdata/integration/fragment/domain"
+
+	"github.com/Yamashou/gqlgenc/v3/testdata/integration/basic/domain"
 )
 
 // User is the resolver for the user field.
