@@ -6,6 +6,7 @@ import (
 	"maps"
 	"slices"
 	"strings"
+	"unicode"
 
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
@@ -74,14 +75,14 @@ func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Sele
 }
 
 func (g *GoTypeGenerator) newTypeKindAndGoType(parentTypeName string, sel *graphql.Field) (TypeKind, gotypes.Type) {
-	fieldTypeName2 := fieldTypeName(parentTypeName, sel.Alias, g.cfg.GQLGencConfig.ExportQueryType)
-	fields := g.newFields(fieldTypeName2, sel.SelectionSet)
+	typeName := fieldTypeName(parentTypeName, sel.Alias, g.cfg.GQLGencConfig.ExportQueryType)
+	fields := g.newFields(typeName, sel.SelectionSet)
 	if len(fields) == 0 {
 		t := g.findGoType(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
 		return Scalar, t
 	}
 
-	t := g.newGoNamedType(fieldTypeName2, sel.Definition.Type.NonNull, fields.goStructType())
+	t := g.newGoNamedType(typeName, sel.Definition.Type.NonNull, fields.goStructType())
 	return Object, t
 }
 
@@ -125,20 +126,29 @@ func (g *GoTypeGenerator) jsonOmitTag(field *graphql.Field) string {
 
 func fieldTypeName(parentTypeName, fieldName string, exportQueryType bool) string {
 	if exportQueryType {
-		fmt.Printf("fieldTypeName: %s %s\n", parentTypeName, fieldName)
-		fmt.Printf("toGo: %s %s\n", parentTypeName, templates.ToGo(fieldName))
-		return fmt.Sprintf("%s_%s", parentTypeName, templates.ToGo(fieldName))
+		return fmt.Sprintf("%s_%s", firstUpper(parentTypeName), templates.ToGo(fieldName))
 	}
 
 	// default: query type is not exported
 	return fmt.Sprintf("%s_%s", firstLower(parentTypeName), templates.ToGo(fieldName))
 }
 
-func firstLower(s string) string {
-	if s == "" {
-		return ""
+func firstUpper(s string) string {
+	if len(s) == 0 {
+		return s
 	}
-	return strings.ToLower(s[:1]) + s[1:]
+	r := []rune(s)
+	r[0] = unicode.ToUpper(r[0])
+	return string(r)
+}
+
+func firstLower(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	r := []rune(s)
+	r[0] = unicode.ToLower(r[0])
+	return string(r)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
