@@ -7,9 +7,6 @@ import (
 	"slices"
 	"strings"
 
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
-
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 
@@ -77,19 +74,14 @@ func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Sele
 }
 
 func (g *GoTypeGenerator) newTypeKindAndGoType(parentTypeName string, sel *graphql.Field) (TypeKind, gotypes.Type) {
-	fieldTypeName := layerTypeName(parentTypeName, templates.ToGo(sel.Alias))
-	fields := g.newFields(fieldTypeName, sel.SelectionSet)
-
+	fieldTypeName2 := fieldTypeName(parentTypeName, sel.Alias, g.cfg.GQLGencConfig.ExportQueryType)
+	fields := g.newFields(fieldTypeName2, sel.SelectionSet)
 	if len(fields) == 0 {
 		t := g.findGoType(sel.Definition.Type.Name(), sel.Definition.Type.NonNull)
 		return Scalar, t
 	}
 
-	if !g.cfg.GQLGencConfig.ExportQueryType {
-		// default: query type is not exported
-		fieldTypeName = templates.ToGoPrivate(fieldTypeName)
-	}
-	t := g.newGoNamedType(fieldTypeName, sel.Definition.Type.NonNull, fields.goStructType())
+	t := g.newGoNamedType(fieldTypeName2, sel.Definition.Type.NonNull, fields.goStructType())
 	return Object, t
 }
 
@@ -131,8 +123,15 @@ func (g *GoTypeGenerator) jsonOmitTag(field *graphql.Field) string {
 	return jsonOmitTag
 }
 
-func layerTypeName(parentTypeName, fieldName string) string {
-	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(parentTypeName), fieldName)
+func fieldTypeName(parentTypeName, fieldName string, exportQueryType bool) string {
+	if exportQueryType {
+		fmt.Printf("fieldTypeName: %s %s\n", parentTypeName, fieldName)
+		fmt.Printf("toGo: %s %s\n", templates.ToGo(parentTypeName), templates.ToGo(fieldName))
+		return fmt.Sprintf("%s_%s", templates.ToGo(parentTypeName), templates.ToGo(fieldName))
+	}
+
+	// default: query type is not exported
+	return fmt.Sprintf("%s_%s", templates.ToGoPrivate(parentTypeName), templates.ToGo(fieldName))
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
