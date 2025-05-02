@@ -8,9 +8,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
-	"slices"
-	"strings"
 	"syscall"
 	"testing"
 	"time"
@@ -148,8 +145,6 @@ func Test_IntegrationTest(t *testing.T) {
 			wantFilePath := tt.want.file
 			compareFiles(t, wantFilePath, actualFilePath)
 
-			// addImport(t, tt.testDir, "query/client_gen.go")
-
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// send request test
 			ctx := t.Context()
@@ -267,51 +262,6 @@ func server(addr string) *http.Server {
 		ReadHeaderTimeout: 1 * time.Minute,
 		WriteTimeout:      60 * time.Minute,
 		IdleTimeout:       2 * time.Minute,
-	}
-}
-
-func addImport(t *testing.T, testDir, clientGenFilePath string) {
-	t.Helper()
-	// Add new import statement to client_gen.go file
-	content, err := os.ReadFile(clientGenFilePath)
-	if err != nil {
-		t.Errorf("error reading file: %v", err)
-		return
-	}
-
-	lines := strings.Split(string(content), "\n")
-	if len(lines) < 1 {
-		t.Errorf("file has invalid format")
-		return
-	}
-
-	// Find the line with package query declaration
-	packageLineIndex := -1
-	for i, line := range lines {
-		if strings.HasPrefix(line, "package ") {
-			packageLineIndex = i
-			break
-		}
-	}
-
-	if packageLineIndex == -1 {
-		t.Errorf("package query declaration not found")
-		return
-	}
-
-	// Add new import after the package query declaration line
-	importPath := filepath.Join("github.com/Yamashou/gqlgenc/v3/", testDir, "domain")
-	modifiedContent := slices.Concat(
-		lines[:packageLineIndex+1],
-		slices.Concat(
-			[]string{"", fmt.Sprintf(`import "%s"`, importPath)},
-			lines[packageLineIndex+1:],
-		),
-	)
-
-	// Write back to file
-	if err := os.WriteFile(clientGenFilePath, []byte(strings.Join(modifiedContent, "\n")), 0o600); err != nil {
-		t.Errorf("error writing to client_gen.go: %v", err)
 	}
 }
 
