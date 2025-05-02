@@ -17,6 +17,7 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 
@@ -186,7 +187,7 @@ func Test_IntegrationTest(t *testing.T) {
 			{
 				input := domain.UpdateUserInput{
 					ID:   "1",
-					Name: nil,
+					Name: graphql.OmittableOf[*string](nil),
 				}
 				updateUser, err := c.UpdateUser(ctx, input)
 				if err != nil {
@@ -196,11 +197,23 @@ func Test_IntegrationTest(t *testing.T) {
 					t.Errorf("expected name to be 'nil', got '%s'", updateUser.GetUpdateUser().User.Name)
 				}
 			}
-
 			{
 				input := domain.UpdateUserInput{
 					ID:   "1",
-					Name: ptr("Sam Smith"),
+					Name: graphql.Omittable[*string]{},
+				}
+				updateUser, err := c.UpdateUser(ctx, input)
+				if err != nil {
+					t.Errorf("request failed: %v", err)
+				}
+				if updateUser.GetUpdateUser().User.Name != "undefined" {
+					t.Errorf("expected name to be 'undefined', got '%s'", updateUser.GetUpdateUser().User.Name)
+				}
+			}
+			{
+				input := domain.UpdateUserInput{
+					ID:   "1",
+					Name: graphql.OmittableOf[*string](ptr("Sam Smith")),
 				}
 				updateUser, err := c.UpdateUser(ctx, input)
 				if err != nil {

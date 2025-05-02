@@ -3606,7 +3606,7 @@ func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, o
 			if err != nil {
 				return it, err
 			}
-			it.Name = data
+			it.Name = graphql.OmittableOf(data)
 		}
 	}
 
