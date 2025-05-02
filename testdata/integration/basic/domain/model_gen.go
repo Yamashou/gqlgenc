@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"io"
 	"strconv"
-
-	"github.com/99designs/gqlgen/graphql"
 )
 
 type Address interface {
@@ -59,8 +57,8 @@ type Query struct {
 }
 
 type UpdateUserInput struct {
-	ID   string                     `json:"id"`
-	Name graphql.Omittable[*string] `json:"name,omitempty,omitzero"`
+	ID   string  `json:"id"`
+	Name *string `json:"name,omitempty,omitzero"`
 }
 
 type UpdateUserPayload struct {

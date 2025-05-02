@@ -13,15 +13,10 @@ import (
 // UpdateUser is the resolver for the updateUser field.
 func (r *mutationResolver) UpdateUser(ctx context.Context, input *domain.UpdateUserInput) (*domain.UpdateUserPayload, error) {
 	var name string
-	n, ok := input.Name.ValueOK()
-	if ok {
-		if n == nil {
-			name = "nil"
-		} else {
-			name = *n
-		}
+	if input.Name == nil {
+		name = "nil"
 	} else {
-		name = "undefined"
+		name = *input.Name
 	}
 	return &domain.UpdateUserPayload{
 		User: &domain.User{
