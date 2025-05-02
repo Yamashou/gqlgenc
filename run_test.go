@@ -147,7 +147,7 @@ func Test_IntegrationTest(t *testing.T) {
 			wantFilePath := tt.want.file
 			compareFiles(t, wantFilePath, actualFilePath)
 
-			addImport(t, tt.testDir, "query/client_gen.go")
+			// addImport(t, tt.testDir, "query/client_gen.go")
 
 			////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// send request test

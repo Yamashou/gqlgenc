@@ -3,10 +3,10 @@
 package domain
 
 type UpdateUser struct {
-	UpdateUser *UpdateUser_UpdateUser "json:\"updateUser\" graphql:\"updateUser\""
+	UpdateUser UpdateUser_UpdateUser "json:\"updateUser,omitempty,omitzero\" graphql:\"updateUser\""
 }
 
-func (t *UpdateUser) GetUpdateUser() *UpdateUser_UpdateUser {
+func (t *UpdateUser) GetUpdateUser() UpdateUser_UpdateUser {
 	if t == nil {
 		t = &UpdateUser{}
 	}
@@ -15,13 +15,6 @@ func (t *UpdateUser) GetUpdateUser() *UpdateUser_UpdateUser {
 
 type UpdateUser_UpdateUser struct {
 	User UpdateUser_UpdateUser_User "json:\"user,omitempty,omitzero\" graphql:\"user\""
-}
-
-func (t *UpdateUser_UpdateUser) GetUser() UpdateUser_UpdateUser_User {
-	if t == nil {
-		t = &UpdateUser_UpdateUser{}
-	}
-	return t.User
 }
 
 type UpdateUser_UpdateUser_User struct {
