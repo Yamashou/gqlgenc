@@ -4,7 +4,7 @@ fmt:
 	goimports -local github.com/Yamashou/gqlgenc -w . && gofumpt -extra -w . && gci write -s Standard -s Default .
 
 lint:
-	golangci-lint cache clean && golangci-lint run
+	go tool golangci-lint cache clean && go tool golangci-lint run
 
 test:
 	go test -v ./...

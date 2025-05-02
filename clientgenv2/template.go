@@ -47,6 +47,38 @@ type GenGettersGenerator struct {
 	ClientPackageName string
 }
 
+func (g *GenGettersGenerator) GenFunc() func(name string, p types.Type) string {
+	// This method returns a string of getters for a struct.
+	// The idea is to be able to chain calls safely without having to check for nil.
+	// To make this work we need to return a pointer to the struct if the field is a struct.
+	return func(name string, p types.Type) string {
+		var it *types.Struct
+		it, ok := p.(*types.Struct)
+		if !ok {
+			return ""
+		}
+		var buf bytes.Buffer
+
+		for i := range it.NumFields() {
+			field := it.Field(i)
+
+			returns := g.returnTypeName(field.Type(), false)
+
+			buf.WriteString("func (t *" + name + ") Get" + field.Name() + "() " + returns + "{\n")
+			buf.WriteString("if t == nil {\n t = &" + name + "{}\n}\n")
+
+			pointerOrNot := ""
+			if _, ok := field.Type().(*types.Named); ok {
+				pointerOrNot = "&"
+			}
+
+			buf.WriteString("return " + pointerOrNot + "t." + field.Name() + "\n}\n")
+		}
+
+		return buf.String()
+	}
+}
+
 func (g *GenGettersGenerator) returnTypeName(t types.Type, nested bool) string {
 	switch it := t.(type) {
 	case *types.Basic:
@@ -77,38 +109,6 @@ func (g *GenGettersGenerator) returnTypeName(t types.Type, nested bool) string {
 		return g.returnTypeName(it.Underlying(), nested)
 	default:
 		return fmt.Sprintf("%T----", it)
-	}
-}
-
-func (g *GenGettersGenerator) GenFunc() func(name string, p types.Type) string {
-	// This method returns a string of getters for a struct.
-	// The idea is to be able to chain calls safely without having to check for nil.
-	// To make this work we need to return a pointer to the struct if the field is a struct.
-	return func(name string, p types.Type) string {
-		var it *types.Struct
-		it, ok := p.(*types.Struct)
-		if !ok {
-			return ""
-		}
-		var buf bytes.Buffer
-
-		for i := range it.NumFields() {
-			field := it.Field(i)
-
-			returns := g.returnTypeName(field.Type(), false)
-
-			buf.WriteString("func (t *" + name + ") Get" + field.Name() + "() " + returns + "{\n")
-			buf.WriteString("if t == nil {\n t = &" + name + "{}\n}\n")
-
-			pointerOrNot := ""
-			if _, ok := field.Type().(*types.Named); ok {
-				pointerOrNot = "&"
-			}
-
-			buf.WriteString("return " + pointerOrNot + "t." + field.Name() + "\n}\n")
-		}
-
-		return buf.String()
 	}
 }
 
