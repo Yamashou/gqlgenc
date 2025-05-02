@@ -171,16 +171,52 @@ func Test_IntegrationTest(t *testing.T) {
 				fmt.Sprintf("http://localhost:%s/graphql", port),
 			))
 
-			userOperation, err := c.UserOperation(ctx)
-			if err != nil {
-				t.Errorf("request failed: %v", err)
+			// Query
+			{
+				userOperation, err := c.UserOperation(ctx)
+				if err != nil {
+					t.Errorf("request failed: %v", err)
+				}
+				if diff := cmp.Diff(tt.want.userOperation, userOperation); diff != "" {
+					t.Errorf("integrationTest mismatch (-want +got):\n%s", diff)
+				}
 			}
 
-			if diff := cmp.Diff(tt.want.userOperation, userOperation); diff != "" {
-				t.Errorf("integrationTest mismatch (-want +got):\n%s", diff)
+			// Mutation
+			{
+				input := domain.UpdateUserInput{
+					ID:   "1",
+					Name: nil,
+				}
+				updateUser, err := c.UpdateUser(ctx, input)
+				if err != nil {
+					t.Errorf("request failed: %v", err)
+				}
+				if updateUser.GetUpdateUser().User.Name != "nil" {
+					t.Errorf("expected name to be 'nil', got '%s'", updateUser.GetUpdateUser().User.Name)
+				}
 			}
+
+			{
+				input := domain.UpdateUserInput{
+					ID:   "1",
+					Name: ptr("Sam Smith"),
+				}
+				updateUser, err := c.UpdateUser(ctx, input)
+				if err != nil {
+					t.Errorf("request failed: %v", err)
+				}
+				if updateUser.GetUpdateUser().User.Name != "Sam Smith" {
+					t.Errorf("expected name to be 'Sam Smith', got '%s'", updateUser.GetUpdateUser().User.Name)
+				}
+			}
+
 		})
 	}
+}
+
+func ptr[T any](v T) *T {
+	return &v
 }
 
 func listenAndServe(ctx context.Context, t *testing.T, port string) {
