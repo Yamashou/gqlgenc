@@ -39,6 +39,7 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	Mutation() MutationResolver
 	Query() QueryResolver
 	User() UserResolver
 }
@@ -47,6 +48,10 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Mutation struct {
+		UpdateUser func(childComplexity int, input *domain.UpdateUserInput) int
+	}
+
 	PrivateAddress struct {
 		ID      func(childComplexity int) int
 		Private func(childComplexity int) int
@@ -74,6 +79,10 @@ type ComplexityRoot struct {
 		User         func(childComplexity int) int
 	}
 
+	UpdateUserPayload struct {
+		User func(childComplexity int) int
+	}
+
 	User struct {
 		Address         func(childComplexity int) int
 		ID              func(childComplexity int) int
@@ -84,6 +93,9 @@ type ComplexityRoot struct {
 	}
 }
 
+type MutationResolver interface {
+	UpdateUser(ctx context.Context, input *domain.UpdateUserInput) (*domain.UpdateUserPayload, error)
+}
 type QueryResolver interface {
 	User(ctx context.Context) (*domain.User, error)
 	OptionalUser(ctx context.Context) (*domain.User, error)
@@ -113,6 +125,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Mutation.updateUser":
+		if e.complexity.Mutation.UpdateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(*domain.UpdateUserInput)), true
 
 	case "PrivateAddress.id":
 		if e.complexity.PrivateAddress.ID == nil {
@@ -198,6 +222,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.User(childComplexity), true
 
+	case "UpdateUserPayload.user":
+		if e.complexity.UpdateUserPayload.User == nil {
+			break
+		}
+
+		return e.complexity.UpdateUserPayload.User(childComplexity), true
+
 	case "User.address":
 		if e.complexity.User.Address == nil {
 			break
@@ -247,7 +278,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputUpdateUserInput,
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -280,6 +313,21 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 
 			return &response
+		}
+	case ast.Mutation:
+		return func(ctx context.Context) *graphql.Response {
+			if !first {
+				return nil
+			}
+			first = false
+			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
+			var buf bytes.Buffer
+			data.MarshalGQL(&buf)
+
+			return &graphql.Response{
+				Data: buf.Bytes(),
+			}
 		}
 
 	default:
@@ -347,6 +395,34 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := ec.field_Mutation_updateUser_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_updateUser_argsInput(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*domain.UpdateUserInput, error) {
+	if _, ok := rawArgs["input"]; !ok {
+		var zeroVal *domain.UpdateUserInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalOUpdateUserInput2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUpdateUserInput(ctx, tmp)
+	}
+
+	var zeroVal *domain.UpdateUserInput
+	return zeroVal, nil
+}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
@@ -495,6 +571,65 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_updateUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateUser(rctx, fc.Args["input"].(*domain.UpdateUserInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*domain.UpdateUserPayload)
+	fc.Result = res
+	return ec.marshalNUpdateUserPayload2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUpdateUserPayload(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "user":
+				return ec.fieldContext_UpdateUserPayload_user(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UpdateUserPayload", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _PrivateAddress_id(ctx context.Context, field graphql.CollectedField, obj *domain.PrivateAddress) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_PrivateAddress_id(ctx, field)
@@ -917,7 +1052,7 @@ func (ec *executionContext) _PublicProfile_status(ctx context.Context, field gra
 	}
 	res := resTmp.(domain.Status)
 	fc.Result = res
-	return ec.marshalNStatus2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐStatus(ctx, field.Selections, res)
+	return ec.marshalNStatus2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_PublicProfile_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -961,7 +1096,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 	}
 	res := resTmp.(*domain.User)
 	fc.Result = res
-	return ec.marshalNUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐUser(ctx, field.Selections, res)
+	return ec.marshalNUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1016,7 +1151,7 @@ func (ec *executionContext) _Query_optionalUser(ctx context.Context, field graph
 	}
 	res := resTmp.(*domain.User)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_optionalUser(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1177,6 +1312,64 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _UpdateUserPayload_user(ctx context.Context, field graphql.CollectedField, obj *domain.UpdateUserPayload) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdateUserPayload_user(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.User, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*domain.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdateUserPayload_user(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdateUserPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "profile":
+				return ec.fieldContext_User_profile(ctx, field)
+			case "optionalProfile":
+				return ec.fieldContext_User_optionalProfile(ctx, field)
+			case "address":
+				return ec.fieldContext_User_address(ctx, field)
+			case "optionalAddress":
+				return ec.fieldContext_User_optionalAddress(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *domain.User) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_User_id(ctx, field)
 	if err != nil {
@@ -1293,7 +1486,7 @@ func (ec *executionContext) _User_profile(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(domain.Profile)
 	fc.Result = res
-	return ec.marshalNProfile2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐProfile(ctx, field.Selections, res)
+	return ec.marshalNProfile2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐProfile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_profile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1334,7 +1527,7 @@ func (ec *executionContext) _User_optionalProfile(ctx context.Context, field gra
 	}
 	res := resTmp.(domain.Profile)
 	fc.Result = res
-	return ec.marshalOProfile2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐProfile(ctx, field.Selections, res)
+	return ec.marshalOProfile2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐProfile(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_optionalProfile(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1378,7 +1571,7 @@ func (ec *executionContext) _User_address(ctx context.Context, field graphql.Col
 	}
 	res := resTmp.(domain.Address)
 	fc.Result = res
-	return ec.marshalNAddress2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐAddress(ctx, field.Selections, res)
+	return ec.marshalNAddress2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐAddress(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_address(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1419,7 +1612,7 @@ func (ec *executionContext) _User_optionalAddress(ctx context.Context, field gra
 	}
 	res := resTmp.(domain.Address)
 	fc.Result = res
-	return ec.marshalOAddress2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐAddress(ctx, field.Selections, res)
+	return ec.marshalOAddress2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐAddress(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_optionalAddress(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3386,6 +3579,40 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, obj any) (domain.UpdateUserInput, error) {
+	var it domain.UpdateUserInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id", "name"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = graphql.OmittableOf(data)
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3439,6 +3666,55 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var mutationImplementors = []string{"Mutation"}
+
+func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Mutation",
+	})
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Mutation")
+		case "updateUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var privateAddressImplementors = []string{"PrivateAddress", "Address"}
 
@@ -3691,6 +3967,45 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var updateUserPayloadImplementors = []string{"UpdateUserPayload"}
+
+func (ec *executionContext) _UpdateUserPayload(ctx context.Context, sel ast.SelectionSet, obj *domain.UpdateUserPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updateUserPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdateUserPayload")
+		case "user":
+			out.Values[i] = ec._UpdateUserPayload_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4231,7 +4546,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAddress2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐAddress(ctx context.Context, sel ast.SelectionSet, v domain.Address) graphql.Marshaler {
+func (ec *executionContext) marshalNAddress2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐAddress(ctx context.Context, sel ast.SelectionSet, v domain.Address) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4247,6 +4562,7 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (
 }
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4262,6 +4578,7 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (str
 }
 
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4271,7 +4588,7 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNProfile2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐProfile(ctx context.Context, sel ast.SelectionSet, v domain.Profile) graphql.Marshaler {
+func (ec *executionContext) marshalNProfile2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐProfile(ctx context.Context, sel ast.SelectionSet, v domain.Profile) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4281,13 +4598,13 @@ func (ec *executionContext) marshalNProfile2githubᚗcomᚋYamashouᚋgqlgencᚋ
 	return ec._Profile(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNStatus2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐStatus(ctx context.Context, v any) (domain.Status, error) {
+func (ec *executionContext) unmarshalNStatus2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐStatus(ctx context.Context, v any) (domain.Status, error) {
 	var res domain.Status
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNStatus2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐStatus(ctx context.Context, sel ast.SelectionSet, v domain.Status) graphql.Marshaler {
+func (ec *executionContext) marshalNStatus2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐStatus(ctx context.Context, sel ast.SelectionSet, v domain.Status) graphql.Marshaler {
 	return v
 }
 
@@ -4297,6 +4614,7 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) 
 }
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4306,11 +4624,25 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNUser2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐUser(ctx context.Context, sel ast.SelectionSet, v domain.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUpdateUserPayload2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUpdateUserPayload(ctx context.Context, sel ast.SelectionSet, v domain.UpdateUserPayload) graphql.Marshaler {
+	return ec._UpdateUserPayload(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUpdateUserPayload2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUpdateUserPayload(ctx context.Context, sel ast.SelectionSet, v *domain.UpdateUserPayload) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._UpdateUserPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNUser2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUser(ctx context.Context, sel ast.SelectionSet, v domain.User) graphql.Marshaler {
 	return ec._User(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐUser(ctx context.Context, sel ast.SelectionSet, v *domain.User) graphql.Marshaler {
+func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUser(ctx context.Context, sel ast.SelectionSet, v *domain.User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -4374,6 +4706,7 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Con
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4562,6 +4895,7 @@ func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v a
 }
 
 func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4571,7 +4905,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) marshalOAddress2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐAddress(ctx context.Context, sel ast.SelectionSet, v domain.Address) graphql.Marshaler {
+func (ec *executionContext) marshalOAddress2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐAddress(ctx context.Context, sel ast.SelectionSet, v domain.Address) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4584,6 +4918,8 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalBoolean(v)
 	return res
 }
@@ -4600,6 +4936,8 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
 }
@@ -4616,11 +4954,13 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalInt(*v)
 	return res
 }
 
-func (ec *executionContext) marshalOProfile2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐProfile(ctx context.Context, sel ast.SelectionSet, v domain.Profile) graphql.Marshaler {
+func (ec *executionContext) marshalOProfile2githubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐProfile(ctx context.Context, sel ast.SelectionSet, v domain.Profile) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4639,11 +4979,21 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋfragmentᚋdomainᚐUser(ctx context.Context, sel ast.SelectionSet, v *domain.User) graphql.Marshaler {
+func (ec *executionContext) unmarshalOUpdateUserInput2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUpdateUserInput(ctx context.Context, v any) (*domain.UpdateUserInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋYamashouᚋgqlgencᚋv3ᚋtestdataᚋintegrationᚋbasicᚋdomainᚐUser(ctx context.Context, sel ast.SelectionSet, v *domain.User) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

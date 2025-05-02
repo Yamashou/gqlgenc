@@ -2,11 +2,25 @@ directive @goField(forceResolver: Boolean, name: String) on INPUT_FIELD_DEFINITI
 
 schema {
   query: Query
+  mutation: Mutation
 }
 
 type Query {
   user: User! @goField(forceResolver: true)
   optionalUser: User @goField(forceResolver: true)
+}
+
+type Mutation {
+  updateUser(input: UpdateUserInput) :UpdateUserPayload!
+}
+
+input UpdateUserInput {
+  id: ID!
+  name: String
+}
+
+type UpdateUserPayload {
+  user: User!
 }
 
 type User {

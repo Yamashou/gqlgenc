@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Address interface {
@@ -16,6 +18,9 @@ type Address interface {
 
 type Profile interface {
 	IsProfile()
+}
+
+type Mutation struct {
 }
 
 type PrivateAddress struct {
@@ -51,6 +56,15 @@ type PublicProfile struct {
 func (PublicProfile) IsProfile() {}
 
 type Query struct {
+}
+
+type UpdateUserInput struct {
+	ID   string                     `json:"id"`
+	Name graphql.Omittable[*string] `json:"name,omitempty,omitzero"`
+}
+
+type UpdateUserPayload struct {
+	User *User `json:"user"`
 }
 
 type User struct {
