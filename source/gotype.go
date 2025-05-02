@@ -59,7 +59,6 @@ func (g *GoTypeGenerator) newFields(parentTypeName string, selectionSet graphql.
 
 // When parentTypeName is empty, the parent is an inline fragment
 func (g *GoTypeGenerator) newField(parentTypeName string, selection graphql.Selection) *Field {
-	// TODO: Name or Alias
 	switch sel := selection.(type) {
 	case *graphql.Field:
 		typeKind, t := g.newTypeKindAndGoType(parentTypeName, sel)
@@ -182,7 +181,7 @@ func (r *Field) joinTags() string {
 type Fields []*Field
 
 func (fs Fields) goStructType() *gotypes.Struct {
-	// Go fields do not allow fields with the same name, so we remove duplicates
+	// Go struct fields do not allow fields with the same name, so we remove duplicates
 	fields := fs.uniqueByName()
 	vars := make([]*gotypes.Var, 0, len(fields))
 	for _, field := range fields {
