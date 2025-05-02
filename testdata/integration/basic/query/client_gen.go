@@ -8,6 +8,7 @@ import (
 	"context"
 
 	"github.com/Yamashou/gqlgenc/v3/client"
+	"github.com/Yamashou/gqlgenc/v3/testdata/integration/basic/domain"
 )
 
 type Client struct {
@@ -16,6 +17,19 @@ type Client struct {
 
 func NewClient(c *client.Client) *Client {
 	return &Client{client: c}
+}
+
+func (c *Client) UpdateUser(ctx context.Context, input domain.UpdateUserInput, options ...client.Option) (*domain.UpdateUser, error) {
+	vars := map[string]any{
+		"input": input,
+	}
+
+	var res domain.UpdateUser
+	if err := c.client.Post(ctx, "UpdateUser", domain.UpdateUserDocument, vars, &res, options...); err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 func (c *Client) UserOperation(ctx context.Context, options ...client.Option) (*domain.UserOperation, error) {

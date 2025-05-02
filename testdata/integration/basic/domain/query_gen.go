@@ -2,6 +2,32 @@
 
 package domain
 
+type UpdateUser struct {
+	UpdateUser *UpdateUser_UpdateUser "json:\"updateUser\" graphql:\"updateUser\""
+}
+
+func (t *UpdateUser) GetUpdateUser() *UpdateUser_UpdateUser {
+	if t == nil {
+		t = &UpdateUser{}
+	}
+	return t.UpdateUser
+}
+
+type UpdateUser_UpdateUser struct {
+	User UpdateUser_UpdateUser_User "json:\"user,omitempty,omitzero\" graphql:\"user\""
+}
+
+func (t *UpdateUser_UpdateUser) GetUser() UpdateUser_UpdateUser_User {
+	if t == nil {
+		t = &UpdateUser_UpdateUser{}
+	}
+	return t.User
+}
+
+type UpdateUser_UpdateUser_User struct {
+	Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
+}
+
 type UserFragment1 struct {
 	User struct {
 		Name string "json:\"name,omitempty,omitzero\" graphql:\"name\""
@@ -161,6 +187,14 @@ type UserOperation_User_Profile2 struct {
 	} "graphql:\"... on PublicProfile\""
 }
 
+const UpdateUserDocument = `mutation UpdateUser ($input: UpdateUserInput!) {
+	updateUser(input: $input) {
+		user {
+			name
+		}
+	}
+}
+`
 const UserOperationDocument = `query UserOperation {
 	user {
 		name
@@ -243,5 +277,6 @@ fragment UserFragment2 on User {
 `
 
 var DocumentOperationNames = map[string]string{
+	UpdateUserDocument:    "UpdateUser",
 	UserOperationDocument: "UserOperation",
 }

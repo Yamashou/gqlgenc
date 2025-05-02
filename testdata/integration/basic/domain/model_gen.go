@@ -64,7 +64,7 @@ type UpdateUserInput struct {
 }
 
 type UpdateUserPayload struct {
-	User *User `json:"user"`
+	User User `json:"user"`
 }
 
 type User struct {
