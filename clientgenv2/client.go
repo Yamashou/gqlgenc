@@ -32,9 +32,9 @@ func New(queryDocument *ast.QueryDocument, operationQueryDocuments []*ast.QueryD
 
 func NewWithQueryDocument(queryFilePaths []string, client config.PackageConfig, generateConfig *gqlgencConfig.GenerateConfig) *Plugin {
 	return &Plugin{
-		queryFilePaths:          queryFilePaths,
-		Client:                  client,
-		GenerateConfig:          generateConfig,
+		queryFilePaths: queryFilePaths,
+		Client:         client,
+		GenerateConfig: generateConfig,
 	}
 }
 
@@ -45,14 +45,14 @@ func (p *Plugin) Name() string {
 func (p *Plugin) MutateConfig(cfg *config.Config) error {
 	queryDocument := p.queryDocument
 	if queryDocument == nil {
-	querySources, err := parsequery.LoadQuerySources(p.queryFilePaths)
-	if err != nil {
-		return fmt.Errorf("load query sources failed: %w", err)
-	}
+		querySources, err := parsequery.LoadQuerySources(p.queryFilePaths)
+		if err != nil {
+			return fmt.Errorf("load query sources failed: %w", err)
+		}
 
-	queryDocument, err = parsequery.ParseQueryDocuments(cfg.Schema, querySources)
-	if err != nil {
-		return fmt.Errorf(": %w", err)
+		queryDocument, err = parsequery.ParseQueryDocuments(cfg.Schema, querySources)
+		if err != nil {
+			return fmt.Errorf(": %w", err)
 		}
 	}
 
