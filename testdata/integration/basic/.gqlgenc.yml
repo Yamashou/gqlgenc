@@ -13,4 +13,4 @@ gqlgen:
     filename: ./domain/model_gen.go
   enable_model_json_omitempty_tag: true
   enable_model_json_omitzero_tag: true
-  nullable_input_omittable: true
+  nullable_input_omittable: false

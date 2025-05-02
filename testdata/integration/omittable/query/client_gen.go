@@ -2,7 +2,7 @@
 
 package query
 
-import "github.com/Yamashou/gqlgenc/v3/testdata/integration/basic/domain"
+import "github.com/Yamashou/gqlgenc/v3/testdata/integration/omittable/domain"
 
 import (
 	"context"
