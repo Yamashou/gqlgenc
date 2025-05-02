@@ -60,9 +60,13 @@ func genCode(t types.Type) string {
 		fieldName := field.Name()
 		fieldTypeName := toString(field.Type())
 
-		fmt.Fprintf(&buf, "func (t *%s) Get%s() %s {\n", typeName, fieldName, fieldTypeName)
-		fmt.Fprintf(&buf, "\tif t == nil {\n\t\tt = &%s{}\n\t}\n", typeName)
-		fmt.Fprintf(&buf, "\treturn t.%s\n}\n", fieldName)
+		fmt.Fprintf(&buf, `func (t *%s) Get%s() %s {
+	if t == nil {
+		t = &%s{}
+	}
+	return t.%s
+}
+`, typeName, fieldName, fieldTypeName, typeName, fieldName)
 	}
 
 	return buf.String()
