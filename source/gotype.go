@@ -87,7 +87,7 @@ func (g *GoTypeGenerator) newTypeKindAndGoType(parentTypeName string, sel *graph
 
 	if !g.cfg.GQLGencConfig.ExportQueryType {
 		// default: query type is not exported
-		fieldTypeName = firstLower(fieldTypeName)
+		fieldTypeName = templates.ToGoPrivate(fieldTypeName)
 	}
 	t := g.newGoNamedType(fieldTypeName, sel.Definition.Type.NonNull, fields.goStructType())
 	return Object, t
@@ -133,13 +133,6 @@ func (g *GoTypeGenerator) jsonOmitTag(field *graphql.Field) string {
 
 func layerTypeName(parentTypeName, fieldName string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(parentTypeName), fieldName)
-}
-
-func firstLower(s string) string {
-	if s == "" {
-		return ""
-	}
-	return strings.ToLower(s[:1]) + s[1:]
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
