@@ -37,7 +37,7 @@ func Test_IntegrationTest(t *testing.T) {
 		want    want
 	}{
 		{
-			name:    "fragment test",
+			name:    "basic test",
 			testDir: "testdata/integration/basic/",
 			want: want{
 				file: "./want/query_gen.go.txt",
