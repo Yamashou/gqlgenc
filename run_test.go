@@ -218,7 +218,6 @@ func Test_IntegrationTest(t *testing.T) {
 					t.Errorf("expected name to be 'Sam Smith', got '%s'", updateUser.GetUpdateUser().User.Name)
 				}
 			}
-
 		})
 	}
 }
