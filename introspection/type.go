@@ -32,34 +32,34 @@ type FullType struct {
 	InputFields []*InputValue
 	Interfaces  []*TypeRef
 	EnumValues  []*struct {
-		Name              string
 		Description       *string
-		IsDeprecated      bool
 		DeprecationReason *string
+		Name              string
+		IsDeprecated      bool
 	}
 	PossibleTypes []*TypeRef
 }
 
 type FieldValue struct {
-	Name              string
-	Description       *string
-	Args              []*InputValue
 	Type              TypeRef
-	IsDeprecated      bool
+	Description       *string
 	DeprecationReason *string
+	Name              string
+	Args              []*InputValue
+	IsDeprecated      bool
 }
 
 type InputValue struct {
-	Name         string
-	Description  *string
 	Type         TypeRef
+	Description  *string
 	DefaultValue *string
+	Name         string
 }
 
 type TypeRef struct {
-	Kind   TypeKind
 	Name   *string
 	OfType *TypeRef
+	Kind   TypeKind
 }
 
 type Query struct {

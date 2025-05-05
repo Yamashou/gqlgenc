@@ -2,12 +2,14 @@ package graphqljson_test
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
 
-	"github.com/Yamashou/gqlgenc/graphqljson"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/Yamashou/gqlgenc/v3/graphqljson"
 )
 
 func TestUnmarshalGraphQL(t *testing.T) {
@@ -26,7 +28,9 @@ func TestUnmarshalGraphQL(t *testing.T) {
 			Height float64
 		}
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"me": {
 			"name": "Luke Skywalker",
@@ -36,9 +40,11 @@ func TestUnmarshalGraphQL(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	var want query
 	want.Me.Name = "Luke Skywalker"
 	want.Me.Height = 1.72
+
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}
@@ -46,16 +52,20 @@ func TestUnmarshalGraphQL(t *testing.T) {
 
 func TestUnmarshalGraphQL_graphqlTag(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Foo string `graphql:"baz"`
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"baz": "bar"
 	}`), &got)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := query{
 		Foo: "bar",
 	}
@@ -66,16 +76,20 @@ func TestUnmarshalGraphQL_graphqlTag(t *testing.T) {
 
 func TestUnmarshalGraphQL_jsonTag(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Foo string `json:"baz"`
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"foo": "bar"
 	}`), &got)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := query{
 		Foo: "bar",
 	}
@@ -86,12 +100,15 @@ func TestUnmarshalGraphQL_jsonTag(t *testing.T) {
 
 func TestUnmarshalGraphQL_array(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Foo []string
 		Bar []string
 		Baz []string
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"foo": [
 			"bar",
@@ -103,6 +120,7 @@ func TestUnmarshalGraphQL_array(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := query{
 		Foo: []string{"bar", "baz"},
 		Bar: []string{},
@@ -117,11 +135,14 @@ func TestUnmarshalGraphQL_array(t *testing.T) {
 // (rather than appended to).
 func TestUnmarshalGraphQL_arrayReset(t *testing.T) {
 	t.Parallel()
+
 	got := []string{"initial"}
+
 	err := graphqljson.UnmarshalData([]byte(`["bar", "baz"]`), &got)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := []string{"bar", "baz"}
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
@@ -130,12 +151,15 @@ func TestUnmarshalGraphQL_arrayReset(t *testing.T) {
 
 func TestUnmarshalGraphQL_objectArray(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Foo []struct {
 			Name string
 		}
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"foo": [
 			{"name": "bar"},
@@ -145,6 +169,7 @@ func TestUnmarshalGraphQL_objectArray(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := query{
 		Foo: []struct{ Name string }{
 			{"bar"},
@@ -158,12 +183,15 @@ func TestUnmarshalGraphQL_objectArray(t *testing.T) {
 
 func TestUnmarshalGraphQL_pointer(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Foo *string
 		Bar *string
 	}
+
 	var got query
 	got.Bar = new(string) // Test that got.Bar gets set to nil.
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"foo": "foo",
 		"bar": null
@@ -171,7 +199,9 @@ func TestUnmarshalGraphQL_pointer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	foo := "foo"
+
 	want := query{
 		Foo: &foo,
 		Bar: nil,
@@ -183,12 +213,15 @@ func TestUnmarshalGraphQL_pointer(t *testing.T) {
 
 func TestUnmarshalGraphQL_objectPointerArray(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Foo []*struct {
 			Name string
 		}
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"foo": [
 			{"name": "bar"},
@@ -199,6 +232,7 @@ func TestUnmarshalGraphQL_objectPointerArray(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := query{
 		Foo: []*struct{ Name string }{
 			{"bar"},
@@ -211,19 +245,84 @@ func TestUnmarshalGraphQL_objectPointerArray(t *testing.T) {
 	}
 }
 
+func TestUnmarshalGraphQL_multipleFragment(t *testing.T) {
+	t.Parallel()
+
+	type UserFragment1 struct {
+		Name string `json:"name"`
+	}
+
+	type UserFragment2 struct {
+		Name string `json:"name"`
+		User struct {
+			Name string `json:"name"`
+		} `graphql:"... on User"`
+	}
+
+	type query struct {
+		Name string `json:"name"`
+		UserFragment1
+		UserFragment2
+		User struct {
+			Name string `json:"name"`
+			UserFragment1
+			UserFragment2
+		} `graphql:"... on User"`
+	}
+
+	var got query
+
+	err := graphqljson.UnmarshalData([]byte(`{ "name": "John Doe" }`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want := query{
+		Name:          "John Doe",
+		UserFragment1: UserFragment1{Name: "John Doe"},
+		UserFragment2: UserFragment2{
+			Name: "John Doe",
+			User: struct {
+				Name string `json:"name"`
+			}{Name: "John Doe"},
+		},
+		User: struct {
+			Name string `json:"name"`
+			UserFragment1
+			UserFragment2
+		}{
+			Name:          "John Doe",
+			UserFragment1: UserFragment1{Name: "John Doe"},
+			UserFragment2: UserFragment2{
+				Name: "John Doe",
+				User: struct {
+					Name string `json:"name"`
+				}{Name: "John Doe"},
+			},
+		},
+	}
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
+
 func TestUnmarshalGraphQL_pointerWithInlineFragment(t *testing.T) {
 	t.Parallel()
+
 	type actor struct {
 		User struct {
 			DatabaseID uint64
 		} `graphql:"... on User"`
 		Login string
 	}
+
 	type query struct {
 		Author actor
 		Editor *actor
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"author": {
 			"databaseId": 1,
@@ -237,6 +336,7 @@ func TestUnmarshalGraphQL_pointerWithInlineFragment(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	var want query
 	want.Author = actor{
 		User:  struct{ DatabaseID uint64 }{1},
@@ -254,15 +354,20 @@ func TestUnmarshalGraphQL_pointerWithInlineFragment(t *testing.T) {
 
 func TestUnmarshalGraphQL_unexportedField(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
+		//nolint:unused // This is a test.
 		foo string
 	}
+
 	err := graphqljson.UnmarshalData([]byte(`{"foo": "bar"}`), new(query))
 	if err == nil {
 		t.Fatal("got error: nil, want: non-nil")
 	}
+
 	got := err.Error()
 	want := ": : struct field for \"foo\" doesn't exist in any of 1 places to unmarshal"
+
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}
@@ -270,13 +375,16 @@ func TestUnmarshalGraphQL_unexportedField(t *testing.T) {
 
 func TestUnmarshalGraphQL_multipleValues(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Foo string
 	}
+
 	err := graphqljson.UnmarshalData([]byte(`{"foo": "bar"}{"foo": "baz"}`), new(query))
 	if err == nil {
 		t.Fatal("got error: nil, want: non-nil")
 	}
+
 	if got, want := err.Error(), "invalid token '{' after top-level value"; got != want {
 		t.Errorf("got error: %v, want: %v", got, want)
 	}
@@ -298,10 +406,12 @@ func TestUnmarshalGraphQL_union(t *testing.T) {
 		}
 	*/
 	type actor struct{ Login string }
+
 	type reopenedEvent struct {
 		Actor     actor
 		CreatedAt time.Time
 	}
+
 	type issueTimelineItem struct {
 		Typename    string `graphql:"__typename"`
 		ClosedEvent struct {
@@ -310,7 +420,9 @@ func TestUnmarshalGraphQL_union(t *testing.T) {
 		} `graphql:"... on ClosedEvent"`
 		ReopenedEvent reopenedEvent `graphql:"... on ReopenedEvent"`
 	}
+
 	var got issueTimelineItem
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"__typename": "ClosedEvent",
 		"createdAt": "2017-06-29T04:12:01Z",
@@ -322,6 +434,7 @@ func TestUnmarshalGraphQL_union(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := issueTimelineItem{
 		Typename: "ClosedEvent",
 		ClosedEvent: struct {
@@ -347,12 +460,15 @@ func TestUnmarshalGraphQL_union(t *testing.T) {
 
 func TestUnmarshalGraphQL_union2(t *testing.T) {
 	t.Parallel()
+
 	type SubscriptionItemFragment struct {
 		ID string
 	}
+
 	type PurchaseItemFragment struct {
 		ID string
 	}
+
 	type OrderFragment struct {
 		SubscriptionItemOrder struct {
 			SubscriptionItem SubscriptionItemFragment
@@ -361,10 +477,13 @@ func TestUnmarshalGraphQL_union2(t *testing.T) {
 			PurchaseItem PurchaseItemFragment
 		} `graphql:"... on PurchaseItemOrder"`
 	}
+
 	type BuyDashItemPayload struct {
 		Order OrderFragment
 	}
+
 	var got BuyDashItemPayload
+
 	resp := `
 	{
 		"order": {
@@ -374,10 +493,12 @@ func TestUnmarshalGraphQL_union2(t *testing.T) {
 		}
 	}
 `
+
 	err := graphqljson.UnmarshalData([]byte(resp), &got)
 	if err != nil {
 		t.Fatalf("%+v", err)
 	}
+
 	want := BuyDashItemPayload{Order: OrderFragment{
 		SubscriptionItemOrder: struct {
 			SubscriptionItem SubscriptionItemFragment
@@ -424,7 +545,9 @@ func TestUnmarshalGraphQL_arrayInsideInlineFragment(t *testing.T) {
 			}
 		} `graphql:"search(type: ISSUE, first: 1, query: \"type:pr repo:owner/name\")"`
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"search": {
 			"nodes": [
@@ -443,6 +566,7 @@ func TestUnmarshalGraphQL_arrayInsideInlineFragment(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	var want query
 	want.Search.Nodes = make([]struct {
 		PullRequest struct {
@@ -457,6 +581,7 @@ func TestUnmarshalGraphQL_arrayInsideInlineFragment(t *testing.T) {
 		URL string `graphql:"url"`
 	}, 1)
 	want.Search.Nodes[0].PullRequest.Commits.Nodes[0].URL = "https://example.org/commit/49e1"
+
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}
@@ -464,6 +589,7 @@ func TestUnmarshalGraphQL_arrayInsideInlineFragment(t *testing.T) {
 
 func TestUnmarshalGraphQL_jsonRawMessage(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		JSONBlob    json.RawMessage `json:"jsonBlob"`
 		JSONArray   json.RawMessage `json:"jsonArray"`
@@ -475,6 +601,7 @@ func TestUnmarshalGraphQL_jsonRawMessage(t *testing.T) {
 	}
 
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"jsonBlob": {
 			"foo": "bar"
@@ -506,6 +633,7 @@ func TestUnmarshalGraphQL_jsonRawMessage(t *testing.T) {
 
 func TestUnmarshalGraphQL_jsonRawMessageInFragment(t *testing.T) {
 	t.Parallel()
+
 	type Object struct {
 		Properties struct {
 			ID       string
@@ -513,11 +641,14 @@ func TestUnmarshalGraphQL_jsonRawMessageInFragment(t *testing.T) {
 		} `graphql:"... on Properties"`
 		Value string
 	}
+
 	type query struct {
 		Object         Object
 		OptionalObject *Object
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"object": {
 			"id": "81beda46-02c1-4641-aa7b-09cc6634c783",
@@ -538,6 +669,7 @@ func TestUnmarshalGraphQL_jsonRawMessageInFragment(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	var want query
 	want.Object = Object{
 		Properties: struct {
@@ -567,10 +699,13 @@ func TestUnmarshalGraphQL_jsonRawMessageInFragment(t *testing.T) {
 
 func TestUnmarshalGraphQL_map(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Outputs map[string]any
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 			"outputs":{
                                  "vpc":"1",
@@ -580,6 +715,7 @@ func TestUnmarshalGraphQL_map(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := query{
 		map[string]any{
 			"vpc":             "1",
@@ -601,7 +737,7 @@ const (
 func (n *Number) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
-		return fmt.Errorf("enums must be strings")
+		return errors.New("enums must be strings")
 	}
 
 	switch str {
@@ -610,8 +746,7 @@ func (n *Number) UnmarshalGQL(v any) error {
 	case "TWO":
 		*n = NumberTwo
 	default:
-
-		return fmt.Errorf("Number not found Type: %d", n)
+		return fmt.Errorf("number not found Type: %d", n)
 	}
 
 	return nil
@@ -619,16 +754,20 @@ func (n *Number) UnmarshalGQL(v any) error {
 
 func TestUnmarshalGQL(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Enum Number
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"enum": "ONE"
 	}`), &got)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := query{
 		Enum: NumberOne,
 	}
@@ -639,16 +778,20 @@ func TestUnmarshalGQL(t *testing.T) {
 
 func TestUnmarshalGQL_array(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Enums []Number
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"enums": ["ONE", "TWO"]
 	}`), &got)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := query{
 		Enums: []Number{NumberOne, NumberTwo},
 	}
@@ -659,10 +802,13 @@ func TestUnmarshalGQL_array(t *testing.T) {
 
 func TestUnmarshalGQL_pointer(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Enum *Number
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"enum": "ONE"
 	}`), &got)
@@ -671,6 +817,7 @@ func TestUnmarshalGQL_pointer(t *testing.T) {
 	}
 
 	v := NumberOne
+
 	want := query{
 		Enum: &v,
 	}
@@ -681,18 +828,23 @@ func TestUnmarshalGQL_pointer(t *testing.T) {
 
 func TestUnmarshalGQL_pointerArray(t *testing.T) {
 	t.Parallel()
+
 	type query struct {
 		Enums []*Number
 	}
+
 	var got query
+
 	err := graphqljson.UnmarshalData([]byte(`{
 		"enums": ["ONE", "TWO"]
 	}`), &got)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	one := NumberOne
 	two := NumberTwo
+
 	want := query{
 		Enums: []*Number{&one, &two},
 	}
@@ -703,13 +855,17 @@ func TestUnmarshalGQL_pointerArray(t *testing.T) {
 
 func TestUnmarshalGQL_pointerArrayReset(t *testing.T) {
 	t.Parallel()
+
 	got := []*Number{new(Number)}
+
 	err := graphqljson.UnmarshalData([]byte(`["TWO"]`), &got)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	want := []*Number{new(Number)}
 	*want[0] = NumberTwo
+
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Error(diff)
 	}

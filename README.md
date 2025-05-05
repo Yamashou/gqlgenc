@@ -4,39 +4,51 @@
 
 This is Go library for building GraphQL client with [gqlgen](https://github.com/99designs/gqlgen)
 
-## Motivation
+### Query First, not Code First
 
-Now, if you build GraphQL api client for Go, have choice:
-
- - [github.com/shurcooL/graphql](https://github.com/shurcooL/graphql)
- - [github.com/machinebox/graphql](https://github.com/machinebox/graphql)
-
-These libraries are very simple and easy to handle.
 However, as I work with [gqlgen](https://github.com/99designs/gqlgen) and [graphql-code-generator](https://graphql-code-generator.com/) every day, I find out the beauty of automatic generation.
 So I want to automatically generate types.
 
-## Installation
+### based on gqlgen
+
+- [Khan/genqlient](https://github.com/Khan/genqlient) is built from scratch as its own system. However, since gqlgenc is based on gqlgen, knowledge learned from either can be directly applied.
+
+## Usage
 
 ```shell script
-go get -u github.com/Yamashou/gqlgenc
+go get -tool github.com/Yamashou/gqlgenc/v3@latest
+or
+go install github.com/Yamashou/gqlgenc/v3@latest
 ```
 
 ## How to use
 
 ### Client Codes Only
 
-gqlgenc base is gqlgen with [plugins](https://gqlgen.com/reference/plugins/). So the setting is yaml in each format.
-gqlgenc can be configured using a `.gqlgenc.yml` file
-
-Load a schema from a remote server:
-
 ```yaml
-model:
-  package: generated
-  filename: ./models_gen.go # https://github.com/99designs/gqlgen/tree/master/plugin/modelgen
+# schema for query
+schema:
+  - ""
+endpoint:
+  url: https://api.annict.com/graphql # Where do you want to send your request?
+  headers: # If you need header for getting introspection query, set it
+    Authorization: "Bearer ${ANNICT_KEY}" # support environment variables
+# generate config
+generate:
+  usedModelsOnly: false
+# client to generate
 client:
   package: generated
   filename: ./client.go # Where should any generated client go?
+# query to generate
+query:
+  source: "./query/*.graphql" # Where are all the query files located?
+  package: generated
+  filename: ./client.go # Where should any generated client go?
+# query to generate
+model:
+ package: generated
+ filename: ./models_gen.go # https://github.com/99designs/gqlgen/tree/master/plugin/modelgen
 models:
   Int:
     model: github.com/99designs/gqlgen/graphql.Int64
@@ -44,15 +56,10 @@ models:
     model: github.com/99designs/gqlgen/graphql.Time
 federation: # Add this if your schema includes Apollo Federation related directives
   version: 2
-endpoint:
-  url: https://api.annict.com/graphql # Where do you want to send your request?
-  headers: # If you need header for getting introspection query, set it
-    Authorization: "Bearer ${ANNICT_KEY}" # support environment variables
-query:
-  - "./query/*.graphql" # Where are all the query files located?
-generate:
-  clientInterfaceName: "GithubGraphQLClient" # Determine the name of the generated client interface
-  structFieldsAlwaysPointers: true # Always use pointers for struct fields (default: true)  [same as gqlgen](https://github.com/99designs/gqlgen/blob/e1ef86e795e738654c98553b325a248c02c8c2f8/docs/content/config.md?plain=1#L73)
+# input model config
+nullable_input_omittable: true
+enable_model_json_omitempty_tag: false
+enable_model_json_omitzero: true
 ```
 
 Load a schema from a local file:
@@ -109,7 +116,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Yamashou/gqlgenc/clientgenv2"
+	"github.com/Yamashou/gqlgenc/v3/clientgen"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -127,7 +134,7 @@ func main() {
 		Package:  "gen",
 	}
 
-	clientPlugin := clientgenv2.New(queries, clientPackage, nil)
+	clientPlugin := clientgen.New(queries, clientPackage, nil)
 	err = api.Generate(cfg,
 		api.AddPlugin(clientPlugin),
 	)
@@ -138,21 +145,5 @@ func main() {
 }
 ```
 
-## Documents
+## VS
 
-- [How to configure gqlgen using gqlgen.yml](https://gqlgen.com/config/)
-- [How to write plugins for gqlgen](https://gqlgen.com/reference/plugins/)
-
-
-## Comments
-
-### Japanese Comments
-These codes have Japanese comments. Replace with English.
-
-### Subscription
-
-This client does not support subscription. If you need a subscription, please create an issue or pull request.
-
-### Pre-conditions
-
-[clientgenv2](https://github.com/Yamashou/gqlgenc/tree/master/clientgenv2) is created based on [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen). So if you don't have a modelgen, it may be a mysterious move.

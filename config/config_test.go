@@ -1,9 +1,7 @@
 package config
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,139 +9,371 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/stretchr/testify/require"
 )
+
+func ptr[T any](t T) *T {
+	return &t
+}
 
 func TestLoadConfig(t *testing.T) {
 	t.Parallel()
-	t.Run("config does not exist", func(t *testing.T) {
-		t.Parallel()
-		_, err := LoadConfig("doesnotexist.yml")
-		require.Error(t, err)
-	})
 
-	t.Run("malformed config", func(t *testing.T) {
-		t.Parallel()
-		_, err := LoadConfig("testdata/cfg/malformedconfig.yml")
-		require.EqualError(t, err, "unable to parse config: [1:1] string was used where mapping is expected\n>  1 | asdf\n       ^\n")
-	})
+	type want struct {
+		config     *Config
+		errMessage string
+		err        bool
+	}
 
-	t.Run("'schema' and 'endpoint' both specified", func(t *testing.T) {
-		t.Parallel()
-		_, err := LoadConfig("testdata/cfg/schema_endpoint.yml")
-		require.EqualError(t, err, "'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
-	})
+	tests := []struct {
+		name string
+		file string
+		want want
+	}{
+		{
+			name: "config does not exist",
+			file: "doesnotexist.yml",
+			want: want{
+				err: true,
+			},
+		},
+		{
+			name: "malformed config",
+			file: "testdata/cfg/malformedconfig.yml",
+			want: want{
+				err:        true,
+				errMessage: "unable to parse config: [1:1] string was used where mapping is expected\n>  1 | asdf\n       ^\n",
+			},
+		},
+		{
+			name: "'schema' and 'endpoint' both specified",
+			file: "testdata/cfg/schema_endpoint.yml",
+			want: want{
+				err:        true,
+				errMessage: "'schema' and 'endpoint' both specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)",
+			},
+		},
+		{
+			name: "neither 'schema' nor 'endpoint' specified",
+			file: "testdata/cfg/no_source.yml",
+			want: want{
+				err:        true,
+				errMessage: "neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)",
+			},
+		},
+		{
+			name: "unknown keys",
+			file: "testdata/cfg/unknownkeys.yml",
+			want: want{
+				err:        true,
+				errMessage: "unknown field \"unknown\"",
+			},
+		},
+		{
+			name: "nullable input omittable",
+			file: "testdata/cfg/nullable_input_omittable.yml",
+			want: want{
+				config: &Config{
+					GQLGencConfig: &GQLGencConfig{
+						Query: []string{"./queries/*.graphql"},
+						QueryGen: config.PackageConfig{
+							Package: "gen",
+						},
+						ClientGen: config.PackageConfig{
+							Package: "gen",
+						},
+					},
+					GQLGenConfig: &config.Config{
+						SchemaFilename: config.StringList{
+							"testdata/cfg/glob/bar/bar with spaces.graphql",
+							"testdata/cfg/glob/foo/foo.graphql",
+						},
+						Exec: config.ExecConfig{
+							Filename: "generated.go",
+						},
+						Model: config.PackageConfig{
+							Filename: "./gen/models_gen.go",
+							Package:  "gen",
+						},
+						Federation: config.PackageConfig{
+							Filename: "generated.go",
+						},
+						Resolver: config.ResolverConfig{
+							Filename: "generated.go",
+						},
+						NullableInputOmittable: true,
+						Directives:             map[string]config.DirectiveConfig{},
+						GoInitialisms:          config.GoInitialismsConfig{},
+					},
+				},
+			},
+		},
+		{
+			name: "omitempty, omitzero",
+			file: "testdata/cfg/omitempty_omitzero.yml",
+			want: want{
+				config: &Config{
+					GQLGencConfig: &GQLGencConfig{
+						Query: []string{"./queries/*.graphql"},
+						QueryGen: config.PackageConfig{
+							Package: "gen",
+						},
+						ClientGen: config.PackageConfig{
+							Package: "gen",
+						},
+					},
+					GQLGenConfig: &config.Config{
+						SchemaFilename: config.StringList{
+							"testdata/cfg/glob/bar/bar with spaces.graphql",
+							"testdata/cfg/glob/foo/foo.graphql",
+						},
+						Exec: config.ExecConfig{
+							Filename: "generated.go",
+						},
+						Model: config.PackageConfig{
+							Filename: "./gen/models_gen.go",
+							Package:  "gen",
+						},
+						Federation: config.PackageConfig{
+							Filename: "generated.go",
+						},
+						Resolver: config.ResolverConfig{
+							Filename: "generated.go",
+						},
+						EnableModelJsonOmitemptyTag: ptr(true),
+						EnableModelJsonOmitzeroTag:  ptr(true),
+						Directives:                  map[string]config.DirectiveConfig{},
+						GoInitialisms:               config.GoInitialismsConfig{},
+					},
+				},
+			},
+		},
+	}
 
-	t.Run("neither 'schema' nor 'endpoint' specified", func(t *testing.T) {
-		t.Parallel()
-		_, err := LoadConfig("testdata/cfg/no_source.yml")
-		require.EqualError(t, err, "neither 'schema' nor 'endpoint' specified. Use schema to load from a local file, use endpoint to load from a remote server (using introspection)")
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
 
-	t.Run("unknown keys", func(t *testing.T) {
-		t.Parallel()
-		_, err := LoadConfig("testdata/cfg/unknownkeys.yml")
-		require.EqualError(t, err, "unable to parse config: [3:1] unknown field \"unknown\"\n   1 | schema:\n   2 |   - outer\n>  3 | unknown: foo\n       ^\n")
-	})
+			cfg, err := Load(tt.file)
 
-	t.Run("globbed filenames", func(t *testing.T) {
-		t.Parallel()
-		loadConfig, err := LoadConfig("testdata/cfg/glob.yml")
-		require.NoError(t, err)
+			if tt.want.err {
+				if err == nil {
+					t.Errorf("loadConfig() error = nil, want error")
 
-		if runtime.GOOS == "windows" {
-			require.Equal(t, loadConfig.SchemaFilename[0], `testdata\cfg\glob\bar\bar with spaces.graphql`)
-			require.Equal(t, loadConfig.SchemaFilename[1], `testdata\cfg\glob\foo\foo.graphql`)
-		} else {
-			require.Equal(t, loadConfig.SchemaFilename[0], "testdata/cfg/glob/bar/bar with spaces.graphql")
-			require.Equal(t, loadConfig.SchemaFilename[1], "testdata/cfg/glob/foo/foo.graphql")
+					return
+				}
+
+				if tt.want.errMessage != "" && !containsString(err.Error(), tt.want.errMessage) {
+					t.Errorf("loadConfig() error = %v, want error containing %v", err, tt.want.errMessage)
+				}
+
+				return
+			}
+
+			if err != nil {
+				t.Errorf("loadConfig() error = %v, want nil", err)
+
+				return
+			}
+
+			if tt.want.config != nil {
+				opts := []cmp.Option{
+					cmpopts.IgnoreFields(config.Config{}, "Sources"),
+					cmpopts.IgnoreFields(config.PackageConfig{}, "Filename"),
+				}
+				if diff := cmp.Diff(tt.want.config, cfg, opts...); diff != "" {
+					t.Errorf("loadConfig() mismatch (-want +got):\n%s", diff)
+				}
+			}
+		})
+	}
+}
+
+func TestLoadConfigWindows(t *testing.T) {
+	t.Parallel()
+	if runtime.GOOS != "windows" {
+		t.Skip("Skipping Windows-specific test on non-Windows platform")
+	}
+
+	// Glob filenames test for Windows
+	t.Run("globbed filenames on Windows", func(t *testing.T) {
+		t.Parallel()
+
+		cfg, err := Load("testdata/cfg/glob.yml")
+		if err != nil {
+			t.Errorf("loadConfig() error = %v, want nil", err)
+
+			return
+		}
+
+		want := `testdata\cfg\glob\bar\bar with spaces.graphql`
+		if got := cfg.GQLGenConfig.SchemaFilename[0]; got != want {
+			t.Errorf("loadConfig() schemaFilename[0] = %v, want %v", got, want)
+		}
+
+		want = `testdata\cfg\glob\foo\foo.graphql`
+		if got := cfg.GQLGenConfig.SchemaFilename[1]; got != want {
+			t.Errorf("loadConfig() schemaFilename[1] = %v, want %v", got, want)
 		}
 	})
 
-	t.Run("unwalkable path", func(t *testing.T) {
+	// Unwalkable path test for Windows
+	t.Run("unwalkable path on Windows", func(t *testing.T) {
 		t.Parallel()
-		_, err := LoadConfig("testdata/cfg/unwalkable.yml")
-		if runtime.GOOS == "windows" {
-			require.EqualError(t, err, "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified.")
-		} else {
-			require.EqualError(t, err, "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory")
+
+		_, err := Load("testdata/cfg/unwalkable.yml")
+		want := "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified."
+
+		if err == nil || err.Error() != want {
+			t.Errorf("loadConfig() error = %v, want %v", err, want)
+		}
+	})
+}
+
+func TestLoadConfigNonWindows(t *testing.T) {
+	t.Parallel()
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping non-Windows test on Windows platform")
+	}
+
+	// Glob filenames test for non-Windows
+	t.Run("globbed filenames on non-Windows", func(t *testing.T) {
+		t.Parallel()
+
+		cfg, err := Load("testdata/cfg/glob.yml")
+		if err != nil {
+			t.Errorf("loadConfig() error = %v, want nil", err)
+
+			return
+		}
+
+		want := "testdata/cfg/glob/bar/bar with spaces.graphql"
+		if got := cfg.GQLGenConfig.SchemaFilename[0]; got != want {
+			t.Errorf("loadConfig() schemaFilename[0] = %v, want %v", got, want)
+		}
+
+		want = "testdata/cfg/glob/foo/foo.graphql"
+		if got := cfg.GQLGenConfig.SchemaFilename[1]; got != want {
+			t.Errorf("loadConfig() schemaFilename[1] = %v, want %v", got, want)
 		}
 	})
 
-	t.Run("generate", func(t *testing.T) {
+	// Unwalkable path test for non-Windows
+	t.Run("unwalkable path on non-Windows", func(t *testing.T) {
 		t.Parallel()
-		loadConfig, err := LoadConfig("testdata/cfg/generate.yml")
-		require.NoError(t, err)
-		require.Equal(t, true, loadConfig.Generate.ShouldGenerateClient())
-		require.Equal(t, loadConfig.Generate.UnamedPattern, "Empty")
-		require.Equal(t, loadConfig.Generate.Suffix.Mutation, "Bar")
-		require.Equal(t, loadConfig.Generate.Suffix.Query, "Foo")
-		require.Equal(t, loadConfig.Generate.Prefix.Mutation, "Hoge")
-		require.Equal(t, loadConfig.Generate.Prefix.Query, "Data")
-	})
 
-	t.Run("generate skip client", func(t *testing.T) {
-		t.Parallel()
-		c, err := LoadConfig("testdata/cfg/generate_client_false.yml")
-		require.NoError(t, err)
+		_, err := Load("testdata/cfg/unwalkable.yml")
+		want := "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory"
 
-		require.Equal(t, false, c.Generate.ShouldGenerateClient())
-	})
-
-	t.Run("nullable input omittable", func(t *testing.T) {
-		t.Parallel()
-		c, err := LoadConfig("testdata/cfg/nullable_input_omittable.yml")
-		require.NoError(t, err)
-
-		require.True(t, c.GQLConfig.NullableInputOmittable)
-	})
-	t.Run("omitempty, omitzero", func(t *testing.T) {
-		t.Parallel()
-		c, err := LoadConfig("testdata/cfg/omitempty_omitzero.yml")
-		require.NoError(t, err)
-
-		require.True(t, *c.GQLConfig.EnableModelJsonOmitemptyTag)
-		require.True(t, *c.GQLConfig.EnableModelJsonOmitzeroTag)
+		if err == nil || err.Error() != want {
+			t.Errorf("\n got = %v\nwant = %v", err, want)
+		}
 	})
 }
 
 func TestLoadConfig_LoadSchema(t *testing.T) {
 	t.Parallel()
 
-	t.Run("correct schema", func(t *testing.T) {
-		t.Parallel()
+	type want struct {
+		config     *Config
+		errMessage string
+		err        bool
+	}
 
-		mockServer, closeServer := newMockRemoteServer(t, responseFromFile("testdata/remote/response_ok.json"))
-		defer closeServer()
-
-		config := &Config{
-			GQLConfig: &config.Config{},
-			Endpoint: &EndPointConfig{
-				URL: mockServer.URL,
+	tests := []struct {
+		want         want
+		name         string
+		responseFile string
+	}{
+		// TODO: LoadLocalSchema
+		{
+			name:         "correct remote schema",
+			responseFile: "testdata/remote/response_ok.json",
+			want: want{
+				config: &Config{
+					GQLGencConfig: &GQLGencConfig{
+						Endpoint: &EndPointConfig{},
+					},
+					GQLGenConfig: &config.Config{},
+				},
 			},
-		}
-
-		err := config.LoadSchema(context.Background())
-		require.NoError(t, err)
-	})
-
-	t.Run("invalid schema", func(t *testing.T) {
-		t.Parallel()
-
-		mockServer, closeServer := newMockRemoteServer(t, responseFromFile("testdata/remote/response_invalid_schema.json"))
-		defer closeServer()
-
-		config := &Config{
-			GQLConfig: &config.Config{},
-			Endpoint: &EndPointConfig{
-				URL: mockServer.URL,
+		},
+		{
+			name:         "invalid remote schema",
+			responseFile: "testdata/remote/response_invalid_schema.json",
+			want: want{
+				err:        true,
+				errMessage: "OBJECT Query: must define one or more fields",
 			},
-		}
+		},
+	}
 
-		err := config.LoadSchema(context.Background())
-		require.Equal(t, fmt.Sprintf("load remote schema failed: validation error: %s:0: OBJECT Query: must define one or more fields.", mockServer.URL), err.Error())
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mockServer, closeServer := newMockRemoteServer(t, responseFromFile(tt.responseFile))
+			defer closeServer()
+
+			cfg := &Config{
+				GQLGenConfig: &config.Config{},
+				GQLGencConfig: &GQLGencConfig{
+					Endpoint: &EndPointConfig{
+						URL: mockServer.URL,
+					},
+				},
+			}
+
+			err := cfg.loadSchema(t.Context())
+			if tt.want.err {
+				if err == nil {
+					t.Errorf("loadSchema() error = nil, want error")
+
+					return
+				}
+
+				if tt.want.errMessage != "" && !containsString(err.Error(), tt.want.errMessage) {
+					t.Errorf("loadSchema() error = %v, want error containing %v", err, tt.want.errMessage)
+				}
+
+				return
+			}
+
+			if err != nil {
+				t.Errorf("loadSchema() error = %v, want nil", err)
+
+				return
+			}
+
+			if tt.want.config != nil {
+				opts := []cmp.Option{
+					cmpopts.IgnoreFields(config.Config{}, "Schema"),
+					cmpopts.IgnoreFields(EndPointConfig{}, "URL"),
+				}
+				if diff := cmp.Diff(tt.want.config, cfg, opts...); diff != "" {
+					t.Errorf("loadSchema() mismatch (-want +got):\n%s", diff)
+				}
+			}
+		})
+	}
+}
+
+// containsString checks if string s contains substring.
+func containsString(s, substring string) bool {
+	if len(s) < len(substring) || substring == "" {
+		return false
+	}
+
+	for i := 0; i <= len(s)-len(substring); i++ {
+		if s[i:i+len(substring)] == substring {
+			return true
+		}
+	}
+
+	return false
 }
 
 type mockRemoteServer struct {
@@ -151,6 +381,7 @@ type mockRemoteServer struct {
 	body []byte
 }
 
+//nolint:nonamedreturns // named return "mock" with type "*mockRemoteServer" found
 func newMockRemoteServer(t *testing.T, response any) (mock *mockRemoteServer, closeServer func()) {
 	t.Helper()
 
@@ -158,7 +389,9 @@ func newMockRemoteServer(t *testing.T, response any) (mock *mockRemoteServer, cl
 		Server: httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 			var err error
 			mock.body, err = io.ReadAll(req.Body)
-			require.NoError(t, err)
+			if err != nil {
+				t.Errorf("failed to read request body: %v", err)
+			}
 
 			var responseBody []byte
 			switch v := response.(type) {
@@ -168,11 +401,15 @@ func newMockRemoteServer(t *testing.T, response any) (mock *mockRemoteServer, cl
 				responseBody = v.load(t)
 			default:
 				responseBody, err = json.Marshal(response)
-				require.NoError(t, err)
+				if err != nil {
+					t.Errorf("failed to marshal response: %v", err)
+				}
 			}
 
 			_, err = writer.Write(responseBody)
-			require.NoError(t, err)
+			if err != nil {
+				t.Errorf("failed to write response: %v", err)
+			}
 		})),
 	}
 
@@ -185,7 +422,9 @@ func (f responseFromFile) load(t *testing.T) []byte {
 	t.Helper()
 
 	content, err := os.ReadFile(string(f))
-	require.NoError(t, err)
+	if err != nil {
+		t.Errorf("failed to read file %s: %v", string(f), err)
+	}
 
 	return content
 }
