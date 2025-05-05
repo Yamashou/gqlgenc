@@ -8,18 +8,18 @@ import (
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 
+	"github.com/Yamashou/gqlgenc/v3/codegen"
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/source"
 )
 
 var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
 	cfg        *config.Config
-	operations []*source.Operation
+	operations []*codegen.Operation
 }
 
-func New(cfg *config.Config, operations []*source.Operation) *Plugin {
+func New(cfg *config.Config, operations []*codegen.Operation) *Plugin {
 	return &Plugin{
 		cfg:        cfg,
 		operations: operations,

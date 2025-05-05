@@ -9,19 +9,19 @@ import (
 	gqlgenconfig "github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
 
+	"github.com/Yamashou/gqlgenc/v3/codegen"
 	"github.com/Yamashou/gqlgenc/v3/config"
-	"github.com/Yamashou/gqlgenc/v3/source"
 )
 
 var _ plugin.ConfigMutator = &Plugin{}
 
 type Plugin struct {
 	cfg        *config.Config
-	operations []*source.Operation
+	operations []*codegen.Operation
 	goTypes    []types.Type
 }
 
-func New(cfg *config.Config, operations []*source.Operation, goTypes []types.Type) *Plugin {
+func New(cfg *config.Config, operations []*codegen.Operation, goTypes []types.Type) *Plugin {
 	return &Plugin{
 		cfg:        cfg,
 		operations: operations,

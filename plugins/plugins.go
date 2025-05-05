@@ -3,12 +3,12 @@ package plugins
 import (
 	"fmt"
 
+	"github.com/Yamashou/gqlgenc/v3/codegen"
 	"github.com/Yamashou/gqlgenc/v3/config"
 	"github.com/Yamashou/gqlgenc/v3/plugins/clientgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/modelgen"
 	"github.com/Yamashou/gqlgenc/v3/plugins/querygen"
 	"github.com/Yamashou/gqlgenc/v3/queryparser"
-	"github.com/Yamashou/gqlgenc/v3/source"
 )
 
 func Run(cfg *config.Config) error {
@@ -40,8 +40,8 @@ func Run(cfg *config.Config) error {
 	// gqlgenc Plugins
 
 	// generate template sources
-	operations := source.NewOperationGenerator(cfg).CreateOperations(queryDocument, operationQueryDocuments)
-	goTypes := source.NewGoTypeGenerator(cfg).CreateGoTypes(queryDocument.Operations)
+	operations := codegen.NewOperationGenerator(cfg).CreateOperations(queryDocument, operationQueryDocuments)
+	goTypes := codegen.NewGoTypeGenerator(cfg).CreateGoTypes(queryDocument.Operations)
 
 	// querygen
 	if cfg.GQLGencConfig.QueryGen.IsDefined() {
