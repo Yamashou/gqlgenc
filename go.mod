@@ -1,15 +1,15 @@
 module github.com/Yamashou/gqlgenc
 
-go 1.23.8
+go 1.23.0
 
 require (
-	github.com/99designs/gqlgen v0.17.71
+	github.com/99designs/gqlgen v0.17.73
 	github.com/goccy/go-yaml v1.17.1
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.6
-	github.com/vektah/gqlparser/v2 v2.5.25
+	github.com/vektah/gqlparser/v2 v2.5.26
 	golang.org/x/text v0.24.0
 	golang.org/x/tools v0.32.0
 )
