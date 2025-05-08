@@ -28,12 +28,14 @@ package graphqljson
 
 import (
 	"bytes"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"reflect"
 	"strings"
+
+	"github.com/go-json-experiment/json"
+	"github.com/go-json-experiment/json/jsontext"
 
 	"github.com/99designs/gqlgen/graphql"
 )
@@ -45,13 +47,13 @@ import (
 //
 // The implementation is created on top of the JSON tokenizer available
 // in "encoding/json".Decoder.
-func UnmarshalData(data json.RawMessage, v any) error {
+func UnmarshalData(data jsontext.Value, v any) error {
 	d := newDecoder(bytes.NewBuffer(data))
 	if err := d.Decode(v); err != nil {
 		return fmt.Errorf(": %w", err)
 	}
 
-	tok, err := d.jsonDecoder.Token()
+	tok, err := d.jsonDecoder.ReadToken()
 	switch err {
 	case io.EOF:
 		// Expect to get io.EOF. There shouldn't be any more
@@ -67,10 +69,10 @@ func UnmarshalData(data json.RawMessage, v any) error {
 // Decoder is a JSON Decoder that performs custom unmarshaling behavior
 // for GraphQL query data structures. It's implemented on top of a JSON tokenizer.
 type Decoder struct {
-	jsonDecoder *json.Decoder
+	jsonDecoder *jsontext.Decoder
 
 	// Stack of what part of input JSON we're in the middle of - objects, arrays.
-	parseState []json.Delim
+	parseState []jsontext.Kind
 
 	// Stacks of values where to unmarshal.
 	// The top of each stack is the reflect.Value where to unmarshal next JSON value.
@@ -82,8 +84,8 @@ type Decoder struct {
 }
 
 func newDecoder(r io.Reader) *Decoder {
-	jsonDecoder := json.NewDecoder(r)
-	jsonDecoder.UseNumber()
+	jsonDecoder := jsontext.NewDecoder(r)
+	// jsonDecoder.UseNumber()
 
 	return &Decoder{
 		jsonDecoder: jsonDecoder,
@@ -110,7 +112,7 @@ func (d *Decoder) decode() error {
 	// The loop invariant is that the top of each d.vs stack
 	// is where we try to unmarshal the next JSON value we see.
 	for len(d.vs) > 0 {
-		tok, err := d.jsonDecoder.Token()
+		tok, err := d.jsonDecoder.ReadToken()
 		if err == io.EOF {
 			return errors.New("unexpected end of JSON input")
 		} else if err != nil {
@@ -119,11 +121,8 @@ func (d *Decoder) decode() error {
 
 		switch {
 		// Are we inside an object and seeing next key (rather than end of object)?
-		case d.state() == '{' && tok != json.Delim('}'):
-			key, ok := tok.(string)
-			if !ok {
-				return errors.New("unexpected non-key in JSON input")
-			}
+		case d.state() == jsontext.BeginArray.Kind() && tok.Kind() != jsontext.EndArray.Kind():
+			key := tok.String()
 
 			// The last matching one is the one considered
 			var matchingFieldValue *reflect.Value
@@ -149,22 +148,7 @@ func (d *Decoder) decode() error {
 				return fmt.Errorf("struct field for %q doesn't exist in any of %v places to unmarshal", key, len(d.vs))
 			}
 
-			// We've just consumed the current token, which was the key.
-			// Read the next token, which should be the value.
-			// If it's of json.RawMessage or map type, decode the value.
-			switch matchingFieldValue.Type() {
-			case reflect.TypeOf(json.RawMessage{}):
-				var data json.RawMessage
-				err = d.jsonDecoder.Decode(&data)
-				tok = data
-			case reflect.TypeOf(map[string]any{}):
-				var data map[string]any
-				err = d.jsonDecoder.Decode(&data)
-				tok = data
-			default:
-				tok, err = d.jsonDecoder.Token()
-			}
-
+			tok, err = d.jsonDecoder.ReadToken()
 			if err == io.EOF {
 				return errors.New("unexpected end of JSON input")
 			} else if err != nil {
@@ -172,7 +156,7 @@ func (d *Decoder) decode() error {
 			}
 
 		// Are we inside an array and seeing next value (rather than end of array)?
-		case d.state() == '[' && tok != json.Delim(']'):
+		case d.state() == jsontext.BeginArray.Kind() && tok.Kind() != jsontext.EndArray.Kind():
 			someSliceExist := false
 
 			for i := range d.vs {
@@ -197,7 +181,7 @@ func (d *Decoder) decode() error {
 			}
 		}
 
-		switch tok := tok.(type) {
+		switch toka := tok.(type) {
 		case nil: // Handle null values correctly.
 			for i := range d.vs {
 				v := d.vs[i][len(d.vs[i])-1]
@@ -213,7 +197,7 @@ func (d *Decoder) decode() error {
 			d.popAllVs()
 
 			continue
-		case string, json.Number, bool, json.RawMessage, map[string]any:
+		case string, bool, jsontext.Value, map[string]any:
 			for i := range d.vs {
 				v := d.vs[i][len(d.vs[i])-1]
 				if !v.IsValid() {
@@ -255,11 +239,11 @@ func (d *Decoder) decode() error {
 
 			d.popAllVs()
 
-		case json.Delim:
+		case jsontext.Kind:
 			switch tok {
-			case '{':
+			case jsontext.BeginObject:
 				// Start of object.
-				d.pushState(tok)
+				d.pushState(tok.Kind())
 
 				frontier := make([]reflect.Value, len(d.vs)) // Places to look for GraphQL fragments/embedded structs.
 
@@ -294,9 +278,9 @@ func (d *Decoder) decode() error {
 						}
 					}
 				}
-			case '[':
+			case jsontext.BeginArray:
 				// Start of array.
-				d.pushState(tok)
+				d.pushState(tok.Kind())
 
 				for i := range d.vs {
 					v := d.vs[i][len(d.vs[i])-1]
@@ -316,7 +300,7 @@ func (d *Decoder) decode() error {
 
 					v.Set(reflect.MakeSlice(v.Type(), 0, 0)) // v = make(T, 0, 0).
 				}
-			case '}', ']':
+			case jsontext.EndObject, jsontext.EndArray:
 				// End of object or array.
 				d.popAllVs()
 				d.popState()
@@ -332,7 +316,7 @@ func (d *Decoder) decode() error {
 }
 
 // pushState pushes a new parse state s onto the stack.
-func (d *Decoder) pushState(s json.Delim) {
+func (d *Decoder) pushState(s jsontext.Kind) {
 	d.parseState = append(d.parseState, s)
 }
 
@@ -343,7 +327,7 @@ func (d *Decoder) popState() {
 }
 
 // state reports the parse state on top of stack, or 0 if empty.
-func (d *Decoder) state() json.Delim {
+func (d *Decoder) state() jsontext.Kind {
 	if len(d.parseState) == 0 {
 		return 0
 	}
@@ -423,7 +407,7 @@ func isGraphQLFragment(f reflect.StructField) bool {
 // unmarshalValue unmarshals JSON value into v.
 // v must be addressable and not obtained by the use of unexported
 // struct fields, otherwise unmarshalValue will panic.
-func unmarshalValue(value json.Token, v reflect.Value) error {
+func unmarshalValue(value jsontext.Token, v reflect.Value) error {
 	b, err := json.Marshal(value) // TODO: Short-circuit (if profiling says it's worth it).
 	if err != nil {
 		return fmt.Errorf(": %w", err)
