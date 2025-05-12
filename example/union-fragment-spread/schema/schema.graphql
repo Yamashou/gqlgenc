@@ -1,0 +1,15 @@
+type Query {
+    item(itemId: ID!): ItemResult!
+}
+
+union ItemResult = Item | ItemNotFound
+
+type Item {
+    id: ID!
+    name: String!
+}
+
+type ItemNotFound {
+    id: ID!
+}
+
