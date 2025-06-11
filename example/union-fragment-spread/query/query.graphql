@@ -1,0 +1,20 @@
+query GetItem($itemId: ID!) {
+  item(itemId: $itemId) {
+    __typename
+    ... on Item {
+      ...ItemFragment
+    }
+    ... on ItemNotFound {
+      ...ItemNotFoundFragment
+    }
+  }
+}
+
+fragment ItemFragment on Item {
+  id
+  name
+}
+
+fragment ItemNotFoundFragment on ItemNotFound {
+  id
+}
