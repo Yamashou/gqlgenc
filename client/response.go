@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/go-json-experiment/json/jsontext"
+
 	"github.com/Yamashou/gqlgenc/v3/graphqljson"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -104,7 +106,7 @@ func unmarshalResponse(respBody []byte, out any) error {
 		return fmt.Errorf("failed to decode response %q: %w", respBody, err)
 	}
 
-	if err := graphqljson.UnmarshalData(resp.Data, out); err != nil {
+	if err := graphqljson.UnmarshalData(jsontext.Value(resp.Data), out); err != nil {
 		return fmt.Errorf("failed to decode response data %q: %w", resp.Data, err)
 	}
 
