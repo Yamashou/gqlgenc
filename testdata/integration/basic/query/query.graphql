@@ -1,0 +1,90 @@
+mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    user {
+      name
+    }
+  }
+}
+
+
+query UserOperation {
+  user {
+    name
+    name2: name
+    profile {
+      ... on PublicProfile {
+        status
+      }
+      ... on PrivateProfile {
+        age
+      }
+    }
+    profile2: profile {
+      ... on PublicProfile {
+        status
+      }
+      ... on PrivateProfile {
+        age
+      }
+    }
+    optionalProfile {
+      ... on PublicProfile {
+        status
+      }
+      ... on PrivateProfile {
+        age
+      }
+    }
+    address {
+      street
+      ... on PublicAddress {
+        street
+        public
+      }
+      ... on PrivateAddress {
+        street
+        private
+      }
+    }
+    optionalAddress {
+      street
+      ... on PublicAddress {
+        street
+        public
+      }
+      ... on PrivateAddress {
+        street
+        private
+      }
+    }
+    ...UserFragment1
+    ...UserFragment2
+    ... on User {
+      name
+      ...UserFragment2
+    }
+  }
+  optionalUser {
+    name
+  }
+}
+
+fragment UserFragment1 on User {
+  name
+  name
+  ... on User {
+    name
+  }
+  profile {
+    ... on PublicProfile {
+      status
+    }
+    ... on PrivateProfile {
+      age
+    }
+  }
+}
+
+fragment UserFragment2 on User {
+  name
+}
