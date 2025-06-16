@@ -97,15 +97,15 @@ func (g *GenGettersGenerator) GenFunc() func(name string, p types.Type) string {
 
 			returns := g.returnTypeName(field.Type(), false)
 
-			buf.WriteString("func (t *" + name + ") Get" + field.Name() + "() " + returns + "{\n")
-			buf.WriteString("if t == nil {\n t = &" + name + "{}\n}\n")
+			fmt.Fprintf(&buf, "func (t *%s) Get%s() %s{\n", name, field.Name(), returns)
+			fmt.Fprintf(&buf, "if t == nil {\n t = &%s{}\n}\n", name)
 
 			pointerOrNot := ""
 			if _, ok := field.Type().(*types.Named); ok {
 				pointerOrNot = "&"
 			}
 
-			buf.WriteString("return " + pointerOrNot + "t." + field.Name() + "\n}\n")
+			fmt.Fprintf(&buf, "return %st.%s\n}\n", pointerOrNot, field.Name())
 		}
 
 		return buf.String()
