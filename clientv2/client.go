@@ -625,7 +625,21 @@ func isSkipField(omitempty, omitzero bool, v reflect.Value) bool {
 
 	var skipByOmitZero bool
 	if omitzero {
-		skipByOmitZero = isZeroValue(v)
+		if v.CanInterface() && strings.Contains(v.Type().String(), "graphql.Omittable[") {
+			isSetMethod := v.MethodByName("IsSet")
+			if isSetMethod.IsValid() {
+				results := isSetMethod.Call(nil)
+				if len(results) > 0 && results[0].Kind() == reflect.Bool {
+					skipByOmitZero = !results[0].Bool()
+				} else {
+					skipByOmitZero = isZeroValue(v)
+				}
+			} else {
+				skipByOmitZero = isZeroValue(v)
+			}
+		} else {
+			skipByOmitZero = isZeroValue(v)
+		}
 	}
 
 	return skipByOmitEmpty || skipByOmitZero
