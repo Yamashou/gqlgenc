@@ -325,6 +325,22 @@ func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName str
 		name := NewLayerTypeName(typeName, templates.ToGo(selection.TypeCondition))
 		fieldsResponseFields := r.NewResponseFields(selection.SelectionSet, name)
 
+		// if single fields that is also a fragment spread, reuse that fragment
+		if len(fieldsResponseFields) == 1 && fieldsResponseFields[0].IsFragmentSpread {
+			typ := types.NewNamed(
+				types.NewTypeName(0, r.client.Pkg(), templates.ToGo(fieldsResponseFields[0].Name), nil),
+				fieldsResponseFields.StructType(),
+				nil,
+			)
+
+			return &ResponseField{
+				Name:           selection.TypeCondition,
+				Type:           typ,
+				Tags:           []string{fmt.Sprintf(`graphql:"... on %s"`, selection.TypeCondition)},
+				ResponseFields: fieldsResponseFields,
+			}
+		}
+
 		hasFragmentSpread := r.hasFragmentSpread(fieldsResponseFields)
 		fragmentFields := r.collectFragmentFields(fieldsResponseFields)
 
