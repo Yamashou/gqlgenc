@@ -227,39 +227,6 @@ func NewLayerTypeName(base, thisField string) string {
 	return fmt.Sprintf("%s_%s", cases.Title(language.Und, cases.NoLower).String(base), thisField)
 }
 
-func (r *SourceGenerator) expandFragmentFields(responseFields ResponseFieldList) ResponseFieldList {
-	result := make(ResponseFieldList, 0, len(responseFields))
-	for _, field := range responseFields {
-		if field.IsFragmentSpread {
-			for _, fragmentField := range field.ResponseFields {
-				result = append(result, fragmentField)
-			}
-		} else {
-			result = append(result, field)
-		}
-	}
-	return result
-}
-
-func (r *SourceGenerator) hasFragmentSpread(fields ResponseFieldList) bool {
-	for _, field := range fields {
-		if field.IsFragmentSpread {
-			return true
-		}
-	}
-	return false
-}
-
-func (r *SourceGenerator) collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
-	var fragmentFields ResponseFieldList
-	for _, field := range fields {
-		if field.IsFragmentSpread {
-			fragmentFields = append(fragmentFields, field.ResponseFields...)
-		}
-	}
-	return fragmentFields
-}
-
 func (r *SourceGenerator) NewResponseField(selection ast.Selection, typeName string) *ResponseField {
 	var isOptional bool
 	switch selection := selection.(type) {
@@ -458,4 +425,37 @@ func (r *SourceGenerator) Type(typeName string) types.Type {
 	}
 
 	return goType
+}
+
+func (r *SourceGenerator) expandFragmentFields(responseFields ResponseFieldList) ResponseFieldList {
+	result := make(ResponseFieldList, 0, len(responseFields))
+	for _, field := range responseFields {
+		if field.IsFragmentSpread {
+			for _, fragmentField := range field.ResponseFields {
+				result = append(result, fragmentField)
+			}
+		} else {
+			result = append(result, field)
+		}
+	}
+	return result
+}
+
+func (r *SourceGenerator) hasFragmentSpread(fields ResponseFieldList) bool {
+	for _, field := range fields {
+		if field.IsFragmentSpread {
+			return true
+		}
+	}
+	return false
+}
+
+func (r *SourceGenerator) collectFragmentFields(fields ResponseFieldList) ResponseFieldList {
+	var fragmentFields ResponseFieldList
+	for _, field := range fields {
+		if field.IsFragmentSpread {
+			fragmentFields = append(fragmentFields, field.ResponseFields...)
+		}
+	}
+	return fragmentFields
 }

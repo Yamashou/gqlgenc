@@ -142,7 +142,7 @@ func TestLoadConfig_LoadSchema(t *testing.T) {
 		}
 
 		err := config.LoadSchema(context.Background())
-		require.Equal(t, fmt.Sprintf("load remote schema failed: validation error: %s:0: OBJECT Query: must define one or more fields.", mockServer.URL), err.Error())
+		require.Equal(t, fmt.Sprintf("load remote schema failed: validation error: %s:0:0: OBJECT Query: must define one or more fields.", mockServer.URL), err.Error())
 	})
 }
 

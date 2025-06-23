@@ -122,15 +122,6 @@ func (s *Source) Operations(queryDocuments []*ast.QueryDocument) ([]*Operation, 
 	return operations, nil
 }
 
-func (s *Source) operationArgsMapByOperationName() map[string][]*Argument {
-	operationArgsMap := make(map[string][]*Argument)
-	for _, operation := range s.queryDocument.Operations {
-		operationArgsMap[operation.Name] = s.sourceGenerator.OperationArguments(operation.VariableDefinitions)
-	}
-
-	return operationArgsMap
-}
-
 func queryDocumentMapByOperationName(queryDocuments []*ast.QueryDocument) map[string]*ast.QueryDocument {
 	queryDocumentMap := make(map[string]*ast.QueryDocument)
 	for _, queryDocument := range queryDocuments {
@@ -181,6 +172,15 @@ func (s *Source) OperationResponses() ([]*OperationResponse, error) {
 
 func (s *Source) ResponseSubTypes() []*StructSource {
 	return s.sourceGenerator.StructSources
+}
+
+func (s *Source) operationArgsMapByOperationName() map[string][]*Argument {
+	operationArgsMap := make(map[string][]*Argument)
+	for _, operation := range s.queryDocument.Operations {
+		operationArgsMap[operation.Name] = s.sourceGenerator.OperationArguments(operation.VariableDefinitions)
+	}
+
+	return operationArgsMap
 }
 
 func getResponseStructName(operation *ast.OperationDefinition, generateConfig *config.GenerateConfig) string {
