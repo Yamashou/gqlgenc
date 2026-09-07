@@ -161,6 +161,16 @@ make test
 ### Japanese Comments
 These codes have Japanese comments. Replace with English.
 
+### Encoding of request variables
+
+`clientv2` encodes request bodies with `encoding/json/v2` configured with `encoding/json` v1 semantics, plus the gqlgen conventions: values implementing `graphql.ContextMarshaler` or `graphql.Marshaler` are encoded with `MarshalGQLContext` / `MarshalGQL`, which take precedence over `json.Marshaler` and `encoding.TextMarshaler`. Everything else is encoded exactly as `encoding/json` would encode it.
+
+Before v0.40.0, `clientv2` used its own reflect-based encoder. Its output differs from the current one in the following ways, so upgrading is a breaking change if you relied on them:
+
+- `[]byte` and other byte slices are encoded as base64 strings, not as arrays of numbers. Use `[]int` or a type implementing `MarshalGQL` if the server expects an array.
+- Fields of embedded structs are flattened into the parent object instead of being nested under the type name.
+- Struct fields are emitted in declaration order instead of alphabetical order. The JSON is equivalent, but byte-for-byte comparisons of the encoded output need updating.
+
 ### Subscription
 
 This client does not support subscription. If you need a subscription, please create an issue or pull request.
