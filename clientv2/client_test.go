@@ -1437,7 +1437,12 @@ func TestMarshalOmittableJSON(t *testing.T) {
 				return
 			}
 
-			if diff := cmp.Diff(string(tt.want), string(got)); diff != "" {
+			// Compare structurally: key order is not part of the contract.
+			var gotJSON, wantJSON any
+			require.NoError(t, json.Unmarshal(got, &gotJSON))
+			require.NoError(t, json.Unmarshal(tt.want, &wantJSON))
+
+			if diff := cmp.Diff(wantJSON, gotJSON); diff != "" {
 				t.Errorf("MarshalJSON()\n%vwant:%s\n got:%s\n", diff, tt.want, got)
 			}
 		})
@@ -1686,55 +1691,6 @@ func TestEncoder_encodeStruct(t *testing.T) {
 			// JSONの文字列として比較
 			if string(got) != string(want) {
 				t.Errorf("encodeStruct()\n got: %s\nwant: %s", got, want)
-			}
-		})
-	}
-}
-
-func TestEncoder_encodeFloat(t *testing.T) {
-	tests := []struct {
-		name  string
-		input any
-		want  string
-	}{
-		{
-			name:  "whole number float encoded without decimal point",
-			input: float64(1),
-			want:  "1",
-		},
-		{
-			name:  "negative whole number float encoded without decimal point",
-			input: float64(-1),
-			want:  "-1",
-		},
-		{
-			name:  "zero encoded as 0",
-			input: float64(0),
-			want:  "0",
-		},
-		{
-			name:  "fractional value keeps decimal point",
-			input: float64(1.5),
-			want:  "1.5",
-		},
-		{
-			name:  "float32 value does not gain spurious precision from float64 conversion",
-			input: float32(0.1),
-			want:  "0.1",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			encoder := &Encoder{}
-
-			got, err := encoder.encodeFloat(reflect.ValueOf(tt.input))
-			if err != nil {
-				t.Fatalf("encodeFloat() error = %v", err)
-			}
-
-			if string(got) != tt.want {
-				t.Errorf("encodeFloat() = %s, want %s", got, tt.want)
 			}
 		})
 	}
@@ -2162,6 +2118,50 @@ func TestMarshalJSONNumber(t *testing.T) {
 			// clientv2.MarshalJSON must agree with encoding/json on json.Number handling.
 			require.NoError(t, stdlibErr)
 			require.Equal(t, string(stdlibGot), string(got))
+		})
+	}
+}
+
+func TestMarshalJSONFloat(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		input any
+		want  string
+	}{
+		{
+			name:  "whole number float encoded without decimal point",
+			input: float64(1),
+			want:  "1",
+		},
+		{
+			name:  "negative whole number float encoded without decimal point",
+			input: float64(-1),
+			want:  "-1",
+		},
+		{
+			name:  "zero encoded as 0",
+			input: float64(0),
+			want:  "0",
+		},
+		{
+			name:  "fractional value keeps decimal point",
+			input: float64(1.5),
+			want:  "1.5",
+		},
+		{
+			name:  "float32 value does not gain spurious precision from float64 conversion",
+			input: float32(0.1),
+			want:  "0.1",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MarshalJSON(context.Background(), tt.input)
+			require.NoError(t, err)
+			require.Equal(t, tt.want, string(got))
 		})
 	}
 }
