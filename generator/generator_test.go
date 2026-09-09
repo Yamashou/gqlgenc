@@ -2,6 +2,7 @@ package generator_test
 
 import (
 	"context"
+	"flag"
 	"os"
 	"path/filepath"
 	"testing"
@@ -25,6 +26,8 @@ const (
 	expected = "expected"
 	actual   = "actual"
 )
+
+var update = flag.Bool("update", false, "rewrite the expected files with the generated output")
 
 func (s *Suite) TestGenerator_withTestData() {
 	dirs := s.getTestDirs()
@@ -58,11 +61,10 @@ func (s *Suite) TestGenerator_withTestData() {
 			s.Require().Len(pkgs, 1)
 			s.Empty(pkgs[0].Errors)
 
-			// reset expected files if there are no expected files,
-			// allowing reset of expected files by removing them
-			if len(expectedFiles) == 0 {
+			// rewrite the expected files from the generated output when -update is given
+			if *update {
 				for path, content := range actualFiles {
-					s.T().Logf("resetting expected file %s", path)
+					s.T().Logf("updating expected file %s", path)
 					expectedPath := filepath.Join(expected, path)
 					_ = os.MkdirAll(filepath.Dir(expectedPath), 0o700)
 					err = os.WriteFile(expectedPath, []byte(content), 0o644)
@@ -71,6 +73,8 @@ func (s *Suite) TestGenerator_withTestData() {
 
 				return
 			}
+
+			s.Require().NotEmpty(expectedFiles, "no expected files found; run with -update to create them")
 
 			// compare expected and actual files
 			for path, expectedContent := range expectedFiles {
@@ -101,21 +105,11 @@ func (s *Suite) TestGenerator_nilGenerateConfig() {
 	s.Require().NoError(err)
 }
 
-// useDir changes the current working directory to the given directory
-// and returns a function that can be used to restore the original
-// working directory.
+// useDirForTest removes the actual output of a previous run and changes the
+// working directory to dir for the rest of the test; t.Chdir restores it.
 func (s *Suite) useDirForTest(dir string) {
-	wd, err := os.Getwd()
-	s.Require().NoError(err)
-	err = os.Chdir(dir)
-	s.Require().NoError(err)
-
-	// cleanup actual directory
-	_ = os.RemoveAll(filepath.Join(dir, actual))
-
-	s.T().Cleanup(func() {
-		s.Require().NoError(os.Chdir(wd))
-	})
+	s.Require().NoError(os.RemoveAll(filepath.Join(dir, actual)))
+	s.T().Chdir(dir)
 }
 
 func (s *Suite) loadFiles(dir string) map[string]string {
