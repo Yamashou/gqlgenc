@@ -610,6 +610,23 @@ func Test_parseMultipartFiles(t *testing.T) {
 		require.Equal(t, 0, multipartFilesGroups[0].Files[0].Index)
 		require.Equal(t, []any{struct{}{}, nil}, varsMutated["fieldFiles"])
 	})
+
+	t.Run("does not modify the caller's vars", func(t *testing.T) {
+		t.Parallel()
+
+		upload := graphql.Upload{Filename: "file.txt", File: bytes.NewReader([]byte("content"))}
+		vars := map[string]any{
+			"field":      "val",
+			"fieldFile":  upload,
+			"fieldFiles": []*graphql.Upload{&upload},
+		}
+
+		_, _, varsForRequest := parseMultipartFiles(vars)
+
+		require.Nil(t, varsForRequest["fieldFile"])
+		require.Equal(t, upload, vars["fieldFile"], "the caller's map must keep the upload")
+		require.Equal(t, []*graphql.Upload{&upload}, vars["fieldFiles"], "the caller's map must keep the uploads")
+	})
 }
 
 type Number int64
