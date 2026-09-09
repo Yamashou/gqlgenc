@@ -316,11 +316,19 @@ func parseMultipartFiles(
 
 			i++
 		case []*graphql.Upload:
-			vars[k] = make([]struct{}, len(item))
+			// Placeholders for the files; nil elements stay null in the operations body.
+			placeholders := make([]any, len(item))
+			vars[k] = placeholders
 
 			groupFiles := make([]MultipartFile, 0, len(item))
 
 			for itemI, itemV := range item {
+				if itemV == nil {
+					continue
+				}
+
+				placeholders[itemI] = struct{}{}
+
 				iStr := strconv.Itoa(i)
 				mapping[iStr] = []string{fmt.Sprintf("variables.%s.%s", k, strconv.Itoa(itemI))}
 
