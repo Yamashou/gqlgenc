@@ -580,6 +580,36 @@ func Test_parseMultipartFiles(t *testing.T) {
 		require.Len(t, multipartFilesGroups[0].Files, 2)
 		require.ElementsMatch(t, fieldFiles, make([]struct{}, 2))
 	})
+
+	t.Run("has a nil file in files", func(t *testing.T) {
+		t.Parallel()
+
+		vars := map[string]any{
+			"fieldFiles": []*graphql.Upload{
+				{
+					Filename: "file.txt",
+					File:     bytes.NewReader([]byte("content")),
+				},
+				nil,
+			},
+		}
+
+		var (
+			multipartFilesGroups []MultipartFilesGroup
+			mapping              map[string][]string
+			varsMutated          map[string]any
+		)
+
+		require.NotPanics(t, func() {
+			multipartFilesGroups, mapping, varsMutated = parseMultipartFiles(vars)
+		})
+
+		require.Equal(t, map[string][]string{"0": {"variables.fieldFiles.0"}}, mapping)
+		require.Len(t, multipartFilesGroups, 1)
+		require.Len(t, multipartFilesGroups[0].Files, 1)
+		require.Equal(t, 0, multipartFilesGroups[0].Files[0].Index)
+		require.Equal(t, []any{struct{}{}, nil}, varsMutated["fieldFiles"])
+	})
 }
 
 type Number int64
