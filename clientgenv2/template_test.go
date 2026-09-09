@@ -3,15 +3,20 @@ package clientgenv2
 import (
 	"go/types"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // TestReturnTypeName tests the returnTypeName function with various types.
 func TestReturnTypeName(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name     string
 		input    types.Type
 		nested   bool
 		expected string
+		wantErr  string
 	}{
 		{
 			name:     "Basic",
@@ -38,6 +43,12 @@ func TestReturnTypeName(t *testing.T) {
 			expected: "*MyType",
 		},
 		{
+			name:     "Named from the universe scope",
+			input:    types.Universe.Lookup("error").Type(),
+			nested:   true,
+			expected: "error",
+		},
+		{
 			name:     "Interface",
 			input:    types.NewInterfaceType(nil, nil).Complete(),
 			nested:   false,
@@ -49,6 +60,12 @@ func TestReturnTypeName(t *testing.T) {
 			nested:   false,
 			expected: "map[int]bool",
 		},
+		{
+			name:    "Unsupported",
+			input:   types.NewChan(types.SendRecv, types.Typ[types.Int]),
+			nested:  false,
+			wantErr: "unsupported type",
+		},
 	}
 
 	g := &GenGettersGenerator{
@@ -57,10 +74,17 @@ func TestReturnTypeName(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			output := g.returnTypeName(test.input, test.nested)
-			if output != test.expected {
-				t.Errorf("Expected %s, but got %s", test.expected, output)
+			t.Parallel()
+
+			output, err := g.returnTypeName(test.input, test.nested)
+			if test.wantErr != "" {
+				require.ErrorContains(t, err, test.wantErr)
+
+				return
 			}
+
+			require.NoError(t, err)
+			require.Equal(t, test.expected, output)
 		})
 	}
 }
