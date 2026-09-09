@@ -1098,3 +1098,39 @@ func TestUnmarshalData_trailingInput(t *testing.T) {
 		})
 	}
 }
+
+// TestUnmarshalGraphQL_typenameNull verifies that a null __typename does not
+// desynchronize the token stream: the following fields must still be decoded.
+func TestUnmarshalGraphQL_typenameNull(t *testing.T) {
+	t.Parallel()
+
+	type query struct {
+		Node struct {
+			Typename *string `graphql:"__typename"`
+			Name     string  `graphql:"name"`
+			ID       string  `graphql:"id"`
+		} `graphql:"node"`
+	}
+
+	var got query
+
+	err := graphqljson.UnmarshalData([]byte(`{
+		"node": {
+			"__typename": null,
+			"name": "Luke Skywalker",
+			"id": "1"
+		}
+	}`), &got)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var want query
+
+	want.Node.Name = "Luke Skywalker"
+	want.Node.ID = "1"
+
+	if diff := cmp.Diff(got, want); diff != "" {
+		t.Error(diff)
+	}
+}
