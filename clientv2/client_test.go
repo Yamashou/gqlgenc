@@ -7,9 +7,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"reflect"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 	"uuid"
@@ -411,6 +413,39 @@ func Test_prepareMultipartFormBody(t *testing.T) {
 
 		require.Contains(t, contentType, "multipart/form-data; boundary=")
 		require.NoError(t, err)
+	})
+
+	t.Run("body is terminated exactly once", func(t *testing.T) {
+		t.Parallel()
+
+		body := new(bytes.Buffer)
+		formFields := []FormField{{Name: "operations", Value: "value"}}
+		files := []MultipartFilesGroup{{Files: []MultipartFile{{
+			Index: 0,
+			File:  graphql.Upload{Filename: "file.txt", File: bytes.NewReader([]byte("content"))},
+		}}}}
+
+		contentType, err := prepareMultipartFormBody(body, formFields, files)
+		require.NoError(t, err)
+
+		boundary := strings.TrimPrefix(contentType, "multipart/form-data; boundary=")
+		require.Equal(t, 1, strings.Count(body.String(), "--"+boundary+"--"), "closing boundary must appear once:\n%s", body.String())
+
+		reader := multipart.NewReader(bytes.NewReader(body.Bytes()), boundary)
+
+		var partNames []string
+
+		for {
+			part, err := reader.NextPart()
+			if errors.Is(err, io.EOF) {
+				break
+			}
+
+			require.NoError(t, err)
+			partNames = append(partNames, part.FormName())
+		}
+
+		require.Equal(t, []string{"operations", "0"}, partNames)
 	})
 }
 
