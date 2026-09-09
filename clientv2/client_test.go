@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"reflect"
@@ -392,7 +393,7 @@ func Test_prepareMultipartFormBody(t *testing.T) {
 			},
 		}
 
-		contentType, err := prepareMultipartFormBody(body, formFields, []MultipartFilesGroup{})
+		contentType, err := (&Client{}).prepareMultipartFormBody(context.Background(), body, formFields, []MultipartFilesGroup{})
 
 		require.Equal(t, contentType, "")
 		require.EqualError(t, err, "encode field: json: unsupported type: chan struct {}")
@@ -409,7 +410,7 @@ func Test_prepareMultipartFormBody(t *testing.T) {
 			},
 		}
 
-		contentType, err := prepareMultipartFormBody(body, formFields, []MultipartFilesGroup{})
+		contentType, err := (&Client{}).prepareMultipartFormBody(context.Background(), body, formFields, []MultipartFilesGroup{})
 
 		require.Contains(t, contentType, "multipart/form-data; boundary=")
 		require.NoError(t, err)
@@ -425,7 +426,7 @@ func Test_prepareMultipartFormBody(t *testing.T) {
 			File:  graphql.Upload{Filename: "file.txt", File: bytes.NewReader([]byte("content"))},
 		}}}}
 
-		contentType, err := prepareMultipartFormBody(body, formFields, files)
+		contentType, err := (&Client{}).prepareMultipartFormBody(context.Background(), body, formFields, files)
 		require.NoError(t, err)
 
 		boundary := strings.TrimPrefix(contentType, "multipart/form-data; boundary=")
@@ -1765,7 +1766,8 @@ func TestEncoderNilSliceAsEmptyArray(t *testing.T) {
 }
 
 type captureHTTPClient struct {
-	body []byte
+	body        []byte
+	contentType string
 }
 
 func (c *captureHTTPClient) Do(req *http.Request) (*http.Response, error) {
@@ -1775,6 +1777,7 @@ func (c *captureHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	}
 
 	c.body = body
+	c.contentType = req.Header.Get("Content-Type")
 
 	return &http.Response{
 		StatusCode: http.StatusOK,
@@ -1965,4 +1968,37 @@ func TestMarshalJSONFloat(t *testing.T) {
 			require.Equal(t, tt.want, string(got))
 		})
 	}
+}
+
+// TestClientPostMultipartUsesClientEncoder verifies that the operations part of a
+// multipart request is encoded with the same rules as a JSON request body:
+// MarshalGQL scalars and the EncodeNilSliceAsEmptyArray option must apply.
+func TestClientPostMultipartUsesClientEncoder(t *testing.T) {
+	t.Parallel()
+
+	httpClient := &captureHTTPClient{}
+	client := NewClient(httpClient, "https://example.com/graphql", &Options{EncodeNilSliceAsEmptyArray: true})
+
+	vars := map[string]any{
+		"file":   graphql.Upload{Filename: "file.txt", File: bytes.NewReader([]byte("content"))},
+		"number": NumberOne,
+		"ids":    []string(nil),
+	}
+
+	err := client.Post(context.Background(), "Upload", "mutation { upload }", &fakeRes{}, vars)
+	require.NoError(t, err)
+
+	_, params, err := mime.ParseMediaType(httpClient.contentType)
+	require.NoError(t, err)
+
+	reader := multipart.NewReader(bytes.NewReader(httpClient.body), params["boundary"])
+	form, err := reader.ReadForm(1 << 20)
+	require.NoError(t, err)
+
+	require.JSONEq(t,
+		`{"query":"mutation { upload }","variables":{"file":null,"number":"ONE","ids":[]},"operationName":"Upload"}`,
+		form.Value["operations"][0],
+	)
+	require.JSONEq(t, `{"0":["variables.file"]}`, form.Value["map"][0])
+	require.Len(t, form.File["0"], 1)
 }
