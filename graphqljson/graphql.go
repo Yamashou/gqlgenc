@@ -147,8 +147,14 @@ func (d *Decoder) decode() error { //nolint:maintidx
 			// If this key is __typename, eagerly read its value so we can use it
 			// to discriminate which inline fragment pointers to initialize below.
 			// This must happen before the nil-pointer init loop.
-			var earlyReadTok json.Token
+			var (
+				earlyReadTok json.Token
+				earlyRead    bool
+			)
+
 			if key == "__typename" {
+				earlyRead = true
+
 				earlyReadTok, err = d.jsonDecoder.Token()
 				if err == io.EOF {
 					return errors.New("unexpected end of JSON input")
@@ -197,7 +203,8 @@ func (d *Decoder) decode() error { //nolint:maintidx
 			// Read the next token, which should be the value.
 			// If it's of json.RawMessage or map type, decode the value.
 			// Skip reading if we already eagerly read the value above (for __typename).
-			if earlyReadTok != nil {
+			// A null __typename yields a nil token, so track the read with a flag.
+			if earlyRead {
 				tok = earlyReadTok
 			} else {
 				switch matchingFieldValue.Type() {
