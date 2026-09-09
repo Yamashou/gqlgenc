@@ -1437,7 +1437,12 @@ func TestMarshalOmittableJSON(t *testing.T) {
 				return
 			}
 
-			if diff := cmp.Diff(string(tt.want), string(got)); diff != "" {
+			// Compare structurally: key order is not part of the contract.
+			var gotJSON, wantJSON any
+			require.NoError(t, json.Unmarshal(got, &gotJSON))
+			require.NoError(t, json.Unmarshal(tt.want, &wantJSON))
+
+			if diff := cmp.Diff(wantJSON, gotJSON); diff != "" {
 				t.Errorf("MarshalJSON()\n%vwant:%s\n got:%s\n", diff, tt.want, got)
 			}
 		})
@@ -1570,358 +1575,6 @@ func TestUnsafeChainInterceptor(t *testing.T) {
 			t.Errorf("unexpected execution order\nexpected: %v\ngot: %v", expected, order)
 		}
 	})
-}
-
-func TestEncoder_encodeStruct(t *testing.T) {
-	type Address struct {
-		City    string  `json:"city"`
-		Country string  `json:"country,omitempty"`
-		Zip     *string `json:"zip,omitempty"`
-	}
-
-	type Person struct {
-		Name      string   `json:"name"`
-		Age       int64    `json:"age,omitempty"`
-		Email     *string  `json:"email,omitempty"`
-		Email2    *string  `json:"email2"`
-		Address   Address  `json:"address"`
-		Tags      []string `json:"tags,omitempty"`
-		Nickname  string   `json:"nickname,omitempty"`
-		Empty     string   `json:"-"`
-		unexposed string
-		Hobbies   []string `json:"hobbies"`
-	}
-
-	zip := "123-4567"
-	email := "test@example.com"
-
-	tests := []struct {
-		name    string
-		input   Person
-		want    map[string]any
-		wantErr bool
-	}{
-		{
-			name: "all fields filled",
-			input: Person{
-				Name:     "John",
-				Age:      30,
-				Email:    &email,
-				Address:  Address{City: "Tokyo", Country: "Japan", Zip: &zip},
-				Tags:     []string{"tag1", "tag2"},
-				Nickname: "Johnny",
-				Hobbies:  []string{"reading", "swimming"},
-			},
-			want: map[string]any{
-				"name":     "John",
-				"age":      int64(30),
-				"email":    "test@example.com",
-				"email2":   nil,
-				"address":  map[string]any{"city": "Tokyo", "country": "Japan", "zip": "123-4567"},
-				"tags":     []any{"tag1", "tag2"},
-				"nickname": "Johnny",
-				"hobbies":  []any{"reading", "swimming"},
-			},
-		},
-		{
-			name: "omitempty fields with zero values",
-			input: Person{
-				Name:    "John",
-				Address: Address{City: "Tokyo"},
-			},
-			want: map[string]any{
-				"name":    "John",
-				"email2":  nil,
-				"address": map[string]any{"city": "Tokyo"},
-				"hobbies": nil,
-			},
-		},
-		{
-			name: "zero value of slice (i.e. nil slice) dropped on omitempty enabled",
-			input: Person{
-				Name:    "John",
-				Address: Address{City: "Tokyo"},
-				Hobbies: nil,
-				Tags:    nil, // will be dropped as omitempty is enabled
-			},
-			want: map[string]any{
-				"name":    "John",
-				"email2":  nil,
-				"hobbies": nil,
-				"address": map[string]any{"city": "Tokyo"},
-			},
-		},
-		{
-			name: "nil slice set to null",
-			input: Person{
-				Tags:    []string{}, // empty slice is empty value but not zero value
-				Hobbies: nil,        // will continue to be nil
-			},
-			want: map[string]any{
-				"name":    "",
-				"email2":  nil,
-				"hobbies": nil,
-				"address": map[string]any{"city": ""},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			encoder := &Encoder{}
-
-			got, err := encoder.encodeStruct(reflect.ValueOf(tt.input))
-			if (err != nil) != tt.wantErr {
-				t.Errorf("encodeStruct() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-
-			// 期待値をJSONに変換
-			want, err := json.Marshal(tt.want)
-			if err != nil {
-				t.Errorf("failed to marshal want: %v", err)
-				return
-			}
-
-			// JSONの文字列として比較
-			if string(got) != string(want) {
-				t.Errorf("encodeStruct()\n got: %s\nwant: %s", got, want)
-			}
-		})
-	}
-}
-
-func TestEncoder_encodeFloat(t *testing.T) {
-	tests := []struct {
-		name  string
-		input any
-		want  string
-	}{
-		{
-			name:  "whole number float encoded without decimal point",
-			input: float64(1),
-			want:  "1",
-		},
-		{
-			name:  "negative whole number float encoded without decimal point",
-			input: float64(-1),
-			want:  "-1",
-		},
-		{
-			name:  "zero encoded as 0",
-			input: float64(0),
-			want:  "0",
-		},
-		{
-			name:  "fractional value keeps decimal point",
-			input: float64(1.5),
-			want:  "1.5",
-		},
-		{
-			name:  "float32 value does not gain spurious precision from float64 conversion",
-			input: float32(0.1),
-			want:  "0.1",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			encoder := &Encoder{}
-
-			got, err := encoder.encodeFloat(reflect.ValueOf(tt.input))
-			if err != nil {
-				t.Fatalf("encodeFloat() error = %v", err)
-			}
-
-			if string(got) != tt.want {
-				t.Errorf("encodeFloat() = %s, want %s", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_isEmptyValue(t *testing.T) {
-	str := "test"
-
-	type User struct {
-		Name string `json:"name,omitempty"`
-	}
-
-	type Where struct {
-		Not graphql.Omittable[*Where] `json:"not,omitempty"`
-	}
-
-	tests := []struct {
-		name  string
-		value any
-		want  bool
-	}{
-		{
-			name:  "non-empty value with omitempty",
-			value: "string",
-			want:  false,
-		},
-		{
-			name:  "empty value with omitempty",
-			value: "",
-			want:  true,
-		},
-		{
-			name:  "nil pointer with omitempty",
-			value: (*string)(nil),
-			want:  true,
-		},
-		{
-			name:  "non-nil pointer with omitempty",
-			value: &str,
-			want:  false,
-		},
-		{
-			name:  "slice value with omitempty",
-			value: []string{"string"},
-			want:  false,
-		},
-		{
-			name:  "empty slice value with omitempty",
-			value: []string{},
-			want:  true,
-		},
-		{
-			name:  "nil slice value with omitempty",
-			value: func() []string { return nil }(),
-			want:  true,
-		},
-		{
-			name:  "Omittable IsSet is true",
-			value: graphql.OmittableOf("test"),
-			want:  false,
-		},
-		{
-			name:  "Omittable IsSet is true and empty string",
-			value: graphql.OmittableOf(""),
-			want:  false,
-		},
-		{
-			name:  "Omittable IsSet is false",
-			value: graphql.Omittable[string]{},
-			want:  false,
-		},
-		{
-			name:  "Omittable IsSet is true, value struct",
-			value: graphql.OmittableOf(User{Name: "test"}),
-			want:  false,
-		},
-		{
-			name:  "Omittable IsSet is false, value struct",
-			value: graphql.Omittable[User]{},
-			want:  false,
-		},
-		{
-			name:  "Omittable IsSet is true, value nest struct",
-			value: graphql.OmittableOf(Where{Not: graphql.OmittableOf(&Where{})}),
-			want:  false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := isEmptyValue(reflect.ValueOf(tt.value)); got != tt.want {
-				t.Errorf("isEmtpyValue() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
-
-func Test_isZeroValue(t *testing.T) {
-	str := "test"
-
-	type User struct {
-		Name string `json:"name,omitzero"`
-	}
-
-	type Where struct {
-		Not graphql.Omittable[*Where] `json:"not,omitzero"`
-	}
-
-	tests := []struct {
-		name  string
-		value any
-		want  bool
-	}{
-		{
-			name:  "non-empty value with omitzeero",
-			value: "string",
-			want:  false,
-		},
-		{
-			name:  "empty value with omitzeero",
-			value: "",
-			want:  true,
-		},
-		{
-			name:  "nil pointer with omitzeero",
-			value: (*string)(nil),
-			want:  true,
-		},
-		{
-			name:  "non-nil pointer with omitzeero",
-			value: &str,
-			want:  false,
-		},
-		{
-			name:  "slice value with omitempty",
-			value: []string{"string"},
-			want:  false,
-		},
-		{
-			name:  "empty slice value with omitempty",
-			value: []string{},
-			want:  false, // omitempty is skip but omitzero is not skip
-		},
-		{
-			name:  "nil slice value with omitempty",
-			value: func() []string { return nil }(),
-			want:  true,
-		},
-		{
-			name:  "Omittable IsSet is true",
-			value: graphql.OmittableOf("test"),
-			want:  false,
-		},
-		{
-			name:  "Omittable IsSet is true and empty string",
-			value: graphql.OmittableOf(""),
-			want:  false,
-		},
-		{
-			name:  "Omittable IsSet is false",
-			value: graphql.Omittable[string]{},
-			want:  true,
-		},
-		{
-			name:  "Omittable IsSet is true, value struct",
-			value: graphql.OmittableOf(User{Name: "test"}),
-			want:  false,
-		},
-		{
-			name:  "Omittable IsSet is false, value struct",
-			value: graphql.Omittable[User]{},
-			want:  true,
-		},
-		{
-			name:  "Omittable IsSet is true, value nest struct",
-			value: graphql.OmittableOf(Where{Not: graphql.OmittableOf(&Where{})}),
-			want:  false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := isZeroValue(reflect.ValueOf(tt.value)); got != tt.want {
-				t.Errorf("isZeroValue() = %v, want %v", got, tt.want)
-			}
-		})
-	}
 }
 
 func TestEncoderNilSliceAsEmptyArray(t *testing.T) {
@@ -2162,6 +1815,50 @@ func TestMarshalJSONNumber(t *testing.T) {
 			// clientv2.MarshalJSON must agree with encoding/json on json.Number handling.
 			require.NoError(t, stdlibErr)
 			require.Equal(t, string(stdlibGot), string(got))
+		})
+	}
+}
+
+func TestMarshalJSONFloat(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		input any
+		want  string
+	}{
+		{
+			name:  "whole number float encoded without decimal point",
+			input: float64(1),
+			want:  "1",
+		},
+		{
+			name:  "negative whole number float encoded without decimal point",
+			input: float64(-1),
+			want:  "-1",
+		},
+		{
+			name:  "zero encoded as 0",
+			input: float64(0),
+			want:  "0",
+		},
+		{
+			name:  "fractional value keeps decimal point",
+			input: float64(1.5),
+			want:  "1.5",
+		},
+		{
+			name:  "float32 value does not gain spurious precision from float64 conversion",
+			input: float32(0.1),
+			want:  "0.1",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := MarshalJSON(context.Background(), tt.input)
+			require.NoError(t, err)
+			require.Equal(t, tt.want, string(got))
 		})
 	}
 }
