@@ -216,7 +216,8 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 	var headers []header
 
 	if len(multipartFilesGroups) > 0 {
-		contentType, err := prepareMultipartFormBody(
+		contentType, err := c.prepareMultipartFormBody(
+			ctx,
 			body,
 			[]FormField{
 				{
@@ -350,14 +351,17 @@ func parseMultipartFiles(
 	return multipartFilesGroups, mapping, vars
 }
 
-func prepareMultipartFormBody(
-	buffer *bytes.Buffer, formFields []FormField, files []MultipartFilesGroup,
+// prepareMultipartFormBody writes the multipart request body into buffer and
+// returns its Content-Type. Form fields are encoded with the client encoder so
+// that they follow the same rules as a JSON request body.
+func (c *Client) prepareMultipartFormBody(
+	ctx context.Context, buffer *bytes.Buffer, formFields []FormField, files []MultipartFilesGroup,
 ) (string, error) {
 	writer := multipart.NewWriter(buffer)
 
 	// form fields
 	for _, field := range formFields {
-		fieldBody, err := json.Marshal(field.Value)
+		fieldBody, err := c.marshalJSON(ctx, field.Value)
 		if err != nil {
 			return "", fmt.Errorf("encode %s: %w", field.Name, err)
 		}

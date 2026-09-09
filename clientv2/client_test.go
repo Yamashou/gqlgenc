@@ -393,7 +393,7 @@ func Test_prepareMultipartFormBody(t *testing.T) {
 			},
 		}
 
-		contentType, err := prepareMultipartFormBody(body, formFields, []MultipartFilesGroup{})
+		contentType, err := (&Client{}).prepareMultipartFormBody(context.Background(), body, formFields, []MultipartFilesGroup{})
 
 		require.Equal(t, contentType, "")
 		require.EqualError(t, err, "encode field: json: unsupported type: chan struct {}")
@@ -410,7 +410,7 @@ func Test_prepareMultipartFormBody(t *testing.T) {
 			},
 		}
 
-		contentType, err := prepareMultipartFormBody(body, formFields, []MultipartFilesGroup{})
+		contentType, err := (&Client{}).prepareMultipartFormBody(context.Background(), body, formFields, []MultipartFilesGroup{})
 
 		require.Contains(t, contentType, "multipart/form-data; boundary=")
 		require.NoError(t, err)
@@ -426,7 +426,7 @@ func Test_prepareMultipartFormBody(t *testing.T) {
 			File:  graphql.Upload{Filename: "file.txt", File: bytes.NewReader([]byte("content"))},
 		}}}}
 
-		contentType, err := prepareMultipartFormBody(body, formFields, files)
+		contentType, err := (&Client{}).prepareMultipartFormBody(context.Background(), body, formFields, files)
 		require.NoError(t, err)
 
 		boundary := strings.TrimPrefix(contentType, "multipart/form-data; boundary=")
