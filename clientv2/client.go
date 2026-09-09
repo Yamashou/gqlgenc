@@ -346,7 +346,6 @@ func prepareMultipartFormBody(
 	buffer *bytes.Buffer, formFields []FormField, files []MultipartFilesGroup,
 ) (string, error) {
 	writer := multipart.NewWriter(buffer)
-	defer writer.Close()
 
 	// form fields
 	for _, field := range formFields {
