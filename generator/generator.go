@@ -49,6 +49,12 @@ func mutateHook(cfg *config.Config, usedTypes map[string]bool) func(b *modelgen.
 }
 
 func Generate(ctx context.Context, cfg *config.Config) error {
+	// LoadConfig always sets Generate, but callers that build Config by hand may
+	// leave it nil. Normalize it once so the plugin and the model hook can rely on it.
+	if cfg.Generate == nil {
+		cfg.Generate = &config.GenerateConfig{}
+	}
+
 	_ = syscall.Unlink(cfg.Client.Filename)
 	if cfg.Model.IsDefined() {
 		_ = syscall.Unlink(cfg.Model.Filename)
@@ -111,10 +117,7 @@ func Generate(ctx context.Context, cfg *config.Config) error {
 		return fmt.Errorf(": %w", err)
 	}
 
-	var clientGen api.Option
-	if cfg.Generate != nil {
-		clientGen = api.AddPlugin(clientgenv2.New(queryDocument, operationQueryDocuments, cfg.Client, cfg.Generate))
-	}
+	clientGen := api.AddPlugin(clientgenv2.New(queryDocument, operationQueryDocuments, cfg.Client, cfg.Generate))
 
 	var plugins []plugin.Plugin
 
