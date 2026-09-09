@@ -51,22 +51,25 @@ type GenGettersGenerator struct {
 	ClientPackageName string
 }
 
-func (g *GenGettersGenerator) GenFunc() func(name string, p types.Type) string {
+func (g *GenGettersGenerator) GenFunc() func(name string, p types.Type) (string, error) {
 	// This method returns a string of getters for a struct.
 	// The idea is to be able to chain calls safely without having to check for nil.
 	// To make this work we need to return a pointer to the struct if the field is a struct.
-	return func(name string, p types.Type) string {
+	return func(name string, p types.Type) (string, error) {
 		var it *types.Struct
 
 		it, ok := p.(*types.Struct)
 		if !ok {
-			return ""
+			return "", nil
 		}
 
 		var buf bytes.Buffer
 
 		for field := range it.Fields() {
-			returns := g.returnTypeName(field.Type(), false)
+			returns, err := g.returnTypeName(field.Type(), false)
+			if err != nil {
+				return "", fmt.Errorf("getter %s.Get%s: %w", name, field.Name(), err)
+			}
 
 			buf.WriteString("func (t *" + name + ") Get" + field.Name() + "() " + returns + "{\n")
 			buf.WriteString("if t == nil {\n t = &" + name + "{}\n}\n")
@@ -79,7 +82,7 @@ func (g *GenGettersGenerator) GenFunc() func(name string, p types.Type) string {
 			buf.WriteString("return " + pointerOrNot + "t." + field.Name() + "\n}\n")
 		}
 
-		return buf.String()
+		return buf.String(), nil
 	}
 }
 
@@ -162,36 +165,75 @@ func (g *GenGettersGenerator) writeFieldAssignment(buf *bytes.Buffer, field *typ
 	}
 }
 
-func (g *GenGettersGenerator) returnTypeName(t types.Type, nested bool) string {
+// returnTypeName renders the Go type of a getter's return value.
+//
+// Arguments:
+//   - t: the field type
+//   - nested: true when t is an element of a pointer, slice, or map, in which
+//     case named types are not wrapped in a pointer
+//
+// Returns:
+//   - string: the Go type expression, qualified with the package name when the
+//     type comes from another package
+//   - error: non-nil when t is a kind the generator cannot express
+//
+// Preconditions:
+//   - none
+//
+// Postconditions:
+//   - a named type at the top level is returned as a pointer so that getters
+//     can be chained without nil checks
+func (g *GenGettersGenerator) returnTypeName(t types.Type, nested bool) (string, error) {
 	switch it := t.(type) {
 	case *types.Basic:
-		return it.String()
+		return it.String(), nil
 	case *types.Pointer:
-		return "*" + g.returnTypeName(it.Elem(), true)
+		elem, err := g.returnTypeName(it.Elem(), true)
+		if err != nil {
+			return "", err
+		}
+
+		return "*" + elem, nil
 	case *types.Slice:
-		return "[]" + g.returnTypeName(it.Elem(), true)
+		elem, err := g.returnTypeName(it.Elem(), true)
+		if err != nil {
+			return "", err
+		}
+
+		return "[]" + elem, nil
 	case *types.Named:
 		s := strings.Split(it.String(), ".")
 		name := s[len(s)-1]
 
-		isImported := it.Obj().Parent() != nil && it.Obj().Pkg().Name() != g.ClientPackageName
+		// Types from the universe scope such as error have no package.
+		isImported := it.Obj().Pkg() != nil && it.Obj().Pkg().Name() != g.ClientPackageName
 		if isImported {
 			name = namedTypeString(it)
 		}
 
 		if nested {
-			return name
+			return name, nil
 		}
 
-		return "*" + name
+		return "*" + name, nil
 	case *types.Interface:
-		return "any"
+		return "any", nil
 	case *types.Map:
-		return "map[" + g.returnTypeName(it.Key(), true) + "]" + g.returnTypeName(it.Elem(), true)
+		key, err := g.returnTypeName(it.Key(), true)
+		if err != nil {
+			return "", err
+		}
+
+		elem, err := g.returnTypeName(it.Elem(), true)
+		if err != nil {
+			return "", err
+		}
+
+		return "map[" + key + "]" + elem, nil
 	case *types.Alias:
 		return g.returnTypeName(it.Underlying(), nested)
 	default:
-		return fmt.Sprintf("%T----", it)
+		return "", fmt.Errorf("unsupported type %s (%T) in getter return type", t, t)
 	}
 }
 
