@@ -83,6 +83,24 @@ func (s *Suite) TestGenerator_withTestData() {
 	}
 }
 
+// TestGenerator_nilGenerateConfig verifies that Generate tolerates a Config
+// whose Generate section was left unset by a caller that built it by hand.
+func (s *Suite) TestGenerator_nilGenerateConfig() {
+	s.useDirForTest(filepath.Join("testdata", "multiple_queries"))
+
+	cfg, err := config.LoadConfig("./gqlgenc.yml")
+	s.Require().NoError(err)
+
+	cfg.GQLConfig.SkipValidation = true
+	cfg.GQLConfig.SkipModTidy = true
+	cfg.Generate = nil
+
+	s.Require().NotPanics(func() {
+		err = generator.Generate(context.Background(), cfg)
+	})
+	s.Require().NoError(err)
+}
+
 // useDir changes the current working directory to the given directory
 // and returns a function that can be used to restore the original
 // working directory.
