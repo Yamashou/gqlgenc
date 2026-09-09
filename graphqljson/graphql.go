@@ -54,13 +54,14 @@ func UnmarshalData(data json.RawMessage, v any) error {
 	}
 
 	tok, err := d.jsonDecoder.Token()
-	switch err {
-	case io.EOF:
+	if errors.Is(err, io.EOF) {
 		// Expect to get io.EOF. There shouldn't be any more
 		// tokens left after we've decoded v successfully.
 		return nil
-	case nil:
-		return fmt.Errorf("invalid token '%v' after top-level value", tok)
+	}
+
+	if err != nil {
+		return fmt.Errorf("invalid input after top-level value: %w", err)
 	}
 
 	return fmt.Errorf("invalid token '%v' after top-level value", tok)

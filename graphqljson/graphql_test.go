@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/stretchr/testify/require"
 
 	"github.com/gqlgo/gqlgenc/graphqljson"
 )
@@ -1063,5 +1064,37 @@ func TestUnmarshalGraphQL_nestedFragmentSpread_multiLevel(t *testing.T) {
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
 		t.Errorf("mismatch:\n%s", diff)
+	}
+}
+
+func TestUnmarshalData_trailingInput(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		data    string
+		wantErr string
+	}{
+		{
+			name:    "trailing token",
+			data:    `{"name": "Luke"} 2`,
+			wantErr: "invalid token '2' after top-level value",
+		},
+		{
+			name:    "trailing malformed input",
+			data:    `{"name": "Luke"} }`,
+			wantErr: "invalid character '}'",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			var got struct{ Name string }
+
+			err := graphqljson.UnmarshalData([]byte(tt.data), &got)
+			require.ErrorContains(t, err, tt.wantErr)
+		})
 	}
 }
