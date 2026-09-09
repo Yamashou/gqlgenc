@@ -465,8 +465,10 @@ func (c *Client) unmarshal(data []byte, res any) error {
 
 	errData := graphqljson.UnmarshalData(resp.Data, res)
 	if errData != nil {
-		// if ParseDataWhenErrors is true, and we failed to unmarshal data, return the actual error
-		if c.ParseDataWhenErrors {
+		// With ParseDataWhenErrors, data may be partial or null when the response
+		// carries GraphQL errors, so report those errors instead of the decode
+		// failure. Without GraphQL errors the decode failure is the only error.
+		if c.ParseDataWhenErrors && err != nil {
 			return err
 		}
 

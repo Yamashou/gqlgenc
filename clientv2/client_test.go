@@ -24,13 +24,14 @@ import (
 )
 
 const (
-	qqlSingleErr        = `{"errors":[{"path":["query GetUser","viewer","repositories","nsodes"],"extensions":{"code":"undefinedField","typeName":"RepositoryConnection","fieldName":"nsodes"},"locations":[{"line":6,"column":4}],"message":"Field 'nsodes' doesn't exist on type 'RepositoryConnection'"}]}`
-	gqlMultipleErr      = `{"errors":[{"path":["query GetUser","viewer","repositories","nsodes"],"extensions":{"code":"undefinedField","typeName":"RepositoryConnection","fieldName":"nsodes"},"locations":[{"line":6,"column":4}],"message":"Field 'nsodes' doesn't exist on type 'RepositoryConnection'"},{"path":["query GetUser"],"extensions":{"code":"variableNotUsed","variableName":"languageFirst"},"locations":[{"line":1,"column":1}],"message":"Variable $languageFirst is declared by GetUser but not used"},{"path":["fragment LanguageFragment"],"extensions":{"code":"useAndDefineFragment","fragmentName":"LanguageFragment"},"locations":[{"line":18,"column":1}],"message":"Fragment LanguageFragment was defined, but not used"}]}`
-	gqlDataAndErr       = `{"data": {"something": "some data"},"errors":[{"path":["query GetUser","viewer","repositories","nsodes"],"extensions":{"code":"undefinedField","typeName":"RepositoryConnection","fieldName":"nsodes"},"locations":[{"line":6,"column":4}],"message":"Field 'nsodes' doesn't exist on type 'RepositoryConnection'"}]}`
-	invalidJSON         = "invalid"
-	validData           = `{"data":{"something": "some data"}}`
-	withBadDataFormat   = `{"data": "notAndObject"}`
-	withBadErrorsFormat = `{"errors": "bad"}`
+	qqlSingleErr            = `{"errors":[{"path":["query GetUser","viewer","repositories","nsodes"],"extensions":{"code":"undefinedField","typeName":"RepositoryConnection","fieldName":"nsodes"},"locations":[{"line":6,"column":4}],"message":"Field 'nsodes' doesn't exist on type 'RepositoryConnection'"}]}`
+	gqlMultipleErr          = `{"errors":[{"path":["query GetUser","viewer","repositories","nsodes"],"extensions":{"code":"undefinedField","typeName":"RepositoryConnection","fieldName":"nsodes"},"locations":[{"line":6,"column":4}],"message":"Field 'nsodes' doesn't exist on type 'RepositoryConnection'"},{"path":["query GetUser"],"extensions":{"code":"variableNotUsed","variableName":"languageFirst"},"locations":[{"line":1,"column":1}],"message":"Variable $languageFirst is declared by GetUser but not used"},{"path":["fragment LanguageFragment"],"extensions":{"code":"useAndDefineFragment","fragmentName":"LanguageFragment"},"locations":[{"line":18,"column":1}],"message":"Fragment LanguageFragment was defined, but not used"}]}`
+	gqlDataAndErr           = `{"data": {"something": "some data"},"errors":[{"path":["query GetUser","viewer","repositories","nsodes"],"extensions":{"code":"undefinedField","typeName":"RepositoryConnection","fieldName":"nsodes"},"locations":[{"line":6,"column":4}],"message":"Field 'nsodes' doesn't exist on type 'RepositoryConnection'"}]}`
+	invalidJSON             = "invalid"
+	validData               = `{"data":{"something": "some data"}}`
+	withBadDataFormat       = `{"data": "notAndObject"}`
+	withBadDataFormatAndErr = `{"data": "notAndObject","errors":[{"message":"boom"}]}`
+	withBadErrorsFormat     = `{"errors": "bad"}`
 )
 
 type fakeRes struct {
@@ -216,6 +217,27 @@ func TestUnmarshal(t *testing.T) {
 		c := &Client{}
 		err := c.unmarshal([]byte(withBadDataFormat), r)
 		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : : json: cannot unmarshal string into Go value of type clientv2.fakeRes")
+	})
+
+	t.Run("bad data format with ParseDataWhenErrors and no graphql errors", func(t *testing.T) {
+		t.Parallel()
+
+		r := &fakeRes{}
+		c := &Client{ParseDataWhenErrors: true}
+		err := c.unmarshal([]byte(withBadDataFormat), r)
+		require.ErrorContains(t, err, "failed to decode data into response")
+	})
+
+	t.Run("bad data format with ParseDataWhenErrors and graphql errors returns the graphql errors", func(t *testing.T) {
+		t.Parallel()
+
+		r := &fakeRes{}
+		c := &Client{ParseDataWhenErrors: true}
+		err := c.unmarshal([]byte(withBadDataFormatAndErr), r)
+
+		var gqlErrors *GqlErrorList
+		require.ErrorAs(t, err, &gqlErrors)
+		require.Len(t, gqlErrors.Errors, 1)
 	})
 
 	t.Run("bad data format", func(t *testing.T) {
