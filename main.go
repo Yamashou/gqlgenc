@@ -5,12 +5,16 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime/debug"
 
 	"github.com/gqlgo/gqlgenc/config"
 	"github.com/gqlgo/gqlgenc/generator"
 )
 
-var version = "0.33.0"
+// version can be set at build time with -ldflags "-X main.version=v1.2.3".
+// When it is empty, the version recorded in the module build info is used,
+// which is the requested version for binaries installed with go install.
+var version = ""
 
 func main() {
 	var (
@@ -22,7 +26,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Println(version)
+		fmt.Println(resolveVersion(version))
 
 		return
 	}
@@ -42,4 +46,31 @@ func main() {
 
 		os.Exit(4)
 	}
+}
+
+// resolveVersion returns the version to print for -version.
+//
+// Arguments:
+//   - override: the value set at build time with -ldflags, or empty
+//
+// Returns:
+//   - string: override when it is set, otherwise the main module version from
+//     the build info, or "(devel)" when no build info is available
+//
+// Preconditions:
+//   - none
+//
+// Postconditions:
+//   - the result is never empty
+func resolveVersion(override string) string {
+	if override != "" {
+		return override
+	}
+
+	info, ok := debug.ReadBuildInfo()
+	if ok && info.Main.Version != "" {
+		return info.Main.Version
+	}
+
+	return "(devel)"
 }
