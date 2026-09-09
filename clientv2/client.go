@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"mime/multipart"
 	"net/http"
 	"strconv"
@@ -272,6 +273,10 @@ func (c *Client) Post(ctx context.Context, operationName, query string, respData
 func parseMultipartFiles(
 	vars map[string]any,
 ) ([]MultipartFilesGroup, map[string][]string, map[string]any) {
+	// Work on a copy: the caller may reuse its map, for example when a
+	// request interceptor retries the request.
+	vars = maps.Clone(vars)
+
 	var (
 		multipartFilesGroups []MultipartFilesGroup
 		mapping              = map[string][]string{}
