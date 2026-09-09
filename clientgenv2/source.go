@@ -127,10 +127,14 @@ func ValidateOperationList(os ast.OperationList) error {
 func IsUniqueName(os ast.OperationList) error {
 	operationNames := make(map[string]struct{})
 	for _, operation := range os {
-		_, exist := operationNames[templates.ToGo(operation.Name)]
+		goName := templates.ToGo(operation.Name)
+
+		_, exist := operationNames[goName]
 		if exist {
 			return fmt.Errorf("duplicate operation: %s", operation.Name)
 		}
+
+		operationNames[goName] = struct{}{}
 	}
 
 	return nil
