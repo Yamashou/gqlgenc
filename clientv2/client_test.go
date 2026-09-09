@@ -30,6 +30,7 @@ const (
 	invalidJSON         = "invalid"
 	validData           = `{"data":{"something": "some data"}}`
 	withBadDataFormat   = `{"data": "notAndObject"}`
+	withBadDataFormatAndErr = `{"data": "notAndObject","errors":[{"message":"boom"}]}`
 	withBadErrorsFormat = `{"errors": "bad"}`
 )
 
@@ -216,6 +217,27 @@ func TestUnmarshal(t *testing.T) {
 		c := &Client{}
 		err := c.unmarshal([]byte(withBadDataFormat), r)
 		require.EqualError(t, err, "failed to decode data into response {\"data\": \"notAndObject\"}: : : : : json: cannot unmarshal string into Go value of type clientv2.fakeRes")
+	})
+
+	t.Run("bad data format with ParseDataWhenErrors and no graphql errors", func(t *testing.T) {
+		t.Parallel()
+
+		r := &fakeRes{}
+		c := &Client{ParseDataWhenErrors: true}
+		err := c.unmarshal([]byte(withBadDataFormat), r)
+		require.ErrorContains(t, err, "failed to decode data into response")
+	})
+
+	t.Run("bad data format with ParseDataWhenErrors and graphql errors returns the graphql errors", func(t *testing.T) {
+		t.Parallel()
+
+		r := &fakeRes{}
+		c := &Client{ParseDataWhenErrors: true}
+		err := c.unmarshal([]byte(withBadDataFormatAndErr), r)
+
+		var gqlErrors *GqlErrorList
+		require.ErrorAs(t, err, &gqlErrors)
+		require.Len(t, gqlErrors.Errors, 1)
 	})
 
 	t.Run("bad data format", func(t *testing.T) {
