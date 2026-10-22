@@ -5,6 +5,7 @@ import (
 	_ "embed" // used to load template file
 	"fmt"
 	"go/types"
+	"strconv"
 	"strings"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -38,6 +39,9 @@ func RenderTemplate(cfg *config.Config, fragments []*Fragment, operations []*Ope
 		Funcs: map[string]any{
 			"genGetters":           genGettersGenerator.GenFunc(),
 			"genConversionGetters": genGettersGenerator.ConversionGettersFunc(fragments),
+			"structDef": func(t types.Type) string {
+				return structDef(t, templates.CurrentImports.LookupType)
+			},
 		},
 	})
 	if err != nil {
@@ -45,6 +49,44 @@ func RenderTemplate(cfg *config.Config, fragments []*Fragment, operations []*Ope
 	}
 
 	return nil
+}
+
+// structDef renders t like the `ref` template func, except that struct types are
+// written field by field so that tags come out as raw string literals
+// (`json:"id"`) instead of the escaped form go/types prints ("json:\"id\"").
+// A tag that itself contains a backtick keeps the quoted form.
+func structDef(t types.Type, lookupType func(types.Type) string) string {
+	st, ok := t.(*types.Struct)
+	if !ok {
+		return lookupType(t)
+	}
+
+	var b strings.Builder
+
+	b.WriteString("struct {\n")
+
+	for i := range st.NumFields() {
+		field := st.Field(i)
+		if !field.Embedded() {
+			b.WriteString(field.Name() + " ")
+		}
+
+		b.WriteString(lookupType(field.Type()))
+
+		if tag := st.Tag(i); tag != "" {
+			if strings.ContainsRune(tag, '`') {
+				b.WriteString(" " + strconv.Quote(tag))
+			} else {
+				b.WriteString(" `" + tag + "`")
+			}
+		}
+
+		b.WriteString("\n")
+	}
+
+	b.WriteString("}")
+
+	return b.String()
 }
 
 type GenGettersGenerator struct {
